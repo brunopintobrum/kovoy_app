@@ -1,0 +1,217 @@
+:root {
+    --accent: #2563eb;
+    --accent-soft: #e0e7ff;
+    --text: #0f172a;
+    --muted: #6b7280;
+    --border: #e2e8f0;
+    --surface: #ffffff;
+    --surface-alt: #f8fafc;
+    --shadow: 0 20px 55px rgba(15, 23, 42, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.12), transparent 25%),
+        radial-gradient(circle at 80% 0%, rgba(99, 102, 241, 0.12), transparent 30%),
+        #f1f5f9;
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.page-shell {
+    max-width: 1100px;
+}
+
+.glass-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+.section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.badge-pill {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 999px;
+    font-weight: 600;
+    padding: 8px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.badge-pill .dot {
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+}
+
+.meta-bar {
+    color: var(--muted);
+}
+
+.meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-alt);
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.subdued {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.divider-soft {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 20px 0;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px 18px;
+}
+
+.info-tile {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+.info-tile .label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+    margin-bottom: 4px;
+}
+
+.info-tile .value {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.chip strong {
+    color: var(--text);
+}
+
+.timeline {
+    position: relative;
+    padding-left: 18px;
+    margin-top: 8px;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+
+.timeline-item {
+    position: relative;
+    padding: 8px 12px 8px 24px;
+    margin-bottom: 6px;
+    border-radius: 10px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+}
+
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    left: -10px;
+    top: 14px;
+}
+
+.timeline-time {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+    margin-right: 8px;
+}
+
+.table-modern th {
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+}
+
+.table-modern td strong {
+    color: var(--text);
+}
+
+.footer-note {
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+@media (max-width: 576px) {
+    .glass-card,
+    .section-card {
+        border-radius: 12px;
+    }
+
+    .chip-row {
+        gap: 8px;
+    }
+}
