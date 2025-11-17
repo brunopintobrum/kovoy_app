@@ -1,0 +1,665 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Resumo da Viagem – Orlando 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #0B5ED7;
+            --text: #212529;
+            --muted: #6C757D;
+            --border: #E9ECEF;
+            --bg-panel: #F7FAFF;
+            --bg-page: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 32px;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text);
+            background: #F3F5F9;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-page);
+            padding: 32px 40px;
+            border-radius: 12px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+        }
+
+        h1, h2, h3, h4 {
+            margin: 0 0 8px;
+            font-weight: 600;
+        }
+
+            h1.title {
+                font-size: 26px;
+                color: var(--accent);
+                letter-spacing: 0.02em;
+                margin-bottom: 4px;
+            }
+
+        .subtitle-main {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .subtitle-meta {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+
+        hr.divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 16px 0 18px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            color: var(--accent);
+            background: #E7F0FF;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .badge-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .section {
+            margin-bottom: 26px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+
+        .section-subtitle {
+            font-size: 15px;
+            color: var(--text);
+            margin-top: 14px;
+            margin-bottom: 6px;
+        }
+
+        .section-subsubtitle {
+            font-size: 14px;
+            color: var(--text);
+            margin-top: 10px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        p {
+            margin: 0 0 6px;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        ul {
+            padding-left: 18px;
+            margin: 4px 0 8px;
+        }
+
+        li {
+            margin-bottom: 2px;
+        }
+
+        .panel {
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            padding: 10px 12px;
+            margin: 6px 0 10px;
+        }
+
+        .panel-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1.1fr 1.3fr;
+            gap: 8px 18px;
+            margin-top: 4px;
+        }
+
+        .label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+        }
+
+        .value {
+            font-size: 13px;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 4px 0 6px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            background: #FFFFFF;
+        }
+
+            .chip strong {
+                color: var(--accent);
+                margin-right: 4px;
+            }
+
+        .timeline {
+            border-left: 2px solid var(--border);
+            padding-left: 14px;
+            margin: 4px 0 6px;
+        }
+
+        .timeline-item {
+            margin-bottom: 6px;
+            position: relative;
+        }
+
+            .timeline-item::before {
+                content: "";
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #FFFFFF;
+                border: 2px solid var(--accent);
+                position: absolute;
+                left: -19px;
+                top: 3px;
+            }
+
+        .timeline-time {
+            font-weight: 500;
+            font-size: 12px;
+            color: var(--accent);
+            margin-right: 6px;
+        }
+
+        .timeline-text {
+            font-size: 13px;
+        }
+
+        .table-like {
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin: 4px 0 10px;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1.5fr;
+            border-top: 1px solid var(--border);
+            padding: 4px 10px;
+            font-size: 13px;
+            align-items: flex-start;
+        }
+
+            .table-row.header {
+                background: #F5F7FB;
+                font-weight: 600;
+                color: var(--accent);
+                border-top: none;
+            }
+
+            .table-row strong {
+                font-weight: 600;
+            }
+
+        .pill {
+            display: inline-flex;
+            padding: 1px 7px;
+            border-radius: 999px;
+            font-size: 11px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        @media print {
+            body {
+                background: #FFFFFF;
+                padding: 0;
+            }
+
+            .page {
+                box-shadow: none;
+                border-radius: 0;
+                max-width: none;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <!-- Header -->
+        <h1 class="title">Resumo da Viagem – Orlando 2026</h1>
+        <p class="subtitle-main">
+            <strong>Família 1:</strong> Bruno, Fernanda, Noah e Alice &nbsp;•&nbsp;
+            <strong>Família 2:</strong> Wilton e Célia
+        </p>
+        <p class="subtitle-meta">
+            <strong>Período:</strong> 22/02/2026 → 11/03/2026 &nbsp;•&nbsp;
+            <strong>Base:</strong> Davenport / Orlando – FL, EUA
+        </p>
+        <hr class="divider" />
+
+        <!-- 1. Detalhes dos voos -->
+        <div class="section">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Seção 1 — Voos
+            </div>
+            <h2 class="section-title">1. Detalhes dos voos – ambas as famílias</h2>
+
+            <h3 class="section-subtitle">1.1 Família 1 – Air Canada (PNR ADI6WR)</h3>
+            <p><strong>Passageiros:</strong> Bruno Pinto Brum; Fernanda Lee Guerra Marques Brum; Noah Marques Brum; Alice Brum (bebê no colo).</p>
+            <p><strong>Tarifa:</strong> Economy Basic (classe G).</p>
+            <p><strong>Bagagem:</strong> 1 item pessoal por passageiro (43 × 33 × 16 cm); sem bagagem de mão incluída; 1ª e 2ª malas despachadas incluídas (até 23 kg cada).</p>
+
+            <div class="panel">
+                <div class="panel-header">Ida – Domingo, 22/02/2026</div>
+                <p><strong>Voo:</strong> AC1638 — Montréal (YUL) → Orlando (MCO)</p>
+                <p><strong>Horário:</strong> 19:25 → 23:02</p>
+                <div class="chip-row">
+                    <span class="chip"><strong>Terminal:</strong> MCO – B</span>
+                    <span class="chip"><strong>Aeronave:</strong> Airbus A321-200</span>
+                    <span class="chip"><strong>Serviço de bordo:</strong> Air Canada Bistro (pago à parte)</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">Volta – Quarta, 11/03/2026</div>
+                <p><strong>Voo:</strong> AC1641 — Orlando (MCO) → Montréal (YUL)</p>
+                <p><strong>Horário:</strong> 18:15 → 21:26</p>
+                <div class="chip-row">
+                    <span class="chip"><strong>Terminal:</strong> MCO – B</span>
+                    <span class="chip"><strong>Aeronave:</strong> Airbus A321-200</span>
+                </div>
+            </div>
+
+            <p class="muted">
+                Regras de embarque (voos Canadá ↔ EUA): check-in e despacho de bagagem até 60 min antes da partida;
+                deadline no portão 30 min antes; portão fecha 15 min antes do voo.
+            </p>
+
+            <h3 class="section-subtitle">1.2 Família 2 – GOL Linhas Aéreas (PNR IEGFNU)</h3>
+            <p><strong>Passageiros:</strong> Célia de Fátima Guerra M de Almeida; Wilton Arcanjo Guimarães.</p>
+            <p><strong>Tarifa:</strong> LIGHT NEW – Cabine Econômica (classe O).</p>
+            <p><strong>Bagagem:</strong> 0 despachada incluída; bagagem de mão 2 volumes (10 kg + 12 kg, até 115 cm lineares); 1ª mala despachada opcional R$ 350 por trecho.</p>
+
+            <h4 class="section-subsubtitle">Célia – Ida (22/02/2026)</h4>
+            <ul>
+                <li>G3 1755 — GIG (T2) 06:00 → BSB 07:45 (Boeing 737-800)</li>
+                <li>Conexão em Brasília ~2h</li>
+                <li>G3 7602 — BSB 09:45 → MCO (Terminal C) 15:55 (Boeing 737 MAX)</li>
+            </ul>
+
+            <h4 class="section-subsubtitle">Célia – Volta (11/03 → 12/03/2026)</h4>
+            <ul>
+                <li>G3 7601 — MCO (Terminal C) 22:00 → BSB 07:05 (+1) (Boeing 737 MAX)</li>
+                <li>Conexão em Brasília ~1h35</li>
+                <li>G3 2074 — BSB 08:40 → GIG (T2) 10:30 (Boeing 737-800)</li>
+            </ul>
+
+            <p><strong>Pagamento total Célia:</strong> Tarifa USD 380 (equivalente BRL 2.043,29) + taxas brasileiras (BR3, BR4, US2, YC, XY2, XA, AY, XF) + bagagem adquirida (BRL 700,00) = <strong>R$ 3.279,95</strong>.</p>
+
+            <h4 class="section-subsubtitle">Wilton – Itinerário</h4>
+            <p>Mesmo itinerário de voos da Célia (ida e volta).</p>
+            <p><strong>Pagamento total Wilton:</strong> Tarifa USD 380 (equivalente BRL 2.043,29) + taxas brasileiras = <strong>R$ 2.579,95</strong>.</p>
+        </div>
+
+        <!-- 2. Airbnb -->
+        <div class="section">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Seção 2 — Hospedagem
+            </div>
+            <h2 class="section-title">2. Airbnb – hospedagem (código HMF5WZ5APC)</h2>
+
+            <p><strong>Imóvel:</strong> New &amp; Comfort Home • 3 Bed • 2.5 Bath • Near Disney</p>
+
+            <div class="panel">
+                <div class="panel-header">Dados principais</div>
+                <div class="grid-2">
+                    <div>
+                        <p class="label">Endereço</p>
+                        <p class="value">677 Longboat Drive, Davenport, FL 33896, Estados Unidos</p>
+                    </div>
+                    <div>
+                        <p class="label">Período</p>
+                        <p class="value">
+                            Check-in: 22/02/2026 a partir de 16:00<br />
+                            Check-out: 11/03/2026 até 10:00
+                        </p>
+                    </div>
+                    <div>
+                        <p class="label">Anfitriã</p>
+                        <p class="value">
+                            Fernanda Batista<br />
+                            Contato: +55 11 96578-0094 (telefone / WhatsApp)<br />
+                            Coanfitriões: Amy, Emma
+                        </p>
+                    </div>
+                    <div>
+                        <p class="label">Regras principais</p>
+                        <p class="value">
+                            Máximo 8 hóspedes; animais de estimação permitidos; self check-in por fechadura inteligente.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="muted">
+                Wi-Fi e instruções finais de acesso serão enviados pelo Airbnb até 48h antes do check-in.
+            </p>
+
+            <h3 class="section-subtitle">2.1 Financeiro da hospedagem (CAD)</h3>
+            <div class="table-like">
+                <div class="table-row header">
+                    <div>Item</div>
+                    <div>Valor (CAD)</div>
+                    <div>Detalhes</div>
+                </div>
+                <div class="table-row">
+                    <div>Total da reserva</div>
+                    <div>3.786,43</div>
+                    <div>Valor completo da hospedagem (Airbnb).</div>
+                </div>
+                <div class="table-row">
+                    <div>Parcela 1 (paga)</div>
+                    <div>1.941,90</div>
+                    <div>Pagamento em 22/10/2025.</div>
+                </div>
+                <div class="table-row">
+                    <div>Saldo pendente</div>
+                    <div>1.844,53</div>
+                    <div>Vencimento em 07/02/2026.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Turo -->
+        <div class="section">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Seção 3 — Carro (Turo)
+            </div>
+            <h2 class="section-title">3. Turo – detalhes da reserva do carro</h2>
+
+            <p><strong>Veículo:</strong> Dodge Grand Caravan 2019 (host Leonardo E) – Placa BL76KP</p>
+            <p><strong>Local:</strong> Orlando International Airport (MCO)</p>
+
+            <div class="panel">
+                <div class="panel-header">Datas da reserva</div>
+                <div class="grid-2">
+                    <div>
+                        <p class="label">Retirada</p>
+                        <p class="value">23/02/2026 às 00:30 – MCO (lockbox)</p>
+                    </div>
+                    <div>
+                        <p class="label">Devolução</p>
+                        <p class="value">11/03/2026 às 15:00 – MCO</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="section-subtitle">3.1 Extras contratados</h3>
+            <ul>
+                <li>2 cadeirinhas infantis — US$ 39 cada (US$ 78 no total)</li>
+                <li>1 carrinho de bebê — US$ 55</li>
+                <li>Enhanced roadside assistance — US$ 50,83</li>
+                <li>Standard protection plan — incluído</li>
+            </ul>
+
+            <h3 class="section-subtitle">3.2 Custos totais (USD)</h3>
+            <ul>
+                <li>Trip price: US$ 623,05</li>
+                <li>Child seats: US$ 78,00</li>
+                <li>Stroller: US$ 55,00</li>
+                <li>Trip fee: US$ 15,00</li>
+                <li>Airport permit fee: US$ 86,59</li>
+                <li>Sales tax: US$ 46,28</li>
+                <li>Standard protection: US$ 205,24</li>
+                <li>Descontos: −US$ 51,31 (protection plan) e −US$ 109,95 (2-week discount)</li>
+            </ul>
+            <p><strong>Total Turo (USD):</strong> US$ 998,73</p>
+
+            <h3 class="section-subtitle">3.3 Cobrança real no cartão (CAD)</h3>
+            <div class="table-like">
+                <div class="table-row header">
+                    <div>Data</div>
+                    <div>Valor (CAD)</div>
+                    <div>Descrição</div>
+                </div>
+                <div class="table-row">
+                    <div>23/10/2025</div>
+                    <div>1.181,97</div>
+                    <div>Primeira cobrança da reserva Turo.</div>
+                </div>
+                <div class="table-row">
+                    <div>25/10/2025</div>
+                    <div>217,57</div>
+                    <div>Complemento da reserva.</div>
+                </div>
+                <div class="table-row">
+                    <div><strong>Total no cartão</strong></div>
+                    <div><strong>1.399,54</strong></div>
+                    <div><strong>Somatório das duas transações em CAD.</strong></div>
+                </div>
+            </div>
+
+            <p><strong>Quilometragem:</strong> 5.950 milhas incluídas • limite 350 mi/dia • excedente: US$ 0,09 por milha.</p>
+            <p class="muted">
+                Política: reserva non-refundable, com possibilidade de cancelamento total em até 24h após reserva (regra específica do anúncio).
+            </p>
+        </div>
+
+        <!-- 4. Financeiro -->
+        <div class="section">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Seção 4 — Financeiro
+            </div>
+            <h2 class="section-title">4. Financeiro da viagem</h2>
+
+            <h3 class="section-subtitle">4.1 Entradas (por moeda)</h3>
+            <div class="panel">
+                <div class="panel-header">Valores em CAD</div>
+                <ul>
+                    <li><strong>Hospedagem_total_cad:</strong> 3.786,43</li>
+                    <li><strong>Turo_total_cad:</strong> 1.399,54</li>
+                    <li><strong>Extras_compartilhados_cad:</strong> 0,00</li>
+                    <li><strong>Voos_família_1_cad:</strong> 935,60</li>
+                </ul>
+            </div>
+            <div class="panel">
+                <div class="panel-header">Valores em BRL</div>
+                <ul>
+                    <li><strong>Voos_família_2 (BRL):</strong> R$ 5.859,90 = R$ 3.279,95 (Célia) + R$ 2.579,95 (Wilton)</li>
+                </ul>
+            </div>
+
+            <h3 class="section-subtitle">4.2 Cálculos dos custos compartilhados (CAD)</h3>
+            <p><strong>Passo 1 – Total compartilhado:</strong></p>
+            <p>
+                Compartilhado_total = hospedagem_total_cad + turo_total_cad + extras_compartilhados_cad<br />
+                = 3.786,43 + 1.399,54 + 0,00 = <strong>5.185,97 CAD</strong>
+            </p>
+
+            <p><strong>Passo 2 – Cota por família:</strong></p>
+            <p>
+                Cota_por_família = 5.185,97 ÷ 2 = <strong>2.592,99 CAD</strong>
+            </p>
+
+            <h3 class="section-subtitle">4.3 Totais por família</h3>
+
+            <div class="panel">
+                <div class="panel-header">Família 1 – Bruno, Fernanda, Noah e Alice</div>
+                <p>
+                    <strong>Total_Família_1 = 2.592,99 (hospedagem + carro) + 935,60 (avião) = 3.528,59 CAD</strong>
+                </p>
+                <p class="muted">
+                    Onde:<br />
+                    • 2.592,99 CAD = cota da família sobre o total compartilhado (Airbnb + Turo).<br />
+                    • 935,60 CAD = valor total das passagens Air Canada para a família 1.
+                </p>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">Família 2 – Wilton e Célia</div>
+                <p>
+                    <strong>Total_Família_2 = 2.592,99 CAD (hospedagem + carro) + R$ 5.859,90 (voos em BRL)</strong>
+                </p>
+                <p class="muted">
+                    Os voos da família 2 foram pagos em reais (R$ 3.279,95 Célia + R$ 2.579,95 Wilton). A decisão foi manter esses
+                    valores em BRL, sem conversão para CAD, para preservar a fidelidade aos valores efetivamente cobrados.
+                </p>
+            </div>
+        </div>
+
+        <!-- 5. Linha do tempo -->
+        <div class="section">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Seção 5 — Linha do tempo
+            </div>
+            <h2 class="section-title">5. Linha do tempo da viagem</h2>
+
+            <h3 class="section-subtitle">22/02/2026 – Domingo</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <span class="timeline-time">15:55</span>
+                    <span class="timeline-text">Chegada de Célia &amp; Wilton ao MCO – Terminal C.</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-time">16:00</span>
+                    <span class="timeline-text">Check-in liberado no Airbnb em Davenport.</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-time">19:25</span>
+                    <span class="timeline-text">Decolagem do voo AC1638 de Montréal (YUL) para Orlando (MCO).</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-time">23:02</span>
+                    <span class="timeline-text">Chegada de Bruno &amp; família ao MCO – Terminal B.</span>
+                </div>
+            </div>
+
+            <h3 class="section-subtitle">23/02/2026 – Segunda</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <span class="timeline-time">00:30</span>
+                    <span class="timeline-text">Retirada do carro (Turo) no aeroporto MCO (lockbox).</span>
+                </div>
+            </div>
+
+            <h3 class="section-subtitle">11/03/2026 – Quarta (retornos)</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <span class="timeline-time">10:00</span>
+                    <span class="timeline-text">Check-out do Airbnb em Davenport.</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-time">15:00</span>
+                    <span class="timeline-text">Devolução do carro no Turo – MCO.</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-time">18:15</span>
+                    <span class="timeline-text">Voo AC1641 decola de MCO para YUL (família 1).</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-time">22:00</span>
+                    <span class="timeline-text">Voo G3 7601 decola de MCO para BSB (família 2, com chegada no dia seguinte).</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Lembretes -->
+        <div class="section">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Seção 6 — Lembretes
+            </div>
+            <h2 class="section-title">6. Lembretes criados</h2>
+
+            <div class="table-like">
+                <div class="table-row header">
+                    <div>Quando</div>
+                    <div>Item</div>
+                    <div>Descrição</div>
+                </div>
+                <div class="table-row">
+                    <div>07/02/2026</div>
+                    <div>Pagamento Airbnb</div>
+                    <div>Quitar saldo da hospedagem no valor de CAD 1.844,53.</div>
+                </div>
+                <div class="table-row">
+                    <div>20/02/2026</div>
+                    <div>Wi-Fi / Acesso</div>
+                    <div>Conferir credenciais do Wi-Fi e instruções finais de acesso enviadas pela anfitriã.</div>
+                </div>
+                <div class="table-row">
+                    <div>22/02/2026</div>
+                    <div>Rota até o Airbnb</div>
+                    <div>Salvar rota até o endereço: 677 Longboat Drive, Davenport, FL 33896.</div>
+                </div>
+                <div class="table-row">
+                    <div>Contato útil</div>
+                    <div>Anfitriã Airbnb</div>
+                    <div>Fernanda Batista – telefone/WhatsApp: +55 11 96578-0094 (associado aos lembretes).</div>
+                </div>
+            </div>
+        </div>
+
+        <p class="muted" style="margin-top: 16px;">
+            Documento consolidado a partir de: reservas Air Canada, GOL, Airbnb e Turo. Valores em CAD e BRL conforme
+            cobrança real informada.
+        </p>
+    </div>
+</body>
+</html>
