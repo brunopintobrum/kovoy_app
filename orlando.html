@@ -21,6 +21,7 @@
             </div>
         </div>
         <nav class="topnav ms-auto d-none d-md-flex">
+            <a href="#dashboard">Dashboard</a>
             <a href="#voos">Voos</a>
             <a href="#hospedagem">Hospedagem</a>
             <a href="#turo">Carro</a>
@@ -75,10 +76,102 @@
         </header>
 
         <main class="d-flex flex-column gap-4">
+            <!-- 0. Dashboard -->
+            <section id="dashboard" class="section-card card-frame p-4 p-lg-5">
+                <div class="section-heading">
+                    <span class="pill"><span class="dot"></span> Sessão 0 - Dashboard</span>
+                    <h2 class="section-title">Visão geral rápida da viagem</h2>
+                </div>
+
+                <div class="dashboard-grid mb-4">
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span class="label">Dias para a viagem</span>
+                            <span class="status status-soft">On track</span>
+                        </div>
+                        <p class="stat-value">+450 dias</p>
+                        <p class="stat-sub">Embarque em 22/02/2026</p>
+                        <div class="mini-progress">
+                            <div class="mini-progress-bar" style="width: 22%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span class="label">Custos em CAD</span>
+                            <span class="status status-alt">Compartilhado</span>
+                        </div>
+                        <p class="stat-value">6.121,57</p>
+                        <p class="stat-sub">Hospedagem + carro + voos F1</p>
+                        <div class="pill trend positive">+12% previsões</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span class="label">Custos em BRL</span>
+                            <span class="status status-soft">Família 2</span>
+                        </div>
+                            <p class="stat-value">R$ 5.859,90</p>
+                            <p class="stat-sub">Voos GOL pagos em reais</p>
+                        <div class="mini-progress">
+                            <div class="mini-progress-bar alt" style="width: 64%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span class="label">Pendências</span>
+                            <span class="status status-soft">2 itens</span>
+                        </div>
+                        <p class="stat-value">Airbnb + Wi‑Fi</p>
+                        <p class="stat-sub">Ver lembretes e prazos</p>
+                        <div class="pill trend neutral">Próximo: 07/02/2026</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-lanes">
+                    <div class="lane-card">
+                        <div class="lane-head">
+                            <h3 class="h6 mb-0">Fluxo financeiro</h3>
+                            <span class="status status-soft">Monitorar</span>
+                        </div>
+                        <div class="lane-row">
+                            <div>
+                                <p class="label">Hospedagem (CAD)</p>
+                                <p class="lane-value">3.786,43</p>
+                                <p class="subdued mb-0">Saldo pendente: 1.844,53 em 07/02/2026</p>
+                            </div>
+                            <div class="mini-progress wide">
+                                <div class="mini-progress-bar" style="width: 48%;"></div>
+                            </div>
+                        </div>
+                        <div class="lane-row">
+                            <div>
+                                <p class="label">Turo (CAD)</p>
+                                <p class="lane-value">1.399,54</p>
+                                <p class="subdued mb-0">Total já cobrado no cartão</p>
+                            </div>
+                            <div class="mini-progress wide">
+                                <div class="mini-progress-bar alt" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lane-card">
+                        <div class="lane-head">
+                            <h3 class="h6 mb-0">Checklist imediato</h3>
+                            <span class="status status-alt">Próximos passos</span>
+                        </div>
+                        <ul class="checklist">
+                            <li><span class="dot"></span> Confirmar pagamento do Airbnb em CAD 1.844,53 (07/02/2026).</li>
+                            <li><span class="dot"></span> Salvar rota até 677 Longboat Drive e compartilhar com ambos.</li>
+                            <li><span class="dot"></span> Anotar credenciais de Wi‑Fi assim que chegarem (48h antes).</li>
+                            <li><span class="dot"></span> Revisar cadeirinhas e carrinho no Turo antes da retirada.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
             <!-- 1. Detalhes dos voos -->
             <section id="voos" class="section-card card-frame p-4 p-lg-5">
                 <div class="section-heading">
-                    <span class="pill"><span class="dot"></span> Seção 1 — Voos</span>
+                    <span class="pill"><span class="dot"></span> Seção 1 - Voos</span>
                     <h2 class="section-title">1. Detalhes dos voos — ambas as famílias</h2>
                 </div>
 
