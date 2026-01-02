@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Criar conta - Orlando 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+    <main class="auth-shell">
+        <section class="auth-card">
+            <p class="login-eyebrow">Cadastro</p>
+            <h1 class="auth-title">Criar conta</h1>
+            <p class="auth-subtitle">Use um email válido e uma senha forte para começar.</p>
+
+            <form class="auth-form" id="registerForm">
+                <div class="login-field">
+                    <label for="email">Email</label>
+                    <div class="login-input">
+                        <input id="email" type="email" name="email" autocomplete="username" placeholder="voce@email.com" required>
+                        <span class="login-field-icon" aria-hidden="true">@</span>
+                    </div>
+                </div>
+                <div class="login-field">
+                    <label for="password">Senha</label>
+                    <div class="login-input">
+                        <input id="password" type="password" name="password" autocomplete="new-password" placeholder="Minimo 8 caracteres" required>
+                        <span class="login-field-icon" aria-hidden="true">*</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-button">Criar conta</button>
+            </form>
+
+            <div class="login-alert" id="registerAlert" role="status" aria-live="polite"></div>
+
+            <p class="auth-footer">
+                Ja tem conta? <a href="/login">Entrar</a>
+            </p>
+        </section>
+    </main>
+
+    <script src="register.js" defer></script>
+</body>
+</html>

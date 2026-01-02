@@ -1,9 +1,9 @@
-﻿﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Resumo da Viagem — Orlando 2026</title>
+    <title>Resumo da Viagem - Orlando 2026</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -12,15 +12,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="topbar container-lg d-flex align-items-center py-3">
-        <div class="brand">
-            <span class="logo-dot"></span>
-            <div class="brand-text">
-                <span class="eyebrow">Orlando 2026</span>
-                <span class="brand-title">Travel Dashboard</span>
+    <a class="skip-link" href="#main">Pular para o conteúdo</a>
+
+    <div class="app-topbar container-lg d-flex align-items-center py-3">
+        <div class="app-brand">
+            <span class="app-logo-dot"></span>
+            <div class="app-brand-text">
+                <span class="ui-eyebrow">Orlando 2026</span>
+                <span class="app-brand-title">Travel Dashboard</span>
             </div>
         </div>
-        <nav class="topnav ms-auto d-none d-md-flex">
+        <nav class="app-nav ms-auto d-none d-md-flex" aria-label="Seções da viagem">
             <a href="#dashboard">Dashboard</a>
             <a href="#voos">Voos</a>
             <a href="#hospedagem">Hospedagem</a>
@@ -28,273 +30,272 @@
             <a href="#financeiro">Financeiro</a>
             <a href="#linha-tempo">Linha do tempo</a>
         </nav>
-        <button class="theme-toggle ms-3" id="themeToggle" type="button" aria-label="Alternar tema">
-            <span class="icon" aria-hidden="true">🌙</span>
-            <span class="label">Modo escuro</span>
+        <button class="ui-toggle ms-3" id="themeToggle" type="button" aria-label="Alternar tema" aria-pressed="false">
+            <span class="ui-toggle-icon" aria-hidden="true">Lua</span>
+            <span class="ui-toggle-label">Modo escuro</span>
         </button>
+        <button class="ui-button ui-button--ghost ms-2" id="logoutButton" type="button">Sair</button>
     </div>
 
-    <div class="page-shell container-lg pb-5">
-        <header class="hero card-frame p-4 p-lg-5 mb-4">
-            <div class="hero-top d-flex flex-wrap gap-3 align-items-center mb-3">
-                <span class="pill pill-strong">Viagem — Orlando 2026</span>
-                <span class="pill"><strong>Período:</strong> 22/02 – 11/03/2026</span>
-                <span class="pill"><strong>Base:</strong> Davenport / Orlando — FL, EUA</span>
+    <div class="app-shell container-lg pb-5">
+        <header class="app-hero ui-card p-4 p-lg-5 mb-4">
+            <div class="app-hero-meta d-flex flex-wrap gap-3 align-items-center mb-3">
+                <span class="ui-pill ui-pill--strong">Viagem - Orlando 2026</span>
+                <span class="ui-pill"><strong>Período:</strong> 22/02 - 11/03/2026</span>
+                <span class="ui-pill"><strong>Base:</strong> Davenport / Orlando - FL, EUA</span>
             </div>
-            <div class="hero-grid">
+            <div class="app-hero-grid">
                 <div>
-                    <p class="eyebrow">Planejamento & logística</p>
-                    <h1 class="hero-title">Resumo da Viagem — Orlando 2026</h1>
-                    <p class="lede">Documento consolidado com voos, hospedagem, carro e lembretes essenciais para as duas famílias.</p>
-                    <div class="hero-chips">
-                        <span class="badge-soft"><strong>Família 1:</strong> Bruno, Fernanda, Noah e Alice</span>
-                        <span class="badge-soft alt"><strong>Família 2:</strong> Wilton e Célia</span>
+                    <p class="ui-eyebrow">Planejamento & logística</p>
+                    <h1 class="app-hero-title">Resumo da Viagem - Orlando 2026</h1>
+                    <p class="ui-lede">Documento consolidado com voos, hospedagem, carro e lembretes essenciais para as duas famílias.</p>
+                    <div class="app-hero-chips">
+                        <span class="ui-badge"><strong>Família 1:</strong> Bruno, Fernanda, Noah e Alice</span>
+                        <span class="ui-badge ui-badge--alt"><strong>Família 2:</strong> Wilton e Célia</span>
                     </div>
                 </div>
-                <div class="hero-panel">
-                    <div class="metric">
-                        <p class="label">Contagem regressiva</p>
-                        <p class="metric-value">+450 dias</p>
-                        <p class="metric-sub">Até o embarque em 22/02/2026</p>
+                <div class="app-hero-panel">
+                    <div class="ui-metric">
+                        <p class="ui-label">Contagem regressiva</p>
+                        <p class="ui-metric-value">+450 dias</p>
+                        <p class="ui-metric-sub">Até o embarque em 22/02/2026</p>
                     </div>
-                    <div class="metric metric-inline">
+                    <div class="ui-metric-group">
                         <div>
-                            <p class="label">Hospedagem</p>
-                            <p class="metric-value">3.786,43 CAD</p>
+                            <p class="ui-label">Hospedagem</p>
+                            <p class="ui-metric-value">3.786,43 CAD</p>
                         </div>
                         <div>
-                            <p class="label">Carro (CAD)</p>
-                            <p class="metric-value">1.399,54</p>
+                            <p class="ui-label">Carro (CAD)</p>
+                            <p class="ui-metric-value">1.399,54</p>
                         </div>
                         <div>
-                            <p class="label">Voos F1 (CAD)</p>
-                            <p class="metric-value">935,60</p>
+                            <p class="ui-label">Voos F1 (CAD)</p>
+                            <p class="ui-metric-value">935,60</p>
                         </div>
                     </div>
                 </div>
             </div>
         </header>
 
-        <main class="d-flex flex-column gap-4">
-            <!-- 0. Dashboard -->
-            <section id="dashboard" class="section-card card-frame p-4 p-lg-5">
-                <div class="section-heading">
-                    <span class="pill"><span class="dot"></span> Sessão 0 - Dashboard</span>
-                    <h2 class="section-title">Visão geral rápida da viagem</h2>
+        <main id="main" class="d-flex flex-column gap-4">
+            <section id="dashboard" class="app-section ui-card p-4 p-lg-5" aria-labelledby="dashboard-title">
+                <div class="app-section-header">
+                    <span class="ui-pill"><span class="ui-dot"></span> Sessão 0 - Dashboard</span>
+                    <h2 class="app-section-title" id="dashboard-title">Visão geral rápida da viagem</h2>
                 </div>
 
-                <div class="dashboard-grid mb-4">
-                    <div class="stat-card">
-                        <div class="stat-top">
-                            <span class="label">Dias para a viagem</span>
-                            <span class="status status-soft">On track</span>
+                <div class="app-dashboard-grid mb-4">
+                    <div class="ui-stat">
+                        <div class="ui-stat-top">
+                            <span class="ui-label">Dias para a viagem</span>
+                            <span class="ui-status ui-status--soft">On track</span>
                         </div>
-                        <p class="stat-value">+450 dias</p>
-                        <p class="stat-sub">Embarque em 22/02/2026</p>
-                        <div class="mini-progress">
-                            <div class="mini-progress-bar" style="width: 22%;"></div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-top">
-                            <span class="label">Custos em CAD</span>
-                            <span class="status status-alt">Compartilhado</span>
-                        </div>
-                        <p class="stat-value">6.121,57</p>
-                        <p class="stat-sub">Hospedagem + carro + voos F1</p>
-                        <div class="pill trend positive">+12% previsões</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-top">
-                            <span class="label">Custos em BRL</span>
-                            <span class="status status-soft">Família 2</span>
-                        </div>
-                            <p class="stat-value">R$ 5.859,90</p>
-                            <p class="stat-sub">Voos GOL pagos em reais</p>
-                        <div class="mini-progress">
-                            <div class="mini-progress-bar alt" style="width: 64%;"></div>
+                        <p class="ui-stat-value">+450 dias</p>
+                        <p class="ui-stat-sub">Embarque em 22/02/2026</p>
+                        <div class="ui-progress">
+                            <div class="ui-progress-bar" style="width: 22%;"></div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-top">
-                            <span class="label">Pendências</span>
-                            <span class="status status-soft">2 itens</span>
+                    <div class="ui-stat">
+                        <div class="ui-stat-top">
+                            <span class="ui-label">Custos em CAD</span>
+                            <span class="ui-status ui-status--alt">Compartilhado</span>
                         </div>
-                        <p class="stat-value">Airbnb + Wi‑Fi</p>
-                        <p class="stat-sub">Ver lembretes e prazos</p>
-                        <div class="pill trend neutral">Próximo: 07/02/2026</div>
+                        <p class="ui-stat-value">6.121,57</p>
+                        <p class="ui-stat-sub">Hospedagem + carro + voos F1</p>
+                        <div class="ui-pill ui-trend ui-trend--positive">+12% previsões</div>
+                    </div>
+                    <div class="ui-stat">
+                        <div class="ui-stat-top">
+                            <span class="ui-label">Custos em BRL</span>
+                            <span class="ui-status ui-status--soft">Família 2</span>
+                        </div>
+                        <p class="ui-stat-value">R$ 5.859,90</p>
+                        <p class="ui-stat-sub">Voos GOL pagos em reais</p>
+                        <div class="ui-progress">
+                            <div class="ui-progress-bar ui-progress-bar--alt" style="width: 64%;"></div>
+                        </div>
+                    </div>
+                    <div class="ui-stat">
+                        <div class="ui-stat-top">
+                            <span class="ui-label">Pendências</span>
+                            <span class="ui-status ui-status--soft">2 itens</span>
+                        </div>
+                        <p class="ui-stat-value">Airbnb + Wi-Fi</p>
+                        <p class="ui-stat-sub">Ver lembretes e prazos</p>
+                        <div class="ui-pill ui-trend ui-trend--neutral">Próximo: 07/02/2026</div>
                     </div>
                 </div>
 
-                <div class="dashboard-lanes">
-                    <div class="lane-card">
-                        <div class="lane-head">
+                <div class="app-dashboard-lanes">
+                    <div class="ui-lane">
+                        <div class="ui-lane-head">
                             <h3 class="h6 mb-0">Fluxo financeiro</h3>
-                            <span class="status status-soft">Monitorar</span>
+                            <span class="ui-status ui-status--soft">Monitorar</span>
                         </div>
-                        <div class="lane-row">
+                        <div class="ui-lane-row">
                             <div>
-                                <p class="label">Hospedagem (CAD)</p>
-                                <p class="lane-value">3.786,43</p>
-                                <p class="subdued mb-0">Saldo pendente: 1.844,53 em 07/02/2026</p>
+                                <p class="ui-label">Hospedagem (CAD)</p>
+                                <p class="ui-lane-value">3.786,43</p>
+                                <p class="ui-subdued mb-0">Saldo pendente: 1.844,53 em 07/02/2026</p>
                             </div>
-                            <div class="mini-progress wide">
-                                <div class="mini-progress-bar" style="width: 48%;"></div>
+                            <div class="ui-progress ui-progress--wide">
+                                <div class="ui-progress-bar" style="width: 48%;"></div>
                             </div>
                         </div>
-                        <div class="lane-row">
+                        <div class="ui-lane-row">
                             <div>
-                                <p class="label">Turo (CAD)</p>
-                                <p class="lane-value">1.399,54</p>
-                                <p class="subdued mb-0">Total já cobrado no cartão</p>
+                                <p class="ui-label">Turo (CAD)</p>
+                                <p class="ui-lane-value">1.399,54</p>
+                                <p class="ui-subdued mb-0">Total já cobrado no cartão</p>
                             </div>
-                            <div class="mini-progress wide">
-                                <div class="mini-progress-bar alt" style="width: 100%;"></div>
+                            <div class="ui-progress ui-progress--wide">
+                                <div class="ui-progress-bar ui-progress-bar--alt" style="width: 100%;"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="lane-card">
-                        <div class="lane-head">
+                    <div class="ui-lane">
+                        <div class="ui-lane-head">
                             <h3 class="h6 mb-0">Checklist imediato</h3>
-                            <span class="status status-alt">Próximos passos</span>
+                            <span class="ui-status ui-status--alt">Próximos passos</span>
                         </div>
-                        <ul class="checklist">
-                            <li><span class="dot"></span> Confirmar pagamento do Airbnb em CAD 1.844,53 (07/02/2026).</li>
-                            <li><span class="dot"></span> Salvar rota até 677 Longboat Drive e compartilhar com ambos.</li>
-                            <li><span class="dot"></span> Anotar credenciais de Wi‑Fi assim que chegarem (48h antes).</li>
-                            <li><span class="dot"></span> Revisar cadeirinhas e carrinho no Turo antes da retirada.</li>
+                        <ul class="ui-checklist">
+                            <li><span class="ui-dot"></span> Confirmar pagamento do Airbnb em CAD 1.844,53 (07/02/2026).</li>
+                            <li><span class="ui-dot"></span> Salvar rota até 677 Longboat Drive e compartilhar com ambos.</li>
+                            <li><span class="ui-dot"></span> Anotar credenciais de Wi-Fi assim que chegarem (48h antes).</li>
+                            <li><span class="ui-dot"></span> Revisar cadeirinhas e carrinho no Turo antes da retirada.</li>
                         </ul>
                     </div>
                 </div>
             </section>
 
-            <!-- 1. Detalhes dos voos -->
-            <section id="voos" class="section-card card-frame p-4 p-lg-5">
-                <div class="section-heading">
-                    <span class="pill"><span class="dot"></span> Seção 1 - Voos</span>
-                    <h2 class="section-title">1. Detalhes dos voos — ambas as famílias</h2>
+            <section id="voos" class="app-section ui-card p-4 p-lg-5" aria-labelledby="voos-title">
+                <div class="app-section-header">
+                    <span class="ui-pill"><span class="ui-dot"></span> Seção 1 - Voos</span>
+                    <h2 class="app-section-title" id="voos-title">1. Detalhes dos voos - ambas as famílias</h2>
                 </div>
 
                 <article class="mb-4">
-                    <div class="section-subhead">
-                        <h3 class="h5 mb-0">1.1 Família 1 — Air Canada (PNR ADI6WR)</h3>
-                        <span class="badge-soft"><strong>Tarifa:</strong> Economy Basic (classe G)</span>
-                        <span class="badge-soft"><strong>Bagagem:</strong> 1 item pessoal + 2 despachadas (23 kg)</span>
+                    <div class="app-section-subhead">
+                        <h3 class="h5 mb-0">1.1 Família 1 - Air Canada (PNR ADI6WR)</h3>
+                        <span class="ui-badge"><strong>Tarifa:</strong> Economy Basic (classe G)</span>
+                        <span class="ui-badge"><strong>Bagagem:</strong> 1 item pessoal + 2 despachadas (23 kg)</span>
                     </div>
                     <p><strong>Passageiros:</strong> Bruno Pinto Brum; Fernanda Lee Guerra Marques Brum; Noah Marques Brum; Alice Brum (bebê no colo).</p>
 
-                    <div class="grid-two">
-                        <div class="info-tile h-100">
-                            <p class="label">Ida — Domingo, 22/02/2026</p>
-                            <p class="mb-1"><strong>Voo:</strong> AC1638 — Montréal (YUL) → Orlando (MCO)</p>
-                            <p class="mb-2"><strong>Horário:</strong> 19:25 → 23:02</p>
-                            <div class="chip-row">
-                                <span class="chip"><strong>Terminal:</strong> MCO — B</span>
-                                <span class="chip"><strong>Aeronave:</strong> Airbus A321-200</span>
-                                <span class="chip"><strong>Serviço:</strong> Air Canada Bistro (pago)</span>
+                    <div class="app-grid-two">
+                        <div class="ui-tile h-100">
+                            <p class="ui-label">Ida - Domingo, 22/02/2026</p>
+                            <p class="mb-1"><strong>Voo:</strong> AC1638 - Montréal (YUL) &rarr; Orlando (MCO)</p>
+                            <p class="mb-2"><strong>Horário:</strong> 19:25 &rarr; 23:02</p>
+                            <div class="ui-chip-row">
+                                <span class="ui-chip"><strong>Terminal:</strong> MCO - B</span>
+                                <span class="ui-chip"><strong>Aeronave:</strong> Airbus A321-200</span>
+                                <span class="ui-chip"><strong>Serviço:</strong> Air Canada Bistro (pago)</span>
                             </div>
                         </div>
-                        <div class="info-tile h-100">
-                            <p class="label">Volta — Quarta, 11/03/2026</p>
-                            <p class="mb-1"><strong>Voo:</strong> AC1641 — Orlando (MCO) → Montréal (YUL)</p>
-                            <p class="mb-2"><strong>Horário:</strong> 18:15 → 21:26</p>
-                            <div class="chip-row">
-                                <span class="chip"><strong>Terminal:</strong> MCO — B</span>
-                                <span class="chip"><strong>Aeronave:</strong> Airbus A321-200</span>
+                        <div class="ui-tile h-100">
+                            <p class="ui-label">Volta - Quarta, 11/03/2026</p>
+                            <p class="mb-1"><strong>Voo:</strong> AC1641 - Orlando (MCO) &rarr; Montréal (YUL)</p>
+                            <p class="mb-2"><strong>Horário:</strong> 18:15 &rarr; 21:26</p>
+                            <div class="ui-chip-row">
+                                <span class="ui-chip"><strong>Terminal:</strong> MCO - B</span>
+                                <span class="ui-chip"><strong>Aeronave:</strong> Airbus A321-200</span>
                             </div>
                         </div>
                     </div>
 
-                    <p class="subdued mt-3 mb-0">
-                        Regras de embarque (voos Canadá → EUA): check-in e despacho de bagagem até 60 min antes da partida; deadline no portão 30 min antes; portão fecha 15 min antes do voo.
+                    <p class="ui-subdued mt-3 mb-0">
+                        Regras de embarque (voos Canadá &rarr; EUA): check-in e despacho de bagagem até 60 min antes da partida; deadline no portão 30 min antes; portão fecha 15 min antes do voo.
                     </p>
                 </article>
 
                 <article>
-                    <div class="section-subhead">
-                        <h3 class="h5 mb-0">1.2 Família 2 — GOL Linhas Aéreas (PNR IEGFNU)</h3>
-                        <span class="badge-soft"><strong>Tarifa:</strong> LIGHT NEW — Econômica (classe O)</span>
-                        <span class="badge-soft"><strong>Bagagem:</strong> 2 volumes de mão (10 kg + 12 kg)</span>
+                    <div class="app-section-subhead">
+                        <h3 class="h5 mb-0">1.2 Família 2 - GOL Linhas Aéreas (PNR IEGFNU)</h3>
+                        <span class="ui-badge"><strong>Tarifa:</strong> LIGHT NEW - Econômica (classe O)</span>
+                        <span class="ui-badge"><strong>Bagagem:</strong> 2 volumes de mão (10 kg + 12 kg)</span>
                     </div>
                     <p><strong>Passageiros:</strong> Célia de Fátima Guerra M de Almeida; Wilton Arcanjo Guimarães.</p>
 
-                    <div class="grid-two">
-                        <div class="info-tile h-100">
-                            <p class="label">Célia — Ida (22/02/2026)</p>
+                    <div class="app-grid-two">
+                        <div class="ui-tile h-100">
+                            <p class="ui-label">Célia - Ida (22/02/2026)</p>
                             <ul class="mb-2 ps-3">
-                                <li>G3 1755 — GIG (T2) 06:00 → BSB 07:45 (Boeing 737-800)</li>
+                                <li>G3 1755 - GIG (T2) 06:00 &rarr; BSB 07:45 (Boeing 737-800)</li>
                                 <li>Conexão em Brasília ~2h</li>
-                                <li>G3 7602 — BSB 09:45 → MCO (Terminal C) 15:55 (Boeing 737 MAX)</li>
+                                <li>G3 7602 - BSB 09:45 &rarr; MCO (Terminal C) 15:55 (Boeing 737 MAX)</li>
                             </ul>
                         </div>
-                        <div class="info-tile h-100">
-                            <p class="label">Célia — Volta (11/03 → 12/03/2026)</p>
+                        <div class="ui-tile h-100">
+                            <p class="ui-label">Célia - Volta (11/03 &rarr; 12/03/2026)</p>
                             <ul class="mb-2 ps-3">
-                                <li>G3 7601 — MCO (Terminal C) 22:00 → BSB 07:05 (+1) (Boeing 737 MAX)</li>
+                                <li>G3 7601 - MCO (Terminal C) 22:00 &rarr; BSB 07:05 (+1) (Boeing 737 MAX)</li>
                                 <li>Conexão em Brasília ~1h35</li>
-                                <li>G3 2074 — BSB 08:40 → GIG (T2) 10:30 (Boeing 737-800)</li>
+                                <li>G3 2074 - BSB 08:40 &rarr; GIG (T2) 10:30 (Boeing 737-800)</li>
                             </ul>
                         </div>
                     </div>
 
-                    <div class="info-grid mt-2">
-                        <div class="info-tile">
-                            <p class="label">Pagamento total Célia</p>
-                            <p class="value">R$ 3.279,95</p>
-                            <p class="subdued mb-0">Tarifa USD 380 (BRL 2.043,29) + taxas (BR3, BR4, US2, YC, XY2, XA, AY, XF) + bagagem (BRL 700,00).</p>
+                    <div class="app-info-grid mt-2">
+                        <div class="ui-tile">
+                            <p class="ui-label">Pagamento total Célia</p>
+                            <p class="ui-tile-value">R$ 3.279,95</p>
+                            <p class="ui-subdued mb-0">Tarifa USD 380 (BRL 2.043,29) + taxas (BR3, BR4, US2, YC, XY2, XA, AY, XF) + bagagem (BRL 700,00).</p>
                         </div>
-                        <div class="info-tile">
-                            <p class="label">Pagamento total Wilton</p>
-                            <p class="value">R$ 2.579,95</p>
-                            <p class="subdued mb-0">Tarifa USD 380 (BRL 2.043,29) + taxas brasileiras.</p>
+                        <div class="ui-tile">
+                            <p class="ui-label">Pagamento total Wilton</p>
+                            <p class="ui-tile-value">R$ 2.579,95</p>
+                            <p class="ui-subdued mb-0">Tarifa USD 380 (BRL 2.043,29) + taxas brasileiras.</p>
                         </div>
                     </div>
                 </article>
             </section>
 
-            <!-- 2. Airbnb -->
-            <section id="hospedagem" class="section-card card-frame p-4 p-lg-5">
-                <div class="section-heading">
-                    <span class="pill"><span class="dot"></span> Seção 2 — Hospedagem</span>
-                    <h2 class="section-title">2. Airbnb — hospedagem (código HMF5WZ5APC)</h2>
+            <section id="hospedagem" class="app-section ui-card p-4 p-lg-5" aria-labelledby="hospedagem-title">
+                <div class="app-section-header">
+                    <span class="ui-pill"><span class="ui-dot"></span> Seção 2 - Hospedagem</span>
+                    <h2 class="app-section-title" id="hospedagem-title">2. Airbnb - hospedagem (código HMF5WZ5APC)</h2>
                 </div>
 
-                <p class="lead mb-3"><strong>Imóvel:</strong> New &amp; Comfort Home — 3 Bed — 2.5 Bath — Near Disney</p>
+                <p class="lead mb-3"><strong>Imóvel:</strong> New &amp; Comfort Home - 3 Bed - 2.5 Bath - Near Disney</p>
 
-                <div class="info-grid mb-3">
-                    <div class="info-tile">
-                        <p class="label">Endereço</p>
-                        <p class="value">677 Longboat Drive, Davenport, FL 33896, Estados Unidos</p>
+                <div class="app-info-grid mb-3">
+                    <div class="ui-tile">
+                        <p class="ui-label">Endereço</p>
+                        <p class="ui-tile-value">677 Longboat Drive, Davenport, FL 33896, Estados Unidos</p>
                     </div>
-                    <div class="info-tile">
-                        <p class="label">Período</p>
+                    <div class="ui-tile">
+                        <p class="ui-label">Período</p>
                         <p class="mb-0"><strong>Check-in:</strong> 22/02/2026 a partir de 16:00</p>
                         <p class="mb-0"><strong>Check-out:</strong> 11/03/2026 até 10:00</p>
                     </div>
-                    <div class="info-tile">
-                        <p class="label">Anfitriã</p>
+                    <div class="ui-tile">
+                        <p class="ui-label">Anfitriã</p>
                         <p class="mb-0">Fernanda Batista</p>
                         <p class="mb-0">Contato: +55 11 96578-0094 (telefone / WhatsApp)</p>
                         <p class="mb-0">Coanfitriãs: Amy, Emma</p>
                     </div>
-                    <div class="info-tile">
-                        <p class="label">Regras principais</p>
+                    <div class="ui-tile">
+                        <p class="ui-label">Regras principais</p>
                         <p class="mb-0">Máximo 8 hóspedes; animais de estimação permitidos; self check-in por fechadura inteligente.</p>
                     </div>
                 </div>
 
-                <p class="subdued">Wi-Fi e instruções finais de acesso serão enviados pelo Airbnb até 48h antes do check-in.</p>
+                <p class="ui-subdued">Wi-Fi e instruções finais de acesso serão enviados pelo Airbnb até 48h antes do check-in.</p>
 
-                <div class="divider-soft"></div>
+                <div class="ui-divider"></div>
 
                 <h3 class="h5 mb-3">2.1 Financeiro da hospedagem (CAD)</h3>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle table-modern mb-0">
+                    <table class="table table-hover align-middle ui-table mb-0">
+                        <caption class="visually-hidden">Financeiro da hospedagem em CAD</caption>
                         <thead>
                             <tr>
-                                <th>Item</th>
-                                <th>Valor (CAD)</th>
-                                <th>Detalhes</th>
+                                <th scope="col">Item</th>
+                                <th scope="col">Valor (CAD)</th>
+                                <th scope="col">Detalhes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -318,33 +319,32 @@
                 </div>
             </section>
 
-            <!-- 3. Turo -->
-            <section id="turo" class="section-card card-frame p-4 p-lg-5">
-                <div class="section-heading">
-                    <span class="pill"><span class="dot"></span> Seção 3 — Carro (Turo)</span>
-                    <h2 class="section-title">3. Turo — detalhes da reserva do carro</h2>
+            <section id="turo" class="app-section ui-card p-4 p-lg-5" aria-labelledby="turo-title">
+                <div class="app-section-header">
+                    <span class="ui-pill"><span class="ui-dot"></span> Seção 3 - Carro (Turo)</span>
+                    <h2 class="app-section-title" id="turo-title">3. Turo - detalhes da reserva do carro</h2>
                 </div>
 
-                <p class="mb-1"><strong>Veículo:</strong> Dodge Grand Caravan 2019 (host Leonardo E) — Placa BL76KP</p>
+                <p class="mb-1"><strong>Veículo:</strong> Dodge Grand Caravan 2019 (host Leonardo E) - Placa BL76KP</p>
                 <p class="mb-3"><strong>Local:</strong> Orlando International Airport (MCO)</p>
 
-                <div class="info-grid mb-3">
-                    <div class="info-tile">
-                        <p class="label">Retirada</p>
-                        <p class="value">23/02/2026 às 00:30 — MCO (lockbox)</p>
+                <div class="app-info-grid mb-3">
+                    <div class="ui-tile">
+                        <p class="ui-label">Retirada</p>
+                        <p class="ui-tile-value">23/02/2026 às 00:30 - MCO (lockbox)</p>
                     </div>
-                    <div class="info-tile">
-                        <p class="label">Devolução</p>
-                        <p class="value">11/03/2026 às 15:00 — MCO</p>
+                    <div class="ui-tile">
+                        <p class="ui-label">Devolução</p>
+                        <p class="ui-tile-value">11/03/2026 às 15:00 - MCO</p>
                     </div>
                 </div>
 
                 <h3 class="h6 text-uppercase text-muted mt-2">3.1 Extras contratados</h3>
                 <ul class="mb-3 ps-3">
-                    <li>2 cadeirinhas infantis — US$ 39 cada (US$ 78 no total)</li>
-                    <li>1 carrinho de bebê — US$ 55</li>
-                    <li>Enhanced roadside assistance — US$ 50,83</li>
-                    <li>Standard protection plan — incluído</li>
+                    <li>2 cadeirinhas infantis - US$ 39 cada (US$ 78 no total)</li>
+                    <li>1 carrinho de bebê - US$ 55</li>
+                    <li>Enhanced roadside assistance - US$ 50,83</li>
+                    <li>Standard protection plan - incluído</li>
                 </ul>
 
                 <h3 class="h6 text-uppercase text-muted">3.2 Custos totais (USD)</h3>
@@ -356,18 +356,19 @@
                     <li>Airport permit fee: US$ 86,59</li>
                     <li>Sales tax: US$ 46,28</li>
                     <li>Standard protection: US$ 205,24</li>
-                    <li>Descontos: −US$ 51,31 (protection plan) e −US$ 109,95 (2-week discount)</li>
+                    <li>Descontos: -US$ 51,31 (protection plan) e -US$ 109,95 (2-week discount)</li>
                 </ul>
                 <p class="fw-semibold">Total Turo (USD): US$ 998,73</p>
 
                 <h3 class="h6 text-uppercase text-muted">3.3 Cobrança real no cartão (CAD)</h3>
                 <div class="table-responsive mb-3">
-                    <table class="table table-hover align-middle table-modern mb-0">
+                    <table class="table table-hover align-middle ui-table mb-0">
+                        <caption class="visually-hidden">Cobrança real no cartão em CAD</caption>
                         <thead>
                             <tr>
-                                <th>Data</th>
-                                <th>Valor (CAD)</th>
-                                <th>Descrição</th>
+                                <th scope="col">Data</th>
+                                <th scope="col">Valor (CAD)</th>
+                                <th scope="col">Descrição</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -390,29 +391,28 @@
                     </table>
                 </div>
 
-                <p class="mb-0"><strong>Quilometragem:</strong> 5.950 milhas incluídas — limite 350 mi/dia — excedente: US$ 0,09 por milha.</p>
-                <p class="subdued mb-0">Política: reserva non-refundable, com possibilidade de cancelamento total em até 24h após reserva (regra específica do anúncio).</p>
+                <p class="mb-0"><strong>Quilometragem:</strong> 5.950 milhas incluídas - limite 350 mi/dia - excedente: US$ 0,09 por milha.</p>
+                <p class="ui-subdued mb-0">Política: reserva non-refundable, com possibilidade de cancelamento total em até 24h após reserva (regra específica do anúncio).</p>
             </section>
 
-            <!-- 4. Financeiro -->
-            <section id="financeiro" class="section-card card-frame p-4 p-lg-5">
-                <div class="section-heading">
-                    <span class="pill"><span class="dot"></span> Seção 4 — Financeiro</span>
-                    <h2 class="section-title">4. Financeiro da viagem</h2>
+            <section id="financeiro" class="app-section ui-card p-4 p-lg-5" aria-labelledby="financeiro-title">
+                <div class="app-section-header">
+                    <span class="ui-pill"><span class="ui-dot"></span> Seção 4 - Financeiro</span>
+                    <h2 class="app-section-title" id="financeiro-title">4. Financeiro da viagem</h2>
                 </div>
 
-                <div class="grid-two mb-3">
-                    <div class="info-tile h-100">
-                        <p class="label">Valores em CAD</p>
+                <div class="app-grid-two mb-3">
+                    <div class="ui-tile h-100">
+                        <p class="ui-label">Valores em CAD</p>
                         <ul class="mb-0 ps-3">
                             <li><strong>Hospedagem_total_cad:</strong> 3.786,43</li>
                             <li><strong>Turo_total_cad:</strong> 1.399,54</li>
                             <li><strong>Extras_compartilhados_cad:</strong> 0,00</li>
-                            <li><strong>Voos_família_1_cad:</strong> 935,60</li>
+                            <li><strong>Voos_familia_1_cad:</strong> 935,60</li>
                         </ul>
                     </div>
-                    <div class="info-tile h-100">
-                        <p class="label">Valores em BRL</p>
+                    <div class="ui-tile h-100">
+                        <p class="ui-label">Valores em BRL</p>
                         <ul class="mb-0 ps-3">
                             <li><strong>Voos_wilton_brl:</strong> 2.579,95</li>
                             <li><strong>Voos_celia_brl:</strong> 3.279,95</li>
@@ -421,63 +421,62 @@
                     </div>
                 </div>
 
-                <div class="info-grid">
-                    <div class="info-tile">
-                        <p class="label">Família 1 — Bruno, Fernanda, Noah e Alice</p>
-                        <p class="mb-0"><strong>Total_Família_1 = 2.592,99 (hospedagem + carro) + 935,60 (avião) = 3.528,59 CAD</strong></p>
-                        <p class="subdued mb-0">Onde: 2.592,99 CAD = cota da família sobre o total compartilhado (Airbnb + Turo). 935,60 CAD = valor total das passagens Air Canada para a família 1.</p>
+                <div class="app-info-grid">
+                    <div class="ui-tile">
+                        <p class="ui-label">Família 1 - Bruno, Fernanda, Noah e Alice</p>
+                        <p class="mb-0"><strong>Total_Familia_1 = 2.592,99 (hospedagem + carro) + 935,60 (avião) = 3.528,59 CAD</strong></p>
+                        <p class="ui-subdued mb-0">Onde: 2.592,99 CAD = cota da família sobre o total compartilhado (Airbnb + Turo). 935,60 CAD = valor total das passagens Air Canada para a família 1.</p>
                     </div>
-                    <div class="info-tile">
-                        <p class="label">Família 2 — Wilton e Célia</p>
-                        <p class="mb-0"><strong>Total_Família_2 = 2.592,99 CAD (hospedagem + carro) + R$ 5.859,90 (voos em BRL)</strong></p>
-                        <p class="subdued mb-0">Os voos da família 2 foram pagos em reais para manter os valores conforme cobrança real.</p>
+                    <div class="ui-tile">
+                        <p class="ui-label">Família 2 - Wilton e Célia</p>
+                        <p class="mb-0"><strong>Total_Familia_2 = 2.592,99 CAD (hospedagem + carro) + R$ 5.859,90 (voos em BRL)</strong></p>
+                        <p class="ui-subdued mb-0">Os voos da família 2 foram pagos em reais para manter os valores conforme cobrança real.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- 5. Linha do tempo -->
-            <section id="linha-tempo" class="section-card card-frame p-4 p-lg-5">
-                <div class="section-heading">
-                    <span class="pill"><span class="dot"></span> Seção 5 — Linha do tempo</span>
-                    <h2 class="section-title">5. Linha do tempo da viagem</h2>
+            <section id="linha-tempo" class="app-section ui-card p-4 p-lg-5" aria-labelledby="linha-tempo-title">
+                <div class="app-section-header">
+                    <span class="ui-pill"><span class="ui-dot"></span> Seção 5 - Linha do tempo</span>
+                    <h2 class="app-section-title" id="linha-tempo-title">5. Linha do tempo da viagem</h2>
                 </div>
 
-                <h3 class="timeline-date">22/02/2026 — Domingo</h3>
-                <div class="timeline mb-3">
-                    <div class="timeline-item"><span class="timeline-time">15:55</span>Chegada de Célia &amp; Wilton ao MCO — Terminal C.</div>
-                    <div class="timeline-item"><span class="timeline-time">16:00</span>Check-in liberado no Airbnb em Davenport.</div>
-                    <div class="timeline-item"><span class="timeline-time">19:25</span>Decolagem do voo AC1638 de Montréal (YUL) para Orlando (MCO).</div>
-                    <div class="timeline-item"><span class="timeline-time">23:02</span>Chegada de Bruno &amp; família ao MCO — Terminal B.</div>
+                <h3 class="ui-timeline-date">22/02/2026 - Domingo</h3>
+                <div class="ui-timeline mb-3">
+                    <div class="ui-timeline-item"><span class="ui-timeline-time">15:55</span>Chegada de Célia &amp; Wilton ao MCO - Terminal C.</div>
+                    <div class="ui-timeline-item"><span class="ui-timeline-time">16:00</span>Check-in liberado no Airbnb em Davenport.</div>
+                    <div class="ui-timeline-item"><span class="ui-timeline-time">19:25</span>Decolagem do voo AC1638 de Montréal (YUL) para Orlando (MCO).</div>
+                    <div class="ui-timeline-item"><span class="ui-timeline-time">23:02</span>Chegada de Bruno &amp; família ao MCO - Terminal B.</div>
                 </div>
 
-                <h3 class="timeline-date">23/02/2026 — Segunda</h3>
-                <div class="timeline mb-3">
-                    <div class="timeline-item"><span class="timeline-time">00:30</span>Retirada do carro (Turo) no aeroporto MCO (lockbox).</div>
+                <h3 class="ui-timeline-date">23/02/2026 - Segunda</h3>
+                <div class="ui-timeline mb-3">
+                    <div class="ui-timeline-item"><span class="ui-timeline-time">00:30</span>Retirada do carro (Turo) no aeroporto MCO (lockbox).</div>
                 </div>
 
-                <h3 class="timeline-date">11/03/2026 — Quarta (retornos)</h3>
-                <div class="timeline">
-                    <div class="timeline-item"><span class="timeline-time">10:00</span>Check-out do Airbnb em Davenport.</div>
-                    <div class="timeline-item"><span class="timeline-time">15:00</span>Devolução do carro no Turo — MCO.</div>
-                    <div class="timeline-item"><span class="timeline-time">18:15</span>Voo AC1641 decola de MCO para YUL (família 1).</div>
-                    <div class="timeline-item"><span class="timeline-time">22:00</span>Voo G3 7601 decola de MCO para BSB (família 2, com chegada no dia seguinte).</div>
+                <h3 class="ui-timeline-date">11/03/2026 - Quarta (retornos)</h3>
+                <div class="ui-timeline">
+                    <div class="ui-timeline-item"><span class="ui-timeline-time">10:00</span>Check-out do Airbnb em Davenport.</div>
+                    <div class="ui-timeline-item"><span class="ui-timeline-time">15:00</span>Devolução do carro no Turo - MCO.</div>
+                    <div class="ui-timeline-item"><span class="ui-timeline-time">18:15</span>Voo AC1641 decola de MCO para YUL (família 1).</div>
+                    <div class="ui-timeline-item"><span class="ui-timeline-time">22:00</span>Voo G3 7601 decola de MCO para BSB (família 2, com chegada no dia seguinte).</div>
                 </div>
             </section>
 
-            <!-- 6. Lembretes -->
-            <section class="section-card card-frame p-4 p-lg-5">
-                <div class="section-heading">
-                    <span class="pill"><span class="dot"></span> Seção 6 — Lembretes</span>
-                    <h2 class="section-title">6. Lembretes criados</h2>
+            <section class="app-section ui-card p-4 p-lg-5" aria-labelledby="lembretes-title">
+                <div class="app-section-header">
+                    <span class="ui-pill"><span class="ui-dot"></span> Seção 6 - Lembretes</span>
+                    <h2 class="app-section-title" id="lembretes-title">6. Lembretes criados</h2>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-striped align-middle table-modern mb-0">
+                    <table class="table table-striped align-middle ui-table mb-0">
+                        <caption class="visually-hidden">Tabela de lembretes da viagem</caption>
                         <thead>
                             <tr>
-                                <th>Quando</th>
-                                <th>Item</th>
-                                <th>Descrição</th>
+                                <th scope="col">Quando</th>
+                                <th scope="col">Item</th>
+                                <th scope="col">Descrição</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -499,42 +498,19 @@
                             <tr>
                                 <td>Contato útil</td>
                                 <td>Anfitriã Airbnb</td>
-                                <td>Fernanda Batista — telefone/WhatsApp: +55 11 96578-0094 (associado aos lembretes).</td>
+                                <td>Fernanda Batista - telefone/WhatsApp: +55 11 96578-0094 (associado aos lembretes).</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <p class="footer-note mt-2 mb-0">Documento consolidado a partir de: reservas Air Canada, GOL, Airbnb e Turo. Valores em CAD e BRL conforme cobrança real informada.</p>
+            <footer class="app-footer-note mt-2">
+                <p>Documento consolidado a partir de: reservas Air Canada, GOL, Airbnb e Turo. Valores em CAD e BRL conforme cobrança real informada.</p>
+            </footer>
         </main>
     </div>
 
-    <script>
-        (function () {
-            const toggle = document.getElementById('themeToggle');
-            const root = document.documentElement;
-            const label = toggle.querySelector('.label');
-            const icon = toggle.querySelector('.icon');
-
-            const applyTheme = (theme) => {
-                root.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
-                const isDark = theme === 'dark';
-                label.textContent = isDark ? 'Modo claro' : 'Modo escuro';
-                icon.textContent = isDark ? '☀️' : '🌙';
-            };
-
-            const stored = localStorage.getItem('theme');
-            const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            applyTheme(stored || preferred);
-
-            toggle.addEventListener('click', () => {
-                const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-                const next = current === 'dark' ? 'light' : 'dark';
-                applyTheme(next);
-            });
-        })();
-    </script>
+    <script src="app.js" defer></script>
 </body>
 </html>

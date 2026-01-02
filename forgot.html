@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recuperar senha - Orlando 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+    <main class="auth-shell">
+        <section class="auth-card">
+            <p class="login-eyebrow">Recuperacao</p>
+            <h1 class="auth-title">Esqueceu a senha?</h1>
+            <p class="auth-subtitle">Informe seu email para gerar um link de redefinicao.</p>
+
+            <form class="auth-form" id="forgotForm">
+                <div class="login-field">
+                    <label for="email">Email</label>
+                    <div class="login-input">
+                        <input id="email" type="email" name="email" autocomplete="username" placeholder="voce@email.com" required>
+                        <span class="login-field-icon" aria-hidden="true">@</span>
+                    </div>
+                </div>
+                <button type="submit" class="login-button">Gerar link</button>
+            </form>
+
+            <div class="login-alert" id="forgotAlert" role="status" aria-live="polite"></div>
+
+            <p class="auth-footer">
+                Voltar para <a href="/login">entrar</a>
+            </p>
+        </section>
+    </main>
+
+    <script src="forgot.js" defer></script>
+</body>
+</html>

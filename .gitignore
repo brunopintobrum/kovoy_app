@@ -361,3 +361,12 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Project local data/secrets
+data/
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.*
+npm-debug.log*
