@@ -3,6 +3,8 @@ const fs = require('fs');
 const crypto = require('crypto');
 const https = require('https');
 const express = require('express');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -43,6 +45,14 @@ const DATA_DIR = path.join(ROOT_DIR, 'data');
 const DB_PATH = path.join(DATA_DIR, 'app.db');
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+if (JWT_SECRET === 'change-this-secret') {
+    if (IS_PROD) {
+        throw new Error('JWT_SECRET must be set in production.');
+    }
+    console.warn('JWT_SECRET not set; using default for local development only.');
+}
 
 if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -88,9 +98,26 @@ if (countUsers.count === 0) {
     console.warn('Seed user created. Update SEED_EMAIL/SEED_PASSWORD and JWT_SECRET in production.');
 }
 
+app.disable('x-powered-by');
+app.use(helmet({ contentSecurityPolicy: false }));
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(PUBLIC_DIR));
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 50,
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+const sensitiveLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false
+});
 
 const signToken = (user) => {
     return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
@@ -150,7 +177,7 @@ app.get('/forgot', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'forgot.html
 app.get('/reset', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'reset.html')));
 app.get('/orlando.html', authRequired, (req, res) => res.sendFile(path.join(ROOT_DIR, 'orlando.html')));
 
-app.get('/api/auth/google', (req, res) => {
+app.get('/api/auth/google', authLimiter, (req, res) => {
     const { clientId, clientSecret, redirectUri } = getGoogleConfig(req);
     if (!clientId || !clientSecret) {
         return res.redirect('/login?google=missing');
@@ -160,6 +187,7 @@ app.get('/api/auth/google', (req, res) => {
     res.cookie(GOOGLE_STATE_COOKIE, state, {
         httpOnly: true,
         sameSite: 'lax',
+        secure: IS_PROD,
         maxAge: 10 * 60 * 1000
     });
 
@@ -175,7 +203,7 @@ app.get('/api/auth/google', (req, res) => {
     return res.redirect(`${GOOGLE_AUTH_ENDPOINT}?${params.toString()}`);
 });
 
-app.get('/api/auth/google/callback', async (req, res) => {
+app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
     const { clientId, clientSecret, redirectUri } = getGoogleConfig(req);
     if (!clientId || !clientSecret) {
         return res.redirect('/login?google=missing');
@@ -209,16 +237,22 @@ app.get('/api/auth/google/callback', async (req, res) => {
             return res.redirect('/login?google=error');
         }
 
-        const tokenInfoResponse = await requestJson(
-            `${GOOGLE_TOKENINFO_ENDPOINT}?id_token=${encodeURIComponent(idToken)}`
-        );
+    const tokenInfoResponse = await requestJson(
+        `${GOOGLE_TOKENINFO_ENDPOINT}?id_token=${encodeURIComponent(idToken)}`
+    );
 
-        const email = tokenInfoResponse.data && tokenInfoResponse.data.email;
-        const emailVerified = tokenInfoResponse.data && tokenInfoResponse.data.email_verified;
-        const googleSub = tokenInfoResponse.data && tokenInfoResponse.data.sub;
-        if (!email || !googleSub || (emailVerified !== true && emailVerified !== 'true')) {
-            return res.redirect('/login?google=error');
-        }
+    const email = tokenInfoResponse.data && tokenInfoResponse.data.email;
+    const emailVerified = tokenInfoResponse.data && tokenInfoResponse.data.email_verified;
+    const googleSub = tokenInfoResponse.data && tokenInfoResponse.data.sub;
+    const tokenAud = tokenInfoResponse.data && tokenInfoResponse.data.aud;
+    const tokenIss = tokenInfoResponse.data && tokenInfoResponse.data.iss;
+    const issOk = tokenIss === 'https://accounts.google.com' || tokenIss === 'accounts.google.com';
+    if (!email || !googleSub || (emailVerified !== true && emailVerified !== 'true')) {
+        return res.redirect('/login?google=error');
+    }
+    if (tokenAud !== clientId || !issOk) {
+        return res.redirect('/login?google=error');
+    }
 
         let user = db.prepare('SELECT * FROM users WHERE google_sub = ?').get(googleSub);
         const userByEmail = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
@@ -251,6 +285,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
         res.cookie(COOKIE_NAME, token, {
             httpOnly: true,
             sameSite: 'lax',
+            secure: IS_PROD,
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
@@ -261,7 +296,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
     }
 });
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', sensitiveLimiter, (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) {
         return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
@@ -281,6 +316,7 @@ app.post('/api/login', (req, res) => {
     res.cookie(COOKIE_NAME, token, {
         httpOnly: true,
         sameSite: 'lax',
+        secure: IS_PROD,
         maxAge: 7 * 24 * 60 * 60 * 1000
     });
     return res.json({ ok: true });
@@ -325,7 +361,7 @@ app.post('/api/register', (req, res) => {
     return res.status(201).json({ ok: true });
 });
 
-app.post('/api/forgot', (req, res) => {
+app.post('/api/forgot', sensitiveLimiter, (req, res) => {
     const { email } = req.body || {};
     if (!email) {
         return res.status(400).json({ error: 'Email é obrigatório.' });
@@ -347,11 +383,13 @@ app.post('/api/forgot', (req, res) => {
         new Date().toISOString()
     );
 
-    console.warn(`Password reset token for ${email}: ${rawToken}`);
+    if (!IS_PROD) {
+        console.warn(`Password reset token for ${email}: ${rawToken}`);
+    }
     return res.json({ ok: true });
 });
 
-app.post('/api/reset', (req, res) => {
+app.post('/api/reset', sensitiveLimiter, (req, res) => {
     const { token, password } = req.body || {};
     if (!token || !password) {
         return res.status(400).json({ error: 'Token e nova senha são obrigatórios.' });
