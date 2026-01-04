@@ -53,6 +53,7 @@ db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
+        google_sub TEXT,
         created_at TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS reset_tokens (
@@ -64,6 +65,13 @@ db.exec(`
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 `);
+
+const userColumns = db.prepare('PRAGMA table_info(users)').all();
+const hasGoogleSub = userColumns.some((column) => column.name === 'google_sub');
+if (!hasGoogleSub) {
+    db.exec('ALTER TABLE users ADD COLUMN google_sub TEXT');
+}
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL');
 
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
 if (countUsers.count === 0) {
@@ -205,19 +213,35 @@ app.get('/api/auth/google/callback', async (req, res) => {
 
         const email = tokenInfoResponse.data && tokenInfoResponse.data.email;
         const emailVerified = tokenInfoResponse.data && tokenInfoResponse.data.email_verified;
-        if (!email || (emailVerified !== true && emailVerified !== 'true')) {
+        const googleSub = tokenInfoResponse.data && tokenInfoResponse.data.sub;
+        if (!email || !googleSub || (emailVerified !== true && emailVerified !== 'true')) {
             return res.redirect('/login?google=error');
         }
 
-        let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-        if (!user) {
+        let user = db.prepare('SELECT * FROM users WHERE google_sub = ?').get(googleSub);
+        const userByEmail = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+
+        if (user) {
+            if (userByEmail && userByEmail.id !== user.id) {
+                return res.redirect('/login?google=conflict');
+            }
+            if (user.email !== email) {
+                db.prepare('UPDATE users SET email = ? WHERE id = ?').run(email, user.id);
+                user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+            }
+        } else if (userByEmail) {
+            if (userByEmail.google_sub) {
+                return res.redirect('/login?google=conflict');
+            }
+            db.prepare('UPDATE users SET google_sub = ? WHERE id = ?').run(googleSub, userByEmail.id);
+            user = db.prepare('SELECT * FROM users WHERE id = ?').get(userByEmail.id);
+        } else {
             const randomPassword = crypto.randomBytes(32).toString('hex');
             const passwordHash = bcrypt.hashSync(randomPassword, 10);
-            db.prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)').run(
-                email,
-                passwordHash,
-                new Date().toISOString()
+            const insert = db.prepare(
+                'INSERT INTO users (email, password_hash, google_sub, created_at) VALUES (?, ?, ?, ?)'
             );
+            insert.run(email, passwordHash, googleSub, new Date().toISOString());
             user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
         }
 

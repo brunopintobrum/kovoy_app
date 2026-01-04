@@ -24,6 +24,8 @@
     const googleStatus = new URLSearchParams(window.location.search).get('google');
     if (googleStatus === 'missing') {
         setAlert('Login com Google ainda nao foi configurado.', 'error');
+    } else if (googleStatus === 'conflict') {
+        setAlert('Ja existe outra conta com esse email ou Google conectado. Fale com o suporte.', 'error');
     } else if (googleStatus === 'error') {
         setAlert('Nao foi possivel entrar com o Google. Tente novamente.', 'error');
     }
