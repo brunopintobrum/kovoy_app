@@ -46,6 +46,10 @@ const DB_PATH = path.join(DATA_DIR, 'app.db');
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 const IS_PROD = process.env.NODE_ENV === 'production';
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
 
 if (JWT_SECRET === 'change-this-secret') {
     if (IS_PROD) {
@@ -87,19 +91,34 @@ db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users(google_
 
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
 if (countUsers.count === 0) {
-    const seedEmail = process.env.SEED_EMAIL || 'admin@orlando.local';
-    const seedPassword = process.env.SEED_PASSWORD || 'orlando2026';
-    const passwordHash = bcrypt.hashSync(seedPassword, 10);
-    db.prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)').run(
-        seedEmail,
-        passwordHash,
-        new Date().toISOString()
-    );
-    console.warn('Seed user created. Update SEED_EMAIL/SEED_PASSWORD and JWT_SECRET in production.');
+    const seedEmail = process.env.SEED_EMAIL;
+    const seedPassword = process.env.SEED_PASSWORD;
+    if (seedEmail && seedPassword) {
+        const passwordHash = bcrypt.hashSync(seedPassword, 10);
+        db.prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)').run(
+            seedEmail,
+            passwordHash,
+            new Date().toISOString()
+        );
+        console.warn('Seed user created from SEED_EMAIL/SEED_PASSWORD.');
+    }
 }
 
 app.disable('x-powered-by');
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(helmet({
+    contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+            'default-src': ["'self'"],
+            'base-uri': ["'self'"],
+            'frame-ancestors': ["'none'"],
+            'img-src': ["'self'", 'data:'],
+            'script-src': ["'self'"],
+            'style-src': ["'self'", 'https://fonts.googleapis.com'],
+            'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:']
+        }
+    }
+}));
 app.set('trust proxy', 1);
 app.use(express.json());
 app.use(cookieParser());
@@ -123,10 +142,32 @@ const signToken = (user) => {
     return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 };
 
+const isAllowedOrigin = (origin, host) => {
+    if (!origin) return true;
+    if (ALLOWED_ORIGINS.includes(origin)) return true;
+    const selfOrigin = `${IS_PROD ? 'https' : 'http'}://${host}`;
+    return origin === selfOrigin;
+};
+
+const originGuard = (req, res, next) => {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+        const origin = req.get('origin');
+        const host = req.get('host');
+        if (!isAllowedOrigin(origin, host)) {
+            return res.status(403).json({ error: 'Origem nao autorizada.' });
+        }
+    }
+    return next();
+};
+
 const getGoogleConfig = (req) => {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+    const redirectUri =
+        process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+    if (IS_PROD && !process.env.GOOGLE_REDIRECT_URI) {
+        throw new Error('GOOGLE_REDIRECT_URI must be set in production.');
+    }
     return { clientId, clientSecret, redirectUri };
 };
 
@@ -296,7 +337,7 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
     }
 });
 
-app.post('/api/login', sensitiveLimiter, (req, res) => {
+app.post('/api/login', sensitiveLimiter, originGuard, (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) {
         return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
@@ -322,7 +363,7 @@ app.post('/api/login', sensitiveLimiter, (req, res) => {
     return res.json({ ok: true });
 });
 
-app.post('/api/logout', (req, res) => {
+app.post('/api/logout', originGuard, (req, res) => {
     res.clearCookie(COOKIE_NAME);
     return res.json({ ok: true });
 });
@@ -338,7 +379,7 @@ app.get('/api/me', (req, res) => {
     }
 });
 
-app.post('/api/register', (req, res) => {
+app.post('/api/register', sensitiveLimiter, originGuard, (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) {
         return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
@@ -361,7 +402,7 @@ app.post('/api/register', (req, res) => {
     return res.status(201).json({ ok: true });
 });
 
-app.post('/api/forgot', sensitiveLimiter, (req, res) => {
+app.post('/api/forgot', sensitiveLimiter, originGuard, (req, res) => {
     const { email } = req.body || {};
     if (!email) {
         return res.status(400).json({ error: 'Email é obrigatório.' });
@@ -389,7 +430,7 @@ app.post('/api/forgot', sensitiveLimiter, (req, res) => {
     return res.json({ ok: true });
 });
 
-app.post('/api/reset', sensitiveLimiter, (req, res) => {
+app.post('/api/reset', sensitiveLimiter, originGuard, (req, res) => {
     const { token, password } = req.body || {};
     if (!token || !password) {
         return res.status(400).json({ error: 'Token e nova senha são obrigatórios.' });
