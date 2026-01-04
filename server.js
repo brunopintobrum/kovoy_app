@@ -10,11 +10,6 @@ const Database = require('better-sqlite3');
 
 const ROOT_DIR = __dirname;
 const ENV_PATH = path.join(ROOT_DIR, '.env');
-const app = express();
-const PORT = process.env.PORT || 3000;
-const DATA_DIR = path.join(ROOT_DIR, 'data');
-const DB_PATH = path.join(DATA_DIR, 'app.db');
-const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 const COOKIE_NAME = 'auth_token';
 const GOOGLE_STATE_COOKIE = 'google_oauth_state';
 const GOOGLE_AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -41,6 +36,13 @@ const loadEnvFile = () => {
 };
 
 loadEnvFile();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const DATA_DIR = path.join(ROOT_DIR, 'data');
+const DB_PATH = path.join(DATA_DIR, 'app.db');
+const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
+const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 
 if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -88,7 +90,7 @@ if (countUsers.count === 0) {
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(ROOT_DIR));
+app.use(express.static(PUBLIC_DIR));
 
 const signToken = (user) => {
     return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
@@ -142,10 +144,10 @@ const authRequired = (req, res, next) => {
 };
 
 app.get('/', (req, res) => res.redirect('/login'));
-app.get('/login', (req, res) => res.sendFile(path.join(ROOT_DIR, 'login.html')));
-app.get('/register', (req, res) => res.sendFile(path.join(ROOT_DIR, 'register.html')));
-app.get('/forgot', (req, res) => res.sendFile(path.join(ROOT_DIR, 'forgot.html')));
-app.get('/reset', (req, res) => res.sendFile(path.join(ROOT_DIR, 'reset.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'login.html')));
+app.get('/register', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'register.html')));
+app.get('/forgot', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'forgot.html')));
+app.get('/reset', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'reset.html')));
 app.get('/orlando.html', authRequired, (req, res) => res.sendFile(path.join(ROOT_DIR, 'orlando.html')));
 
 app.get('/api/auth/google', (req, res) => {
@@ -345,7 +347,8 @@ app.post('/api/forgot', (req, res) => {
         new Date().toISOString()
     );
 
-    return res.json({ ok: true, token: rawToken });
+    console.warn(`Password reset token for ${email}: ${rawToken}`);
+    return res.json({ ok: true });
 });
 
 app.post('/api/reset', (req, res) => {

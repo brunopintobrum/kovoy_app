@@ -23,12 +23,8 @@
                     body: JSON.stringify(payload)
                 });
 
-                const data = await res.json().catch(() => ({}));
-                let message = 'Se o email existir, enviaremos um link de redefinicao.';
-                if (data.token) {
-                    message += ` Link de teste: /reset?token=${data.token}`;
-                }
-                setAlert(message, 'success');
+                await res.json().catch(() => ({}));
+                setAlert('Se o email existir, enviaremos um link de redefinicao.', 'success');
             } catch (err) {
                 setAlert('Erro de conexao. Tente novamente.', 'error');
             }
