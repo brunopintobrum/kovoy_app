@@ -1,19 +1,46 @@
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const https = require('https');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const Database = require('better-sqlite3');
 
+const ROOT_DIR = __dirname;
+const ENV_PATH = path.join(ROOT_DIR, '.env');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ROOT_DIR = __dirname;
 const DATA_DIR = path.join(ROOT_DIR, 'data');
 const DB_PATH = path.join(DATA_DIR, 'app.db');
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 const COOKIE_NAME = 'auth_token';
+const GOOGLE_STATE_COOKIE = 'google_oauth_state';
+const GOOGLE_AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
+const GOOGLE_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
+const GOOGLE_TOKENINFO_ENDPOINT = 'https://oauth2.googleapis.com/tokeninfo';
+
+const loadEnvFile = () => {
+    if (!fs.existsSync(ENV_PATH)) return;
+    const lines = fs.readFileSync(ENV_PATH, 'utf8').split(/\r?\n/);
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const separatorIndex = trimmed.indexOf('=');
+        if (separatorIndex === -1) continue;
+        const key = trimmed.slice(0, separatorIndex).trim();
+        let value = trimmed.slice(separatorIndex + 1).trim();
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+            value = value.slice(1, -1);
+        }
+        if (key && process.env[key] === undefined) {
+            process.env[key] = value;
+        }
+    }
+};
+
+loadEnvFile();
 
 if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -59,6 +86,40 @@ const signToken = (user) => {
     return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 };
 
+const getGoogleConfig = (req) => {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+    return { clientId, clientSecret, redirectUri };
+};
+
+const httpsRequest = (url, { method = 'GET', headers = {}, body } = {}) => {
+    return new Promise((resolve, reject) => {
+        const requestUrl = new URL(url);
+        const req = https.request(requestUrl, { method, headers }, (res) => {
+            let data = '';
+            res.on('data', (chunk) => { data += chunk; });
+            res.on('end', () => resolve({ status: res.statusCode || 500, body: data }));
+        });
+        req.on('error', reject);
+        if (body) req.write(body);
+        req.end();
+    });
+};
+
+const requestJson = async (url, options) => {
+    const { status, body } = await httpsRequest(url, options);
+    let data = {};
+    if (body) {
+        try {
+            data = JSON.parse(body);
+        } catch (err) {
+            data = {};
+        }
+    }
+    return { status, data };
+};
+
 const authRequired = (req, res, next) => {
     const token = req.cookies[COOKIE_NAME];
     if (!token) return res.redirect('/login');
@@ -78,6 +139,101 @@ app.get('/register', (req, res) => res.sendFile(path.join(ROOT_DIR, 'register.ht
 app.get('/forgot', (req, res) => res.sendFile(path.join(ROOT_DIR, 'forgot.html')));
 app.get('/reset', (req, res) => res.sendFile(path.join(ROOT_DIR, 'reset.html')));
 app.get('/orlando.html', authRequired, (req, res) => res.sendFile(path.join(ROOT_DIR, 'orlando.html')));
+
+app.get('/api/auth/google', (req, res) => {
+    const { clientId, clientSecret, redirectUri } = getGoogleConfig(req);
+    if (!clientId || !clientSecret) {
+        return res.redirect('/login?google=missing');
+    }
+
+    const state = crypto.randomBytes(16).toString('hex');
+    res.cookie(GOOGLE_STATE_COOKIE, state, {
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: 10 * 60 * 1000
+    });
+
+    const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        response_type: 'code',
+        scope: 'openid email profile',
+        state,
+        prompt: 'select_account'
+    });
+
+    return res.redirect(`${GOOGLE_AUTH_ENDPOINT}?${params.toString()}`);
+});
+
+app.get('/api/auth/google/callback', async (req, res) => {
+    const { clientId, clientSecret, redirectUri } = getGoogleConfig(req);
+    if (!clientId || !clientSecret) {
+        return res.redirect('/login?google=missing');
+    }
+
+    const { code, state } = req.query || {};
+    const expectedState = req.cookies[GOOGLE_STATE_COOKIE];
+    res.clearCookie(GOOGLE_STATE_COOKIE);
+
+    if (!code || !state || !expectedState || state !== expectedState) {
+        return res.redirect('/login?google=error');
+    }
+
+    try {
+        const tokenBody = new URLSearchParams({
+            code,
+            client_id: clientId,
+            client_secret: clientSecret,
+            redirect_uri: redirectUri,
+            grant_type: 'authorization_code'
+        }).toString();
+
+        const tokenResponse = await requestJson(GOOGLE_TOKEN_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: tokenBody
+        });
+
+        const idToken = tokenResponse.data && tokenResponse.data.id_token;
+        if (!idToken) {
+            return res.redirect('/login?google=error');
+        }
+
+        const tokenInfoResponse = await requestJson(
+            `${GOOGLE_TOKENINFO_ENDPOINT}?id_token=${encodeURIComponent(idToken)}`
+        );
+
+        const email = tokenInfoResponse.data && tokenInfoResponse.data.email;
+        const emailVerified = tokenInfoResponse.data && tokenInfoResponse.data.email_verified;
+        if (!email || (emailVerified !== true && emailVerified !== 'true')) {
+            return res.redirect('/login?google=error');
+        }
+
+        let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+        if (!user) {
+            const randomPassword = crypto.randomBytes(32).toString('hex');
+            const passwordHash = bcrypt.hashSync(randomPassword, 10);
+            db.prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)').run(
+                email,
+                passwordHash,
+                new Date().toISOString()
+            );
+            user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+        }
+
+        const token = signToken(user);
+        res.cookie(COOKIE_NAME, token, {
+            httpOnly: true,
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        return res.redirect('/orlando.html');
+    } catch (err) {
+        console.error('Google auth error:', err);
+        return res.redirect('/login?google=error');
+    }
+});
 
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body || {};

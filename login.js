@@ -1,6 +1,7 @@
 (() => {
     const form = document.getElementById('loginForm');
     const alertBox = document.getElementById('loginAlert');
+    const googleButton = document.getElementById('googleLogin');
 
     const setAlert = (message, type = 'error') => {
         if (!alertBox) return;
@@ -19,6 +20,22 @@
             setAlert('', 'error');
         }
     };
+
+    const googleStatus = new URLSearchParams(window.location.search).get('google');
+    if (googleStatus === 'missing') {
+        setAlert('Login com Google ainda nao foi configurado.', 'error');
+    } else if (googleStatus === 'error') {
+        setAlert('Nao foi possivel entrar com o Google. Tente novamente.', 'error');
+    }
+
+    if (googleButton) {
+        googleButton.addEventListener('click', () => {
+            googleButton.disabled = true;
+            googleButton.setAttribute('aria-busy', 'true');
+            setAlert('Redirecionando para o Google...', 'success');
+            window.location.href = '/api/auth/google';
+        });
+    }
 
     if (form) {
         form.addEventListener('submit', async (event) => {

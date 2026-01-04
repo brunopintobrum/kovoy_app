@@ -837,19 +837,43 @@ body.login-page {
     gap: 12px;
 }
 
-.login-social button {
+.login-social-button {
     border: 1px solid rgba(20, 22, 26, 0.15);
     background: #fff;
     padding: 10px 12px;
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.login-social button:hover {
+.login-social-button:hover {
     border-color: rgba(20, 22, 26, 0.35);
     transform: translateY(-1px);
+}
+
+.login-social-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.login-social-logo {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-social-logo svg {
+    width: 18px;
+    height: 18px;
+    display: block;
 }
 
 .login-alert {
