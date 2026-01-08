@@ -185,5 +185,5 @@ Nao definida. Adicione um `LICENSE` quando decidir.
 
 ## Creditos / autores / contato
 
-Mantenedor: (a definir)
-Contato: (a definir)
+Mantenedor: Bruno Pinto Brum
+Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
