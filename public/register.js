@@ -3,6 +3,19 @@
     const emailInput = form ? form.querySelector('#useremail') : null;
     const passwordInput = form ? form.querySelector('#userpassword') : null;
     const passwordToggle = document.getElementById('password-addon');
+    const strengthBar = document.getElementById('passwordStrengthBar');
+    const strengthText = document.getElementById('passwordStrengthText');
+    const rules = {
+        length: document.getElementById('rule-length'),
+        upper: document.getElementById('rule-upper'),
+        lower: document.getElementById('rule-lower'),
+        number: document.getElementById('rule-number'),
+        special: document.getElementById('rule-special'),
+        trim: document.getElementById('rule-trim'),
+        common: document.getElementById('rule-common'),
+        email: document.getElementById('rule-email'),
+        confirm: null
+    };
     let alertBox = document.getElementById('registerAlert');
 
     const ensureAlert = () => {
@@ -28,10 +41,98 @@
         box.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
     };
 
+    const commonPasswords = [
+        '123456', '12345678', 'password', 'qwerty', 'abc123',
+        '111111', '123123', 'qwerty123', 'admin', 'letmein'
+    ];
+
+    const evaluatePassword = () => {
+        const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+        const password = passwordInput ? passwordInput.value : '';
+        const trimmed = password.trim();
+        const hasLength = password.length >= 8 && password.length <= 64;
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':",.<>/?\\|]/.test(password);
+        const noTrimIssue = password === trimmed;
+        const notCommon = password.length > 0
+            ? !commonPasswords.some((item) => password.toLowerCase().includes(item))
+            : false;
+        const notEmail = email.length > 0
+            ? password.toLowerCase() !== email
+            : false;
+        const confirmOk = true;
+
+        const applyRule = (node, ok) => {
+            if (!node) return;
+            node.textContent = `${ok ? '✅' : '❌'} ${node.textContent.replace(/^✅ |^❌ /, '')}`;
+        };
+
+        applyRule(rules.length, hasLength);
+        applyRule(rules.upper, hasUpper);
+        applyRule(rules.lower, hasLower);
+        applyRule(rules.number, hasNumber);
+        applyRule(rules.special, hasSpecial);
+        applyRule(rules.trim, noTrimIssue);
+        applyRule(rules.common, notCommon);
+        applyRule(rules.email, notEmail);
+
+        let score = 0;
+        if (hasUpper) score += 1;
+        if (hasLower) score += 1;
+        if (hasNumber) score += 1;
+        if (hasSpecial) score += 1;
+        if (password.length >= 12) score += 1;
+
+        let strength = 'fraca';
+        let strengthClass = 'bg-danger';
+        let percent = 25;
+        let tip = 'Inclua caracteres variados para melhorar a forca.';
+
+        if (score >= 3 && hasLength) {
+            strength = 'media';
+            strengthClass = 'bg-warning';
+            percent = 60;
+            tip = 'Use mais caracteres e misture tipos diferentes.';
+        }
+        if (score >= 4 && hasLength && notCommon && notEmail) {
+            strength = 'forte';
+            strengthClass = 'bg-success';
+            percent = 100;
+            tip = 'Boa senha.';
+        }
+
+        if (strengthBar) {
+            strengthBar.classList.remove('bg-danger', 'bg-warning', 'bg-success');
+            strengthBar.classList.add(strengthClass);
+            strengthBar.style.width = `${percent}%`;
+        }
+        if (strengthText) {
+            strengthText.textContent = `Forca: ${strength}. ${tip}`;
+        }
+
+        const valid = hasLength && hasUpper && hasLower && hasNumber && hasSpecial && noTrimIssue && notCommon && notEmail && confirmOk;
+        return { valid, message: tip };
+    };
+
+    const bindLiveValidation = () => {
+        if (!form) return;
+        const handler = () => evaluatePassword();
+        if (emailInput) emailInput.addEventListener('input', handler);
+        if (passwordInput) passwordInput.addEventListener('input', handler);
+        handler();
+    };
+
     if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             setAlert('');
+            const { valid } = evaluatePassword();
+            if (!valid) {
+                setAlert('A senha nao atende todos os requisitos.', 'error');
+                return;
+            }
             const payload = {
                 email: emailInput ? emailInput.value.trim() : '',
                 password: passwordInput ? passwordInput.value : ''
@@ -59,6 +160,8 @@
             }
         });
     }
+
+    bindLiveValidation();
 
     if (passwordToggle && passwordInput) {
         passwordToggle.addEventListener('click', () => {
