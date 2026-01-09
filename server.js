@@ -346,11 +346,11 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
 app.post('/api/login', sensitiveLimiter, originGuard, (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) {
-        return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
+        return res.status(400).json({ error: 'Email and password are required.' });
     }
 
     if (!isValidEmail(email)) {
-        return res.status(400).json({ error: 'Email invÇ­lido.' });
+        return res.status(400).json({ error: 'Invalid email address.' });
     }
 
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
@@ -392,13 +392,13 @@ app.get('/api/me', (req, res) => {
 app.post('/api/register', sensitiveLimiter, originGuard, (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) {
-        return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
+        return res.status(400).json({ error: 'Email and password are required.' });
     }
     if (!isValidEmail(email)) {
-        return res.status(400).json({ error: 'Email invÇ­lido.' });
+        return res.status(400).json({ error: 'Invalid email address.' });
     }
     if (password.length < 8) {
-        return res.status(400).json({ error: 'Senha precisa ter ao menos 8 caracteres.' });
+        return res.status(400).json({ error: 'Password must be at least 8 characters.' });
     }
 
     const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
@@ -422,7 +422,7 @@ app.post('/api/forgot', sensitiveLimiter, originGuard, (req, res) => {
     }
 
     if (!isValidEmail(email)) {
-        return res.status(400).json({ error: 'Email invÇ­lido.' });
+        return res.status(400).json({ error: 'Invalid email address.' });
     }
 
     const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
@@ -453,7 +453,7 @@ app.post('/api/reset', sensitiveLimiter, originGuard, (req, res) => {
         return res.status(400).json({ error: 'Token e nova senha são obrigatórios.' });
     }
     if (password.length < 8) {
-        return res.status(400).json({ error: 'Senha precisa ter ao menos 8 caracteres.' });
+        return res.status(400).json({ error: 'Password must be at least 8 characters.' });
     }
 
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');

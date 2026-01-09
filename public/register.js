@@ -46,16 +46,16 @@
 
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
-                    setAlert(data.error || 'Nao foi possivel criar a conta.', 'error');
+                    setAlert(data.error || 'Could not create the account.', 'error');
                     return;
                 }
 
-                setAlert('Conta criada com sucesso. Redirecionando...', 'success');
+                setAlert('Account created successfully. Redirecting...', 'success');
                 setTimeout(() => {
                     window.location.href = '/login';
                 }, 700);
             } catch (err) {
-                setAlert('Erro de conexao. Tente novamente.', 'error');
+                setAlert('Connection error. Please try again.', 'error');
             }
         });
     }

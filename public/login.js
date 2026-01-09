@@ -42,17 +42,17 @@
 
     const googleStatus = new URLSearchParams(window.location.search).get('google');
     if (googleStatus === 'missing') {
-        setAlert('Login com Google ainda nao foi configurado.', 'error');
+        setAlert('Google login is not configured yet.', 'error');
     } else if (googleStatus === 'conflict') {
         setAlert('Ja existe outra conta com esse email ou Google conectado. Fale com o suporte.', 'error');
     } else if (googleStatus === 'error') {
-        setAlert('Nao foi possivel entrar com o Google. Tente novamente.', 'error');
+        setAlert('Could not sign in with Google. Please try again.', 'error');
     }
 
     if (googleButton) {
         googleButton.addEventListener('click', (event) => {
             event.preventDefault();
-            setAlert('Redirecionando para o Google...', 'success');
+            setAlert('Redirecting to Google...', 'success');
             window.location.href = '/api/auth/google';
         });
     }
@@ -88,16 +88,16 @@
 
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
-                    setAlert(data.error || 'Nao foi possivel entrar. Tente novamente.', 'error');
+                    setAlert(data.error || 'Could not sign in. Please try again.', 'error');
                     return;
                 }
 
-                setAlert('Login realizado com sucesso. Redirecionando...', 'success');
+                setAlert('Signed in successfully. Redirecting...', 'success');
                 setTimeout(() => {
                     window.location.href = '/orlando.html';
                 }, 600);
             } catch (err) {
-                setAlert('Erro de conexao. Tente novamente.', 'error');
+                setAlert('Connection error. Please try again.', 'error');
             }
         });
     }
