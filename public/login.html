@@ -10,6 +10,14 @@
     <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
     <link href="assets/css/icons.min.css" rel="stylesheet" />
     <link href="assets/css/app.min.css" rel="stylesheet" />
+    <style>
+        .social-list-item.is-disabled {
+            opacity: 0.45;
+            filter: grayscale(100%);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
     <div class="account-pages my-5 pt-sm-5">
@@ -73,12 +81,12 @@
                                         <h5 class="font-size-14 mb-3">Sign in with</h5>
                                         <ul class="list-inline">
                                             <li class="list-inline-item">
-                                                <a href="javascript::void()" class="social-list-item bg-primary text-white border-primary">
+                                                <a href="#" class="social-list-item bg-primary text-white border-primary is-disabled" aria-disabled="true" title="Coming soon">
                                                     <i class="mdi mdi-facebook"></i>
                                                 </a>
                                             </li>
                                             <li class="list-inline-item">
-                                                <a href="javascript::void()" class="social-list-item bg-info text-white border-info">
+                                                <a href="#" class="social-list-item bg-info text-white border-info is-disabled" aria-disabled="true" title="Coming soon">
                                                     <i class="mdi mdi-twitter"></i>
                                                 </a>
                                             </li>
