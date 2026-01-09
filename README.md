@@ -15,6 +15,7 @@ Deploy: sem deploy publico no momento.
 ## Features
 
 - Login com email/senha (JWT em cookie HTTP-only)
+- Tela de login baseada no template Skote (UI fiel)
 - Cadastro, logout e perfil do usuario
 - Recuperacao de senha (token por log em dev)
 - Login social via Google OAuth

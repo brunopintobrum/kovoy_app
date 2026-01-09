@@ -1,13 +1,31 @@
 (() => {
-    const form = document.getElementById('loginForm');
-    const alertBox = document.getElementById('loginAlert');
-    const googleButton = document.getElementById('googleLogin');
+    const form = document.querySelector('form.form-horizontal');
+    const usernameInput = form ? form.querySelector('#username') : null;
+    const passwordInput = form ? form.querySelector('input[type="password"]') : null;
+    const googleButton = document.querySelector('.social-list-item.bg-danger');
+    let alertBox = document.getElementById('loginAlert');
+
+    const ensureAlert = () => {
+        if (alertBox || !form) return alertBox;
+        alertBox = document.createElement('div');
+        alertBox.id = 'loginAlert';
+        alertBox.className = 'alert alert-danger mt-3 d-none';
+        alertBox.setAttribute('role', 'status');
+        alertBox.setAttribute('aria-live', 'polite');
+        form.appendChild(alertBox);
+        return alertBox;
+    };
 
     const setAlert = (message, type = 'error') => {
-        if (!alertBox) return;
-        alertBox.textContent = message;
-        alertBox.dataset.type = type;
-        alertBox.style.display = message ? 'block' : 'none';
+        const box = ensureAlert();
+        if (!box) return;
+        box.textContent = message;
+        box.classList.remove('d-none', 'alert-danger', 'alert-success');
+        if (!message) {
+            box.classList.add('d-none');
+            return;
+        }
+        box.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
     };
 
     const checkSession = async () => {
@@ -31,9 +49,8 @@
     }
 
     if (googleButton) {
-        googleButton.addEventListener('click', () => {
-            googleButton.disabled = true;
-            googleButton.setAttribute('aria-busy', 'true');
+        googleButton.addEventListener('click', (event) => {
+            event.preventDefault();
             setAlert('Redirecionando para o Google...', 'success');
             window.location.href = '/api/auth/google';
         });
@@ -43,8 +60,10 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             setAlert('');
-            const formData = new FormData(form);
-            const payload = Object.fromEntries(formData.entries());
+            const payload = {
+                email: usernameInput ? usernameInput.value.trim() : '',
+                password: passwordInput ? passwordInput.value : ''
+            };
 
             try {
                 const res = await fetch('/api/login', {

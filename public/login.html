@@ -1,101 +1,123 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Entrar - Orlando 2026</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8" />
+    <title>Login | Skote - Responsive Bootstrap 4 Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
+    <meta content="Themesbrand" name="author" />
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/css/icons.min.css" rel="stylesheet" />
+    <link href="assets/css/app.min.css" rel="stylesheet" />
 </head>
-<body class="login-page">
-    <main class="login-shell">
-        <section class="login-aside" aria-labelledby="login-aside-title">
-            <div class="login-aside-content">
-                <p class="login-aside-kicker">Orlando 2026</p>
-                <h1 id="login-aside-title">Volte para o planejamento da viagem.</h1>
-                <p class="login-subtitle">Acompanhe voos, hospedagem, carro e tarefas da familia em um painel unificado.</p>
-                <div class="login-highlights">
-                    <div>
-                        <p class="login-highlight-title">Dashboard vivo</p>
-                        <p class="login-highlight-text">Custos, checklist e linha do tempo em tempo real.</p>
+<body>
+    <div class="account-pages my-5 pt-sm-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 col-xl-5">
+                    <div class="card overflow-hidden">
+                        <div class="bg-primary bg-soft">
+                            <div class="row">
+                                <div class="col-7">
+                                    <div class="text-primary p-4">
+                                        <h5 class="text-primary">Welcome Back !</h5>
+                                        <p>Sign in to continue to Skote.</p>
+                                    </div>
+                                </div>
+                                <div class="col-5 align-self-end">
+                                    <img src="assets/images/profile-img.png" alt="" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div class="auth-logo">
+                                <a href="/" class="auth-logo-light">
+                                    <div class="avatar-md profile-user-wid mb-4">
+                                        <span class="avatar-title rounded-circle bg-light">
+                                            <img src="assets/images/logo-light.svg" alt="" class="rounded-circle" height="34">
+                                        </span>
+                                    </div>
+                                </a>
+                                <a href="/" class="auth-logo-dark">
+                                    <div class="avatar-md profile-user-wid mb-4">
+                                        <span class="avatar-title rounded-circle bg-light">
+                                            <img src="assets/images/logo.svg" alt="" class="rounded-circle" height="34">
+                                        </span>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="p-2">
+                                <form class="form-horizontal" action="/">
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="username" placeholder="Enter username">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Password</label>
+                                        <div class="input-group auth-pass-inputgroup">
+                                            <input type="password" class="form-control" placeholder="Enter password" aria-label="Password" aria-describedby="password-addon">
+                                            <button class="btn btn-light" type="button" id="password-addon"><i class="mdi mdi-eye-outline"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="remember-check">
+                                        <label class="form-check-label" for="remember-check">
+                                            Remember me
+                                        </label>
+                                    </div>
+                                    <div class="mt-3 d-grid">
+                                        <button class="btn btn-primary waves-effect waves-light" type="submit">Log In</button>
+                                    </div>
+                                    <div class="mt-4 text-center">
+                                        <h5 class="font-size-14 mb-3">Sign in with</h5>
+                                        <ul class="list-inline">
+                                            <li class="list-inline-item">
+                                                <a href="javascript::void()" class="social-list-item bg-primary text-white border-primary">
+                                                    <i class="mdi mdi-facebook"></i>
+                                                </a>
+                                            </li>
+                                            <li class="list-inline-item">
+                                                <a href="javascript::void()" class="social-list-item bg-info text-white border-info">
+                                                    <i class="mdi mdi-twitter"></i>
+                                                </a>
+                                            </li>
+                                            <li class="list-inline-item">
+                                                <a href="javascript::void()" class="social-list-item bg-danger text-white border-danger">
+                                                    <i class="mdi mdi-google"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="mt-4 text-center">
+                                        <a href="/forgot" class="text-muted"><i class="mdi mdi-lock me-1"></i> Forgot your password?</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <p class="login-highlight-title">Tudo no mesmo lugar</p>
-                        <p class="login-highlight-text">Reservas, contatos e lembretes sem perder contexto.</p>
+                    <div class="mt-5 text-center">
+                        <div>
+                            <p>Don't have an account ? <a href="/register" class="fw-medium text-primary"> Signup now </a> </p>
+                            <p>
+                                &copy;
+                                <script>document.write(new Date().getFullYear())</script> Skote. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand
+                            </p>
+                        </div>
                     </div>
-                </div>
-                <div class="login-badges" aria-hidden="true">
-                    <span>Voos</span>
-                    <span>Airbnb</span>
-                    <span>Turo</span>
-                    <span>Financeiro</span>
                 </div>
             </div>
-        </section>
-
-        <section class="login-card" aria-labelledby="login-title">
-            <div class="login-card-header">
-                <p class="login-eyebrow">Acesso seguro</p>
-                <h2 id="login-title">Entrar</h2>
-                <p class="login-card-subtitle">Use seu email cadastrado para continuar.</p>
-            </div>
-
-            <form class="login-form" id="loginForm">
-                <div class="login-field">
-                    <label for="email">Email</label>
-                    <div class="login-input">
-                        <input id="email" type="email" name="email" autocomplete="username" placeholder="voce@email.com" required>
-                        <span class="login-field-icon" aria-hidden="true">@</span>
-                    </div>
-                </div>
-                <div class="login-field">
-                    <label for="password">Senha</label>
-                    <div class="login-input">
-                        <input id="password" type="password" name="password" autocomplete="current-password" placeholder="Sua senha" required>
-                        <span class="login-field-icon" aria-hidden="true">*</span>
-                    </div>
-                </div>
-
-                <div class="login-row">
-                    <label class="login-checkbox">
-                        <input type="checkbox" name="remember">
-                        <span>Manter conectado</span>
-                    </label>
-                    <a class="login-link" href="/forgot">Esqueci minha senha</a>
-                </div>
-
-                <button type="submit" class="login-button">Entrar</button>
-            </form>
-
-            <div class="login-alert" id="loginAlert" role="status" aria-live="polite"></div>
-
-            <div class="login-divider">
-                <span>ou continue com</span>
-            </div>
-
-            <div class="login-social">
-                <button type="button" class="login-social-button login-social-google" id="googleLogin" aria-label="Entrar com Google">
-                    <span class="login-social-logo" aria-hidden="true">
-                        <svg viewBox="0 0 533.5 544.3" focusable="false" aria-hidden="true">
-                            <path fill="#4285f4" d="M533.5 278.4c0-17.4-1.4-34.1-4.1-50.4H272v95.4h146.9c-6.3 33.9-25 62.6-53.3 81.8v67h86.1c50.5-46.5 81.8-115.2 81.8-193.8z"/>
-                            <path fill="#34a853" d="M272 544.3c72.6 0 133.5-24.1 178-65.6l-86.1-67c-23.9 16-54.5 25.5-91.9 25.5-70.7 0-130.6-47.7-152.1-111.7h-89v70.2c44.1 87.4 134.8 148.6 241.1 148.6z"/>
-                            <path fill="#fbbc04" d="M119.9 325.5c-10.6-31.9-10.6-66.2 0-98.1v-70.2h-89c-38.5 76.9-38.5 161.6 0 238.5l89-70.2z"/>
-                            <path fill="#ea4335" d="M272 107.7c39.5-.6 77.5 13.9 106.4 40.5l79.1-79.1C409.7 24.1 348.6-1.1 272 0 165.7 0 75 61.2 30.9 148.6l89 70.2c21.5-64 81.4-111.7 152.1-111.1z"/>
-                        </svg>
-                    </span>
-                    <span>Google</span>
-                </button>
-                <button type="button" class="login-social-button login-social-apple">Apple</button>
-            </div>
-
-            <p class="login-cta">
-                Ainda nao tem conta? <a href="/register">Criar agora</a>
-            </p>
-        </section>
-    </main>
-
+        </div>
+    </div>
+    <script src="assets/libs/jquery/jquery.min.js"></script>
+    <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/libs/metismenu/metisMenu.min.js"></script>
+    <script src="assets/libs/simplebar/simplebar.min.js"></script>
+    <script src="assets/libs/node-waves/waves.min.js"></script>
+    <script src="assets/libs/owl.carousel/owl.carousel.min.js"></script>
+    <script src="assets/js/pages/auth-2-carousel.init.js"></script>
+    <script src="assets/js/pages/two-step-verification.init.js"></script>
+    <script src="assets/js/app.js"></script>
     <script src="login.js" defer></script>
 </body>
 </html>
