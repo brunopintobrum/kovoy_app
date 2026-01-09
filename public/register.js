@@ -85,22 +85,22 @@
         if (hasSpecial) score += 1;
         if (password.length >= 12) score += 1;
 
-        let strength = 'fraca';
+        let strength = 'weak';
         let strengthClass = 'bg-danger';
         let percent = 25;
-        let tip = 'Inclua caracteres variados para melhorar a forca.';
+        let tip = 'Use a mix of character types to improve strength.';
 
         if (score >= 3 && hasLength) {
-            strength = 'media';
+            strength = 'medium';
             strengthClass = 'bg-warning';
             percent = 60;
-            tip = 'Use mais caracteres e misture tipos diferentes.';
+            tip = 'Use a longer password and mix more character types.';
         }
         if (score >= 4 && hasLength && notCommon && notEmail) {
-            strength = 'forte';
+            strength = 'strong';
             strengthClass = 'bg-success';
             percent = 100;
-            tip = 'Boa senha.';
+            tip = 'Good password.';
         }
 
         if (strengthBar) {
@@ -109,7 +109,7 @@
             strengthBar.style.width = `${percent}%`;
         }
         if (strengthText) {
-            strengthText.textContent = `Forca: ${strength}. ${tip}`;
+            strengthText.textContent = `Strength: ${strength}. ${tip}`;
         }
 
         const valid = hasLength && hasUpper && hasLower && hasNumber && hasSpecial && noTrimIssue && notCommon && notEmail && confirmOk;
@@ -130,7 +130,7 @@
             setAlert('');
             const { valid } = evaluatePassword();
             if (!valid) {
-                setAlert('A senha nao atende todos os requisitos.', 'error');
+                setAlert('Password does not meet all requirements.', 'error');
                 return;
             }
             const payload = {

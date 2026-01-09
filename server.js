@@ -64,6 +64,7 @@ if (!fs.existsSync(DATA_DIR)) {
 
 const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000');
 db.exec(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -153,6 +154,46 @@ const isValidEmail = (email) => {
     if (!email || typeof email !== 'string') return false;
     const normalized = email.trim().toLowerCase();
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+};
+
+const validatePassword = (email, password) => {
+    const errors = [];
+    if (typeof password !== 'string') {
+        return ['Invalid password.'];
+    }
+    if (password.length < 8 || password.length > 64) {
+        errors.push('Password must be between 8 and 64 characters.');
+    }
+    if (!/[A-Z]/.test(password)) {
+        errors.push('Password must include 1 uppercase letter.');
+    }
+    if (!/[a-z]/.test(password)) {
+        errors.push('Password must include 1 lowercase letter.');
+    }
+    if (!/[0-9]/.test(password)) {
+        errors.push('Password must include 1 number.');
+    }
+    if (!/[!@#$%^&*()_+\-=[\]{};':",.<>/?\\|]/.test(password)) {
+        errors.push('Password must include 1 special character.');
+    }
+    if (password.trim() !== password) {
+        errors.push('Password cannot start or end with spaces.');
+    }
+    const commonPasswords = [
+        '123456', '12345678', 'password', 'qwerty', 'abc123',
+        '111111', '123123', 'qwerty123', 'admin', 'letmein'
+    ];
+    const lowered = password.toLowerCase();
+    if (commonPasswords.some((item) => lowered.includes(item))) {
+        errors.push('Password is too common.');
+    }
+    if (email && typeof email === 'string') {
+        const normalizedEmail = email.trim().toLowerCase();
+        if (normalizedEmail && lowered === normalizedEmail) {
+            errors.push('Password cannot match the email.');
+        }
+    }
+    return errors;
 };
 
 const originGuard = (req, res, next) => {
@@ -397,22 +438,32 @@ app.post('/api/register', sensitiveLimiter, originGuard, (req, res) => {
     if (!isValidEmail(email)) {
         return res.status(400).json({ error: 'Invalid email address.' });
     }
-    if (password.length < 8) {
-        return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+    const passwordErrors = validatePassword(email, password);
+    if (passwordErrors.length) {
+        return res.status(400).json({ error: passwordErrors[0] });
     }
 
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-    if (existing) {
-        return res.status(409).json({ error: 'Email já cadastrado.' });
-    }
+    try {
+        const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+        if (existing) {
+            return res.status(409).json({ error: 'Email already registered.' });
+        }
 
-    const passwordHash = bcrypt.hashSync(password, 10);
-    db.prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)').run(
-        email,
-        passwordHash,
-        new Date().toISOString()
-    );
-    return res.status(201).json({ ok: true });
+        const passwordHash = bcrypt.hashSync(password, 10);
+        db.prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)').run(
+            email,
+            passwordHash,
+            new Date().toISOString()
+        );
+        return res.status(201).json({ ok: true });
+    } catch (err) {
+        const message = err && err.message ? err.message : '';
+        if (message.includes('database is locked') || message.includes('SQLITE_BUSY')) {
+            return res.status(503).json({ error: 'Database is busy. Please try again.' });
+        }
+        console.error('Register error:', err);
+        return res.status(500).json({ error: 'Unexpected server error.' });
+    }
 });
 
 app.post('/api/forgot', sensitiveLimiter, originGuard, (req, res) => {
