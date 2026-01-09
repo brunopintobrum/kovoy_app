@@ -3,6 +3,7 @@
     const emailInput = form ? form.querySelector('#useremail') : null;
     const passwordInput = form ? form.querySelector('#userpassword') : null;
     const passwordToggle = document.getElementById('password-addon');
+    const submitButton = form ? form.querySelector('button[type="submit"]') : null;
     const strengthBar = document.getElementById('passwordStrengthBar');
     const strengthText = document.getElementById('passwordStrengthText');
     const rules = {
@@ -41,6 +42,17 @@
         box.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
     };
 
+    const isValidEmail = (value) => {
+        if (!value || typeof value !== 'string') return false;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim().toLowerCase());
+    };
+
+    const setSubmitting = (isSubmitting) => {
+        if (!submitButton) return;
+        submitButton.disabled = isSubmitting;
+        submitButton.setAttribute('aria-busy', isSubmitting ? 'true' : 'false');
+    };
+
     const commonPasswords = [
         '123456', '12345678', 'password', 'qwerty', 'abc123',
         '111111', '123123', 'qwerty123', 'admin', 'letmein'
@@ -66,7 +78,8 @@
 
         const applyRule = (node, ok) => {
             if (!node) return;
-            node.textContent = `${ok ? '✅' : '❌'} ${node.textContent.replace(/^✅ |^❌ /, '')}`;
+            const label = node.textContent.replace(/^OK |^NO /, '');
+            node.textContent = `${ok ? 'OK' : 'NO'} ${label}`;
         };
 
         applyRule(rules.length, hasLength);
@@ -128,14 +141,30 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             setAlert('');
+            const emailValue = emailInput ? emailInput.value.trim() : '';
+            const passwordValue = passwordInput ? passwordInput.value : '';
+
+            if (!emailValue) {
+                setAlert('Email is required.', 'error');
+                return;
+            }
+            if (!isValidEmail(emailValue)) {
+                setAlert('Please enter a valid email address.', 'error');
+                return;
+            }
+            if (!passwordValue) {
+                setAlert('Password is required.', 'error');
+                return;
+            }
             const { valid } = evaluatePassword();
             if (!valid) {
                 setAlert('Password does not meet all requirements.', 'error');
                 return;
             }
+            setSubmitting(true);
             const payload = {
-                email: emailInput ? emailInput.value.trim() : '',
-                password: passwordInput ? passwordInput.value : ''
+                email: emailValue,
+                password: passwordValue
             };
 
             try {
@@ -148,6 +177,7 @@
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
                     setAlert(data.error || 'Could not create the account.', 'error');
+                    setSubmitting(false);
                     return;
                 }
 
@@ -157,6 +187,7 @@
                 }, 700);
             } catch (err) {
                 setAlert('Connection error. Please try again.', 'error');
+                setSubmitting(false);
             }
         });
     }

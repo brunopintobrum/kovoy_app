@@ -2,6 +2,7 @@
     const form = document.querySelector('form.form-horizontal');
     const usernameInput = form ? form.querySelector('#email') : null;
     const passwordInput = form ? form.querySelector('input[type="password"]') : null;
+    const submitButton = form ? form.querySelector('button[type="submit"]') : null;
     const googleButton = document.querySelector('.social-list-item.bg-danger');
     const passwordToggle = document.getElementById('password-addon');
     let alertBox = document.getElementById('loginAlert');
@@ -27,6 +28,17 @@
             return;
         }
         box.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
+    };
+
+    const isValidEmail = (value) => {
+        if (!value || typeof value !== 'string') return false;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim().toLowerCase());
+    };
+
+    const setSubmitting = (isSubmitting) => {
+        if (!submitButton) return;
+        submitButton.disabled = isSubmitting;
+        submitButton.setAttribute('aria-busy', isSubmitting ? 'true' : 'false');
     };
 
     const checkSession = async () => {
@@ -74,9 +86,26 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             setAlert('');
+            const emailValue = usernameInput ? usernameInput.value.trim() : '';
+            const passwordValue = passwordInput ? passwordInput.value : '';
+
+            if (!emailValue) {
+                setAlert('Email is required.', 'error');
+                return;
+            }
+            if (!isValidEmail(emailValue)) {
+                setAlert('Please enter a valid email address.', 'error');
+                return;
+            }
+            if (!passwordValue) {
+                setAlert('Password is required.', 'error');
+                return;
+            }
+
+            setSubmitting(true);
             const payload = {
-                email: usernameInput ? usernameInput.value.trim() : '',
-                password: passwordInput ? passwordInput.value : ''
+                email: emailValue,
+                password: passwordValue
             };
 
             try {
@@ -89,6 +118,7 @@
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
                     setAlert(data.error || 'Could not sign in. Please try again.', 'error');
+                    setSubmitting(false);
                     return;
                 }
 
@@ -98,6 +128,7 @@
                 }, 600);
             } catch (err) {
                 setAlert('Connection error. Please try again.', 'error');
+                setSubmitting(false);
             }
         });
     }
