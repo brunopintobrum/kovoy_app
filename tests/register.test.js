@@ -141,4 +141,14 @@ describe('Register page', () => {
     await user.click(toggle);
     expect(passwordInput.getAttribute('type')).toBe('text');
   });
+
+  test('clicking Google button redirects to OAuth flow', async () => {
+    setupRegister();
+    const user = userEvent.setup();
+    const googleButton = document.querySelector('.social-list-item.bg-danger');
+
+    await user.click(googleButton);
+
+    expect(window.location.href).toBe('/api/auth/google');
+  });
 });

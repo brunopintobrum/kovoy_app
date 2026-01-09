@@ -18,6 +18,7 @@
         confirm: null
     };
     let alertBox = document.getElementById('registerAlert');
+    const googleButton = document.querySelector('.social-list-item.bg-danger');
 
     const ensureAlert = () => {
         if (alertBox || !form) return alertBox;
@@ -41,6 +42,23 @@
         }
         box.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
     };
+
+    const googleStatus = new URLSearchParams(window.location.search).get('google');
+    if (googleStatus === 'missing') {
+        setAlert('Google login is not configured yet.', 'error');
+    } else if (googleStatus === 'conflict') {
+        setAlert('There is already another account using this email or Google.', 'error');
+    } else if (googleStatus === 'error') {
+        setAlert('Could not sign in with Google. Please try again.', 'error');
+    }
+
+    if (googleButton) {
+        googleButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            setAlert('Redirecting to Google...', 'success');
+            window.location.href = '/api/auth/google';
+        });
+    }
 
     const isValidEmail = (value) => {
         if (!value || typeof value !== 'string') return false;

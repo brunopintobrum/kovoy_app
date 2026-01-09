@@ -56,7 +56,7 @@
     if (googleStatus === 'missing') {
         setAlert('Google login is not configured yet.', 'error');
     } else if (googleStatus === 'conflict') {
-        setAlert('Ja existe outra conta com esse email ou Google conectado. Fale com o suporte.', 'error');
+        setAlert('There is already another account using this email or Google.', 'error');
     } else if (googleStatus === 'error') {
         setAlert('Could not sign in with Google. Please try again.', 'error');
     }
