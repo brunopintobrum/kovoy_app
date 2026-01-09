@@ -1,20 +1,40 @@
 (() => {
-    const form = document.getElementById('registerForm');
-    const alertBox = document.getElementById('registerAlert');
+    const form = document.querySelector('form.needs-validation');
+    const emailInput = form ? form.querySelector('#useremail') : null;
+    const passwordInput = form ? form.querySelector('#userpassword') : null;
+    let alertBox = document.getElementById('registerAlert');
+
+    const ensureAlert = () => {
+        if (alertBox || !form) return alertBox;
+        alertBox = document.createElement('div');
+        alertBox.id = 'registerAlert';
+        alertBox.className = 'alert alert-danger mt-3 d-none';
+        alertBox.setAttribute('role', 'status');
+        alertBox.setAttribute('aria-live', 'polite');
+        form.appendChild(alertBox);
+        return alertBox;
+    };
 
     const setAlert = (message, type = 'error') => {
-        if (!alertBox) return;
-        alertBox.textContent = message;
-        alertBox.dataset.type = type;
-        alertBox.style.display = message ? 'block' : 'none';
+        const box = ensureAlert();
+        if (!box) return;
+        box.textContent = message;
+        box.classList.remove('d-none', 'alert-danger', 'alert-success');
+        if (!message) {
+            box.classList.add('d-none');
+            return;
+        }
+        box.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
     };
 
     if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             setAlert('');
-            const formData = new FormData(form);
-            const payload = Object.fromEntries(formData.entries());
+            const payload = {
+                email: emailInput ? emailInput.value.trim() : '',
+                password: passwordInput ? passwordInput.value : ''
+            };
 
             try {
                 const res = await fetch('/api/register', {
