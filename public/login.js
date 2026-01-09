@@ -1,6 +1,6 @@
 (() => {
     const form = document.querySelector('form.form-horizontal');
-    const usernameInput = form ? form.querySelector('#username') : null;
+    const usernameInput = form ? form.querySelector('#email') : null;
     const passwordInput = form ? form.querySelector('input[type="password"]') : null;
     const googleButton = document.querySelector('.social-list-item.bg-danger');
     const passwordToggle = document.getElementById('password-addon');
