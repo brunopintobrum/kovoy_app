@@ -149,6 +149,12 @@ const isAllowedOrigin = (origin, host) => {
     return origin === selfOrigin;
 };
 
+const isValidEmail = (email) => {
+    if (!email || typeof email !== 'string') return false;
+    const normalized = email.trim().toLowerCase();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+};
+
 const originGuard = (req, res, next) => {
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
         const origin = req.get('origin');
@@ -343,6 +349,10 @@ app.post('/api/login', sensitiveLimiter, originGuard, (req, res) => {
         return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
     }
 
+    if (!isValidEmail(email)) {
+        return res.status(400).json({ error: 'Email invÇ­lido.' });
+    }
+
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
     if (!user) {
         return res.status(401).json({ error: 'Credenciais inválidas.' });
@@ -384,6 +394,9 @@ app.post('/api/register', sensitiveLimiter, originGuard, (req, res) => {
     if (!email || !password) {
         return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
     }
+    if (!isValidEmail(email)) {
+        return res.status(400).json({ error: 'Email invÇ­lido.' });
+    }
     if (password.length < 8) {
         return res.status(400).json({ error: 'Senha precisa ter ao menos 8 caracteres.' });
     }
@@ -406,6 +419,10 @@ app.post('/api/forgot', sensitiveLimiter, originGuard, (req, res) => {
     const { email } = req.body || {};
     if (!email) {
         return res.status(400).json({ error: 'Email é obrigatório.' });
+    }
+
+    if (!isValidEmail(email)) {
+        return res.status(400).json({ error: 'Email invÇ­lido.' });
     }
 
     const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
