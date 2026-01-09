@@ -3,6 +3,7 @@
     const usernameInput = form ? form.querySelector('#username') : null;
     const passwordInput = form ? form.querySelector('input[type="password"]') : null;
     const googleButton = document.querySelector('.social-list-item.bg-danger');
+    const passwordToggle = document.getElementById('password-addon');
     let alertBox = document.getElementById('loginAlert');
 
     const ensureAlert = () => {
@@ -53,6 +54,19 @@
             event.preventDefault();
             setAlert('Redirecionando para o Google...', 'success');
             window.location.href = '/api/auth/google';
+        });
+    }
+
+    if (passwordToggle && passwordInput) {
+        passwordToggle.addEventListener('click', () => {
+            const isHidden = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isHidden ? 'text' : 'password');
+            passwordToggle.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+            const icon = passwordToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('mdi-eye-outline', !isHidden);
+                icon.classList.toggle('mdi-eye-off-outline', isHidden);
+            }
         });
     }
 
