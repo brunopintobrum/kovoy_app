@@ -2,6 +2,7 @@
     const form = document.querySelector('form.needs-validation');
     const emailInput = form ? form.querySelector('#useremail') : null;
     const passwordInput = form ? form.querySelector('#userpassword') : null;
+    const passwordToggle = document.getElementById('password-addon');
     let alertBox = document.getElementById('registerAlert');
 
     const ensureAlert = () => {
@@ -55,6 +56,19 @@
                 }, 700);
             } catch (err) {
                 setAlert('Erro de conexao. Tente novamente.', 'error');
+            }
+        });
+    }
+
+    if (passwordToggle && passwordInput) {
+        passwordToggle.addEventListener('click', () => {
+            const isHidden = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isHidden ? 'text' : 'password');
+            passwordToggle.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+            const icon = passwordToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('mdi-eye-outline', !isHidden);
+                icon.classList.toggle('mdi-eye-off-outline', isHidden);
             }
         });
     }

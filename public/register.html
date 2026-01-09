@@ -51,7 +51,10 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="userpassword" class="form-label">Password</label>
-                                        <input type="password" class="form-control" id="userpassword" placeholder="Enter password" required>
+                                        <div class="input-group auth-pass-inputgroup">
+                                            <input type="password" class="form-control" id="userpassword" placeholder="Enter password" required>
+                                            <button class="btn btn-light" type="button" id="password-addon"><i class="mdi mdi-eye-outline"></i></button>
+                                        </div>
                                         <div class="invalid-feedback">
                                             Please Enter Password
                                         </div>
