@@ -104,7 +104,19 @@ SEED_PASSWORD=senha-forte-123
 
 ## Testes
 
-Nao ha suite de testes configurada no momento.
+Suite de testes com Jest.
+
+Rodar testes:
+
+```bash
+npm test
+```
+
+No Windows, se houver travamento, use:
+
+```bash
+npm test -- --runInBand
+```
 
 Sugestao de padrao:
 
