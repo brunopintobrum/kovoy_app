@@ -311,6 +311,9 @@ app.get('/login', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'login.html')
 app.get('/register', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'register.html')));
 app.get('/forgot', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'forgot.html')));
 app.get('/reset', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'reset.html')));
+app.get('/confirm-mail', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'confirm-mail.html')));
+app.get('/email-verification', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'email-verification.html')));
+app.get('/two-step-verification', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'two-step-verification.html')));
 app.get('/orlando.html', authRequired, (req, res) => res.sendFile(path.join(ROOT_DIR, 'orlando.html')));
 
 app.get('/api/auth/google', authLimiter, (req, res) => {
