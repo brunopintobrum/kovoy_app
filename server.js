@@ -1349,10 +1349,283 @@ const mapReminderRow = (row) => ({
     description: row.description
 });
 
+const trimString = (value) => (typeof value === 'string' ? value.trim() : '');
+
+const requireString = (value, field) => {
+    const trimmed = trimString(value);
+    if (!trimmed) {
+        return { error: `${field} is required.` };
+    }
+    return { value: trimmed };
+};
+
+const optionalString = (value) => {
+    const trimmed = trimString(value);
+    return trimmed ? trimmed : null;
+};
+
+const requireNumber = (value, field) => {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+        return { error: `${field} must be a number.` };
+    }
+    return { value: number };
+};
+
+const requireDate = (value, field) => {
+    if (!value || Number.isNaN(Date.parse(value))) {
+        return { error: `${field} is invalid.` };
+    }
+    return { value };
+};
+
+const optionalDate = (value, field) => {
+    if (!value) return { value: null };
+    if (Number.isNaN(Date.parse(value))) {
+        return { error: `${field} is invalid.` };
+    }
+    return { value };
+};
+
+const optionalTime = (value, field) => {
+    if (!value) return { value: null };
+    if (!/^\d{2}:\d{2}/.test(value)) {
+        return { error: `${field} is invalid.` };
+    }
+    return { value };
+};
+
+const requireCurrency = (value) => {
+    const valid = ['USD', 'CAD', 'BRL'];
+    if (!valid.includes(value)) {
+        return { error: 'Currency is invalid.' };
+    }
+    return { value };
+};
+
+const requireStatus = (value) => {
+    const valid = ['planned', 'paid', 'due'];
+    if (!valid.includes(value)) {
+        return { error: 'Status is invalid.' };
+    }
+    return { value };
+};
+
+const validateFlightPayload = (payload) => {
+    const airline = requireString(payload.airline, 'Airline');
+    if (airline.error) return airline;
+    const fromCity = requireString(payload.from, 'From');
+    if (fromCity.error) return fromCity;
+    const toCity = requireString(payload.to, 'To');
+    if (toCity.error) return toCity;
+    const departAt = requireDate(payload.departAt, 'Departure');
+    if (departAt.error) return departAt;
+    const arriveAt = requireDate(payload.arriveAt, 'Arrival');
+    if (arriveAt.error) return arriveAt;
+    const currency = requireCurrency(payload.currency);
+    if (currency.error) return currency;
+    const cost = requireNumber(payload.cost, 'Cost');
+    if (cost.error) return cost;
+    return {
+        value: {
+            airline: airline.value,
+            pnr: optionalString(payload.pnr),
+            group: optionalString(payload.group),
+            cost: cost.value,
+            currency: currency.value,
+            from: fromCity.value,
+            to: toCity.value,
+            departAt: departAt.value,
+            arriveAt: arriveAt.value,
+            notes: optionalString(payload.notes)
+        }
+    };
+};
+
+const validateLodgingPayload = (payload) => {
+    const name = requireString(payload.name, 'Property');
+    if (name.error) return name;
+    const address = requireString(payload.address, 'Address');
+    if (address.error) return address;
+    const checkIn = requireDate(payload.checkIn, 'Check-in');
+    if (checkIn.error) return checkIn;
+    const checkOut = requireDate(payload.checkOut, 'Check-out');
+    if (checkOut.error) return checkOut;
+    const currency = requireCurrency(payload.currency);
+    if (currency.error) return currency;
+    const cost = requireNumber(payload.cost, 'Total cost');
+    if (cost.error) return cost;
+    return {
+        value: {
+            name: name.value,
+            address: address.value,
+            checkIn: checkIn.value,
+            checkOut: checkOut.value,
+            cost: cost.value,
+            currency: currency.value,
+            host: optionalString(payload.host),
+            contact: optionalString(payload.contact),
+            notes: optionalString(payload.notes)
+        }
+    };
+};
+
+const validateCarPayload = (payload) => {
+    const vehicle = requireString(payload.vehicle, 'Vehicle');
+    if (vehicle.error) return vehicle;
+    const currency = requireCurrency(payload.currency);
+    if (currency.error) return currency;
+    const cost = requireNumber(payload.cost, 'Total cost');
+    if (cost.error) return cost;
+    const pickup = requireDate(payload.pickup, 'Pickup');
+    if (pickup.error) return pickup;
+    const dropoff = requireDate(payload.dropoff, 'Drop-off');
+    if (dropoff.error) return dropoff;
+    return {
+        value: {
+            vehicle: vehicle.value,
+            provider: optionalString(payload.provider),
+            cost: cost.value,
+            currency: currency.value,
+            pickup: pickup.value,
+            dropoff: dropoff.value,
+            location: optionalString(payload.location),
+            notes: optionalString(payload.notes)
+        }
+    };
+};
+
+const validateExpensePayload = (payload) => {
+    const category = requireString(payload.category, 'Category');
+    if (category.error) return category;
+    const currency = requireCurrency(payload.currency);
+    if (currency.error) return currency;
+    const amount = requireNumber(payload.amount, 'Amount');
+    if (amount.error) return amount;
+    const status = requireStatus(payload.status);
+    if (status.error) return status;
+    const dueDate = optionalDate(payload.dueDate, 'Due date');
+    if (dueDate.error) return dueDate;
+    return {
+        value: {
+            category: category.value,
+            amount: amount.value,
+            currency: currency.value,
+            status: status.value,
+            dueDate: dueDate.value,
+            group: optionalString(payload.group),
+            split: optionalString(payload.split),
+            notes: optionalString(payload.notes)
+        }
+    };
+};
+
+const validateTransportPayload = (payload) => {
+    const type = requireString(payload.type, 'Type');
+    if (type.error) return type;
+    const date = requireDate(payload.date, 'Date');
+    if (date.error) return date;
+    const currency = requireCurrency(payload.currency);
+    if (currency.error) return currency;
+    const amount = requireNumber(payload.amount, 'Amount');
+    if (amount.error) return amount;
+    return {
+        value: {
+            type: type.value,
+            date: date.value,
+            amount: amount.value,
+            currency: currency.value,
+            group: optionalString(payload.group),
+            notes: optionalString(payload.notes)
+        }
+    };
+};
+
+const validateTimelinePayload = (payload) => {
+    const date = requireDate(payload.date, 'Date');
+    if (date.error) return date;
+    const title = requireString(payload.title, 'Title');
+    if (title.error) return title;
+    const time = optionalTime(payload.time, 'Time');
+    if (time.error) return time;
+    return {
+        value: {
+            date: date.value,
+            time: time.value,
+            title: title.value,
+            notes: optionalString(payload.notes)
+        }
+    };
+};
+
+const validateReminderPayload = (payload) => {
+    const date = requireDate(payload.date, 'When');
+    if (date.error) return date;
+    const title = requireString(payload.title, 'Item');
+    if (title.error) return title;
+    return {
+        value: {
+            date: date.value,
+            title: title.value,
+            description: optionalString(payload.description)
+        }
+    };
+};
+
+const validateTripMetaPayload = (payload, current) => {
+    return {
+        value: {
+            name: optionalString(payload.name) || current.name,
+            startDate: optionalString(payload.startDate) || current.start_date,
+            endDate: optionalString(payload.endDate) || current.end_date,
+            base: optionalString(payload.base) || current.base,
+            familyOne: optionalString(payload.familyOne) || current.family_one,
+            familyTwo: optionalString(payload.familyTwo) || current.family_two,
+            subtitle: optionalString(payload.subtitle) || current.subtitle
+        }
+    };
+};
+
 const fetchTripId = (userId) => {
     const trip = getTripRecord.get(userId);
     return trip ? trip.id : null;
 };
+
+app.get('/api/trip/meta', authRequiredApi, (req, res) => {
+    const trip = getTripRecord.get(req.user.sub);
+    if (!trip) return res.json({ ok: true, data: null });
+    return res.json({
+        ok: true,
+        data: {
+            name: trip.name,
+            startDate: trip.start_date,
+            endDate: trip.end_date,
+            base: trip.base,
+            familyOne: trip.family_one,
+            familyTwo: trip.family_two,
+            subtitle: trip.subtitle
+        }
+    });
+});
+
+app.put('/api/trip/meta', authRequiredApi, requireCsrfToken, (req, res) => {
+    const payload = req.body || {};
+    const tripId = getOrCreateTripId(req.user.sub);
+    const current = getTripRecord.get(req.user.sub) || {};
+    const normalized = validateTripMetaPayload(payload, current);
+    updateTripRecord.run(
+        normalized.value.name || null,
+        normalized.value.startDate || null,
+        normalized.value.endDate || null,
+        normalized.value.base || null,
+        normalized.value.familyOne || null,
+        normalized.value.familyTwo || null,
+        normalized.value.subtitle || null,
+        new Date().toISOString(),
+        tripId
+    );
+    return res.json({ ok: true });
+});
 
 app.get('/api/trip/flights', authRequiredApi, (req, res) => {
     const tripId = fetchTripId(req.user.sub);
@@ -1363,6 +1636,10 @@ app.get('/api/trip/flights', authRequiredApi, (req, res) => {
 
 app.post('/api/trip/flights', authRequiredApi, requireCsrfToken, (req, res) => {
     const payload = req.body || {};
+    const normalized = validateFlightPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const tripId = getOrCreateTripId(req.user.sub);
     const id = payload.id || generateTripItemId();
     db.prepare(`
@@ -1371,16 +1648,16 @@ app.post('/api/trip/flights', authRequiredApi, requireCsrfToken, (req, res) => {
     `).run(
         id,
         tripId,
-        payload.airline || null,
-        payload.pnr || null,
-        payload.group || null,
-        payload.cost ?? null,
-        payload.currency || null,
-        payload.from || null,
-        payload.to || null,
-        payload.departAt || null,
-        payload.arriveAt || null,
-        payload.notes || null
+        normalized.value.airline,
+        normalized.value.pnr,
+        normalized.value.group,
+        normalized.value.cost,
+        normalized.value.currency,
+        normalized.value.from,
+        normalized.value.to,
+        normalized.value.departAt,
+        normalized.value.arriveAt,
+        normalized.value.notes
     );
     touchTripRecord.run(new Date().toISOString(), tripId);
     return res.json({ ok: true, id });
@@ -1390,21 +1667,25 @@ app.put('/api/trip/flights/:id', authRequiredApi, requireCsrfToken, (req, res) =
     const tripId = fetchTripId(req.user.sub);
     if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
     const payload = req.body || {};
+    const normalized = validateFlightPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const result = db.prepare(`
         UPDATE trip_flights
         SET airline = ?, pnr = ?, group_name = ?, cost = ?, currency = ?, from_city = ?, to_city = ?, depart_at = ?, arrive_at = ?, notes = ?
         WHERE id = ? AND trip_id = ?
     `).run(
-        payload.airline || null,
-        payload.pnr || null,
-        payload.group || null,
-        payload.cost ?? null,
-        payload.currency || null,
-        payload.from || null,
-        payload.to || null,
-        payload.departAt || null,
-        payload.arriveAt || null,
-        payload.notes || null,
+        normalized.value.airline,
+        normalized.value.pnr,
+        normalized.value.group,
+        normalized.value.cost,
+        normalized.value.currency,
+        normalized.value.from,
+        normalized.value.to,
+        normalized.value.departAt,
+        normalized.value.arriveAt,
+        normalized.value.notes,
         req.params.id,
         tripId
     );
@@ -1431,6 +1712,10 @@ app.get('/api/trip/lodgings', authRequiredApi, (req, res) => {
 
 app.post('/api/trip/lodgings', authRequiredApi, requireCsrfToken, (req, res) => {
     const payload = req.body || {};
+    const normalized = validateLodgingPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const tripId = getOrCreateTripId(req.user.sub);
     const id = payload.id || generateTripItemId();
     db.prepare(`
@@ -1439,15 +1724,15 @@ app.post('/api/trip/lodgings', authRequiredApi, requireCsrfToken, (req, res) => 
     `).run(
         id,
         tripId,
-        payload.name || null,
-        payload.address || null,
-        payload.checkIn || null,
-        payload.checkOut || null,
-        payload.cost ?? null,
-        payload.currency || null,
-        payload.host || null,
-        payload.contact || null,
-        payload.notes || null
+        normalized.value.name,
+        normalized.value.address,
+        normalized.value.checkIn,
+        normalized.value.checkOut,
+        normalized.value.cost,
+        normalized.value.currency,
+        normalized.value.host,
+        normalized.value.contact,
+        normalized.value.notes
     );
     touchTripRecord.run(new Date().toISOString(), tripId);
     return res.json({ ok: true, id });
@@ -1457,20 +1742,24 @@ app.put('/api/trip/lodgings/:id', authRequiredApi, requireCsrfToken, (req, res) 
     const tripId = fetchTripId(req.user.sub);
     if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
     const payload = req.body || {};
+    const normalized = validateLodgingPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const result = db.prepare(`
         UPDATE trip_lodgings
         SET name = ?, address = ?, check_in = ?, check_out = ?, cost = ?, currency = ?, host = ?, contact = ?, notes = ?
         WHERE id = ? AND trip_id = ?
     `).run(
-        payload.name || null,
-        payload.address || null,
-        payload.checkIn || null,
-        payload.checkOut || null,
-        payload.cost ?? null,
-        payload.currency || null,
-        payload.host || null,
-        payload.contact || null,
-        payload.notes || null,
+        normalized.value.name,
+        normalized.value.address,
+        normalized.value.checkIn,
+        normalized.value.checkOut,
+        normalized.value.cost,
+        normalized.value.currency,
+        normalized.value.host,
+        normalized.value.contact,
+        normalized.value.notes,
         req.params.id,
         tripId
     );
@@ -1497,6 +1786,10 @@ app.get('/api/trip/cars', authRequiredApi, (req, res) => {
 
 app.post('/api/trip/cars', authRequiredApi, requireCsrfToken, (req, res) => {
     const payload = req.body || {};
+    const normalized = validateCarPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const tripId = getOrCreateTripId(req.user.sub);
     const id = payload.id || generateTripItemId();
     db.prepare(`
@@ -1505,14 +1798,14 @@ app.post('/api/trip/cars', authRequiredApi, requireCsrfToken, (req, res) => {
     `).run(
         id,
         tripId,
-        payload.vehicle || null,
-        payload.provider || null,
-        payload.cost ?? null,
-        payload.currency || null,
-        payload.pickup || null,
-        payload.dropoff || null,
-        payload.location || null,
-        payload.notes || null
+        normalized.value.vehicle,
+        normalized.value.provider,
+        normalized.value.cost,
+        normalized.value.currency,
+        normalized.value.pickup,
+        normalized.value.dropoff,
+        normalized.value.location,
+        normalized.value.notes
     );
     touchTripRecord.run(new Date().toISOString(), tripId);
     return res.json({ ok: true, id });
@@ -1522,19 +1815,23 @@ app.put('/api/trip/cars/:id', authRequiredApi, requireCsrfToken, (req, res) => {
     const tripId = fetchTripId(req.user.sub);
     if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
     const payload = req.body || {};
+    const normalized = validateCarPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const result = db.prepare(`
         UPDATE trip_cars
         SET vehicle = ?, provider = ?, cost = ?, currency = ?, pickup = ?, dropoff = ?, location = ?, notes = ?
         WHERE id = ? AND trip_id = ?
     `).run(
-        payload.vehicle || null,
-        payload.provider || null,
-        payload.cost ?? null,
-        payload.currency || null,
-        payload.pickup || null,
-        payload.dropoff || null,
-        payload.location || null,
-        payload.notes || null,
+        normalized.value.vehicle,
+        normalized.value.provider,
+        normalized.value.cost,
+        normalized.value.currency,
+        normalized.value.pickup,
+        normalized.value.dropoff,
+        normalized.value.location,
+        normalized.value.notes,
         req.params.id,
         tripId
     );
@@ -1561,6 +1858,10 @@ app.get('/api/trip/expenses', authRequiredApi, (req, res) => {
 
 app.post('/api/trip/expenses', authRequiredApi, requireCsrfToken, (req, res) => {
     const payload = req.body || {};
+    const normalized = validateExpensePayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const tripId = getOrCreateTripId(req.user.sub);
     const id = payload.id || generateTripItemId();
     db.prepare(`
@@ -1569,14 +1870,14 @@ app.post('/api/trip/expenses', authRequiredApi, requireCsrfToken, (req, res) => 
     `).run(
         id,
         tripId,
-        payload.category || null,
-        payload.amount ?? null,
-        payload.currency || null,
-        payload.status || null,
-        payload.dueDate || null,
-        payload.group || null,
-        payload.split || null,
-        payload.notes || null
+        normalized.value.category,
+        normalized.value.amount,
+        normalized.value.currency,
+        normalized.value.status,
+        normalized.value.dueDate,
+        normalized.value.group,
+        normalized.value.split,
+        normalized.value.notes
     );
     touchTripRecord.run(new Date().toISOString(), tripId);
     return res.json({ ok: true, id });
@@ -1586,19 +1887,23 @@ app.put('/api/trip/expenses/:id', authRequiredApi, requireCsrfToken, (req, res) 
     const tripId = fetchTripId(req.user.sub);
     if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
     const payload = req.body || {};
+    const normalized = validateExpensePayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const result = db.prepare(`
         UPDATE trip_expenses
         SET category = ?, amount = ?, currency = ?, status = ?, due_date = ?, group_name = ?, split = ?, notes = ?
         WHERE id = ? AND trip_id = ?
     `).run(
-        payload.category || null,
-        payload.amount ?? null,
-        payload.currency || null,
-        payload.status || null,
-        payload.dueDate || null,
-        payload.group || null,
-        payload.split || null,
-        payload.notes || null,
+        normalized.value.category,
+        normalized.value.amount,
+        normalized.value.currency,
+        normalized.value.status,
+        normalized.value.dueDate,
+        normalized.value.group,
+        normalized.value.split,
+        normalized.value.notes,
         req.params.id,
         tripId
     );
@@ -1625,6 +1930,10 @@ app.get('/api/trip/transports', authRequiredApi, (req, res) => {
 
 app.post('/api/trip/transports', authRequiredApi, requireCsrfToken, (req, res) => {
     const payload = req.body || {};
+    const normalized = validateTransportPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const tripId = getOrCreateTripId(req.user.sub);
     const id = payload.id || generateTripItemId();
     db.prepare(`
@@ -1633,12 +1942,12 @@ app.post('/api/trip/transports', authRequiredApi, requireCsrfToken, (req, res) =
     `).run(
         id,
         tripId,
-        payload.type || null,
-        payload.date || null,
-        payload.amount ?? null,
-        payload.currency || null,
-        payload.group || null,
-        payload.notes || null
+        normalized.value.type,
+        normalized.value.date,
+        normalized.value.amount,
+        normalized.value.currency,
+        normalized.value.group,
+        normalized.value.notes
     );
     touchTripRecord.run(new Date().toISOString(), tripId);
     return res.json({ ok: true, id });
@@ -1648,17 +1957,21 @@ app.put('/api/trip/transports/:id', authRequiredApi, requireCsrfToken, (req, res
     const tripId = fetchTripId(req.user.sub);
     if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
     const payload = req.body || {};
+    const normalized = validateTransportPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const result = db.prepare(`
         UPDATE trip_transports
         SET type = ?, date = ?, amount = ?, currency = ?, group_name = ?, notes = ?
         WHERE id = ? AND trip_id = ?
     `).run(
-        payload.type || null,
-        payload.date || null,
-        payload.amount ?? null,
-        payload.currency || null,
-        payload.group || null,
-        payload.notes || null,
+        normalized.value.type,
+        normalized.value.date,
+        normalized.value.amount,
+        normalized.value.currency,
+        normalized.value.group,
+        normalized.value.notes,
         req.params.id,
         tripId
     );
@@ -1685,6 +1998,10 @@ app.get('/api/trip/timeline', authRequiredApi, (req, res) => {
 
 app.post('/api/trip/timeline', authRequiredApi, requireCsrfToken, (req, res) => {
     const payload = req.body || {};
+    const normalized = validateTimelinePayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const tripId = getOrCreateTripId(req.user.sub);
     const id = payload.id || generateTripItemId();
     db.prepare(`
@@ -1693,10 +2010,10 @@ app.post('/api/trip/timeline', authRequiredApi, requireCsrfToken, (req, res) => 
     `).run(
         id,
         tripId,
-        payload.date || null,
-        payload.time || null,
-        payload.title || null,
-        payload.notes || null
+        normalized.value.date,
+        normalized.value.time,
+        normalized.value.title,
+        normalized.value.notes
     );
     touchTripRecord.run(new Date().toISOString(), tripId);
     return res.json({ ok: true, id });
@@ -1706,15 +2023,19 @@ app.put('/api/trip/timeline/:id', authRequiredApi, requireCsrfToken, (req, res) 
     const tripId = fetchTripId(req.user.sub);
     if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
     const payload = req.body || {};
+    const normalized = validateTimelinePayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const result = db.prepare(`
         UPDATE trip_timeline
         SET date = ?, time = ?, title = ?, notes = ?
         WHERE id = ? AND trip_id = ?
     `).run(
-        payload.date || null,
-        payload.time || null,
-        payload.title || null,
-        payload.notes || null,
+        normalized.value.date,
+        normalized.value.time,
+        normalized.value.title,
+        normalized.value.notes,
         req.params.id,
         tripId
     );
@@ -1741,6 +2062,10 @@ app.get('/api/trip/reminders', authRequiredApi, (req, res) => {
 
 app.post('/api/trip/reminders', authRequiredApi, requireCsrfToken, (req, res) => {
     const payload = req.body || {};
+    const normalized = validateReminderPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const tripId = getOrCreateTripId(req.user.sub);
     const id = payload.id || generateTripItemId();
     db.prepare(`
@@ -1749,9 +2074,9 @@ app.post('/api/trip/reminders', authRequiredApi, requireCsrfToken, (req, res) =>
     `).run(
         id,
         tripId,
-        payload.date || null,
-        payload.title || null,
-        payload.description || null
+        normalized.value.date,
+        normalized.value.title,
+        normalized.value.description
     );
     touchTripRecord.run(new Date().toISOString(), tripId);
     return res.json({ ok: true, id });
@@ -1761,14 +2086,18 @@ app.put('/api/trip/reminders/:id', authRequiredApi, requireCsrfToken, (req, res)
     const tripId = fetchTripId(req.user.sub);
     if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
     const payload = req.body || {};
+    const normalized = validateReminderPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
     const result = db.prepare(`
         UPDATE trip_reminders
         SET date = ?, title = ?, description = ?
         WHERE id = ? AND trip_id = ?
     `).run(
-        payload.date || null,
-        payload.title || null,
-        payload.description || null,
+        normalized.value.date,
+        normalized.value.title,
+        normalized.value.description,
         req.params.id,
         tripId
     );

@@ -54,9 +54,6 @@
 
     const saveData = () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
-        if (state.useRemote) {
-            syncRemote();
-        }
     };
 
     const getCookie = (name) => {
@@ -73,43 +70,55 @@
         if (badge) badge.textContent = value;
     };
 
-    const syncRemote = async () => {
-        const csrf = getCookie('csrf_token');
-        try {
-            const res = await fetch('/api/trip', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-csrf-token': csrf || ''
-                },
-                body: JSON.stringify(state.data)
-            });
-            if (res.ok) {
-                setSyncStatus('Server');
-            } else {
-                setSyncStatus('Local');
-            }
-        } catch (err) {
-            setSyncStatus('Local');
+
+    const apiRequest = async (url, options = {}) => {
+        const method = (options.method || 'GET').toUpperCase();
+        const headers = { ...(options.headers || {}) };
+        if (method !== 'GET') {
+            headers['x-csrf-token'] = getCookie('csrf_token') || '';
         }
+        if (options.body && !headers['Content-Type']) {
+            headers['Content-Type'] = 'application/json';
+        }
+        const res = await fetch(url, { ...options, method, headers });
+        if (!res.ok) {
+            throw new Error(`Request failed: ${res.status}`);
+        }
+        const text = await res.text();
+        return text ? JSON.parse(text) : {};
     };
 
-    const fetchRemote = async () => {
+    const fetchRemoteData = async () => {
         try {
-            const res = await fetch('/api/trip');
-            if (!res.ok) {
-                return null;
-            }
-            const body = await res.json();
-            if (body && body.data) {
-                state.useRemote = true;
-                setSyncStatus('Server');
-                return body.data;
-            }
+            const [meta, flights, lodgings, cars, expenses, transports, timeline, reminders] = await Promise.all([
+                apiRequest('/api/trip/meta'),
+                apiRequest('/api/trip/flights'),
+                apiRequest('/api/trip/lodgings'),
+                apiRequest('/api/trip/cars'),
+                apiRequest('/api/trip/expenses'),
+                apiRequest('/api/trip/transports'),
+                apiRequest('/api/trip/timeline'),
+                apiRequest('/api/trip/reminders')
+            ]);
+
+            state.useRemote = true;
+            setSyncStatus('Server');
+
+            return {
+                trip: meta.data || { ...defaultData.trip },
+                flights: flights.data || [],
+                lodgings: lodgings.data || [],
+                cars: cars.data || [],
+                expenses: expenses.data || [],
+                transports: transports.data || [],
+                timeline: timeline.data || [],
+                reminders: reminders.data || []
+            };
         } catch (err) {
+            state.useRemote = false;
+            setSyncStatus('Local');
             return null;
         }
-        return null;
     };
 
     const formatCurrency = (value, currency) => {
@@ -625,6 +634,44 @@
         setText('footerNote', 'Auto-updated summary based on saved data.');
     };
 
+
+    const entityEndpoints = {
+        flights: 'flights',
+        lodgings: 'lodgings',
+        cars: 'cars',
+        expenses: 'expenses',
+        transports: 'transports',
+        timeline: 'timeline',
+        reminders: 'reminders'
+    };
+
+    const updateTripMeta = async (trip) => {
+        if (!state.useRemote) return;
+        await apiRequest('/api/trip/meta', {
+            method: 'PUT',
+            body: JSON.stringify(trip || {})
+        });
+    };
+
+    const replaceRemoteEntity = async (key, items) => {
+        const endpoint = entityEndpoints[key];
+        if (!endpoint) return;
+        const existing = state.data[key] || [];
+        for (const item of existing) {
+            if (!item.id) continue;
+            await apiRequest(`/api/trip/${endpoint}/${item.id}`, { method: 'DELETE' });
+        }
+        const updated = [];
+        for (const item of items || []) {
+            const res = await apiRequest(`/api/trip/${endpoint}`, {
+                method: 'POST',
+                body: JSON.stringify(item)
+            });
+            updated.push({ ...item, id: res.id || item.id });
+        }
+        state.data[key] = updated;
+    };
+
     const bindExportImport = () => {
         const exportButton = document.getElementById('exportData');
         const importInput = document.getElementById('importData');
@@ -649,6 +696,16 @@
                     const text = await file.text();
                     const parsed = JSON.parse(text);
                     state.data = { ...defaultData, ...parsed };
+                    if (state.useRemote) {
+                        await updateTripMeta(state.data.trip);
+                        await replaceRemoteEntity('flights', state.data.flights);
+                        await replaceRemoteEntity('lodgings', state.data.lodgings);
+                        await replaceRemoteEntity('cars', state.data.cars);
+                        await replaceRemoteEntity('expenses', state.data.expenses);
+                        await replaceRemoteEntity('transports', state.data.transports);
+                        await replaceRemoteEntity('timeline', state.data.timeline);
+                        await replaceRemoteEntity('reminders', state.data.reminders);
+                    }
                     saveData();
                     renderAll();
                 } catch (err) {
@@ -665,10 +722,10 @@
         state.editing[editingKey] = null;
     };
 
-    const bindForm = (formId, dataKey, fields, listKey) => {
+    const bindForm = (formId, dataKey, fields) => {
         const form = document.getElementById(formId);
         if (!form) return;
-        form.addEventListener('submit', (event) => {
+        form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const formData = new FormData(form);
             const payload = Object.fromEntries(formData.entries());
@@ -680,6 +737,27 @@
                         payload[field] = payload[field] ? Number(payload[field]) : 0;
                     }
                 });
+            }
+
+            const endpoint = entityEndpoints[dataKey];
+            if (state.useRemote && endpoint) {
+                try {
+                    if (state.editing[dataKey]) {
+                        await apiRequest(`/api/trip/${endpoint}/${payload.id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        const res = await apiRequest(`/api/trip/${endpoint}`, {
+                            method: 'POST',
+                            body: JSON.stringify(payload)
+                        });
+                        payload.id = res.id || payload.id;
+                    }
+                } catch (err) {
+                    alert('Could not save. Please try again.');
+                    return;
+                }
             }
 
             if (state.editing[dataKey]) {
@@ -723,6 +801,11 @@
             const key = entityMap[entity] || entity;
 
             if (action === 'delete') {
+                const endpoint = entityEndpoints[key];
+                if (state.useRemote && endpoint) {
+                    apiRequest(`/api/trip/${endpoint}/${id}`, { method: 'DELETE' })
+                        .catch(() => {});
+                }
                 state.data[key] = state.data[key].filter((item) => item.id !== id);
                 saveData();
                 renderAll();
@@ -743,7 +826,7 @@
     };
 
     const init = async () => {
-        const remote = await fetchRemote();
+        const remote = await fetchRemoteData();
         state.data = remote || loadData();
         renderAll();
 
