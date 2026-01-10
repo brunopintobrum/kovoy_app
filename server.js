@@ -133,6 +133,110 @@ db.exec(`
         ip_addr TEXT,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
+    CREATE TABLE IF NOT EXISTS trip_data (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        data_json TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS trips (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL UNIQUE,
+        name TEXT,
+        start_date TEXT,
+        end_date TEXT,
+        base TEXT,
+        family_one TEXT,
+        family_two TEXT,
+        subtitle TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS trip_flights (
+        id TEXT PRIMARY KEY,
+        trip_id INTEGER NOT NULL,
+        airline TEXT,
+        pnr TEXT,
+        group_name TEXT,
+        cost REAL,
+        currency TEXT,
+        from_city TEXT,
+        to_city TEXT,
+        depart_at TEXT,
+        arrive_at TEXT,
+        notes TEXT,
+        FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS trip_lodgings (
+        id TEXT PRIMARY KEY,
+        trip_id INTEGER NOT NULL,
+        name TEXT,
+        address TEXT,
+        check_in TEXT,
+        check_out TEXT,
+        cost REAL,
+        currency TEXT,
+        host TEXT,
+        contact TEXT,
+        notes TEXT,
+        FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS trip_cars (
+        id TEXT PRIMARY KEY,
+        trip_id INTEGER NOT NULL,
+        vehicle TEXT,
+        provider TEXT,
+        cost REAL,
+        currency TEXT,
+        pickup TEXT,
+        dropoff TEXT,
+        location TEXT,
+        notes TEXT,
+        FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS trip_expenses (
+        id TEXT PRIMARY KEY,
+        trip_id INTEGER NOT NULL,
+        category TEXT,
+        amount REAL,
+        currency TEXT,
+        status TEXT,
+        due_date TEXT,
+        group_name TEXT,
+        split TEXT,
+        notes TEXT,
+        FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS trip_transports (
+        id TEXT PRIMARY KEY,
+        trip_id INTEGER NOT NULL,
+        type TEXT,
+        date TEXT,
+        amount REAL,
+        currency TEXT,
+        group_name TEXT,
+        notes TEXT,
+        FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS trip_timeline (
+        id TEXT PRIMARY KEY,
+        trip_id INTEGER NOT NULL,
+        date TEXT,
+        time TEXT,
+        title TEXT,
+        notes TEXT,
+        FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS trip_reminders (
+        id TEXT PRIMARY KEY,
+        trip_id INTEGER NOT NULL,
+        date TEXT,
+        title TEXT,
+        description TEXT,
+        FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+    );
 `);
 
 const userColumns = db.prepare('PRAGMA table_info(users)').all();
@@ -156,6 +260,15 @@ db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_hash ON email_
 db.exec('CREATE INDEX IF NOT EXISTS idx_two_factor_codes_hash ON two_factor_codes(code_hash)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_hash ON refresh_tokens(token_hash)');
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_trip_data_user ON trip_data(user_id)');
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_trips_user ON trips(user_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_trip_flights_trip ON trip_flights(trip_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_trip_lodgings_trip ON trip_lodgings(trip_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_trip_cars_trip ON trip_cars(trip_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_trip_expenses_trip ON trip_expenses(trip_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_trip_transports_trip ON trip_transports(trip_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_trip_timeline_trip ON trip_timeline(trip_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_trip_reminders_trip ON trip_reminders(trip_id)');
 const refreshTokenColumns = db.prepare('PRAGMA table_info(refresh_tokens)').all();
 const hasRememberColumn = refreshTokenColumns.some((column) => column.name === 'remember');
 if (!hasRememberColumn) {
@@ -554,6 +667,19 @@ const authRequired = (req, res, next) => {
     }
 };
 
+const authRequiredApi = (req, res, next) => {
+    const token = req.cookies[COOKIE_NAME];
+    if (!token) return res.status(401).json({ error: 'Not authenticated.' });
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        req.user = payload;
+        return next();
+    } catch (err) {
+        res.clearCookie(COOKIE_NAME);
+        return res.status(401).json({ error: 'Not authenticated.' });
+    }
+};
+
 app.get('/', (req, res) => res.redirect('/login'));
 app.get('/login', (req, res) => {
     ensureCsrfCookie(req, res);
@@ -600,7 +726,10 @@ app.get('/two-step-verification', (req, res) => {
     }
     return res.sendFile(path.join(PUBLIC_DIR, 'two-step-verification.html'));
 });
-app.get('/orlando.html', authRequired, (req, res) => res.sendFile(path.join(ROOT_DIR, 'orlando.html')));
+app.get('/orlando.html', authRequired, (req, res) => {
+    ensureCsrfCookie(req, res);
+    return res.sendFile(path.join(ROOT_DIR, 'orlando.html'));
+});
 
 app.get('/api/auth/google', authLimiter, (req, res) => {
     const { clientId, clientSecret, redirectUri } = getGoogleConfig(req);
@@ -828,6 +957,326 @@ app.get('/api/me', (req, res) => {
     } catch (err) {
         return res.status(401).json({ error: 'Não autenticado.' });
     }
+});
+
+const generateTripItemId = () => {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return crypto.randomBytes(16).toString('hex');
+};
+
+const getTripRecord = db.prepare('SELECT * FROM trips WHERE user_id = ?');
+const insertTripRecord = db.prepare(`
+    INSERT INTO trips (user_id, name, start_date, end_date, base, family_one, family_two, subtitle, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`);
+const updateTripRecord = db.prepare(`
+    UPDATE trips
+    SET name = ?, start_date = ?, end_date = ?, base = ?, family_one = ?, family_two = ?, subtitle = ?, updated_at = ?
+    WHERE id = ?
+`);
+
+const saveTripData = (userId, data) => {
+    const trip = data.trip || {};
+    const now = new Date().toISOString();
+    const existing = getTripRecord.get(userId);
+    let tripId = existing ? existing.id : null;
+
+    if (existing) {
+        updateTripRecord.run(
+            trip.name || null,
+            trip.startDate || null,
+            trip.endDate || null,
+            trip.base || null,
+            trip.familyOne || null,
+            trip.familyTwo || null,
+            trip.subtitle || null,
+            now,
+            tripId
+        );
+    } else {
+        const result = insertTripRecord.run(
+            userId,
+            trip.name || null,
+            trip.startDate || null,
+            trip.endDate || null,
+            trip.base || null,
+            trip.familyOne || null,
+            trip.familyTwo || null,
+            trip.subtitle || null,
+            now,
+            now
+        );
+        tripId = result.lastInsertRowid;
+    }
+
+    const tx = db.transaction(() => {
+        db.prepare('DELETE FROM trip_flights WHERE trip_id = ?').run(tripId);
+        db.prepare('DELETE FROM trip_lodgings WHERE trip_id = ?').run(tripId);
+        db.prepare('DELETE FROM trip_cars WHERE trip_id = ?').run(tripId);
+        db.prepare('DELETE FROM trip_expenses WHERE trip_id = ?').run(tripId);
+        db.prepare('DELETE FROM trip_transports WHERE trip_id = ?').run(tripId);
+        db.prepare('DELETE FROM trip_timeline WHERE trip_id = ?').run(tripId);
+        db.prepare('DELETE FROM trip_reminders WHERE trip_id = ?').run(tripId);
+
+        const insertFlight = db.prepare(`
+            INSERT INTO trip_flights (id, trip_id, airline, pnr, group_name, cost, currency, from_city, to_city, depart_at, arrive_at, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        (data.flights || []).forEach((item) => {
+            insertFlight.run(
+                item.id || generateTripItemId(),
+                tripId,
+                item.airline || null,
+                item.pnr || null,
+                item.group || null,
+                item.cost ?? null,
+                item.currency || null,
+                item.from || null,
+                item.to || null,
+                item.departAt || null,
+                item.arriveAt || null,
+                item.notes || null
+            );
+        });
+
+        const insertLodging = db.prepare(`
+            INSERT INTO trip_lodgings (id, trip_id, name, address, check_in, check_out, cost, currency, host, contact, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        (data.lodgings || []).forEach((item) => {
+            insertLodging.run(
+                item.id || generateTripItemId(),
+                tripId,
+                item.name || null,
+                item.address || null,
+                item.checkIn || null,
+                item.checkOut || null,
+                item.cost ?? null,
+                item.currency || null,
+                item.host || null,
+                item.contact || null,
+                item.notes || null
+            );
+        });
+
+        const insertCar = db.prepare(`
+            INSERT INTO trip_cars (id, trip_id, vehicle, provider, cost, currency, pickup, dropoff, location, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        (data.cars || []).forEach((item) => {
+            insertCar.run(
+                item.id || generateTripItemId(),
+                tripId,
+                item.vehicle || null,
+                item.provider || null,
+                item.cost ?? null,
+                item.currency || null,
+                item.pickup || null,
+                item.dropoff || null,
+                item.location || null,
+                item.notes || null
+            );
+        });
+
+        const insertExpense = db.prepare(`
+            INSERT INTO trip_expenses (id, trip_id, category, amount, currency, status, due_date, group_name, split, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        (data.expenses || []).forEach((item) => {
+            insertExpense.run(
+                item.id || generateTripItemId(),
+                tripId,
+                item.category || null,
+                item.amount ?? null,
+                item.currency || null,
+                item.status || null,
+                item.dueDate || null,
+                item.group || null,
+                item.split || null,
+                item.notes || null
+            );
+        });
+
+        const insertTransport = db.prepare(`
+            INSERT INTO trip_transports (id, trip_id, type, date, amount, currency, group_name, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        (data.transports || []).forEach((item) => {
+            insertTransport.run(
+                item.id || generateTripItemId(),
+                tripId,
+                item.type || null,
+                item.date || null,
+                item.amount ?? null,
+                item.currency || null,
+                item.group || null,
+                item.notes || null
+            );
+        });
+
+        const insertTimeline = db.prepare(`
+            INSERT INTO trip_timeline (id, trip_id, date, time, title, notes)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `);
+        (data.timeline || []).forEach((item) => {
+            insertTimeline.run(
+                item.id || generateTripItemId(),
+                tripId,
+                item.date || null,
+                item.time || null,
+                item.title || null,
+                item.notes || null
+            );
+        });
+
+        const insertReminder = db.prepare(`
+            INSERT INTO trip_reminders (id, trip_id, date, title, description)
+            VALUES (?, ?, ?, ?, ?)
+        `);
+        (data.reminders || []).forEach((item) => {
+            insertReminder.run(
+                item.id || generateTripItemId(),
+                tripId,
+                item.date || null,
+                item.title || null,
+                item.description || null
+            );
+        });
+    });
+
+    tx();
+    return { tripId, updatedAt: now };
+};
+
+const buildTripPayload = (userId) => {
+    const trip = getTripRecord.get(userId);
+    if (!trip) return null;
+    const tripId = trip.id;
+
+    const flights = db.prepare('SELECT * FROM trip_flights WHERE trip_id = ?').all(tripId);
+    const lodgings = db.prepare('SELECT * FROM trip_lodgings WHERE trip_id = ?').all(tripId);
+    const cars = db.prepare('SELECT * FROM trip_cars WHERE trip_id = ?').all(tripId);
+    const expenses = db.prepare('SELECT * FROM trip_expenses WHERE trip_id = ?').all(tripId);
+    const transports = db.prepare('SELECT * FROM trip_transports WHERE trip_id = ?').all(tripId);
+    const timeline = db.prepare('SELECT * FROM trip_timeline WHERE trip_id = ?').all(tripId);
+    const reminders = db.prepare('SELECT * FROM trip_reminders WHERE trip_id = ?').all(tripId);
+
+    return {
+        trip: {
+            name: trip.name,
+            startDate: trip.start_date,
+            endDate: trip.end_date,
+            base: trip.base,
+            familyOne: trip.family_one,
+            familyTwo: trip.family_two,
+            subtitle: trip.subtitle
+        },
+        flights: flights.map((row) => ({
+            id: row.id,
+            airline: row.airline,
+            pnr: row.pnr,
+            group: row.group_name,
+            cost: row.cost,
+            currency: row.currency,
+            from: row.from_city,
+            to: row.to_city,
+            departAt: row.depart_at,
+            arriveAt: row.arrive_at,
+            notes: row.notes
+        })),
+        lodgings: lodgings.map((row) => ({
+            id: row.id,
+            name: row.name,
+            address: row.address,
+            checkIn: row.check_in,
+            checkOut: row.check_out,
+            cost: row.cost,
+            currency: row.currency,
+            host: row.host,
+            contact: row.contact,
+            notes: row.notes
+        })),
+        cars: cars.map((row) => ({
+            id: row.id,
+            vehicle: row.vehicle,
+            provider: row.provider,
+            cost: row.cost,
+            currency: row.currency,
+            pickup: row.pickup,
+            dropoff: row.dropoff,
+            location: row.location,
+            notes: row.notes
+        })),
+        expenses: expenses.map((row) => ({
+            id: row.id,
+            category: row.category,
+            amount: row.amount,
+            currency: row.currency,
+            status: row.status,
+            dueDate: row.due_date,
+            group: row.group_name,
+            split: row.split,
+            notes: row.notes
+        })),
+        transports: transports.map((row) => ({
+            id: row.id,
+            type: row.type,
+            date: row.date,
+            amount: row.amount,
+            currency: row.currency,
+            group: row.group_name,
+            notes: row.notes
+        })),
+        timeline: timeline.map((row) => ({
+            id: row.id,
+            date: row.date,
+            time: row.time,
+            title: row.title,
+            notes: row.notes
+        })),
+        reminders: reminders.map((row) => ({
+            id: row.id,
+            date: row.date,
+            title: row.title,
+            description: row.description
+        }))
+    };
+};
+
+const migrateTripDataFromLegacy = (userId) => {
+    const existing = getTripRecord.get(userId);
+    if (existing) return null;
+    const legacy = db.prepare('SELECT data_json FROM trip_data WHERE user_id = ?').get(userId);
+    if (!legacy) return null;
+    try {
+        const parsed = JSON.parse(legacy.data_json);
+        if (!parsed || typeof parsed !== 'object') return null;
+        saveTripData(userId, parsed);
+        return parsed;
+    } catch (err) {
+        return null;
+    }
+};
+
+app.get('/api/trip', authRequiredApi, (req, res) => {
+    const migrated = migrateTripDataFromLegacy(req.user.sub);
+    if (migrated) {
+        return res.json({ ok: true, data: buildTripPayload(req.user.sub) });
+    }
+    const data = buildTripPayload(req.user.sub);
+    if (!data) {
+        return res.json({ ok: true, data: null });
+    }
+    return res.json({ ok: true, data });
+});
+
+app.post('/api/trip', authRequiredApi, requireCsrfToken, (req, res) => {
+    const data = req.body;
+    if (!data || typeof data !== 'object') {
+        return res.status(400).json({ error: 'Invalid payload.' });
+    }
+    const result = saveTripData(req.user.sub, data);
+    return res.json({ ok: true, updatedAt: result.updatedAt });
 });
 
 app.post('/api/refresh', originGuard, requireCsrfToken, (req, res) => {
