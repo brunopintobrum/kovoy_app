@@ -199,8 +199,13 @@
                     return;
                 }
 
+                const data = await res.json().catch(() => ({}));
                 setAlert('Account created successfully. Redirecting...', 'success');
                 setTimeout(() => {
+                    if (data.emailVerificationRequired) {
+                        window.location.href = `/email-verification?email=${encodeURIComponent(emailValue)}`;
+                        return;
+                    }
                     window.location.href = '/login';
                 }, 700);
             } catch (err) {

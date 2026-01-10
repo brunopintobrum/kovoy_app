@@ -117,8 +117,18 @@
 
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
+                    if (res.status === 403 && data.code === 'email_verification_required') {
+                        window.location.href = `/email-verification?email=${encodeURIComponent(emailValue)}`;
+                        return;
+                    }
                     setAlert(data.error || 'Could not sign in. Please try again.', 'error');
                     setSubmitting(false);
+                    return;
+                }
+
+                const data = await res.json().catch(() => ({}));
+                if (data.twoFactorRequired) {
+                    window.location.href = '/two-step-verification';
                     return;
                 }
 
