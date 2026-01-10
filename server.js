@@ -14,6 +14,8 @@ const ROOT_DIR = __dirname;
 const ENV_PATH = path.join(ROOT_DIR, '.env');
 const COOKIE_NAME = 'auth_token';
 const GOOGLE_STATE_COOKIE = 'google_oauth_state';
+const TWO_FACTOR_COOKIE = 'two_factor_token';
+const CSRF_COOKIE = 'csrf_token';
 const GOOGLE_AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const GOOGLE_TOKENINFO_ENDPOINT = 'https://oauth2.googleapis.com/tokeninfo';
@@ -42,10 +44,15 @@ loadEnvFile();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(ROOT_DIR, 'data');
-const DB_PATH = path.join(DATA_DIR, 'app.db');
+const DB_PATH = process.env.DB_PATH || path.join(DATA_DIR, 'app.db');
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 const IS_PROD = process.env.NODE_ENV === 'production';
+const EMAIL_VERIFICATION_REQUIRED = process.env.EMAIL_VERIFICATION_REQUIRED !== 'false';
+const TWO_FACTOR_REQUIRED = process.env.TWO_FACTOR_REQUIRED === 'true';
+const EMAIL_TOKEN_TTL_MINUTES = Number(process.env.EMAIL_TOKEN_TTL_MINUTES || 60);
+const TWO_FACTOR_TTL_MINUTES = Number(process.env.TWO_FACTOR_TTL_MINUTES || 10);
+const TWO_FACTOR_ATTEMPT_LIMIT = Number(process.env.TWO_FACTOR_ATTEMPT_LIMIT || 5);
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
     .split(',')
     .map((value) => value.trim())
@@ -88,14 +95,43 @@ db.exec(`
         created_at TEXT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
+    CREATE TABLE IF NOT EXISTS email_verification_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        token_hash TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        used_at INTEGER,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS two_factor_codes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        code_hash TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        attempts INTEGER NOT NULL DEFAULT 0,
+        consumed_at INTEGER,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
 `);
 
 const userColumns = db.prepare('PRAGMA table_info(users)').all();
 const hasGoogleSub = userColumns.some((column) => column.name === 'google_sub');
+const hasEmailVerifiedAt = userColumns.some((column) => column.name === 'email_verified_at');
+const hasTwoFactorEnabled = userColumns.some((column) => column.name === 'two_factor_enabled');
 if (!hasGoogleSub) {
     db.exec('ALTER TABLE users ADD COLUMN google_sub TEXT');
 }
+if (!hasEmailVerifiedAt) {
+    db.exec('ALTER TABLE users ADD COLUMN email_verified_at TEXT');
+}
+if (!hasTwoFactorEnabled) {
+    db.exec('ALTER TABLE users ADD COLUMN two_factor_enabled INTEGER DEFAULT 0');
+}
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL');
+db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user ON email_verification_tokens(user_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_two_factor_codes_user ON two_factor_codes(user_id)');
 
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
 if (countUsers.count === 0) {
@@ -252,15 +288,19 @@ const requestJson = async (url, options) => {
     return { status, data };
 };
 
+const hashValue = (value) => {
+    return crypto.createHash('sha256').update(value).digest('hex');
+};
+
 const getBaseUrl = (req) => {
     if (APP_BASE_URL) return APP_BASE_URL.replace(/\/+$/, '');
     return `${req.protocol}://${req.get('host')}`;
 };
 
-const sendResetEmail = async ({ to, resetUrl }) => {
+const getEmailTransporter = () => {
     if (!SMTP_HOST) {
-        console.warn('SMTP not configured. Skipping password reset email.');
-        return false;
+        console.warn('SMTP not configured. Skipping email send.');
+        return null;
     }
 
     let nodemailer;
@@ -268,15 +308,20 @@ const sendResetEmail = async ({ to, resetUrl }) => {
         nodemailer = require('nodemailer');
     } catch (err) {
         console.error('nodemailer is not installed. Run npm install to enable email sending.');
-        return false;
+        return null;
     }
 
-    const transporter = nodemailer.createTransport({
+    return nodemailer.createTransport({
         host: SMTP_HOST,
         port: SMTP_PORT,
         secure: SMTP_SECURE,
         auth: SMTP_USER ? { user: SMTP_USER, pass: SMTP_PASS } : undefined
     });
+};
+
+const sendResetEmail = async ({ to, resetUrl }) => {
+    const transporter = getEmailTransporter();
+    if (!transporter) return false;
 
     await transporter.sendMail({
         from: SMTP_FROM,
@@ -291,6 +336,123 @@ const sendResetEmail = async ({ to, resetUrl }) => {
     });
 
     return true;
+};
+
+const sendVerificationEmail = async ({ to, verifyUrl }) => {
+    const transporter = getEmailTransporter();
+    if (!transporter) return false;
+
+    await transporter.sendMail({
+        from: SMTP_FROM,
+        to,
+        subject: 'Verify your email',
+        text: `Use the link below to verify your email:\n\n${verifyUrl}\n\nIf you did not request this, ignore this email.`,
+        html: `
+            <p>Use the link below to verify your email:</p>
+            <p><a href="${verifyUrl}">${verifyUrl}</a></p>
+            <p>If you did not request this, ignore this email.</p>
+        `
+    });
+
+    return true;
+};
+
+const sendTwoFactorEmail = async ({ to, code }) => {
+    const transporter = getEmailTransporter();
+    if (!transporter) return false;
+
+    await transporter.sendMail({
+        from: SMTP_FROM,
+        to,
+        subject: 'Your verification code',
+        text: `Your verification code is: ${code}\n\nThis code expires in ${TWO_FACTOR_TTL_MINUTES} minutes.`,
+        html: `
+            <p>Your verification code is:</p>
+            <p style="font-size: 20px; font-weight: bold;">${code}</p>
+            <p>This code expires in ${TWO_FACTOR_TTL_MINUTES} minutes.</p>
+        `
+    });
+
+    return true;
+};
+
+const ensureCsrfCookie = (req, res) => {
+    if (!req.cookies[CSRF_COOKIE]) {
+        const token = crypto.randomBytes(16).toString('hex');
+        res.cookie(CSRF_COOKIE, token, {
+            httpOnly: false,
+            sameSite: 'lax',
+            secure: IS_PROD,
+            maxAge: 60 * 60 * 1000
+        });
+    }
+};
+
+const requireCsrfToken = (req, res, next) => {
+    const header = req.get('x-csrf-token');
+    const cookie = req.cookies[CSRF_COOKIE];
+    if (!header || !cookie || header !== cookie) {
+        return res.status(403).json({ error: 'CSRF validation failed.' });
+    }
+    return next();
+};
+
+const createEmailVerificationToken = (userId) => {
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = hashValue(rawToken);
+    const expiresAt = Date.now() + EMAIL_TOKEN_TTL_MINUTES * 60 * 1000;
+    db.prepare('DELETE FROM email_verification_tokens WHERE user_id = ? AND used_at IS NULL').run(userId);
+    db.prepare(
+        'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, ?, ?)'
+    ).run(userId, tokenHash, expiresAt, new Date().toISOString());
+    return rawToken;
+};
+
+const verifyEmailToken = (rawToken) => {
+    const tokenHash = hashValue(rawToken);
+    const record = db.prepare('SELECT * FROM email_verification_tokens WHERE token_hash = ?').get(tokenHash);
+    if (!record) return { status: 'invalid' };
+    if (record.used_at) return { status: 'used', record };
+    if (record.expires_at < Date.now()) return { status: 'expired', record };
+    return { status: 'valid', record };
+};
+
+const createTwoFactorCode = (userId) => {
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    const codeHash = hashValue(code);
+    const expiresAt = Date.now() + TWO_FACTOR_TTL_MINUTES * 60 * 1000;
+    db.prepare('DELETE FROM two_factor_codes WHERE user_id = ? AND consumed_at IS NULL').run(userId);
+    db.prepare(
+        'INSERT INTO two_factor_codes (user_id, code_hash, expires_at, created_at) VALUES (?, ?, ?, ?)'
+    ).run(userId, codeHash, expiresAt, new Date().toISOString());
+    return code;
+};
+
+const getTwoFactorSession = (req) => {
+    const token = req.cookies[TWO_FACTOR_COOKIE];
+    if (!token) return null;
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        if (!payload || !payload.tfa) return null;
+        return payload;
+    } catch (err) {
+        return null;
+    }
+};
+
+const issueTwoFactorSession = (res, userId) => {
+    const token = jwt.sign(
+        { sub: userId, tfa: true },
+        JWT_SECRET,
+        { expiresIn: `${TWO_FACTOR_TTL_MINUTES}m` }
+    );
+    res.cookie(TWO_FACTOR_COOKIE, token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: IS_PROD,
+        maxAge: TWO_FACTOR_TTL_MINUTES * 60 * 1000
+    });
+    return token;
 };
 
 const authRequired = (req, res, next) => {
@@ -311,9 +473,41 @@ app.get('/login', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'login.html')
 app.get('/register', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'register.html')));
 app.get('/forgot', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'forgot.html')));
 app.get('/reset', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'reset.html')));
-app.get('/confirm-mail', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'confirm-mail.html')));
-app.get('/email-verification', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'email-verification.html')));
-app.get('/two-step-verification', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'two-step-verification.html')));
+app.get('/confirm-mail', (req, res) => {
+    ensureCsrfCookie(req, res);
+    const { token, status } = req.query || {};
+    if (!token) {
+        return res.sendFile(path.join(PUBLIC_DIR, 'confirm-mail.html'));
+    }
+    const result = verifyEmailToken(token);
+    if (result.status === 'valid') {
+        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.record.user_id);
+        if (user && !user.email_verified_at) {
+            db.prepare('UPDATE users SET email_verified_at = ? WHERE id = ?').run(
+                new Date().toISOString(),
+                user.id
+            );
+        }
+        db.prepare('UPDATE email_verification_tokens SET used_at = ? WHERE id = ?').run(Date.now(), result.record.id);
+        return res.redirect('/confirm-mail?status=success');
+    }
+    const nextStatus = status || result.status;
+    return res.redirect(`/confirm-mail?status=${encodeURIComponent(nextStatus)}`);
+});
+
+app.get('/email-verification', (req, res) => {
+    ensureCsrfCookie(req, res);
+    return res.sendFile(path.join(PUBLIC_DIR, 'email-verification.html'));
+});
+
+app.get('/two-step-verification', (req, res) => {
+    ensureCsrfCookie(req, res);
+    const session = getTwoFactorSession(req);
+    if (!session) {
+        return res.redirect('/login');
+    }
+    return res.sendFile(path.join(PUBLIC_DIR, 'two-step-verification.html'));
+});
 app.get('/orlando.html', authRequired, (req, res) => res.sendFile(path.join(ROOT_DIR, 'orlando.html')));
 
 app.get('/api/auth/google', authLimiter, (req, res) => {
@@ -420,6 +614,31 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
             user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
         }
 
+        if (user && !user.email_verified_at) {
+            db.prepare('UPDATE users SET email_verified_at = ? WHERE id = ?').run(
+                new Date().toISOString(),
+                user.id
+            );
+            user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+        }
+
+        if (TWO_FACTOR_REQUIRED || user.two_factor_enabled) {
+            const code = createTwoFactorCode(user.id);
+            try {
+                const sent = await sendTwoFactorEmail({ to: user.email, code });
+                if (!sent && !IS_PROD) {
+                    console.warn(`Two-factor code for ${user.email}: ${code}`);
+                }
+            } catch (err) {
+                console.error('Two-factor email error:', err);
+                if (!IS_PROD) {
+                    console.warn(`Two-factor code for ${user.email}: ${code}`);
+                }
+            }
+            issueTwoFactorSession(res, user.id);
+            return res.redirect('/two-step-verification');
+        }
+
         const token = signToken(user);
         res.cookie(COOKIE_NAME, token, {
             httpOnly: true,
@@ -435,7 +654,7 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
     }
 });
 
-app.post('/api/login', sensitiveLimiter, originGuard, (req, res) => {
+app.post('/api/login', sensitiveLimiter, originGuard, async (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required.' });
@@ -455,6 +674,43 @@ app.post('/api/login', sensitiveLimiter, originGuard, (req, res) => {
         return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
+    if (EMAIL_VERIFICATION_REQUIRED && !user.email_verified_at) {
+        const rawToken = createEmailVerificationToken(user.id);
+        const verifyUrl = `${getBaseUrl(req)}/confirm-mail?token=${encodeURIComponent(rawToken)}`;
+        try {
+            const sent = await sendVerificationEmail({ to: user.email, verifyUrl });
+            if (!sent && !IS_PROD) {
+                console.warn(`Email verification link for ${user.email}: ${verifyUrl}`);
+            }
+        } catch (err) {
+            console.error('Email verification error:', err);
+            if (!IS_PROD) {
+                console.warn(`Email verification link for ${user.email}: ${verifyUrl}`);
+            }
+        }
+        return res.status(403).json({
+            error: 'Email verification required.',
+            code: 'email_verification_required'
+        });
+    }
+
+    if (TWO_FACTOR_REQUIRED || user.two_factor_enabled) {
+        const code = createTwoFactorCode(user.id);
+        try {
+            const sent = await sendTwoFactorEmail({ to: user.email, code });
+            if (!sent && !IS_PROD) {
+                console.warn(`Two-factor code for ${user.email}: ${code}`);
+            }
+        } catch (err) {
+            console.error('Two-factor email error:', err);
+            if (!IS_PROD) {
+                console.warn(`Two-factor code for ${user.email}: ${code}`);
+            }
+        }
+        issueTwoFactorSession(res, user.id);
+        return res.status(202).json({ twoFactorRequired: true });
+    }
+
     const token = signToken(user);
     res.cookie(COOKIE_NAME, token, {
         httpOnly: true,
@@ -467,6 +723,7 @@ app.post('/api/login', sensitiveLimiter, originGuard, (req, res) => {
 
 app.post('/api/logout', originGuard, (req, res) => {
     res.clearCookie(COOKIE_NAME);
+    res.clearCookie(TWO_FACTOR_COOKIE);
     return res.json({ ok: true });
 });
 
@@ -481,7 +738,7 @@ app.get('/api/me', (req, res) => {
     }
 });
 
-app.post('/api/register', sensitiveLimiter, originGuard, (req, res) => {
+app.post('/api/register', sensitiveLimiter, originGuard, async (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required.' });
@@ -501,12 +758,27 @@ app.post('/api/register', sensitiveLimiter, originGuard, (req, res) => {
         }
 
         const passwordHash = bcrypt.hashSync(password, 10);
-        db.prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)').run(
+        const insert = db.prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)').run(
             email,
             passwordHash,
             new Date().toISOString()
         );
-        return res.status(201).json({ ok: true });
+        if (EMAIL_VERIFICATION_REQUIRED) {
+            const rawToken = createEmailVerificationToken(insert.lastInsertRowid);
+            const verifyUrl = `${getBaseUrl(req)}/confirm-mail?token=${encodeURIComponent(rawToken)}`;
+            try {
+                const sent = await sendVerificationEmail({ to: email, verifyUrl });
+                if (!sent && !IS_PROD) {
+                    console.warn(`Email verification link for ${email}: ${verifyUrl}`);
+                }
+            } catch (err) {
+                console.error('Email verification error:', err);
+                if (!IS_PROD) {
+                    console.warn(`Email verification link for ${email}: ${verifyUrl}`);
+                }
+            }
+        }
+        return res.status(201).json({ ok: true, emailVerificationRequired: EMAIL_VERIFICATION_REQUIRED });
     } catch (err) {
         const message = err && err.message ? err.message : '';
         if (message.includes('database is locked') || message.includes('SQLITE_BUSY')) {
@@ -558,6 +830,107 @@ app.post('/api/forgot', sensitiveLimiter, originGuard, async (req, res) => {
     return res.json({ ok: true });
 });
 
+app.post('/api/email-verification/resend', sensitiveLimiter, originGuard, requireCsrfToken, async (req, res) => {
+    const { email } = req.body || {};
+    if (!isValidEmail(email)) {
+        return res.json({ ok: true });
+    }
+
+    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    if (!user || user.email_verified_at) {
+        return res.json({ ok: true });
+    }
+
+    const rawToken = createEmailVerificationToken(user.id);
+    const verifyUrl = `${getBaseUrl(req)}/confirm-mail?token=${encodeURIComponent(rawToken)}`;
+    try {
+        const sent = await sendVerificationEmail({ to: user.email, verifyUrl });
+        if (!sent && !IS_PROD) {
+            console.warn(`Email verification link for ${user.email}: ${verifyUrl}`);
+        }
+    } catch (err) {
+        console.error('Email verification error:', err);
+        if (!IS_PROD) {
+            console.warn(`Email verification link for ${user.email}: ${verifyUrl}`);
+        }
+    }
+    return res.json({ ok: true });
+});
+
+app.post('/api/two-step/verify', sensitiveLimiter, originGuard, requireCsrfToken, (req, res) => {
+    const session = getTwoFactorSession(req);
+    if (!session) {
+        return res.status(401).json({ error: 'Two-factor session required.' });
+    }
+
+    const { code } = req.body || {};
+    const codeValue = typeof code === 'string' ? code.trim() : '';
+    if (!/^\d{4}$/.test(codeValue)) {
+        return res.status(400).json({ error: 'Invalid verification code.' });
+    }
+
+    const record = db.prepare(
+        'SELECT * FROM two_factor_codes WHERE user_id = ? AND consumed_at IS NULL ORDER BY id DESC LIMIT 1'
+    ).get(session.sub);
+    if (!record || record.expires_at < Date.now()) {
+        return res.status(400).json({ error: 'Invalid verification code.' });
+    }
+
+    if (record.attempts >= TWO_FACTOR_ATTEMPT_LIMIT) {
+        db.prepare('DELETE FROM two_factor_codes WHERE id = ?').run(record.id);
+        return res.status(429).json({ error: 'Too many attempts. Request a new code.' });
+    }
+
+    const codeHash = hashValue(codeValue);
+    if (codeHash !== record.code_hash) {
+        db.prepare('UPDATE two_factor_codes SET attempts = attempts + 1 WHERE id = ?').run(record.id);
+        return res.status(400).json({ error: 'Invalid verification code.' });
+    }
+
+    db.prepare('UPDATE two_factor_codes SET consumed_at = ? WHERE id = ?').run(Date.now(), record.id);
+    res.clearCookie(TWO_FACTOR_COOKIE);
+
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(session.sub);
+    if (!user) {
+        return res.status(401).json({ error: 'Invalid session.' });
+    }
+
+    const token = signToken(user);
+    res.cookie(COOKIE_NAME, token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: IS_PROD,
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+    return res.json({ ok: true });
+});
+
+app.post('/api/two-step/resend', sensitiveLimiter, originGuard, requireCsrfToken, async (req, res) => {
+    const session = getTwoFactorSession(req);
+    if (!session) {
+        return res.status(401).json({ error: 'Two-factor session required.' });
+    }
+
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(session.sub);
+    if (!user) {
+        return res.status(401).json({ error: 'Invalid session.' });
+    }
+
+    const code = createTwoFactorCode(user.id);
+    try {
+        const sent = await sendTwoFactorEmail({ to: user.email, code });
+        if (!sent && !IS_PROD) {
+            console.warn(`Two-factor code for ${user.email}: ${code}`);
+        }
+    } catch (err) {
+        console.error('Two-factor email error:', err);
+        if (!IS_PROD) {
+            console.warn(`Two-factor code for ${user.email}: ${code}`);
+        }
+    }
+    return res.json({ ok: true });
+});
+
 app.post('/api/reset', sensitiveLimiter, originGuard, (req, res) => {
     const { token, password } = req.body || {};
     if (!token || !password) {
@@ -580,6 +953,25 @@ app.post('/api/reset', sensitiveLimiter, originGuard, (req, res) => {
     return res.json({ ok: true });
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor ativo em http://localhost:${PORT}`);
-});
+const startServer = (port = PORT, onReady) => {
+    const server = app.listen(port, () => {
+        if (typeof onReady === 'function') {
+            onReady(server);
+        } else if (port === PORT) {
+            console.log(`Servidor ativo em http://localhost:${port}`);
+        }
+    });
+    return server;
+};
+
+if (require.main === module) {
+    startServer(PORT);
+}
+
+module.exports = {
+    app,
+    db,
+    startServer,
+    createEmailVerificationToken,
+    createTwoFactorCode
+};
