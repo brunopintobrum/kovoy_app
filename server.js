@@ -53,6 +53,7 @@ const TWO_FACTOR_REQUIRED = process.env.TWO_FACTOR_REQUIRED === 'true';
 const EMAIL_TOKEN_TTL_MINUTES = Number(process.env.EMAIL_TOKEN_TTL_MINUTES || 60);
 const TWO_FACTOR_TTL_MINUTES = Number(process.env.TWO_FACTOR_TTL_MINUTES || 10);
 const TWO_FACTOR_ATTEMPT_LIMIT = Number(process.env.TWO_FACTOR_ATTEMPT_LIMIT || 5);
+const RESET_TOKEN_TTL_MINUTES = Number(process.env.RESET_TOKEN_TTL_MINUTES || 30);
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
     .split(',')
     .map((value) => value.trim())
@@ -300,6 +301,10 @@ const getBaseUrl = (req) => {
     return `${req.protocol}://${req.get('host')}`;
 };
 
+const isEmailConfigured = () => {
+    return Boolean(SMTP_HOST);
+};
+
 const getEmailTransporter = () => {
     if (!SMTP_HOST) {
         console.warn('SMTP not configured. Skipping email send.');
@@ -474,7 +479,10 @@ const authRequired = (req, res, next) => {
 app.get('/', (req, res) => res.redirect('/login'));
 app.get('/login', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'login.html')));
 app.get('/register', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'register.html')));
-app.get('/forgot', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'forgot.html')));
+app.get('/forgot', (req, res) => {
+    ensureCsrfCookie(req, res);
+    return res.sendFile(path.join(PUBLIC_DIR, 'forgot.html'));
+});
 app.get('/reset', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'reset.html')));
 app.get('/confirm-mail', (req, res) => {
     ensureCsrfCookie(req, res);
@@ -792,7 +800,7 @@ app.post('/api/register', sensitiveLimiter, originGuard, async (req, res) => {
     }
 });
 
-app.post('/api/forgot', sensitiveLimiter, originGuard, async (req, res) => {
+app.post('/api/forgot', sensitiveLimiter, originGuard, requireCsrfToken, async (req, res) => {
     const { email } = req.body || {};
     if (!email) {
         return res.status(400).json({ error: 'Email é obrigatório.' });
@@ -802,6 +810,10 @@ app.post('/api/forgot', sensitiveLimiter, originGuard, async (req, res) => {
         return res.status(400).json({ error: 'Invalid email address.' });
     }
 
+    if (!isEmailConfigured()) {
+        return res.status(503).json({ error: 'Email service is not available right now.' });
+    }
+
     const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
     if (!user) {
         return res.json({ ok: true });
@@ -809,8 +821,9 @@ app.post('/api/forgot', sensitiveLimiter, originGuard, async (req, res) => {
 
     const rawToken = crypto.randomBytes(32).toString('hex');
     const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
-    const expiresAt = Date.now() + 60 * 60 * 1000;
+    const expiresAt = Date.now() + RESET_TOKEN_TTL_MINUTES * 60 * 1000;
 
+    db.prepare('DELETE FROM reset_tokens WHERE user_id = ?').run(user.id);
     db.prepare('INSERT INTO reset_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, ?, ?)').run(
         user.id,
         tokenHash,
@@ -822,12 +835,12 @@ app.post('/api/forgot', sensitiveLimiter, originGuard, async (req, res) => {
     try {
         const sent = await sendResetEmail({ to: email, resetUrl });
         if (!sent && !IS_PROD) {
-            console.warn(`Password reset token for ${email}: ${rawToken}`);
+            console.warn(`Password reset email could not be sent for ${email}.`);
         }
     } catch (err) {
         console.error('Reset email error:', err);
         if (!IS_PROD) {
-            console.warn(`Password reset token for ${email}: ${rawToken}`);
+            console.warn(`Password reset email could not be sent for ${email}.`);
         }
     }
     return res.json({ ok: true });
