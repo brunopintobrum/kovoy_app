@@ -1,40 +1,81 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Recuperar senha - Orlando 2026</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8" />
+    <title>Recover Password | Skote - Responsive Bootstrap 4 Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
+    <meta content="Themesbrand" name="author" />
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/css/icons.min.css" rel="stylesheet" />
+    <link href="assets/css/app.min.css" rel="stylesheet" />
 </head>
-<body class="login-page">
-    <main class="auth-shell">
-        <section class="auth-card">
-            <p class="login-eyebrow">Recuperacao</p>
-            <h1 class="auth-title">Esqueceu a senha?</h1>
-            <p class="auth-subtitle">Informe seu email para gerar um link de redefinicao.</p>
-
-            <form class="auth-form" id="forgotForm">
-                <div class="login-field">
-                    <label for="email">Email</label>
-                    <div class="login-input">
-                        <input id="email" type="email" name="email" autocomplete="username" placeholder="voce@email.com" required>
-                        <span class="login-field-icon" aria-hidden="true">@</span>
+<body>
+    <div class="account-pages my-5 pt-sm-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 col-xl-5">
+                    <div class="card overflow-hidden">
+                        <div class="bg-primary bg-soft">
+                            <div class="row">
+                                <div class="col-7">
+                                    <div class="text-primary p-4">
+                                        <h5 class="text-primary"> Reset Password</h5>
+                                        <p>Reset Password with Skote.</p>
+                                    </div>
+                                </div>
+                                <div class="col-5 align-self-end">
+                                    <img src="assets/images/profile-img.png" alt="" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div>
+                                <a href="/">
+                                    <div class="avatar-md profile-user-wid mb-4">
+                                        <span class="avatar-title rounded-circle bg-light">
+                                            <img src="assets/images/logo.svg" alt="" class="rounded-circle" height="34">
+                                        </span>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="p-2">
+                                <div class="alert alert-success text-center mb-4" id="forgotAlert" role="alert">
+                                    Enter your Email and instructions will be sent to you!
+                                </div>
+                                <form class="form-horizontal" id="forgotForm" action="/" novalidate>
+                                    <div class="mb-3">
+                                        <label for="useremail" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="useremail" name="email" placeholder="Enter email" required>
+                                    </div>
+                                    <div class="text-end">
+                                        <button class="btn btn-primary w-md waves-effect waves-light" type="submit">Reset</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-5 text-center">
+                        <p>Remember It ? <a href="/login" class="fw-medium text-primary"> Sign In here</a> </p>
+                        <p>
+                            &copy;
+                            <script>document.write(new Date().getFullYear())</script> Bruno Pinto Brum. All rights reserved.
+                        </p>
                     </div>
                 </div>
-                <button type="submit" class="login-button">Gerar link</button>
-            </form>
-
-            <div class="login-alert" id="forgotAlert" role="status" aria-live="polite"></div>
-
-            <p class="auth-footer">
-                Voltar para <a href="/login">entrar</a>
-            </p>
-        </section>
-    </main>
-
+            </div>
+        </div>
+    </div>
+    <script src="assets/libs/jquery/jquery.min.js"></script>
+    <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/libs/metismenu/metisMenu.min.js"></script>
+    <script src="assets/libs/simplebar/simplebar.min.js"></script>
+    <script src="assets/libs/node-waves/waves.min.js"></script>
+    <script src="assets/libs/owl.carousel/owl.carousel.min.js"></script>
+    <script src="assets/js/pages/auth-2-carousel.init.js"></script>
+    <script src="assets/js/pages/two-step-verification.init.js"></script>
+    <script src="assets/js/app.js"></script>
     <script src="forgot.js" defer></script>
 </body>
 </html>

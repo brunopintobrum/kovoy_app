@@ -5,7 +5,8 @@
     const setAlert = (message, type = 'success') => {
         if (!alertBox) return;
         alertBox.textContent = message;
-        alertBox.dataset.type = type;
+        alertBox.classList.remove('alert-success', 'alert-danger');
+        alertBox.classList.add(type === 'error' ? 'alert-danger' : 'alert-success');
         alertBox.style.display = message ? 'block' : 'none';
     };
 
@@ -24,9 +25,9 @@
                 });
 
                 await res.json().catch(() => ({}));
-                setAlert('Se o email existir, enviaremos um link de redefinicao.', 'success');
+                setAlert('If the email exists, we will send you reset instructions.', 'success');
             } catch (err) {
-                setAlert('Erro de conexao. Tente novamente.', 'error');
+                setAlert('Connection error. Please try again.', 'error');
             }
         });
     }
