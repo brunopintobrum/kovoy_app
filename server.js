@@ -13,6 +13,7 @@ const Database = require('better-sqlite3');
 const ROOT_DIR = __dirname;
 const ENV_PATH = path.join(ROOT_DIR, '.env');
 const COOKIE_NAME = 'auth_token';
+const REFRESH_COOKIE = 'refresh_token';
 const GOOGLE_STATE_COOKIE = 'google_oauth_state';
 const TWO_FACTOR_COOKIE = 'two_factor_token';
 const CSRF_COOKIE = 'csrf_token';
@@ -54,6 +55,9 @@ const EMAIL_TOKEN_TTL_MINUTES = Number(process.env.EMAIL_TOKEN_TTL_MINUTES || 60
 const TWO_FACTOR_TTL_MINUTES = Number(process.env.TWO_FACTOR_TTL_MINUTES || 10);
 const TWO_FACTOR_ATTEMPT_LIMIT = Number(process.env.TWO_FACTOR_ATTEMPT_LIMIT || 5);
 const RESET_TOKEN_TTL_MINUTES = Number(process.env.RESET_TOKEN_TTL_MINUTES || 30);
+const ACCESS_TOKEN_TTL_MINUTES = Number(process.env.ACCESS_TOKEN_TTL_MINUTES || 30);
+const REFRESH_TOKEN_TTL_DAYS_REMEMBER = Number(process.env.REFRESH_TOKEN_TTL_DAYS_REMEMBER || 30);
+const REFRESH_TOKEN_TTL_DAYS_SESSION = Number(process.env.REFRESH_TOKEN_TTL_DAYS_SESSION || 1);
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
     .split(',')
     .map((value) => value.trim())
@@ -115,6 +119,20 @@ db.exec(`
         created_at TEXT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
+    CREATE TABLE IF NOT EXISTS refresh_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        token_hash TEXT NOT NULL,
+        remember INTEGER NOT NULL DEFAULT 0,
+        expires_at INTEGER NOT NULL,
+        revoked_at INTEGER,
+        replaced_by TEXT,
+        created_at TEXT NOT NULL,
+        last_used_at INTEGER,
+        user_agent TEXT,
+        ip_addr TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
 `);
 
 const userColumns = db.prepare('PRAGMA table_info(users)').all();
@@ -136,6 +154,13 @@ db.exec('CREATE INDEX IF NOT EXISTS idx_two_factor_codes_user ON two_factor_code
 db.exec('CREATE INDEX IF NOT EXISTS idx_reset_tokens_hash ON reset_tokens(token_hash)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_hash ON email_verification_tokens(token_hash)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_two_factor_codes_hash ON two_factor_codes(code_hash)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_hash ON refresh_tokens(token_hash)');
+const refreshTokenColumns = db.prepare('PRAGMA table_info(refresh_tokens)').all();
+const hasRememberColumn = refreshTokenColumns.some((column) => column.name === 'remember');
+if (!hasRememberColumn) {
+    db.exec('ALTER TABLE refresh_tokens ADD COLUMN remember INTEGER NOT NULL DEFAULT 0');
+}
 
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
 if (countUsers.count === 0) {
@@ -186,8 +211,12 @@ const sensitiveLimiter = rateLimit({
     legacyHeaders: false
 });
 
-const signToken = (user) => {
-    return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+const signAccessToken = (user) => {
+    return jwt.sign(
+        { sub: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: `${ACCESS_TOKEN_TTL_MINUTES}m` }
+    );
 };
 
 const isAllowedOrigin = (origin, host) => {
@@ -448,9 +477,9 @@ const getTwoFactorSession = (req) => {
     }
 };
 
-const issueTwoFactorSession = (res, userId) => {
+const issueTwoFactorSession = (res, userId, remember) => {
     const token = jwt.sign(
-        { sub: userId, tfa: true },
+        { sub: userId, tfa: true, remember: Boolean(remember) },
         JWT_SECRET,
         { expiresIn: `${TWO_FACTOR_TTL_MINUTES}m` }
     );
@@ -461,6 +490,55 @@ const issueTwoFactorSession = (res, userId) => {
         maxAge: TWO_FACTOR_TTL_MINUTES * 60 * 1000
     });
     return token;
+};
+
+const setAccessCookie = (res, token) => {
+    res.cookie(COOKIE_NAME, token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: IS_PROD,
+        maxAge: ACCESS_TOKEN_TTL_MINUTES * 60 * 1000
+    });
+};
+
+const createRefreshToken = (userId, remember, req) => {
+    const rawToken = crypto.randomBytes(48).toString('hex');
+    const tokenHash = hashValue(rawToken);
+    const ttlDays = remember ? REFRESH_TOKEN_TTL_DAYS_REMEMBER : REFRESH_TOKEN_TTL_DAYS_SESSION;
+    const expiresAt = Date.now() + ttlDays * 24 * 60 * 60 * 1000;
+
+    db.prepare(
+        `INSERT INTO refresh_tokens
+        (user_id, token_hash, remember, expires_at, created_at, user_agent, ip_addr)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+        userId,
+        tokenHash,
+        remember ? 1 : 0,
+        expiresAt,
+        new Date().toISOString(),
+        req.get('user-agent') || null,
+        req.ip || null
+    );
+
+    return { rawToken, expiresAt, ttlDays };
+};
+
+const setRefreshCookie = (res, rawToken, ttlDays) => {
+    res.cookie(REFRESH_COOKIE, rawToken, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: IS_PROD,
+        maxAge: ttlDays * 24 * 60 * 60 * 1000
+    });
+};
+
+const revokeRefreshToken = (rawToken, replacedBy) => {
+    if (!rawToken) return;
+    const tokenHash = hashValue(rawToken);
+    db.prepare(
+        'UPDATE refresh_tokens SET revoked_at = ?, replaced_by = ? WHERE token_hash = ? AND revoked_at IS NULL'
+    ).run(Date.now(), replacedBy || null, tokenHash);
 };
 
 const authRequired = (req, res, next) => {
@@ -477,7 +555,10 @@ const authRequired = (req, res, next) => {
 };
 
 app.get('/', (req, res) => res.redirect('/login'));
-app.get('/login', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'login.html')));
+app.get('/login', (req, res) => {
+    ensureCsrfCookie(req, res);
+    return res.sendFile(path.join(PUBLIC_DIR, 'login.html'));
+});
 app.get('/register', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'register.html')));
 app.get('/forgot', (req, res) => {
     ensureCsrfCookie(req, res);
@@ -633,6 +714,7 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
         }
 
+        const remember = true;
         if (TWO_FACTOR_REQUIRED || user.two_factor_enabled) {
             const code = createTwoFactorCode(user.id);
             try {
@@ -646,17 +728,14 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
                     console.warn(`Two-factor code for ${user.email}: ${code}`);
                 }
             }
-            issueTwoFactorSession(res, user.id);
+            issueTwoFactorSession(res, user.id, remember);
             return res.redirect('/two-step-verification');
         }
 
-        const token = signToken(user);
-        res.cookie(COOKIE_NAME, token, {
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: IS_PROD,
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        });
+        const accessToken = signAccessToken(user);
+        setAccessCookie(res, accessToken);
+        const refreshToken = createRefreshToken(user.id, remember, req);
+        setRefreshCookie(res, refreshToken.rawToken, refreshToken.ttlDays);
 
         return res.redirect('/orlando.html');
     } catch (err) {
@@ -667,6 +746,7 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
 
 app.post('/api/login', sensitiveLimiter, originGuard, async (req, res) => {
     const { email, password } = req.body || {};
+    const remember = Boolean(req.body && req.body.remember);
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required.' });
     }
@@ -718,22 +798,23 @@ app.post('/api/login', sensitiveLimiter, originGuard, async (req, res) => {
                 console.warn(`Two-factor code for ${user.email}: ${code}`);
             }
         }
-        issueTwoFactorSession(res, user.id);
+        issueTwoFactorSession(res, user.id, remember);
         return res.status(202).json({ twoFactorRequired: true });
     }
 
-    const token = signToken(user);
-    res.cookie(COOKIE_NAME, token, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: IS_PROD,
-        maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    const accessToken = signAccessToken(user);
+    setAccessCookie(res, accessToken);
+    const refreshToken = createRefreshToken(user.id, remember, req);
+    setRefreshCookie(res, refreshToken.rawToken, refreshToken.ttlDays);
     return res.json({ ok: true });
 });
 
 app.post('/api/logout', originGuard, (req, res) => {
     res.clearCookie(COOKIE_NAME);
+    if (req.cookies[REFRESH_COOKIE]) {
+        revokeRefreshToken(req.cookies[REFRESH_COOKIE]);
+    }
+    res.clearCookie(REFRESH_COOKIE);
     res.clearCookie(TWO_FACTOR_COOKIE);
     return res.json({ ok: true });
 });
@@ -747,6 +828,43 @@ app.get('/api/me', (req, res) => {
     } catch (err) {
         return res.status(401).json({ error: 'Não autenticado.' });
     }
+});
+
+app.post('/api/refresh', originGuard, requireCsrfToken, (req, res) => {
+    const rawToken = req.cookies[REFRESH_COOKIE];
+    if (!rawToken) {
+        return res.status(401).json({ error: 'Refresh token required.' });
+    }
+
+    const tokenHash = hashValue(rawToken);
+    const record = db.prepare('SELECT * FROM refresh_tokens WHERE token_hash = ?').get(tokenHash);
+    if (!record || record.revoked_at || record.expires_at < Date.now()) {
+        if (record && !record.revoked_at) {
+            revokeRefreshToken(rawToken);
+        }
+        res.clearCookie(REFRESH_COOKIE);
+        res.clearCookie(COOKIE_NAME);
+        return res.status(401).json({ error: 'Invalid refresh token.' });
+    }
+
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(record.user_id);
+    if (!user) {
+        revokeRefreshToken(rawToken);
+        res.clearCookie(REFRESH_COOKIE);
+        res.clearCookie(COOKIE_NAME);
+        return res.status(401).json({ error: 'Invalid session.' });
+    }
+
+    const remember = Boolean(record.remember);
+    const newRefresh = createRefreshToken(user.id, remember, req);
+    revokeRefreshToken(rawToken, hashValue(newRefresh.rawToken));
+
+    const accessToken = signAccessToken(user);
+    setAccessCookie(res, accessToken);
+    setRefreshCookie(res, newRefresh.rawToken, newRefresh.ttlDays);
+
+    db.prepare('UPDATE refresh_tokens SET last_used_at = ? WHERE id = ?').run(Date.now(), record.id);
+    return res.json({ ok: true });
 });
 
 app.post('/api/register', sensitiveLimiter, originGuard, async (req, res) => {
@@ -911,13 +1029,11 @@ app.post('/api/two-step/verify', sensitiveLimiter, originGuard, requireCsrfToken
         return res.status(401).json({ error: 'Invalid session.' });
     }
 
-    const token = signToken(user);
-    res.cookie(COOKIE_NAME, token, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: IS_PROD,
-        maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    const remember = Boolean(session.remember);
+    const accessToken = signAccessToken(user);
+    setAccessCookie(res, accessToken);
+    const refreshToken = createRefreshToken(user.id, remember, req);
+    setRefreshCookie(res, refreshToken.rawToken, refreshToken.ttlDays);
     return res.json({ ok: true });
 });
 

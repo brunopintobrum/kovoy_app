@@ -3,6 +3,7 @@
     const usernameInput = form ? form.querySelector('#email') : null;
     const passwordInput = form ? form.querySelector('input[type="password"]') : null;
     const submitButton = form ? form.querySelector('button[type="submit"]') : null;
+    const rememberInput = document.getElementById('remember-check');
     const googleButton = document.querySelector('.social-list-item.bg-danger');
     const passwordToggle = document.getElementById('password-addon');
     let alertBox = document.getElementById('loginAlert');
@@ -41,11 +42,41 @@
         submitButton.setAttribute('aria-busy', isSubmitting ? 'true' : 'false');
     };
 
+    const getCookie = (name) => {
+        return document.cookie
+            .split(';')
+            .map((item) => item.trim())
+            .find((item) => item.startsWith(`${name}=`))
+            ?.split('=')[1];
+    };
+
+    const refreshSession = async () => {
+        const csrf = getCookie('csrf_token');
+        const res = await fetch('/api/refresh', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-csrf-token': csrf || ''
+            }
+        });
+        return res.ok;
+    };
+
     const checkSession = async () => {
         try {
             const res = await fetch('/api/me');
             if (res.ok) {
                 window.location.href = '/orlando.html';
+                return;
+            }
+            if (res.status === 401) {
+                const refreshed = await refreshSession();
+                if (refreshed) {
+                    const retry = await fetch('/api/me');
+                    if (retry.ok) {
+                        window.location.href = '/orlando.html';
+                    }
+                }
             }
         } catch (err) {
             setAlert('', 'error');
@@ -105,7 +136,8 @@
             setSubmitting(true);
             const payload = {
                 email: emailValue,
-                password: passwordValue
+                password: passwordValue,
+                remember: Boolean(rememberInput && rememberInput.checked)
             };
 
             try {
