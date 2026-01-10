@@ -132,6 +132,9 @@ if (!hasTwoFactorEnabled) {
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL');
 db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user ON email_verification_tokens(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_two_factor_codes_user ON two_factor_codes(user_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_reset_tokens_hash ON reset_tokens(token_hash)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_hash ON email_verification_tokens(token_hash)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_two_factor_codes_hash ON two_factor_codes(code_hash)');
 
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
 if (countUsers.count === 0) {
