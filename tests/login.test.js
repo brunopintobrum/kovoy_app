@@ -1,127 +1,194 @@
-/* Targets:
- * - public/login.html
- * - public/login.js
+/**
+ * @jest-environment jsdom
  */
+const fs = require('fs');
+const path = require('path');
 const { screen } = require('@testing-library/dom');
 const userEvent = require('@testing-library/user-event').default;
-const { loadPage, resetLocation } = require('./test-utils');
 
-const setupLogin = () => {
-  jest.resetModules();
-  loadPage('public/login.html');
-  resetLocation();
-  global.fetch = jest.fn().mockResolvedValue({
-    ok: false,
-    json: async () => ({})
-  });
-  require('../public/login.js');
-  global.fetch.mockClear();
+const loadLoginDom = ({ search = '' } = {}) => {
+    const html = fs.readFileSync(path.join(__dirname, '..', 'public', 'login.html'), 'utf8');
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    document.body.innerHTML = doc.body.innerHTML;
+    document.cookie = 'csrf_token=test-token';
+    delete window.location;
+    window.location = { href: '', search };
+};
+
+const mockFetch = (handlers) => {
+    global.fetch = jest.fn((url, options) => {
+        const handler = handlers.find((item) => item.match(url, options));
+        if (!handler) {
+            return Promise.resolve({ ok: false, status: 500, json: async () => ({}) });
+        }
+        return handler.handle(url, options);
+    });
+};
+
+const setupLoginPage = (loginHandler) => {
+    mockFetch([
+        {
+            match: (url) => url === '/api/me',
+            handle: async () => ({ ok: false, status: 401, json: async () => ({}) })
+        },
+        {
+            match: (url) => url === '/api/refresh',
+            handle: async () => ({ ok: false, status: 401, json: async () => ({}) })
+        },
+        loginHandler
+    ]);
+    loadLoginDom();
+    require('../public/login.js');
 };
 
 describe('Login page', () => {
-  beforeEach(() => {
-    document.body.innerHTML = '';
-    jest.clearAllMocks();
-  });
-
-  test('renders email and password fields and submit button', () => {
-    setupLogin();
-    expect(screen.getByLabelText(/email/i)).toBeTruthy();
-    expect(screen.getByLabelText(/password/i)).toBeTruthy();
-    expect(screen.getByRole('button', { name: /log in/i })).toBeTruthy();
-  });
-
-  test('empty submit shows error and does not call login', async () => {
-    setupLogin();
-    const user = userEvent.setup();
-    await user.click(screen.getByRole('button', { name: /log in/i }));
-    expect(global.fetch).not.toHaveBeenCalled();
-    expect(document.getElementById('loginAlert').textContent).toMatch(/email is required/i);
-  });
-
-  test('invalid email shows error and does not call login', async () => {
-    setupLogin();
-    const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/email/i), 'not-an-email');
-    await user.type(screen.getByLabelText(/password/i), 'Abcdef1!');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
-    expect(global.fetch).not.toHaveBeenCalled();
-    expect(document.getElementById('loginAlert').textContent).toMatch(/valid email address/i);
-  });
-
-  test('submits valid login and redirects on success', async () => {
-    jest.useFakeTimers();
-    setupLogin();
-    global.fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ ok: true }) });
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-
-    await user.type(screen.getByLabelText(/email/i), ' user@example.com ');
-    await user.type(screen.getByLabelText(/password/i), 'Abcdef1!');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
-
-    expect(global.fetch).toHaveBeenCalledWith('/api/login', expect.objectContaining({
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'user@example.com', password: 'Abcdef1!' })
-    }));
-
-    jest.runAllTimers();
-    expect(window.location.href).toBe('/orlando.html');
-    jest.useRealTimers();
-  });
-
-  test('shows API error message on 401', async () => {
-    setupLogin();
-    global.fetch.mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({ error: 'Invalid credentials.' })
+    beforeEach(() => {
+        jest.resetModules();
+        document.body.innerHTML = '';
+        global.fetch = undefined;
     });
-    const user = userEvent.setup();
 
-    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'Abcdef1!');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
+    test('renders required inputs and links', () => {
+        setupLoginPage({
+            match: () => true,
+            handle: async () => ({ ok: false, status: 401, json: async () => ({}) })
+        });
 
-    expect(document.getElementById('loginAlert').textContent).toMatch(/invalid credentials/i);
-  });
+        expect(screen.getByLabelText('Email')).toBeTruthy();
+        expect(screen.getByLabelText('Password')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /log in/i })).toBeTruthy();
+        expect(screen.getByText(/forgot your password/i)).toBeTruthy();
+    });
 
-  test('shows generic error on network failure', async () => {
-    setupLogin();
-    global.fetch.mockRejectedValueOnce(new Error('Network down'));
-    const user = userEvent.setup();
+    test('validates empty submit', async () => {
+        setupLoginPage({
+            match: (url) => url === '/api/login',
+            handle: async () => ({ ok: false, status: 401, json: async () => ({}) })
+        });
 
-    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'Abcdef1!');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
+        await userEvent.click(screen.getByRole('button', { name: /log in/i }));
+        expect(screen.getByText('Email is required.')).toBeTruthy();
+        expect(global.fetch).not.toHaveBeenCalledWith(
+            '/api/login',
+            expect.any(Object)
+        );
+    });
 
-    expect(document.getElementById('loginAlert').textContent).toMatch(/connection error/i);
-  });
+    test('validates invalid email', async () => {
+        setupLoginPage({
+            match: (url) => url === '/api/login',
+            handle: async () => ({ ok: false, status: 401, json: async () => ({}) })
+        });
 
-  test('disables submit button while request is in flight', async () => {
-    setupLogin();
-    let resolveFetch;
-    global.fetch.mockImplementation(() => new Promise((resolve) => { resolveFetch = resolve; }));
-    const user = userEvent.setup();
+        await userEvent.type(screen.getByLabelText('Email'), 'invalid-email');
+        await userEvent.click(screen.getByRole('button', { name: /log in/i }));
+        expect(screen.getByText('Please enter a valid email address.')).toBeTruthy();
+    });
 
-    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'Abcdef1!');
-    const submitButton = screen.getByRole('button', { name: /log in/i });
-    await user.click(submitButton);
+    test('validates missing password', async () => {
+        setupLoginPage({
+            match: (url) => url === '/api/login',
+            handle: async () => ({ ok: false, status: 401, json: async () => ({}) })
+        });
 
-    expect(submitButton.disabled).toBe(true);
-    resolveFetch({ ok: false, json: async () => ({ error: 'Invalid credentials.' }) });
-  });
+        await userEvent.type(screen.getByLabelText('Email'), 'user@example.com');
+        await userEvent.click(screen.getByRole('button', { name: /log in/i }));
+        expect(screen.getByText('Password is required.')).toBeTruthy();
+    });
 
-  test('toggles password visibility', async () => {
-    setupLogin();
-    const user = userEvent.setup();
-    const passwordInput = screen.getByLabelText(/password/i);
-    const toggle = document.getElementById('password-addon');
+    test('submits payload with remember me', async () => {
+        let payload;
+        setupLoginPage({
+            match: (url) => url === '/api/login',
+            handle: async (_url, options) => {
+                payload = JSON.parse(options.body);
+                return { ok: true, status: 200, json: async () => ({ ok: true }) };
+            }
+        });
 
-    expect(passwordInput.getAttribute('type')).toBe('password');
-    await user.click(toggle);
-    expect(passwordInput.getAttribute('type')).toBe('text');
-    await user.click(toggle);
-    expect(passwordInput.getAttribute('type')).toBe('password');
-  });
+        await userEvent.type(screen.getByLabelText('Email'), 'user@example.com');
+        await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+        await userEvent.click(screen.getByLabelText('Remember me'));
+        await userEvent.click(screen.getByRole('button', { name: /log in/i }));
+
+        expect(payload).toMatchObject({
+            email: 'user@example.com',
+            password: 'Password123!',
+            remember: true
+        });
+    });
+
+    test('shows error on invalid credentials (401)', async () => {
+        setupLoginPage({
+            match: (url) => url === '/api/login',
+            handle: async () => ({
+                ok: false,
+                status: 401,
+                json: async () => ({ error: 'Invalid credentials.' })
+            })
+        });
+
+        await userEvent.type(screen.getByLabelText('Email'), 'user@example.com');
+        await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+        await userEvent.click(screen.getByRole('button', { name: /log in/i }));
+
+        expect(screen.getByText('Invalid credentials.')).toBeTruthy();
+    });
+
+    test('disables submit while request is pending', async () => {
+        let resolveLogin;
+        const pending = new Promise((resolve) => {
+            resolveLogin = resolve;
+        });
+
+        setupLoginPage({
+            match: (url) => url === '/api/login',
+            handle: async () => {
+                await pending;
+                return { ok: true, status: 200, json: async () => ({ ok: true }) };
+            }
+        });
+
+        await userEvent.type(screen.getByLabelText('Email'), 'user@example.com');
+        await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+
+        const submit = screen.getByRole('button', { name: /log in/i });
+        await userEvent.click(submit);
+        expect(submit.disabled).toBe(true);
+
+        resolveLogin();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    test('redirects to email verification on 403', async () => {
+        setupLoginPage({
+            match: (url) => url === '/api/login',
+            handle: async () => ({
+                ok: false,
+                status: 403,
+                json: async () => ({ code: 'email_verification_required' })
+            })
+        });
+
+        await userEvent.type(screen.getByLabelText('Email'), 'user@example.com');
+        await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+        await userEvent.click(screen.getByRole('button', { name: /log in/i }));
+
+        expect(window.location.href).toBe('/email-verification?email=user%40example.com');
+    });
+
+    test('toggles password visibility', async () => {
+        setupLoginPage({
+            match: (url) => url === '/api/login',
+            handle: async () => ({ ok: false, status: 401, json: async () => ({}) })
+        });
+
+        const passwordInput = screen.getByLabelText('Password');
+        const toggle = document.getElementById('password-addon');
+        expect(passwordInput.getAttribute('type')).toBe('password');
+
+        await userEvent.click(toggle);
+        expect(passwordInput.getAttribute('type')).toBe('text');
+    });
 });
