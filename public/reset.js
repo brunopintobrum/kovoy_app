@@ -14,7 +14,7 @@
     };
 
     if (!token) {
-        setAlert('Token nao encontrado. Solicite um novo link.', 'error');
+        setAlert('Token not found. Request a new link.', 'error');
         return;
     }
 
@@ -27,34 +27,34 @@
             payload.token = token;
 
             try {
-            if (submitButton) {
-                submitButton.disabled = true;
-                submitButton.setAttribute('aria-busy', 'true');
-            }
-            const res = await fetch('/api/reset', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.setAttribute('aria-busy', 'true');
+                }
+                const res = await fetch('/api/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
-                    setAlert(data.error || 'Nao foi possivel atualizar a senha.', 'error');
+                    setAlert(data.error || 'Unable to update the password.', 'error');
                     return;
                 }
 
-                setAlert('Senha atualizada. Redirecionando...', 'success');
+                setAlert('Password updated. Redirecting...', 'success');
                 setTimeout(() => {
                     window.location.href = '/login';
                 }, 700);
             } catch (err) {
-            setAlert('Erro de conexao. Tente novamente.', 'error');
-        } finally {
-            if (submitButton) {
-                submitButton.disabled = false;
-                submitButton.setAttribute('aria-busy', 'false');
+                setAlert('Connection error. Please try again.', 'error');
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.setAttribute('aria-busy', 'false');
+                }
             }
-        }
-    });
-}
+        });
+    }
 })();
