@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Resumo da Viagem - Orlando 2026</title>
+    <title>Trip Summary - Orlando 2026</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="trip-page">
-    <a class="skip-link" href="#main">Pular para o conteúdo</a>
+    <a class="skip-link" href="#main">Skip to content</a>
 
     <div class="app-topbar container-lg d-flex align-items-center py-3">
         <div class="app-brand">
@@ -22,56 +22,56 @@
                 <span class="app-brand-title">Travel Dashboard</span>
             </div>
         </div>
-        <nav class="app-nav ms-auto d-none d-md-flex" aria-label="Seções da viagem">
+        <nav class="app-nav ms-auto d-none d-md-flex" aria-label="Trip sections">
             <a href="#dashboard">Dashboard</a>
-            <a href="#voos">Voos</a>
-            <a href="#hospedagem">Hospedagem</a>
-            <a href="#turo">Carro</a>
-            <a href="#financeiro">Financeiro</a>
-            <a href="#linha-tempo">Linha do tempo</a>
+            <a href="#voos">Flights</a>
+            <a href="#hospedagem">Lodging</a>
+            <a href="#turo">Car</a>
+            <a href="#financeiro">Costs</a>
+            <a href="#linha-tempo">Timeline</a>
         </nav>
-        <button class="ui-toggle ms-3" id="themeToggle" type="button" aria-label="Alternar tema" aria-pressed="false">
-            <span class="ui-toggle-icon" aria-hidden="true">Lua</span>
-            <span class="ui-toggle-label">Modo escuro</span>
+        <button class="ui-toggle ms-3" id="themeToggle" type="button" aria-label="Toggle theme" aria-pressed="false">
+            <span class="ui-toggle-icon" aria-hidden="true">Moon</span>
+            <span class="ui-toggle-label">Dark mode</span>
         </button>
-        <button class="ui-button ui-button--ghost ms-2" id="logoutButton" type="button">Sair</button>
+        <button class="ui-button ui-button--ghost ms-2" id="logoutButton" type="button">Sign out</button>
     </div>
 
     <div class="app-shell container-lg pb-5">
         <header class="app-hero ui-card p-4 p-lg-5 mb-4">
             <div class="app-hero-meta d-flex flex-wrap gap-3 align-items-center mb-3">
-                <span class="ui-pill ui-pill--strong">Viagem - Orlando 2026</span>
-                <span class="ui-pill"><strong>Período:</strong> 22/02 - 11/03/2026</span>
-                <span class="ui-pill"><strong>Base:</strong> Davenport / Orlando - FL, EUA</span>
+                <span class="ui-pill ui-pill--strong" id="tripNamePill">Trip</span>
+                <span class="ui-pill"><strong>Period:</strong> <span id="tripPeriod">--</span></span>
+                <span class="ui-pill"><strong>Base:</strong> <span id="tripBase">--</span></span>
             </div>
             <div class="app-hero-grid">
                 <div>
-                    <p class="ui-eyebrow">Planejamento & logística</p>
-                    <h1 class="app-hero-title">Resumo da Viagem - Orlando 2026</h1>
-                    <p class="ui-lede">Documento consolidado com voos, hospedagem, carro e lembretes essenciais para as duas famílias.</p>
+                    <p class="ui-eyebrow">Planning and logistics</p>
+                    <h1 class="app-hero-title" id="tripTitle">Trip summary</h1>
+                    <p class="ui-lede" id="tripSubtitle">Consolidated document with flights, lodging, car, and key reminders.</p>
                     <div class="app-hero-chips">
-                        <span class="ui-badge"><strong>Família 1:</strong> Bruno, Fernanda, Noah e Alice</span>
-                        <span class="ui-badge ui-badge--alt"><strong>Família 2:</strong> Wilton e Célia</span>
+                        <span class="ui-badge"><strong>Family 1:</strong> <span id="familyOne">--</span></span>
+                        <span class="ui-badge ui-badge--alt"><strong>Family 2:</strong> <span id="familyTwo">--</span></span>
                     </div>
                 </div>
                 <div class="app-hero-panel">
                     <div class="ui-metric">
-                        <p class="ui-label">Contagem regressiva</p>
-                        <p class="ui-metric-value">+450 dias</p>
-                        <p class="ui-metric-sub">Até o embarque em 22/02/2026</p>
+                        <p class="ui-label">Countdown</p>
+                        <p class="ui-metric-value" id="countdownDays">--</p>
+                        <p class="ui-metric-sub" id="countdownLabel">--</p>
                     </div>
                     <div class="ui-metric-group">
                         <div>
-                            <p class="ui-label">Hospedagem</p>
-                            <p class="ui-metric-value">3.786,43 CAD</p>
+                            <p class="ui-label">Lodging</p>
+                            <p class="ui-metric-value" id="metricLodging">--</p>
                         </div>
                         <div>
-                            <p class="ui-label">Carro (CAD)</p>
-                            <p class="ui-metric-value">1.399,54</p>
+                            <p class="ui-label">Car (CAD)</p>
+                            <p class="ui-metric-value" id="metricCar">--</p>
                         </div>
                         <div>
-                            <p class="ui-label">Voos F1 (CAD)</p>
-                            <p class="ui-metric-value">935,60</p>
+                            <p class="ui-label">Flights F1 (CAD)</p>
+                            <p class="ui-metric-value" id="metricFlights">--</p>
                         </div>
                     </div>
                 </div>
@@ -81,436 +81,458 @@
         <main id="main" class="d-flex flex-column gap-4">
             <section id="dashboard" class="app-section ui-card p-4 p-lg-5" aria-labelledby="dashboard-title">
                 <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Sessão 0 - Dashboard</span>
-                    <h2 class="app-section-title" id="dashboard-title">Visão geral rápida da viagem</h2>
+                    <span class="ui-pill"><span class="ui-dot"></span> Section 0 - Dashboard</span>
+                    <h2 class="app-section-title" id="dashboard-title">Trip overview at a glance</h2>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <button class="ui-button" id="exportData" type="button">Export JSON</button>
+                    <label class="ui-button ui-button--ghost" for="importData">Import JSON</label>
+                    <input class="visually-hidden" type="file" id="importData" accept="application/json">
+                    <span class="ui-pill" id="syncStatus">Local</span>
                 </div>
 
                 <div class="app-dashboard-grid mb-4">
                     <div class="ui-stat">
                         <div class="ui-stat-top">
-                            <span class="ui-label">Dias para a viagem</span>
-                            <span class="ui-status ui-status--soft">On track</span>
+                            <span class="ui-label">Days to trip</span>
+                            <span class="ui-status ui-status--soft" id="statusTrip">On track</span>
                         </div>
-                        <p class="ui-stat-value">+450 dias</p>
-                        <p class="ui-stat-sub">Embarque em 22/02/2026</p>
+                        <p class="ui-stat-value" id="dashboardDays">--</p>
+                        <p class="ui-stat-sub" id="dashboardDaysLabel">--</p>
                         <div class="ui-progress">
-                            <div class="ui-progress-bar" style="width: 22%;"></div>
+                            <div class="ui-progress-bar" id="dashboardProgress" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="ui-stat">
                         <div class="ui-stat-top">
-                            <span class="ui-label">Custos em CAD</span>
-                            <span class="ui-status ui-status--alt">Compartilhado</span>
+                            <span class="ui-label">Costs in CAD</span>
+                            <span class="ui-status ui-status--alt">Shared</span>
                         </div>
-                        <p class="ui-stat-value">6.121,57</p>
-                        <p class="ui-stat-sub">Hospedagem + carro + voos F1</p>
-                        <div class="ui-pill ui-trend ui-trend--positive">+12% previsões</div>
+                        <p class="ui-stat-value" id="dashboardCad">--</p>
+                        <p class="ui-stat-sub" id="dashboardCadLabel">--</p>
+                        <div class="ui-pill ui-trend ui-trend--positive" id="dashboardCadTrend">--</div>
                     </div>
                     <div class="ui-stat">
                         <div class="ui-stat-top">
-                            <span class="ui-label">Custos em BRL</span>
-                            <span class="ui-status ui-status--soft">Família 2</span>
+                            <span class="ui-label">Costs in BRL</span>
+                            <span class="ui-status ui-status--soft">Family 2</span>
                         </div>
-                        <p class="ui-stat-value">R$ 5.859,90</p>
-                        <p class="ui-stat-sub">Voos GOL pagos em reais</p>
+                        <p class="ui-stat-value" id="dashboardBrl">--</p>
+                        <p class="ui-stat-sub" id="dashboardBrlLabel">--</p>
                         <div class="ui-progress">
-                            <div class="ui-progress-bar ui-progress-bar--alt" style="width: 64%;"></div>
+                            <div class="ui-progress-bar ui-progress-bar--alt" id="dashboardBrlProgress" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="ui-stat">
                         <div class="ui-stat-top">
-                            <span class="ui-label">Pendências</span>
-                            <span class="ui-status ui-status--soft">2 itens</span>
+                            <span class="ui-label">Pending items</span>
+                            <span class="ui-status ui-status--soft" id="dashboardPendingCount">0 items</span>
                         </div>
-                        <p class="ui-stat-value">Airbnb + Wi-Fi</p>
-                        <p class="ui-stat-sub">Ver lembretes e prazos</p>
-                        <div class="ui-pill ui-trend ui-trend--neutral">Próximo: 07/02/2026</div>
+                        <p class="ui-stat-value" id="dashboardPendingTitle">--</p>
+                        <p class="ui-stat-sub" id="dashboardPendingLabel">--</p>
+                        <div class="ui-pill ui-trend ui-trend--neutral" id="dashboardPendingNext">--</div>
                     </div>
                 </div>
 
                 <div class="app-dashboard-lanes">
                     <div class="ui-lane">
                         <div class="ui-lane-head">
-                            <h3 class="h6 mb-0">Fluxo financeiro</h3>
-                            <span class="ui-status ui-status--soft">Monitorar</span>
+                            <h3 class="h6 mb-0">Cash flow</h3>
+                            <span class="ui-status ui-status--soft">Monitor</span>
                         </div>
-                        <div class="ui-lane-row">
-                            <div>
-                                <p class="ui-label">Hospedagem (CAD)</p>
-                                <p class="ui-lane-value">3.786,43</p>
-                                <p class="ui-subdued mb-0">Saldo pendente: 1.844,53 em 07/02/2026</p>
-                            </div>
-                            <div class="ui-progress ui-progress--wide">
-                                <div class="ui-progress-bar" style="width: 48%;"></div>
-                            </div>
-                        </div>
-                        <div class="ui-lane-row">
-                            <div>
-                                <p class="ui-label">Turo (CAD)</p>
-                                <p class="ui-lane-value">1.399,54</p>
-                                <p class="ui-subdued mb-0">Total já cobrado no cartão</p>
-                            </div>
-                            <div class="ui-progress ui-progress--wide">
-                                <div class="ui-progress-bar ui-progress-bar--alt" style="width: 100%;"></div>
-                            </div>
-                        </div>
+                        <div id="financeLanes"></div>
                     </div>
                     <div class="ui-lane">
                         <div class="ui-lane-head">
-                            <h3 class="h6 mb-0">Checklist imediato</h3>
-                            <span class="ui-status ui-status--alt">Próximos passos</span>
+                            <h3 class="h6 mb-0">Immediate checklist</h3>
+                            <span class="ui-status ui-status--alt">Next steps</span>
                         </div>
-                        <ul class="ui-checklist">
-                            <li><span class="ui-dot"></span> Confirmar pagamento do Airbnb em CAD 1.844,53 (07/02/2026).</li>
-                            <li><span class="ui-dot"></span> Salvar rota até 677 Longboat Drive e compartilhar com ambos.</li>
-                            <li><span class="ui-dot"></span> Anotar credenciais de Wi-Fi assim que chegarem (48h antes).</li>
-                            <li><span class="ui-dot"></span> Revisar cadeirinhas e carrinho no Turo antes da retirada.</li>
-                        </ul>
+                        <ul class="ui-checklist" id="checklistList"></ul>
                     </div>
                 </div>
             </section>
 
             <section id="voos" class="app-section ui-card p-4 p-lg-5" aria-labelledby="voos-title">
                 <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Seção 1 - Voos</span>
-                    <h2 class="app-section-title" id="voos-title">1. Detalhes dos voos - ambas as famílias</h2>
+                    <span class="ui-pill"><span class="ui-dot"></span> Section 1 - Flights</span>
+                    <h2 class="app-section-title" id="voos-title">1. Flight details</h2>
                 </div>
 
-                <article class="mb-4">
-                    <div class="app-section-subhead">
-                        <h3 class="h5 mb-0">1.1 Família 1 - Air Canada (PNR ADI6WR)</h3>
-                        <span class="ui-badge"><strong>Tarifa:</strong> Economy Basic (classe G)</span>
-                        <span class="ui-badge"><strong>Bagagem:</strong> 1 item pessoal + 2 despachadas (23 kg)</span>
-                    </div>
-                    <p><strong>Passageiros:</strong> Bruno Pinto Brum; Fernanda Lee Guerra Marques Brum; Noah Marques Brum; Alice Brum (bebê no colo).</p>
-
-                    <div class="app-grid-two">
-                        <div class="ui-tile h-100">
-                            <p class="ui-label">Ida - Domingo, 22/02/2026</p>
-                            <p class="mb-1"><strong>Voo:</strong> AC1638 - Montréal (YUL) &rarr; Orlando (MCO)</p>
-                            <p class="mb-2"><strong>Horário:</strong> 19:25 &rarr; 23:02</p>
-                            <div class="ui-chip-row">
-                                <span class="ui-chip"><strong>Terminal:</strong> MCO - B</span>
-                                <span class="ui-chip"><strong>Aeronave:</strong> Airbus A321-200</span>
-                                <span class="ui-chip"><strong>Serviço:</strong> Air Canada Bistro (pago)</span>
-                            </div>
+                <div class="ui-tile mb-3">
+                    <h3 class="h6 mb-3">Add flight</h3>
+                    <form class="row g-3" id="flightForm">
+                        <div class="col-md-4">
+                            <label class="form-label" for="flightAirline">Airline</label>
+                            <input class="form-control" id="flightAirline" name="airline" required>
                         </div>
-                        <div class="ui-tile h-100">
-                            <p class="ui-label">Volta - Quarta, 11/03/2026</p>
-                            <p class="mb-1"><strong>Voo:</strong> AC1641 - Orlando (MCO) &rarr; Montréal (YUL)</p>
-                            <p class="mb-2"><strong>Horário:</strong> 18:15 &rarr; 21:26</p>
-                            <div class="ui-chip-row">
-                                <span class="ui-chip"><strong>Terminal:</strong> MCO - B</span>
-                                <span class="ui-chip"><strong>Aeronave:</strong> Airbus A321-200</span>
-                            </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="flightPnr">PNR</label>
+                            <input class="form-control" id="flightPnr" name="pnr">
                         </div>
-                    </div>
-
-                    <p class="ui-subdued mt-3 mb-0">
-                        Regras de embarque (voos Canadá &rarr; EUA): check-in e despacho de bagagem até 60 min antes da partida; deadline no portão 30 min antes; portão fecha 15 min antes do voo.
-                    </p>
-                </article>
-
-                <article>
-                    <div class="app-section-subhead">
-                        <h3 class="h5 mb-0">1.2 Família 2 - GOL Linhas Aéreas (PNR IEGFNU)</h3>
-                        <span class="ui-badge"><strong>Tarifa:</strong> LIGHT NEW - Econômica (classe O)</span>
-                        <span class="ui-badge"><strong>Bagagem:</strong> 2 volumes de mão (10 kg + 12 kg)</span>
-                    </div>
-                    <p><strong>Passageiros:</strong> Célia de Fátima Guerra M de Almeida; Wilton Arcanjo Guimarães.</p>
-
-                    <div class="app-grid-two">
-                        <div class="ui-tile h-100">
-                            <p class="ui-label">Célia - Ida (22/02/2026)</p>
-                            <ul class="mb-2 ps-3">
-                                <li>G3 1755 - GIG (T2) 06:00 &rarr; BSB 07:45 (Boeing 737-800)</li>
-                                <li>Conexão em Brasília ~2h</li>
-                                <li>G3 7602 - BSB 09:45 &rarr; MCO (Terminal C) 15:55 (Boeing 737 MAX)</li>
-                            </ul>
+                        <div class="col-md-2">
+                            <label class="form-label" for="flightGroup">Group</label>
+                            <input class="form-control" id="flightGroup" name="group" placeholder="Family 1">
                         </div>
-                        <div class="ui-tile h-100">
-                            <p class="ui-label">Célia - Volta (11/03 &rarr; 12/03/2026)</p>
-                            <ul class="mb-2 ps-3">
-                                <li>G3 7601 - MCO (Terminal C) 22:00 &rarr; BSB 07:05 (+1) (Boeing 737 MAX)</li>
-                                <li>Conexão em Brasília ~1h35</li>
-                                <li>G3 2074 - BSB 08:40 &rarr; GIG (T2) 10:30 (Boeing 737-800)</li>
-                            </ul>
+                        <div class="col-md-3">
+                            <label class="form-label" for="flightCost">Cost</label>
+                            <input class="form-control" id="flightCost" name="cost" type="number" step="0.01" required>
                         </div>
-                    </div>
-
-                    <div class="app-info-grid mt-2">
-                        <div class="ui-tile">
-                            <p class="ui-label">Pagamento total Célia</p>
-                            <p class="ui-tile-value">R$ 3.279,95</p>
-                            <p class="ui-subdued mb-0">Tarifa USD 380 (BRL 2.043,29) + taxas (BR3, BR4, US2, YC, XY2, XA, AY, XF) + bagagem (BRL 700,00).</p>
+                        <div class="col-md-3">
+                            <label class="form-label" for="flightCurrency">Currency</label>
+                            <select class="form-select" id="flightCurrency" name="currency">
+                                <option value="CAD">CAD</option>
+                                <option value="USD">USD</option>
+                                <option value="BRL">BRL</option>
+                            </select>
                         </div>
-                        <div class="ui-tile">
-                            <p class="ui-label">Pagamento total Wilton</p>
-                            <p class="ui-tile-value">R$ 2.579,95</p>
-                            <p class="ui-subdued mb-0">Tarifa USD 380 (BRL 2.043,29) + taxas brasileiras.</p>
+                        <div class="col-md-3">
+                            <label class="form-label" for="flightFrom">From</label>
+                            <input class="form-control" id="flightFrom" name="from" placeholder="YUL" required>
                         </div>
-                    </div>
-                </article>
+                        <div class="col-md-3">
+                            <label class="form-label" for="flightTo">To</label>
+                            <input class="form-control" id="flightTo" name="to" placeholder="MCO" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="flightDepart">Departure</label>
+                            <input class="form-control" id="flightDepart" name="departAt" type="datetime-local" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="flightArrive">Arrival</label>
+                            <input class="form-control" id="flightArrive" name="arriveAt" type="datetime-local" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="flightNotes">Notes</label>
+                            <input class="form-control" id="flightNotes" name="notes" placeholder="Bags, fare, aircraft">
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Add</button>
+                            <button class="btn btn-outline-secondary" type="button" id="flightCancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="flightsList" class="d-grid gap-3"></div>
             </section>
 
             <section id="hospedagem" class="app-section ui-card p-4 p-lg-5" aria-labelledby="hospedagem-title">
                 <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Seção 2 - Hospedagem</span>
-                    <h2 class="app-section-title" id="hospedagem-title">2. Airbnb - hospedagem (código HMF5WZ5APC)</h2>
+                    <span class="ui-pill"><span class="ui-dot"></span> Section 2 - Lodging</span>
+                    <h2 class="app-section-title" id="hospedagem-title">2. Lodging</h2>
                 </div>
 
-                <p class="lead mb-3"><strong>Imóvel:</strong> New &amp; Comfort Home - 3 Bed - 2.5 Bath - Near Disney</p>
-
-                <div class="app-info-grid mb-3">
-                    <div class="ui-tile">
-                        <p class="ui-label">Endereço</p>
-                        <p class="ui-tile-value">677 Longboat Drive, Davenport, FL 33896, Estados Unidos</p>
-                    </div>
-                    <div class="ui-tile">
-                        <p class="ui-label">Período</p>
-                        <p class="mb-0"><strong>Check-in:</strong> 22/02/2026 a partir de 16:00</p>
-                        <p class="mb-0"><strong>Check-out:</strong> 11/03/2026 até 10:00</p>
-                    </div>
-                    <div class="ui-tile">
-                        <p class="ui-label">Anfitriã</p>
-                        <p class="mb-0">Fernanda Batista</p>
-                        <p class="mb-0">Contato: +55 11 96578-0094 (telefone / WhatsApp)</p>
-                        <p class="mb-0">Coanfitriãs: Amy, Emma</p>
-                    </div>
-                    <div class="ui-tile">
-                        <p class="ui-label">Regras principais</p>
-                        <p class="mb-0">Máximo 8 hóspedes; animais de estimação permitidos; self check-in por fechadura inteligente.</p>
-                    </div>
+                <div class="ui-tile mb-3">
+                    <h3 class="h6 mb-3">Add lodging</h3>
+                    <form class="row g-3" id="lodgingForm">
+                        <div class="col-md-6">
+                            <label class="form-label" for="lodgingName">Property</label>
+                            <input class="form-control" id="lodgingName" name="name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="lodgingAddress">Address</label>
+                            <input class="form-control" id="lodgingAddress" name="address" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="lodgingCheckIn">Check-in</label>
+                            <input class="form-control" id="lodgingCheckIn" name="checkIn" type="datetime-local" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="lodgingCheckOut">Check-out</label>
+                            <input class="form-control" id="lodgingCheckOut" name="checkOut" type="datetime-local" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="lodgingCost">Total cost</label>
+                            <input class="form-control" id="lodgingCost" name="cost" type="number" step="0.01" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="lodgingCurrency">Currency</label>
+                            <select class="form-select" id="lodgingCurrency" name="currency">
+                                <option value="CAD">CAD</option>
+                                <option value="USD">USD</option>
+                                <option value="BRL">BRL</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label" for="lodgingHost">Host</label>
+                            <input class="form-control" id="lodgingHost" name="host">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="lodgingContact">Contact</label>
+                            <input class="form-control" id="lodgingContact" name="contact">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="lodgingNotes">Notes</label>
+                            <input class="form-control" id="lodgingNotes" name="notes" placeholder="Rules, Wi-Fi, reservation link">
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Add</button>
+                            <button class="btn btn-outline-secondary" type="button" id="lodgingCancel">Cancel</button>
+                        </div>
+                    </form>
                 </div>
-
-                <p class="ui-subdued">Wi-Fi e instruções finais de acesso serão enviados pelo Airbnb até 48h antes do check-in.</p>
-
-                <div class="ui-divider"></div>
-
-                <h3 class="h5 mb-3">2.1 Financeiro da hospedagem (CAD)</h3>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle ui-table mb-0">
-                        <caption class="visually-hidden">Financeiro da hospedagem em CAD</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">Item</th>
-                                <th scope="col">Valor (CAD)</th>
-                                <th scope="col">Detalhes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Total da reserva</td>
-                                <td>3.786,43</td>
-                                <td>Valor completo da hospedagem (Airbnb).</td>
-                            </tr>
-                            <tr>
-                                <td>Parcela 1 (paga)</td>
-                                <td>1.941,90</td>
-                                <td>Pagamento em 22/10/2025.</td>
-                            </tr>
-                            <tr>
-                                <td>Saldo pendente</td>
-                                <td>1.844,53</td>
-                                <td>Vencimento em 07/02/2026.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <div id="lodgingList" class="d-grid gap-3"></div>
             </section>
 
             <section id="turo" class="app-section ui-card p-4 p-lg-5" aria-labelledby="turo-title">
                 <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Seção 3 - Carro (Turo)</span>
-                    <h2 class="app-section-title" id="turo-title">3. Turo - detalhes da reserva do carro</h2>
+                    <span class="ui-pill"><span class="ui-dot"></span> Section 3 - Car</span>
+                    <h2 class="app-section-title" id="turo-title">3. Car</h2>
                 </div>
 
-                <p class="mb-1"><strong>Veículo:</strong> Dodge Grand Caravan 2019 (host Leonardo E) - Placa BL76KP</p>
-                <p class="mb-3"><strong>Local:</strong> Orlando International Airport (MCO)</p>
-
-                <div class="app-info-grid mb-3">
-                    <div class="ui-tile">
-                        <p class="ui-label">Retirada</p>
-                        <p class="ui-tile-value">23/02/2026 às 00:30 - MCO (lockbox)</p>
-                    </div>
-                    <div class="ui-tile">
-                        <p class="ui-label">Devolução</p>
-                        <p class="ui-tile-value">11/03/2026 às 15:00 - MCO</p>
-                    </div>
+                <div class="ui-tile mb-3">
+                    <h3 class="h6 mb-3">Add car</h3>
+                    <form class="row g-3" id="carForm">
+                        <div class="col-md-5">
+                            <label class="form-label" for="carVehicle">Vehicle</label>
+                            <input class="form-control" id="carVehicle" name="vehicle" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="carProvider">Provider</label>
+                            <input class="form-control" id="carProvider" name="provider" placeholder="Turo">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="carCost">Total cost</label>
+                            <input class="form-control" id="carCost" name="cost" type="number" step="0.01" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="carCurrency">Currency</label>
+                            <select class="form-select" id="carCurrency" name="currency">
+                                <option value="USD">USD</option>
+                                <option value="CAD">CAD</option>
+                                <option value="BRL">BRL</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="carPickup">Pickup</label>
+                            <input class="form-control" id="carPickup" name="pickup" type="datetime-local" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="carDropoff">Drop-off</label>
+                            <input class="form-control" id="carDropoff" name="dropoff" type="datetime-local" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="carLocation">Location</label>
+                            <input class="form-control" id="carLocation" name="location" placeholder="MCO">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="carNotes">Extras / Notes</label>
+                            <input class="form-control" id="carNotes" name="notes" placeholder="Child seats, protection, mileage">
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Add</button>
+                            <button class="btn btn-outline-secondary" type="button" id="carCancel">Cancel</button>
+                        </div>
+                    </form>
                 </div>
-
-                <h3 class="h6 text-uppercase text-muted mt-2">3.1 Extras contratados</h3>
-                <ul class="mb-3 ps-3">
-                    <li>2 cadeirinhas infantis - US$ 39 cada (US$ 78 no total)</li>
-                    <li>1 carrinho de bebê - US$ 55</li>
-                    <li>Enhanced roadside assistance - US$ 50,83</li>
-                    <li>Standard protection plan - incluído</li>
-                </ul>
-
-                <h3 class="h6 text-uppercase text-muted">3.2 Custos totais (USD)</h3>
-                <ul class="mb-3 ps-3">
-                    <li>Trip price: US$ 623,05</li>
-                    <li>Child seats: US$ 78,00</li>
-                    <li>Stroller: US$ 55,00</li>
-                    <li>Trip fee: US$ 15,00</li>
-                    <li>Airport permit fee: US$ 86,59</li>
-                    <li>Sales tax: US$ 46,28</li>
-                    <li>Standard protection: US$ 205,24</li>
-                    <li>Descontos: -US$ 51,31 (protection plan) e -US$ 109,95 (2-week discount)</li>
-                </ul>
-                <p class="fw-semibold">Total Turo (USD): US$ 998,73</p>
-
-                <h3 class="h6 text-uppercase text-muted">3.3 Cobrança real no cartão (CAD)</h3>
-                <div class="table-responsive mb-3">
-                    <table class="table table-hover align-middle ui-table mb-0">
-                        <caption class="visually-hidden">Cobrança real no cartão em CAD</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">Data</th>
-                                <th scope="col">Valor (CAD)</th>
-                                <th scope="col">Descrição</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>23/10/2025</td>
-                                <td>1.181,97</td>
-                                <td>Primeira cobrança da reserva Turo.</td>
-                            </tr>
-                            <tr>
-                                <td>25/10/2025</td>
-                                <td>217,57</td>
-                                <td>Complemento da reserva.</td>
-                            </tr>
-                            <tr class="fw-semibold">
-                                <td>Total no cartão</td>
-                                <td>1.399,54</td>
-                                <td>Somatório das duas transações em CAD.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <p class="mb-0"><strong>Quilometragem:</strong> 5.950 milhas incluídas - limite 350 mi/dia - excedente: US$ 0,09 por milha.</p>
-                <p class="ui-subdued mb-0">Política: reserva non-refundable, com possibilidade de cancelamento total em até 24h após reserva (regra específica do anúncio).</p>
+                <div id="carList" class="d-grid gap-3"></div>
             </section>
 
             <section id="financeiro" class="app-section ui-card p-4 p-lg-5" aria-labelledby="financeiro-title">
                 <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Seção 4 - Financeiro</span>
-                    <h2 class="app-section-title" id="financeiro-title">4. Financeiro da viagem</h2>
+                    <span class="ui-pill"><span class="ui-dot"></span> Section 4 - Costs</span>
+                    <h2 class="app-section-title" id="financeiro-title">4. Trip costs</h2>
                 </div>
 
                 <div class="app-grid-two mb-3">
                     <div class="ui-tile h-100">
-                        <p class="ui-label">Valores em CAD</p>
-                        <ul class="mb-0 ps-3">
-                            <li><strong>Hospedagem_total_cad:</strong> 3.786,43</li>
-                            <li><strong>Turo_total_cad:</strong> 1.399,54</li>
-                            <li><strong>Extras_compartilhados_cad:</strong> 0,00</li>
-                            <li><strong>Voos_familia_1_cad:</strong> 935,60</li>
-                        </ul>
+                        <p class="ui-label">Totals by currency</p>
+                        <ul class="mb-0 ps-3" id="totalsByCurrency"></ul>
                     </div>
                     <div class="ui-tile h-100">
-                        <p class="ui-label">Valores em BRL</p>
-                        <ul class="mb-0 ps-3">
-                            <li><strong>Voos_wilton_brl:</strong> 2.579,95</li>
-                            <li><strong>Voos_celia_brl:</strong> 3.279,95</li>
-                            <li><strong>Extras_compartilhados_brl:</strong> 0,00</li>
-                        </ul>
+                        <p class="ui-label">Totals by category</p>
+                        <ul class="mb-0 ps-3" id="totalsByCategory"></ul>
                     </div>
                 </div>
 
                 <div class="app-info-grid">
                     <div class="ui-tile">
-                        <p class="ui-label">Família 1 - Bruno, Fernanda, Noah e Alice</p>
-                        <p class="mb-0"><strong>Total_Familia_1 = 2.592,99 (hospedagem + carro) + 935,60 (avião) = 3.528,59 CAD</strong></p>
-                        <p class="ui-subdued mb-0">Onde: 2.592,99 CAD = cota da família sobre o total compartilhado (Airbnb + Turo). 935,60 CAD = valor total das passagens Air Canada para a família 1.</p>
+                        <p class="ui-label">Totals by person/group</p>
+                        <div id="totalsByGroup"></div>
                     </div>
                     <div class="ui-tile">
-                        <p class="ui-label">Família 2 - Wilton e Célia</p>
-                        <p class="mb-0"><strong>Total_Familia_2 = 2.592,99 CAD (hospedagem + carro) + R$ 5.859,90 (voos em BRL)</strong></p>
-                        <p class="ui-subdued mb-0">Os voos da família 2 foram pagos em reais para manter os valores conforme cobrança real.</p>
+                        <p class="ui-label">Finance notes</p>
+                        <p class="ui-subdued mb-0" id="financeNotes">Add expenses and define splits to see totals.</p>
+                    </div>
+                </div>
+
+                <div class="ui-divider"></div>
+
+                <div class="app-grid-two">
+                    <div class="ui-tile">
+                        <h3 class="h6 mb-3">Add expense</h3>
+                        <form class="row g-3" id="expenseForm">
+                            <div class="col-md-4">
+                                <label class="form-label" for="expenseCategory">Category</label>
+                                <input class="form-control" id="expenseCategory" name="category" placeholder="Lodging, Food" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="expenseAmount">Amount</label>
+                                <input class="form-control" id="expenseAmount" name="amount" type="number" step="0.01" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="expenseCurrency">Currency</label>
+                                <select class="form-select" id="expenseCurrency" name="currency">
+                                    <option value="CAD">CAD</option>
+                                    <option value="USD">USD</option>
+                                    <option value="BRL">BRL</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="expenseStatus">Status</label>
+                                <select class="form-select" id="expenseStatus" name="status">
+                                    <option value="planned">Planned</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="due">Due</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="expenseDue">Due date</label>
+                                <input class="form-control" id="expenseDue" name="dueDate" type="date">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="expenseGroup">Group</label>
+                                <input class="form-control" id="expenseGroup" name="group" placeholder="Family 1">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="expenseSplit">Split (optional)</label>
+                                <input class="form-control" id="expenseSplit" name="split" placeholder="Bruno=100; Fernanda=50">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="expenseNotes">Notes</label>
+                                <input class="form-control" id="expenseNotes" name="notes">
+                            </div>
+                            <div class="col-12 d-flex gap-2">
+                                <button class="btn btn-primary" type="submit">Add</button>
+                                <button class="btn btn-outline-secondary" type="button" id="expenseCancel">Cancel</button>
+                            </div>
+                        </form>
+                        <div class="mt-3" id="expensesList"></div>
+                    </div>
+                    <div class="ui-tile">
+                        <h3 class="h6 mb-3">Add extra transport</h3>
+                        <form class="row g-3" id="transportForm">
+                            <div class="col-md-6">
+                                <label class="form-label" for="transportType">Type</label>
+                                <input class="form-control" id="transportType" name="type" placeholder="Uber, bus, train" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="transportDate">Date</label>
+                                <input class="form-control" id="transportDate" name="date" type="date" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="transportAmount">Amount</label>
+                                <input class="form-control" id="transportAmount" name="amount" type="number" step="0.01" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="transportCurrency">Currency</label>
+                                <select class="form-select" id="transportCurrency" name="currency">
+                                    <option value="USD">USD</option>
+                                    <option value="CAD">CAD</option>
+                                    <option value="BRL">BRL</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="transportGroup">Group</label>
+                                <input class="form-control" id="transportGroup" name="group" placeholder="Family 2">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="transportNotes">Notes</label>
+                                <input class="form-control" id="transportNotes" name="notes">
+                            </div>
+                            <div class="col-12 d-flex gap-2">
+                                <button class="btn btn-primary" type="submit">Add</button>
+                                <button class="btn btn-outline-secondary" type="button" id="transportCancel">Cancel</button>
+                            </div>
+                        </form>
+                        <div class="mt-3" id="transportList"></div>
                     </div>
                 </div>
             </section>
 
             <section id="linha-tempo" class="app-section ui-card p-4 p-lg-5" aria-labelledby="linha-tempo-title">
                 <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Seção 5 - Linha do tempo</span>
-                    <h2 class="app-section-title" id="linha-tempo-title">5. Linha do tempo da viagem</h2>
+                    <span class="ui-pill"><span class="ui-dot"></span> Section 5 - Timeline</span>
+                    <h2 class="app-section-title" id="linha-tempo-title">5. Trip timeline</h2>
                 </div>
 
-                <h3 class="ui-timeline-date">22/02/2026 - Domingo</h3>
-                <div class="ui-timeline mb-3">
-                    <div class="ui-timeline-item"><span class="ui-timeline-time">15:55</span>Chegada de Célia &amp; Wilton ao MCO - Terminal C.</div>
-                    <div class="ui-timeline-item"><span class="ui-timeline-time">16:00</span>Check-in liberado no Airbnb em Davenport.</div>
-                    <div class="ui-timeline-item"><span class="ui-timeline-time">19:25</span>Decolagem do voo AC1638 de Montréal (YUL) para Orlando (MCO).</div>
-                    <div class="ui-timeline-item"><span class="ui-timeline-time">23:02</span>Chegada de Bruno &amp; família ao MCO - Terminal B.</div>
+                <div class="ui-tile mb-3">
+                    <h3 class="h6 mb-3">Add event</h3>
+                    <form class="row g-3" id="timelineForm">
+                        <div class="col-md-4">
+                            <label class="form-label" for="timelineDate">Date</label>
+                            <input class="form-control" id="timelineDate" name="date" type="date" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="timelineTime">Time</label>
+                            <input class="form-control" id="timelineTime" name="time" type="time">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label" for="timelineTitle">Title</label>
+                            <input class="form-control" id="timelineTitle" name="title" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="timelineNotes">Notes</label>
+                            <input class="form-control" id="timelineNotes" name="notes">
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Add</button>
+                            <button class="btn btn-outline-secondary" type="button" id="timelineCancel">Cancel</button>
+                        </div>
+                    </form>
                 </div>
-
-                <h3 class="ui-timeline-date">23/02/2026 - Segunda</h3>
-                <div class="ui-timeline mb-3">
-                    <div class="ui-timeline-item"><span class="ui-timeline-time">00:30</span>Retirada do carro (Turo) no aeroporto MCO (lockbox).</div>
-                </div>
-
-                <h3 class="ui-timeline-date">11/03/2026 - Quarta (retornos)</h3>
-                <div class="ui-timeline">
-                    <div class="ui-timeline-item"><span class="ui-timeline-time">10:00</span>Check-out do Airbnb em Davenport.</div>
-                    <div class="ui-timeline-item"><span class="ui-timeline-time">15:00</span>Devolução do carro no Turo - MCO.</div>
-                    <div class="ui-timeline-item"><span class="ui-timeline-time">18:15</span>Voo AC1641 decola de MCO para YUL (família 1).</div>
-                    <div class="ui-timeline-item"><span class="ui-timeline-time">22:00</span>Voo G3 7601 decola de MCO para BSB (família 2, com chegada no dia seguinte).</div>
-                </div>
+                <div id="timelineList"></div>
             </section>
 
             <section class="app-section ui-card p-4 p-lg-5" aria-labelledby="lembretes-title">
                 <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Seção 6 - Lembretes</span>
-                    <h2 class="app-section-title" id="lembretes-title">6. Lembretes criados</h2>
+                    <span class="ui-pill"><span class="ui-dot"></span> Section 6 - Reminders</span>
+                    <h2 class="app-section-title" id="lembretes-title">6. Created reminders</h2>
                 </div>
 
+                <div class="ui-tile mb-3">
+                    <h3 class="h6 mb-3">Add reminder</h3>
+                    <form class="row g-3" id="reminderForm">
+                        <div class="col-md-3">
+                            <label class="form-label" for="reminderDate">When</label>
+                            <input class="form-control" id="reminderDate" name="date" type="date" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="reminderTitle">Item</label>
+                            <input class="form-control" id="reminderTitle" name="title" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label" for="reminderDescription">Description</label>
+                            <input class="form-control" id="reminderDescription" name="description">
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Add</button>
+                            <button class="btn btn-outline-secondary" type="button" id="reminderCancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-striped align-middle ui-table mb-0">
-                        <caption class="visually-hidden">Tabela de lembretes da viagem</caption>
+                        <caption class="visually-hidden">Trip reminders table</caption>
                         <thead>
                             <tr>
-                                <th scope="col">Quando</th>
+                                <th scope="col">When</th>
                                 <th scope="col">Item</th>
-                                <th scope="col">Descrição</th>
+                                <th scope="col">Description</th>
+                                <th scope="col" class="text-end">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>07/02/2026</td>
-                                <td>Pagamento Airbnb</td>
-                                <td>Quitar saldo da hospedagem no valor de CAD 1.844,53.</td>
-                            </tr>
-                            <tr>
-                                <td>20/02/2026</td>
-                                <td>Wi-Fi / Acesso</td>
-                                <td>Conferir credenciais do Wi-Fi e instruções finais de acesso enviadas pela anfitriã.</td>
-                            </tr>
-                            <tr>
-                                <td>22/02/2026</td>
-                                <td>Rota até o Airbnb</td>
-                                <td>Salvar rota até o endereço: 677 Longboat Drive, Davenport, FL 33896.</td>
-                            </tr>
-                            <tr>
-                                <td>Contato útil</td>
-                                <td>Anfitriã Airbnb</td>
-                                <td>Fernanda Batista - telefone/WhatsApp: +55 11 96578-0094 (associado aos lembretes).</td>
-                            </tr>
-                        </tbody>
+                        <tbody id="remindersList"></tbody>
                     </table>
                 </div>
             </section>
 
             <footer class="app-footer-note mt-2">
-                <p>Documento consolidado a partir de: reservas Air Canada, GOL, Airbnb e Turo. Valores em CAD e BRL conforme cobrança real informada.</p>
+                <p id="footerNote">Consolidated document based on bookings and receipts. Values shown in original currency.</p>
             </footer>
         </main>
     </div>
 
     <script src="app.js" defer></script>
+    <script src="orlando.js" defer></script>
 </body>
 </html>
