@@ -2,6 +2,7 @@
     const message = document.getElementById('emailVerificationMessage');
     const address = document.getElementById('emailVerificationAddress');
     const resend = document.getElementById('emailVerificationResend');
+    const verifyButton = document.getElementById('emailVerificationButton');
     const params = new URLSearchParams(window.location.search);
     const email = params.get('email');
 
@@ -33,26 +34,49 @@
         address.textContent = email;
     }
 
+    const resendEmail = async () => {
+        const csrf = getCookie('csrf_token');
+        await fetch('/api/email-verification/resend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-csrf-token': csrf || ''
+            },
+            body: JSON.stringify({ email })
+        });
+    };
+
     if (resend) {
         resend.addEventListener('click', async (event) => {
             event.preventDefault();
             resend.classList.add('disabled');
-            const csrf = getCookie('csrf_token');
 
             try {
-                await fetch('/api/email-verification/resend', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-csrf-token': csrf || ''
-                    },
-                    body: JSON.stringify({ email })
-                });
+                await resendEmail();
                 setMessage('We have resent the verification email to', true);
             } catch (err) {
                 setMessage('Unable to resend the email right now. Please try again.');
             } finally {
                 resend.classList.remove('disabled');
+            }
+        });
+    }
+
+    if (verifyButton) {
+        verifyButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+            verifyButton.classList.add('disabled');
+            try {
+                if (email) {
+                    await resendEmail();
+                    setMessage('We have resent the verification email to', true);
+                } else {
+                    setMessage('Please check your inbox and open the verification link.');
+                }
+            } catch (err) {
+                setMessage('Unable to send the verification email right now. Please try again.');
+            } finally {
+                verifyButton.classList.remove('disabled');
             }
         });
     }
