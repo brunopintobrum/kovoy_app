@@ -1,375 +1,346 @@
-﻿<!DOCTYPE html>
-<html lang="en" data-theme="light">
+﻿<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Trip Summary - Orlando 2026</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8" />
+    <title>Orlando 2026 | Trip Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Trip planning dashboard" name="description" />
+    <meta content="Bruno Pinto Brum" name="author" />
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/css/icons.min.css" rel="stylesheet" />
+    <link href="assets/css/app.min.css" rel="stylesheet" />
 </head>
-<body class="trip-page">
-    <a class="skip-link" href="#main">Skip to content</a>
-
-    <div class="app-topbar container-lg d-flex align-items-center py-3">
-        <div class="app-brand">
-            <span class="app-logo-dot"></span>
-            <div class="app-brand-text">
-                <span class="ui-eyebrow">Orlando 2026</span>
-                <span class="app-brand-title">Travel Dashboard</span>
+<body data-layout-mode="light" data-topbar="light">
+    <div class="container-fluid py-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+            <div>
+                <span class="badge bg-primary" id="tripNamePill">Trip</span>
+                <h4 class="mb-1" id="tripTitle">Trip summary</h4>
+                <p class="text-muted mb-0" id="tripSubtitle">Consolidated document with flights, lodging, car, and key reminders.</p>
+            </div>
+            <div class="text-sm-end mt-3 mt-sm-0">
+                <div class="small text-muted">Period: <span id="tripPeriod">--</span></div>
+                <div class="small text-muted">Base: <span id="tripBase">--</span></div>
             </div>
         </div>
-        <nav class="app-nav ms-auto d-none d-md-flex" aria-label="Trip sections">
-            <a href="#dashboard">Dashboard</a>
-            <a href="#voos">Flights</a>
-            <a href="#hospedagem">Lodging</a>
-            <a href="#turo">Car</a>
-            <a href="#financeiro">Costs</a>
-            <a href="#linha-tempo">Timeline</a>
-        </nav>
-        <button class="ui-toggle ms-3" id="themeToggle" type="button" aria-label="Toggle theme" aria-pressed="false">
-            <span class="ui-toggle-icon" aria-hidden="true">Moon</span>
-            <span class="ui-toggle-label">Dark mode</span>
-        </button>
-        <button class="ui-button ui-button--ghost ms-2" id="logoutButton" type="button">Sign out</button>
-    </div>
 
-    <div class="app-shell container-lg pb-5">
-        <header class="app-hero ui-card p-4 p-lg-5 mb-4">
-            <div class="app-hero-meta d-flex flex-wrap gap-3 align-items-center mb-3">
-                <span class="ui-pill ui-pill--strong" id="tripNamePill">Trip</span>
-                <span class="ui-pill"><strong>Period:</strong> <span id="tripPeriod">--</span></span>
-                <span class="ui-pill"><strong>Base:</strong> <span id="tripBase">--</span></span>
-            </div>
-            <div class="app-hero-grid">
-                <div>
-                    <p class="ui-eyebrow">Planning and logistics</p>
-                    <h1 class="app-hero-title" id="tripTitle">Trip summary</h1>
-                    <p class="ui-lede" id="tripSubtitle">Consolidated document with flights, lodging, car, and key reminders.</p>
-                    <div class="app-hero-chips">
-                        <span class="ui-badge"><strong>Family 1:</strong> <span id="familyOne">--</span></span>
-                        <span class="ui-badge ui-badge--alt"><strong>Family 2:</strong> <span id="familyTwo">--</span></span>
-                    </div>
-                </div>
-                <div class="app-hero-panel">
-                    <div class="ui-metric">
-                        <p class="ui-label">Countdown</p>
-                        <p class="ui-metric-value" id="countdownDays">--</p>
-                        <p class="ui-metric-sub" id="countdownLabel">--</p>
-                    </div>
-                    <div class="ui-metric-group">
-                        <div>
-                            <p class="ui-label">Lodging</p>
-                            <p class="ui-metric-value" id="metricLodging">--</p>
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge bg-light text-dark">Family 1: <span id="familyOne">--</span></span>
+                            <span class="badge bg-light text-dark">Family 2: <span id="familyTwo">--</span></span>
                         </div>
-                        <div>
-                            <p class="ui-label">Car (CAD)</p>
-                            <p class="ui-metric-value" id="metricCar">--</p>
-                        </div>
-                        <div>
-                            <p class="ui-label">Flights F1 (CAD)</p>
-                            <p class="ui-metric-value" id="metricFlights">--</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <main id="main" class="d-flex flex-column gap-4">
-            <section id="dashboard" class="app-section ui-card p-4 p-lg-5" aria-labelledby="dashboard-title">
-                <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Section 0 - Dashboard</span>
-                    <h2 class="app-section-title" id="dashboard-title">Trip overview at a glance</h2>
-                </div>
-
-                <div class="d-flex flex-wrap gap-2 mb-4">
-                    <button class="ui-button" id="exportData" type="button">Export JSON</button>
-                    <label class="ui-button ui-button--ghost" for="importData">Import JSON</label>
-                    <input class="visually-hidden" type="file" id="importData" accept="application/json">
-                    <span class="ui-pill" id="syncStatus">Local</span>
-                </div>
-
-                <div class="app-dashboard-grid mb-4">
-                    <div class="ui-stat">
-                        <div class="ui-stat-top">
-                            <span class="ui-label">Days to trip</span>
-                            <span class="ui-status ui-status--soft" id="statusTrip">On track</span>
-                        </div>
-                        <p class="ui-stat-value" id="dashboardDays">--</p>
-                        <p class="ui-stat-sub" id="dashboardDaysLabel">--</p>
-                        <div class="ui-progress">
-                            <div class="ui-progress-bar" id="dashboardProgress" style="width: 0%;"></div>
-                        </div>
-                    </div>
-                    <div class="ui-stat">
-                        <div class="ui-stat-top">
-                            <span class="ui-label">Costs in CAD</span>
-                            <span class="ui-status ui-status--alt">Shared</span>
-                        </div>
-                        <p class="ui-stat-value" id="dashboardCad">--</p>
-                        <p class="ui-stat-sub" id="dashboardCadLabel">--</p>
-                        <div class="ui-pill ui-trend ui-trend--positive" id="dashboardCadTrend">--</div>
-                    </div>
-                    <div class="ui-stat">
-                        <div class="ui-stat-top">
-                            <span class="ui-label">Costs in BRL</span>
-                            <span class="ui-status ui-status--soft">Family 2</span>
-                        </div>
-                        <p class="ui-stat-value" id="dashboardBrl">--</p>
-                        <p class="ui-stat-sub" id="dashboardBrlLabel">--</p>
-                        <div class="ui-progress">
-                            <div class="ui-progress-bar ui-progress-bar--alt" id="dashboardBrlProgress" style="width: 0%;"></div>
-                        </div>
-                    </div>
-                    <div class="ui-stat">
-                        <div class="ui-stat-top">
-                            <span class="ui-label">Pending items</span>
-                            <span class="ui-status ui-status--soft" id="dashboardPendingCount">0 items</span>
-                        </div>
-                        <p class="ui-stat-value" id="dashboardPendingTitle">--</p>
-                        <p class="ui-stat-sub" id="dashboardPendingLabel">--</p>
-                        <div class="ui-pill ui-trend ui-trend--neutral" id="dashboardPendingNext">--</div>
-                    </div>
-                </div>
-
-                <div class="app-dashboard-lanes">
-                    <div class="ui-lane">
-                        <div class="ui-lane-head">
-                            <h3 class="h6 mb-0">Cash flow</h3>
-                            <span class="ui-status ui-status--soft">Monitor</span>
-                        </div>
-                        <div id="financeLanes"></div>
-                    </div>
-                    <div class="ui-lane">
-                        <div class="ui-lane-head">
-                            <h3 class="h6 mb-0">Immediate checklist</h3>
-                            <span class="ui-status ui-status--alt">Next steps</span>
-                        </div>
-                        <ul class="ui-checklist" id="checklistList"></ul>
-                    </div>
-                </div>
-            </section>
-
-            <section id="voos" class="app-section ui-card p-4 p-lg-5" aria-labelledby="voos-title">
-                <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Section 1 - Flights</span>
-                    <h2 class="app-section-title" id="voos-title">1. Flight details</h2>
-                </div>
-
-                <div class="ui-tile mb-3">
-                    <h3 class="h6 mb-3">Add flight</h3>
-                    <form class="row g-3" id="flightForm">
-                        <div class="col-md-4">
-                            <label class="form-label" for="flightAirline">Airline</label>
-                            <input class="form-control" id="flightAirline" name="airline" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="flightPnr">PNR</label>
-                            <input class="form-control" id="flightPnr" name="pnr">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label" for="flightGroup">Group</label>
-                            <input class="form-control" id="flightGroup" name="group" placeholder="Family 1">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="flightCost">Cost</label>
-                            <input class="form-control" id="flightCost" name="cost" type="number" step="0.01" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="flightCurrency">Currency</label>
-                            <select class="form-select" id="flightCurrency" name="currency">
-                                <option value="CAD">CAD</option>
-                                <option value="USD">USD</option>
-                                <option value="BRL">BRL</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="flightFrom">From</label>
-                            <input class="form-control" id="flightFrom" name="from" placeholder="YUL" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="flightTo">To</label>
-                            <input class="form-control" id="flightTo" name="to" placeholder="MCO" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="flightDepart">Departure</label>
-                            <input class="form-control" id="flightDepart" name="departAt" type="datetime-local" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="flightArrive">Arrival</label>
-                            <input class="form-control" id="flightArrive" name="arriveAt" type="datetime-local" required>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label" for="flightNotes">Notes</label>
-                            <input class="form-control" id="flightNotes" name="notes" placeholder="Bags, fare, aircraft">
-                        </div>
-                        <div class="col-12 d-flex gap-2">
-                            <button class="btn btn-primary" type="submit">Add</button>
-                            <button class="btn btn-outline-secondary" type="button" id="flightCancel">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-                <div id="flightsList" class="d-grid gap-3"></div>
-            </section>
-
-            <section id="hospedagem" class="app-section ui-card p-4 p-lg-5" aria-labelledby="hospedagem-title">
-                <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Section 2 - Lodging</span>
-                    <h2 class="app-section-title" id="hospedagem-title">2. Lodging</h2>
-                </div>
-
-                <div class="ui-tile mb-3">
-                    <h3 class="h6 mb-3">Add lodging</h3>
-                    <form class="row g-3" id="lodgingForm">
-                        <div class="col-md-6">
-                            <label class="form-label" for="lodgingName">Property</label>
-                            <input class="form-control" id="lodgingName" name="name" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="lodgingAddress">Address</label>
-                            <input class="form-control" id="lodgingAddress" name="address" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="lodgingCheckIn">Check-in</label>
-                            <input class="form-control" id="lodgingCheckIn" name="checkIn" type="datetime-local" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="lodgingCheckOut">Check-out</label>
-                            <input class="form-control" id="lodgingCheckOut" name="checkOut" type="datetime-local" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="lodgingCost">Total cost</label>
-                            <input class="form-control" id="lodgingCost" name="cost" type="number" step="0.01" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="lodgingCurrency">Currency</label>
-                            <select class="form-select" id="lodgingCurrency" name="currency">
-                                <option value="CAD">CAD</option>
-                                <option value="USD">USD</option>
-                                <option value="BRL">BRL</option>
-                            </select>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label" for="lodgingHost">Host</label>
-                            <input class="form-control" id="lodgingHost" name="host">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="lodgingContact">Contact</label>
-                            <input class="form-control" id="lodgingContact" name="contact">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label" for="lodgingNotes">Notes</label>
-                            <input class="form-control" id="lodgingNotes" name="notes" placeholder="Rules, Wi-Fi, reservation link">
-                        </div>
-                        <div class="col-12 d-flex gap-2">
-                            <button class="btn btn-primary" type="submit">Add</button>
-                            <button class="btn btn-outline-secondary" type="button" id="lodgingCancel">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-                <div id="lodgingList" class="d-grid gap-3"></div>
-            </section>
-
-            <section id="turo" class="app-section ui-card p-4 p-lg-5" aria-labelledby="turo-title">
-                <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Section 3 - Car</span>
-                    <h2 class="app-section-title" id="turo-title">3. Car</h2>
-                </div>
-
-                <div class="ui-tile mb-3">
-                    <h3 class="h6 mb-3">Add car</h3>
-                    <form class="row g-3" id="carForm">
-                        <div class="col-md-5">
-                            <label class="form-label" for="carVehicle">Vehicle</label>
-                            <input class="form-control" id="carVehicle" name="vehicle" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="carProvider">Provider</label>
-                            <input class="form-control" id="carProvider" name="provider" placeholder="Turo">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="carCost">Total cost</label>
-                            <input class="form-control" id="carCost" name="cost" type="number" step="0.01" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="carCurrency">Currency</label>
-                            <select class="form-select" id="carCurrency" name="currency">
-                                <option value="USD">USD</option>
-                                <option value="CAD">CAD</option>
-                                <option value="BRL">BRL</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="carPickup">Pickup</label>
-                            <input class="form-control" id="carPickup" name="pickup" type="datetime-local" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="carDropoff">Drop-off</label>
-                            <input class="form-control" id="carDropoff" name="dropoff" type="datetime-local" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="carLocation">Location</label>
-                            <input class="form-control" id="carLocation" name="location" placeholder="MCO">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label" for="carNotes">Extras / Notes</label>
-                            <input class="form-control" id="carNotes" name="notes" placeholder="Child seats, protection, mileage">
-                        </div>
-                        <div class="col-12 d-flex gap-2">
-                            <button class="btn btn-primary" type="submit">Add</button>
-                            <button class="btn btn-outline-secondary" type="button" id="carCancel">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-                <div id="carList" class="d-grid gap-3"></div>
-            </section>
-
-            <section id="financeiro" class="app-section ui-card p-4 p-lg-5" aria-labelledby="financeiro-title">
-                <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Section 4 - Costs</span>
-                    <h2 class="app-section-title" id="financeiro-title">4. Trip costs</h2>
-                </div>
-
-                <div class="app-grid-two mb-3">
-                    <div class="ui-tile h-100">
-                        <p class="ui-label">Totals by currency</p>
-                        <ul class="mb-0 ps-3" id="totalsByCurrency"></ul>
-                    </div>
-                    <div class="ui-tile h-100">
-                        <p class="ui-label">Totals by category</p>
-                        <ul class="mb-0 ps-3" id="totalsByCategory"></ul>
-                    </div>
-                </div>
-
-                <div class="app-info-grid">
-                    <div class="ui-tile">
-                        <p class="ui-label">Totals by person/group</p>
-                        <div id="totalsByGroup"></div>
-                    </div>
-                    <div class="ui-tile">
-                        <p class="ui-label">Finance notes</p>
-                        <p class="ui-subdued mb-0" id="financeNotes">Add expenses and define splits to see totals.</p>
-                    </div>
-                </div>
-
-                <div class="ui-divider"></div>
-
-                <div class="app-grid-two">
-                    <div class="ui-tile">
-                        <h3 class="h6 mb-3">Add expense</h3>
-                        <form class="row g-3" id="expenseForm">
+                        <div class="row g-3">
                             <div class="col-md-4">
+                                <div class="border rounded p-3 h-100">
+                                    <p class="text-muted mb-1">Countdown</p>
+                                    <h5 class="mb-1" id="countdownDays">--</h5>
+                                    <small class="text-muted" id="countdownLabel">--</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3 h-100">
+                                    <p class="text-muted mb-1">Lodging</p>
+                                    <h5 class="mb-0" id="metricLodging">--</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3 h-100">
+                                    <p class="text-muted mb-1">Car (CAD)</p>
+                                    <h5 class="mb-0" id="metricCar">--</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3 h-100">
+                                    <p class="text-muted mb-1">Flights F1 (CAD)</p>
+                                    <h5 class="mb-0" id="metricFlights">--</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button class="btn btn-primary" id="exportData" type="button">Export JSON</button>
+                            <label class="btn btn-outline-secondary mb-0" for="importData">Import JSON</label>
+                            <input class="visually-hidden" type="file" id="importData" accept="application/json">
+                            <span class="badge bg-soft-info text-info" id="syncStatus">Local</span>
+                        </div>
+                        <p class="text-muted mb-1">Days to trip</p>
+                        <h4 class="mb-1" id="dashboardDays">--</h4>
+                        <p class="text-muted" id="dashboardDaysLabel">--</p>
+                        <div class="progress mb-3" style="height: 6px;">
+                            <div class="progress-bar" id="dashboardProgress" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="border rounded p-2">
+                                    <p class="text-muted mb-1">Costs in CAD</p>
+                                    <h6 class="mb-1" id="dashboardCad">--</h6>
+                                    <small class="text-muted" id="dashboardCadLabel">--</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-2">
+                                    <p class="text-muted mb-1">Costs in BRL</p>
+                                    <h6 class="mb-1" id="dashboardBrl">--</h6>
+                                    <small class="text-muted" id="dashboardBrlLabel">--</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <p class="text-muted mb-1">Pending items</p>
+                            <h6 class="mb-1" id="dashboardPendingTitle">--</h6>
+                            <small class="text-muted" id="dashboardPendingLabel">--</small>
+                            <div class="small text-muted mt-1" id="dashboardPendingCount">0 items</div>
+                            <div class="small text-muted" id="dashboardPendingNext">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="dashboard">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <h5 class="mb-0">Dashboard</h5>
+                        <small class="text-muted">Trip overview at a glance</small>
+                    </div>
+                    <span class="badge bg-soft-success text-success" id="statusTrip">On track</span>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <h6 class="mb-3">Cash flow</h6>
+                        <div class="list-group" id="financeLanes"></div>
+                    </div>
+                    <div class="col-lg-6">
+                        <h6 class="mb-3">Immediate checklist</h6>
+                        <ul class="list-group" id="checklistList"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4" id="voos">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="mb-0">1. Flight details</h5>
+                </div>
+                <form class="row g-3" id="flightForm">
+                    <div class="col-md-4">
+                        <label class="form-label" for="flightAirline">Airline</label>
+                        <input class="form-control" id="flightAirline" name="airline" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="flightPnr">PNR</label>
+                        <input class="form-control" id="flightPnr" name="pnr">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" for="flightGroup">Group</label>
+                        <input class="form-control" id="flightGroup" name="group" placeholder="Family 1">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="flightCost">Cost</label>
+                        <input class="form-control" id="flightCost" name="cost" type="number" step="0.01" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="flightCurrency">Currency</label>
+                        <select class="form-select" id="flightCurrency" name="currency">
+                            <option value="CAD">CAD</option>
+                            <option value="USD">USD</option>
+                            <option value="BRL">BRL</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="flightFrom">From</label>
+                        <input class="form-control" id="flightFrom" name="from" placeholder="YUL" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="flightTo">To</label>
+                        <input class="form-control" id="flightTo" name="to" placeholder="MCO" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="flightDepart">Departure</label>
+                        <input class="form-control" id="flightDepart" name="departAt" type="datetime-local" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="flightArrive">Arrival</label>
+                        <input class="form-control" id="flightArrive" name="arriveAt" type="datetime-local" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="flightNotes">Notes</label>
+                        <input class="form-control" id="flightNotes" name="notes" placeholder="Bags, fare, aircraft">
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Add</button>
+                        <button class="btn btn-outline-secondary" type="button" id="flightCancel">Cancel</button>
+                    </div>
+                </form>
+                <div id="flightsList" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div class="card mt-4" id="hospedagem">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="mb-0">2. Lodging</h5>
+                </div>
+                <form class="row g-3" id="lodgingForm">
+                    <div class="col-md-6">
+                        <label class="form-label" for="lodgingName">Property</label>
+                        <input class="form-control" id="lodgingName" name="name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="lodgingAddress">Address</label>
+                        <input class="form-control" id="lodgingAddress" name="address" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="lodgingCheckIn">Check-in</label>
+                        <input class="form-control" id="lodgingCheckIn" name="checkIn" type="datetime-local" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="lodgingCheckOut">Check-out</label>
+                        <input class="form-control" id="lodgingCheckOut" name="checkOut" type="datetime-local" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="lodgingCost">Total cost</label>
+                        <input class="form-control" id="lodgingCost" name="cost" type="number" step="0.01" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="lodgingCurrency">Currency</label>
+                        <select class="form-select" id="lodgingCurrency" name="currency">
+                            <option value="CAD">CAD</option>
+                            <option value="USD">USD</option>
+                            <option value="BRL">BRL</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="lodgingHost">Host</label>
+                        <input class="form-control" id="lodgingHost" name="host">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="lodgingContact">Contact</label>
+                        <input class="form-control" id="lodgingContact" name="contact">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="lodgingNotes">Notes</label>
+                        <input class="form-control" id="lodgingNotes" name="notes" placeholder="Rules, Wi-Fi, reservation link">
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Add</button>
+                        <button class="btn btn-outline-secondary" type="button" id="lodgingCancel">Cancel</button>
+                    </div>
+                </form>
+                <div id="lodgingList" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div class="card mt-4" id="turo">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="mb-0">3. Car</h5>
+                </div>
+                <form class="row g-3" id="carForm">
+                    <div class="col-md-5">
+                        <label class="form-label" for="carVehicle">Vehicle</label>
+                        <input class="form-control" id="carVehicle" name="vehicle" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="carProvider">Provider</label>
+                        <input class="form-control" id="carProvider" name="provider" placeholder="Turo">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="carCost">Total cost</label>
+                        <input class="form-control" id="carCost" name="cost" type="number" step="0.01" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="carCurrency">Currency</label>
+                        <select class="form-select" id="carCurrency" name="currency">
+                            <option value="USD">USD</option>
+                            <option value="CAD">CAD</option>
+                            <option value="BRL">BRL</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="carPickup">Pickup</label>
+                        <input class="form-control" id="carPickup" name="pickup" type="datetime-local" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="carDropoff">Drop-off</label>
+                        <input class="form-control" id="carDropoff" name="dropoff" type="datetime-local" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="carLocation">Location</label>
+                        <input class="form-control" id="carLocation" name="location" placeholder="MCO">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="carNotes">Extras / Notes</label>
+                        <input class="form-control" id="carNotes" name="notes" placeholder="Child seats, protection, mileage">
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Add</button>
+                        <button class="btn btn-outline-secondary" type="button" id="carCancel">Cancel</button>
+                    </div>
+                </form>
+                <div id="carList" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div class="card mt-4" id="financeiro">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="mb-0">4. Trip costs</h5>
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <p class="text-muted mb-2">Totals by currency</p>
+                            <ul class="list-unstyled mb-0" id="totalsByCurrency"></ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <p class="text-muted mb-2">Totals by category</p>
+                            <ul class="list-unstyled mb-0" id="totalsByCategory"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <p class="text-muted mb-2">Totals by person/group</p>
+                            <div id="totalsByGroup"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <p class="text-muted mb-2">Finance notes</p>
+                            <p class="text-muted mb-0" id="financeNotes">Add expenses and define splits to see totals.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <h6 class="mb-3">Add expense</h6>
+                        <form class="row g-3" id="expenseForm">
+                            <div class="col-md-6">
                                 <label class="form-label" for="expenseCategory">Category</label>
                                 <input class="form-control" id="expenseCategory" name="category" placeholder="Lodging, Food" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label" for="expenseAmount">Amount</label>
                                 <input class="form-control" id="expenseAmount" name="amount" type="number" step="0.01" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label" for="expenseCurrency">Currency</label>
                                 <select class="form-select" id="expenseCurrency" name="currency">
                                     <option value="CAD">CAD</option>
@@ -377,7 +348,7 @@
                                     <option value="BRL">BRL</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label" for="expenseStatus">Status</label>
                                 <select class="form-select" id="expenseStatus" name="status">
                                     <option value="planned">Planned</option>
@@ -385,11 +356,11 @@
                                     <option value="due">Due</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label" for="expenseDue">Due date</label>
                                 <input class="form-control" id="expenseDue" name="dueDate" type="date">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label" for="expenseGroup">Group</label>
                                 <input class="form-control" id="expenseGroup" name="group" placeholder="Family 1">
                             </div>
@@ -408,8 +379,8 @@
                         </form>
                         <div class="mt-3" id="expensesList"></div>
                     </div>
-                    <div class="ui-tile">
-                        <h3 class="h6 mb-3">Add extra transport</h3>
+                    <div class="col-lg-6">
+                        <h6 class="mb-3">Add extra transport</h6>
                         <form class="row g-3" id="transportForm">
                             <div class="col-md-6">
                                 <label class="form-label" for="transportType">Type</label>
@@ -419,11 +390,11 @@
                                 <label class="form-label" for="transportDate">Date</label>
                                 <input class="form-control" id="transportDate" name="date" type="date" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label" for="transportAmount">Amount</label>
                                 <input class="form-control" id="transportAmount" name="amount" type="number" step="0.01" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label" for="transportCurrency">Currency</label>
                                 <select class="form-select" id="transportCurrency" name="currency">
                                     <option value="USD">USD</option>
@@ -431,7 +402,7 @@
                                     <option value="BRL">BRL</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label" for="transportGroup">Group</label>
                                 <input class="form-control" id="transportGroup" name="group" placeholder="Family 2">
                             </div>
@@ -447,92 +418,90 @@
                         <div class="mt-3" id="transportList"></div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <section id="linha-tempo" class="app-section ui-card p-4 p-lg-5" aria-labelledby="linha-tempo-title">
-                <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Section 5 - Timeline</span>
-                    <h2 class="app-section-title" id="linha-tempo-title">5. Trip timeline</h2>
+        <div class="card mt-4" id="linha-tempo">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="mb-0">5. Trip timeline</h5>
                 </div>
+                <form class="row g-3" id="timelineForm">
+                    <div class="col-md-4">
+                        <label class="form-label" for="timelineDate">Date</label>
+                        <input class="form-control" id="timelineDate" name="date" type="date" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="timelineTime">Time</label>
+                        <input class="form-control" id="timelineTime" name="time" type="time">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="timelineTitle">Title</label>
+                        <input class="form-control" id="timelineTitle" name="title" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="timelineNotes">Notes</label>
+                        <input class="form-control" id="timelineNotes" name="notes">
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Add</button>
+                        <button class="btn btn-outline-secondary" type="button" id="timelineCancel">Cancel</button>
+                    </div>
+                </form>
+                <div id="timelineList" class="mt-3"></div>
+            </div>
+        </div>
 
-                <div class="ui-tile mb-3">
-                    <h3 class="h6 mb-3">Add event</h3>
-                    <form class="row g-3" id="timelineForm">
-                        <div class="col-md-4">
-                            <label class="form-label" for="timelineDate">Date</label>
-                            <input class="form-control" id="timelineDate" name="date" type="date" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="timelineTime">Time</label>
-                            <input class="form-control" id="timelineTime" name="time" type="time">
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label" for="timelineTitle">Title</label>
-                            <input class="form-control" id="timelineTitle" name="title" required>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label" for="timelineNotes">Notes</label>
-                            <input class="form-control" id="timelineNotes" name="notes">
-                        </div>
-                        <div class="col-12 d-flex gap-2">
-                            <button class="btn btn-primary" type="submit">Add</button>
-                            <button class="btn btn-outline-secondary" type="button" id="timelineCancel">Cancel</button>
-                        </div>
-                    </form>
+        <div class="card mt-4" id="lembretes">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="mb-0">6. Created reminders</h5>
                 </div>
-                <div id="timelineList"></div>
-            </section>
-
-            <section class="app-section ui-card p-4 p-lg-5" aria-labelledby="lembretes-title">
-                <div class="app-section-header">
-                    <span class="ui-pill"><span class="ui-dot"></span> Section 6 - Reminders</span>
-                    <h2 class="app-section-title" id="lembretes-title">6. Created reminders</h2>
-                </div>
-
-                <div class="ui-tile mb-3">
-                    <h3 class="h6 mb-3">Add reminder</h3>
-                    <form class="row g-3" id="reminderForm">
-                        <div class="col-md-3">
-                            <label class="form-label" for="reminderDate">When</label>
-                            <input class="form-control" id="reminderDate" name="date" type="date" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="reminderTitle">Item</label>
-                            <input class="form-control" id="reminderTitle" name="title" required>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label" for="reminderDescription">Description</label>
-                            <input class="form-control" id="reminderDescription" name="description">
-                        </div>
-                        <div class="col-12 d-flex gap-2">
-                            <button class="btn btn-primary" type="submit">Add</button>
-                            <button class="btn btn-outline-secondary" type="button" id="reminderCancel">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-striped align-middle ui-table mb-0">
-                        <caption class="visually-hidden">Trip reminders table</caption>
-                        <thead>
+                <form class="row g-3" id="reminderForm">
+                    <div class="col-md-3">
+                        <label class="form-label" for="reminderDate">When</label>
+                        <input class="form-control" id="reminderDate" name="date" type="date" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="reminderTitle">Item</label>
+                        <input class="form-control" id="reminderTitle" name="title" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="reminderDescription">Description</label>
+                        <input class="form-control" id="reminderDescription" name="description">
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Add</button>
+                        <button class="btn btn-outline-secondary" type="button" id="reminderCancel">Cancel</button>
+                    </div>
+                </form>
+                <div class="table-responsive mt-3">
+                    <table class="table table-striped table-bordered align-middle mb-0">
+                        <thead class="table-light">
                             <tr>
-                                <th scope="col">When</th>
-                                <th scope="col">Item</th>
-                                <th scope="col">Description</th>
-                                <th scope="col" class="text-end">Actions</th>
+                                <th>When</th>
+                                <th>Item</th>
+                                <th>Description</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="remindersList"></tbody>
                     </table>
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <footer class="app-footer-note mt-2">
-                <p id="footerNote">Consolidated document based on bookings and receipts. Values shown in original currency.</p>
-            </footer>
-        </main>
+        <div class="text-center text-muted my-4" id="footerNote">
+            Consolidated document based on bookings and receipts. Values shown in original currency.
+        </div>
     </div>
 
-    <script src="app.js" defer></script>
+    <script src="assets/libs/jquery/jquery.min.js"></script>
+    <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/libs/metismenu/metisMenu.min.js"></script>
+    <script src="assets/libs/simplebar/simplebar.min.js"></script>
+    <script src="assets/libs/node-waves/waves.min.js"></script>
+    <script src="assets/js/app.js"></script>
     <script src="orlando.js" defer></script>
 </body>
 </html>

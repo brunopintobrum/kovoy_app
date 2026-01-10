@@ -267,22 +267,19 @@
         ];
 
         if (!items.length) {
-            container.innerHTML = '<p class="ui-subdued mb-0">No finance data yet.</p>';
+            container.innerHTML = '<div class="list-group-item text-muted">No finance data yet.</div>';
             return;
         }
 
         items.forEach((item) => {
             const row = document.createElement('div');
-            row.className = 'ui-lane-row';
+            row.className = 'list-group-item d-flex align-items-center justify-content-between gap-3';
             row.innerHTML = `
                 <div>
-                    <p class="ui-label">${item.label}</p>
-                    <p class="ui-lane-value">${item.value}</p>
-                    <p class="ui-subdued mb-0">${item.detail}</p>
+                    <div class="fw-semibold">${item.label}</div>
+                    <div class="text-muted small">${item.detail}</div>
                 </div>
-                <div class="ui-progress ui-progress--wide">
-                    <div class="ui-progress-bar" style="width: 70%;"></div>
-                </div>
+                <div class="fw-semibold">${item.value}</div>
             `;
             container.appendChild(row);
         });
@@ -294,12 +291,16 @@
         list.innerHTML = '';
         const items = state.data.reminders.slice(0, 4);
         if (!items.length) {
-            list.innerHTML = '<li class="ui-subdued">No pending reminders.</li>';
+            list.innerHTML = '<li class="list-group-item text-muted">No pending reminders.</li>';
             return;
         }
         items.forEach((item) => {
             const li = document.createElement('li');
-            li.innerHTML = `<span class="ui-dot"></span>${item.title} (${formatDate(item.date)})`;
+            li.className = 'list-group-item d-flex align-items-center justify-content-between';
+            li.innerHTML = `
+                <span>${item.title}</span>
+                <small class="text-muted">${formatDate(item.date)}</small>
+            `;
             list.appendChild(li);
         });
     };
@@ -314,10 +315,11 @@
             const totals = totalsByCurrency();
             const entries = Object.entries(totals);
             if (!entries.length) {
-                currencyList.innerHTML = '<li>No values yet.</li>';
+                currencyList.innerHTML = '<li class="text-muted">No values yet.</li>';
             } else {
                 entries.forEach(([currency, value]) => {
                     const li = document.createElement('li');
+                    li.className = 'mb-1';
                     li.innerHTML = `<strong>${currency}:</strong> ${formatCurrency(value, currency)}`;
                     currencyList.appendChild(li);
                 });
@@ -329,10 +331,11 @@
             const totals = totalsByCategory();
             const entries = Object.entries(totals);
             if (!entries.length) {
-                categoryList.innerHTML = '<li>No categories yet.</li>';
+                categoryList.innerHTML = '<li class="text-muted">No categories yet.</li>';
             } else {
                 entries.forEach(([category, value]) => {
                     const li = document.createElement('li');
+                    li.className = 'mb-1';
                     li.innerHTML = `<strong>${category}:</strong> ${value.toFixed(2)}`;
                     categoryList.appendChild(li);
                 });
@@ -393,44 +396,47 @@
 
             const groups = Array.from(new Set([...baseGroups, ...Array.from(groupNames)])).filter(Boolean);
             if (!groups.length) {
-                groupList.innerHTML = '<p class="ui-subdued mb-0">Define trip groups to see split totals.</p>';
+                groupList.innerHTML = '<p class="text-muted mb-0">Define trip groups to see split totals.</p>';
                 return;
             }
             groupList.innerHTML = '';
             groups.forEach((group) => {
                 const entries = totals[group] ? Object.entries(totals[group]) : [];
-                const line = document.createElement('div');
-                const label = document.createElement('p');
-                label.className = 'mb-1 fw-semibold';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'mb-3';
+                const label = document.createElement('div');
+                label.className = 'fw-semibold';
                 label.textContent = group;
-                line.appendChild(label);
+                wrapper.appendChild(label);
                 if (!entries.length) {
-                    const empty = document.createElement('p');
-                    empty.className = 'ui-subdued mb-2';
+                    const empty = document.createElement('div');
+                    empty.className = 'text-muted small';
                     empty.textContent = 'No costs assigned.';
-                    line.appendChild(empty);
+                    wrapper.appendChild(empty);
                 } else {
                     entries.forEach(([currency, value]) => {
-                        const item = document.createElement('p');
-                        item.className = 'mb-1';
+                        const item = document.createElement('div');
+                        item.className = 'small';
                         item.textContent = `${currency}: ${formatCurrency(value, currency)}`;
-                        line.appendChild(item);
+                        wrapper.appendChild(item);
                     });
                 }
-                groupList.appendChild(line);
+                groupList.appendChild(wrapper);
             });
         }
     };
 
     const createCard = (title, meta, details, actions) => {
         const wrapper = document.createElement('div');
-        wrapper.className = 'ui-tile';
+        wrapper.className = 'card border shadow-none mb-3';
         wrapper.innerHTML = `
-            <div class="d-flex flex-column gap-1">
-                <strong>${title}</strong>
-                <span class="ui-subdued">${meta}</span>
-                <span>${details || ''}</span>
-                <div class="d-flex gap-2 mt-2">${actions || ''}</div>
+            <div class="card-body">
+                <div class="d-flex flex-column gap-1">
+                    <div class="fw-semibold">${title}</div>
+                    <div class="text-muted small">${meta}</div>
+                    <div>${details || ''}</div>
+                    <div class="d-flex gap-2 mt-2">${actions || ''}</div>
+                </div>
             </div>
         `;
         return wrapper;
@@ -441,7 +447,7 @@
         if (!container) return;
         container.innerHTML = '';
         if (!state.data.flights.length) {
-            container.innerHTML = '<p class="ui-subdued mb-0">No flights yet.</p>';
+            container.innerHTML = '<p class="text-muted mb-0">No flights yet.</p>';
             return;
         }
         state.data.flights.forEach((flight) => {
@@ -449,7 +455,7 @@
             const meta = `${flight.from} -> ${flight.to} | ${formatDateTime(flight.departAt)} - ${formatDateTime(flight.arriveAt)}`;
             const details = `${flight.group || 'Unassigned group'} | ${formatCurrency(flight.cost, flight.currency)}`;
             const card = createCard(title, meta, details, `
-                <button class="btn btn-sm btn-outline-secondary" data-action="edit" data-id="${flight.id}" data-entity="flight">Edit</button>
+                <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${flight.id}" data-entity="flight">Edit</button>
                 <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${flight.id}" data-entity="flight">Delete</button>
             `);
             container.appendChild(card);
@@ -461,7 +467,7 @@
         if (!container) return;
         container.innerHTML = '';
         if (!state.data.lodgings.length) {
-            container.innerHTML = '<p class="ui-subdued mb-0">No lodging yet.</p>';
+            container.innerHTML = '<p class="text-muted mb-0">No lodging yet.</p>';
             return;
         }
         state.data.lodgings.forEach((item) => {
@@ -469,7 +475,7 @@
             const meta = `${item.address} | ${formatDateTime(item.checkIn)} -> ${formatDateTime(item.checkOut)}`;
             const details = `${formatCurrency(item.cost, item.currency)} | ${item.host || 'No host'}`;
             const card = createCard(title, meta, details, `
-                <button class="btn btn-sm btn-outline-secondary" data-action="edit" data-id="${item.id}" data-entity="lodging">Edit</button>
+                <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${item.id}" data-entity="lodging">Edit</button>
                 <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${item.id}" data-entity="lodging">Delete</button>
             `);
             container.appendChild(card);
@@ -481,7 +487,7 @@
         if (!container) return;
         container.innerHTML = '';
         if (!state.data.cars.length) {
-            container.innerHTML = '<p class="ui-subdued mb-0">No car rental yet.</p>';
+            container.innerHTML = '<p class="text-muted mb-0">No car rental yet.</p>';
             return;
         }
         state.data.cars.forEach((item) => {
@@ -489,7 +495,7 @@
             const meta = `${formatDateTime(item.pickup)} -> ${formatDateTime(item.dropoff)} | ${item.location || ''}`;
             const details = `${formatCurrency(item.cost, item.currency)}`;
             const card = createCard(title, meta, details, `
-                <button class="btn btn-sm btn-outline-secondary" data-action="edit" data-id="${item.id}" data-entity="car">Edit</button>
+                <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${item.id}" data-entity="car">Edit</button>
                 <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${item.id}" data-entity="car">Delete</button>
             `);
             container.appendChild(card);
@@ -501,7 +507,7 @@
         if (!container) return;
         container.innerHTML = '';
         if (!state.data.expenses.length) {
-            container.innerHTML = '<p class="ui-subdued mb-0">No expenses yet.</p>';
+            container.innerHTML = '<p class="text-muted mb-0">No expenses yet.</p>';
             return;
         }
         state.data.expenses.forEach((item) => {
@@ -510,7 +516,7 @@
             const groupLabel = item.group === 'Compartilhado' ? 'Shared' : item.group;
             const details = `${formatCurrency(item.amount, item.currency)} | ${groupLabel || 'Shared'}`;
             const card = createCard(title, meta, details, `
-                <button class="btn btn-sm btn-outline-secondary" data-action="edit" data-id="${item.id}" data-entity="expense">Edit</button>
+                <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${item.id}" data-entity="expense">Edit</button>
                 <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${item.id}" data-entity="expense">Delete</button>
             `);
             container.appendChild(card);
@@ -522,7 +528,7 @@
         if (!container) return;
         container.innerHTML = '';
         if (!state.data.transports.length) {
-            container.innerHTML = '<p class="ui-subdued mb-0">No extra transport yet.</p>';
+            container.innerHTML = '<p class="text-muted mb-0">No extra transport yet.</p>';
             return;
         }
         state.data.transports.forEach((item) => {
@@ -530,7 +536,7 @@
             const meta = `${formatDate(item.date)} | ${item.group || 'Unassigned group'}`;
             const details = `${formatCurrency(item.amount, item.currency)}`;
             const card = createCard(title, meta, details, `
-                <button class="btn btn-sm btn-outline-secondary" data-action="edit" data-id="${item.id}" data-entity="transport">Edit</button>
+                <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${item.id}" data-entity="transport">Edit</button>
                 <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${item.id}" data-entity="transport">Delete</button>
             `);
             container.appendChild(card);
@@ -542,7 +548,7 @@
         if (!container) return;
         container.innerHTML = '';
         if (!state.data.timeline.length) {
-            container.innerHTML = '<p class="ui-subdued mb-0">No events yet.</p>';
+            container.innerHTML = '<p class="text-muted mb-0">No events yet.</p>';
             return;
         }
         const grouped = state.data.timeline.reduce((acc, item) => {
@@ -553,26 +559,29 @@
         }, {});
 
         Object.keys(grouped).sort().forEach((date) => {
-            const title = document.createElement('h3');
-            title.className = 'ui-timeline-date';
+            const title = document.createElement('h6');
+            title.className = 'text-muted text-uppercase mt-3 mb-2';
             title.textContent = date !== 'No date' ? formatDate(date) : 'No date';
             container.appendChild(title);
 
-            const list = document.createElement('div');
-            list.className = 'ui-timeline mb-3';
             grouped[date].forEach((item) => {
                 const row = document.createElement('div');
-                row.className = 'ui-timeline-item';
+                row.className = 'border rounded p-3 mb-2';
                 row.innerHTML = `
-                    <span class="ui-timeline-time">${item.time || '--'}</span>${item.title}
-                    <div class="mt-2 d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary" data-action="edit" data-id="${item.id}" data-entity="timeline">Edit</button>
-                        <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${item.id}" data-entity="timeline">Delete</button>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-semibold">${item.title}</div>
+                            <small class="text-muted">${item.time || '--'}</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${item.id}" data-entity="timeline">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${item.id}" data-entity="timeline">Delete</button>
+                        </div>
                     </div>
+                    ${item.notes ? `<div class="text-muted small mt-2">${item.notes}</div>` : ''}
                 `;
-                list.appendChild(row);
+                container.appendChild(row);
             });
-            container.appendChild(list);
         });
     };
 
@@ -581,7 +590,7 @@
         if (!container) return;
         container.innerHTML = '';
         if (!state.data.reminders.length) {
-            container.innerHTML = '<tr><td colspan="4" class="ui-subdued">No reminders yet.</td></tr>';
+            container.innerHTML = '<tr><td colspan="4" class="text-muted">No reminders yet.</td></tr>';
             return;
         }
         state.data.reminders.forEach((item) => {
@@ -591,7 +600,7 @@
                 <td>${item.title}</td>
                 <td>${item.description || ''}</td>
                 <td class="text-end">
-                    <button class="btn btn-sm btn-outline-secondary" data-action="edit" data-id="${item.id}" data-entity="reminder">Edit</button>
+                    <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${item.id}" data-entity="reminder">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${item.id}" data-entity="reminder">Delete</button>
                 </td>
             `;
