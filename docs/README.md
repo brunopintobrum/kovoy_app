@@ -6,3 +6,6 @@ Sugestao de nomes:
 - login.png
 - register.png
 - orlando.png
+- flights.png
+- lodgings.png
+- cars.png
