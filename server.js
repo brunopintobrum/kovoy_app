@@ -50,6 +50,13 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
     .split(',')
     .map((value) => value.trim())
     .filter(Boolean);
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
+const SMTP_FROM = process.env.SMTP_FROM || 'no-reply@example.com';
+const APP_BASE_URL = process.env.APP_BASE_URL;
 
 if (JWT_SECRET === 'change-this-secret') {
     if (IS_PROD) {
@@ -243,6 +250,47 @@ const requestJson = async (url, options) => {
         }
     }
     return { status, data };
+};
+
+const getBaseUrl = (req) => {
+    if (APP_BASE_URL) return APP_BASE_URL.replace(/\/+$/, '');
+    return `${req.protocol}://${req.get('host')}`;
+};
+
+const sendResetEmail = async ({ to, resetUrl }) => {
+    if (!SMTP_HOST) {
+        console.warn('SMTP not configured. Skipping password reset email.');
+        return false;
+    }
+
+    let nodemailer;
+    try {
+        nodemailer = require('nodemailer');
+    } catch (err) {
+        console.error('nodemailer is not installed. Run npm install to enable email sending.');
+        return false;
+    }
+
+    const transporter = nodemailer.createTransport({
+        host: SMTP_HOST,
+        port: SMTP_PORT,
+        secure: SMTP_SECURE,
+        auth: SMTP_USER ? { user: SMTP_USER, pass: SMTP_PASS } : undefined
+    });
+
+    await transporter.sendMail({
+        from: SMTP_FROM,
+        to,
+        subject: 'Reset your password',
+        text: `Use the link below to reset your password:\n\n${resetUrl}\n\nIf you did not request this, ignore this email.`,
+        html: `
+            <p>Use the link below to reset your password:</p>
+            <p><a href="${resetUrl}">${resetUrl}</a></p>
+            <p>If you did not request this, ignore this email.</p>
+        `
+    });
+
+    return true;
 };
 
 const authRequired = (req, res, next) => {
@@ -466,7 +514,7 @@ app.post('/api/register', sensitiveLimiter, originGuard, (req, res) => {
     }
 });
 
-app.post('/api/forgot', sensitiveLimiter, originGuard, (req, res) => {
+app.post('/api/forgot', sensitiveLimiter, originGuard, async (req, res) => {
     const { email } = req.body || {};
     if (!email) {
         return res.status(400).json({ error: 'Email é obrigatório.' });
@@ -492,8 +540,17 @@ app.post('/api/forgot', sensitiveLimiter, originGuard, (req, res) => {
         new Date().toISOString()
     );
 
-    if (!IS_PROD) {
-        console.warn(`Password reset token for ${email}: ${rawToken}`);
+    const resetUrl = `${getBaseUrl(req)}/reset?token=${encodeURIComponent(rawToken)}`;
+    try {
+        const sent = await sendResetEmail({ to: email, resetUrl });
+        if (!sent && !IS_PROD) {
+            console.warn(`Password reset token for ${email}: ${rawToken}`);
+        }
+    } catch (err) {
+        console.error('Reset email error:', err);
+        if (!IS_PROD) {
+            console.warn(`Password reset token for ${email}: ${rawToken}`);
+        }
     }
     return res.json({ ok: true });
 });
