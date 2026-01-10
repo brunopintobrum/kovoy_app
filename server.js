@@ -133,13 +133,6 @@ db.exec(`
         ip_addr TEXT,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
-    CREATE TABLE IF NOT EXISTS trip_data (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        data_json TEXT NOT NULL,
-        updated_at TEXT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    );
     CREATE TABLE IF NOT EXISTS trips (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL UNIQUE,
@@ -238,6 +231,7 @@ db.exec(`
         FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
     );
 `);
+db.exec('DROP TABLE IF EXISTS trip_data');
 
 const userColumns = db.prepare('PRAGMA table_info(users)').all();
 const hasGoogleSub = userColumns.some((column) => column.name === 'google_sub');
@@ -260,7 +254,6 @@ db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_hash ON email_
 db.exec('CREATE INDEX IF NOT EXISTS idx_two_factor_codes_hash ON two_factor_codes(code_hash)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_hash ON refresh_tokens(token_hash)');
-db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_trip_data_user ON trip_data(user_id)');
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_trips_user ON trips(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_trip_flights_trip ON trip_flights(trip_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_trip_lodgings_trip ON trip_lodgings(trip_id)');
@@ -974,6 +967,26 @@ const updateTripRecord = db.prepare(`
     SET name = ?, start_date = ?, end_date = ?, base = ?, family_one = ?, family_two = ?, subtitle = ?, updated_at = ?
     WHERE id = ?
 `);
+const touchTripRecord = db.prepare('UPDATE trips SET updated_at = ? WHERE id = ?');
+
+const getOrCreateTripId = (userId) => {
+    const existing = getTripRecord.get(userId);
+    if (existing) return existing.id;
+    const now = new Date().toISOString();
+    const result = insertTripRecord.run(
+        userId,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        now,
+        now
+    );
+    return result.lastInsertRowid;
+};
 
 const saveTripData = (userId, data) => {
     const trip = data.trip || {};
@@ -1243,26 +1256,7 @@ const buildTripPayload = (userId) => {
     };
 };
 
-const migrateTripDataFromLegacy = (userId) => {
-    const existing = getTripRecord.get(userId);
-    if (existing) return null;
-    const legacy = db.prepare('SELECT data_json FROM trip_data WHERE user_id = ?').get(userId);
-    if (!legacy) return null;
-    try {
-        const parsed = JSON.parse(legacy.data_json);
-        if (!parsed || typeof parsed !== 'object') return null;
-        saveTripData(userId, parsed);
-        return parsed;
-    } catch (err) {
-        return null;
-    }
-};
-
 app.get('/api/trip', authRequiredApi, (req, res) => {
-    const migrated = migrateTripDataFromLegacy(req.user.sub);
-    if (migrated) {
-        return res.json({ ok: true, data: buildTripPayload(req.user.sub) });
-    }
     const data = buildTripPayload(req.user.sub);
     if (!data) {
         return res.json({ ok: true, data: null });
@@ -1277,6 +1271,519 @@ app.post('/api/trip', authRequiredApi, requireCsrfToken, (req, res) => {
     }
     const result = saveTripData(req.user.sub, data);
     return res.json({ ok: true, updatedAt: result.updatedAt });
+});
+
+const mapFlightRow = (row) => ({
+    id: row.id,
+    airline: row.airline,
+    pnr: row.pnr,
+    group: row.group_name,
+    cost: row.cost,
+    currency: row.currency,
+    from: row.from_city,
+    to: row.to_city,
+    departAt: row.depart_at,
+    arriveAt: row.arrive_at,
+    notes: row.notes
+});
+
+const mapLodgingRow = (row) => ({
+    id: row.id,
+    name: row.name,
+    address: row.address,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    cost: row.cost,
+    currency: row.currency,
+    host: row.host,
+    contact: row.contact,
+    notes: row.notes
+});
+
+const mapCarRow = (row) => ({
+    id: row.id,
+    vehicle: row.vehicle,
+    provider: row.provider,
+    cost: row.cost,
+    currency: row.currency,
+    pickup: row.pickup,
+    dropoff: row.dropoff,
+    location: row.location,
+    notes: row.notes
+});
+
+const mapExpenseRow = (row) => ({
+    id: row.id,
+    category: row.category,
+    amount: row.amount,
+    currency: row.currency,
+    status: row.status,
+    dueDate: row.due_date,
+    group: row.group_name,
+    split: row.split,
+    notes: row.notes
+});
+
+const mapTransportRow = (row) => ({
+    id: row.id,
+    type: row.type,
+    date: row.date,
+    amount: row.amount,
+    currency: row.currency,
+    group: row.group_name,
+    notes: row.notes
+});
+
+const mapTimelineRow = (row) => ({
+    id: row.id,
+    date: row.date,
+    time: row.time,
+    title: row.title,
+    notes: row.notes
+});
+
+const mapReminderRow = (row) => ({
+    id: row.id,
+    date: row.date,
+    title: row.title,
+    description: row.description
+});
+
+const fetchTripId = (userId) => {
+    const trip = getTripRecord.get(userId);
+    return trip ? trip.id : null;
+};
+
+app.get('/api/trip/flights', authRequiredApi, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.json({ ok: true, data: [] });
+    const rows = db.prepare('SELECT * FROM trip_flights WHERE trip_id = ?').all(tripId);
+    return res.json({ ok: true, data: rows.map(mapFlightRow) });
+});
+
+app.post('/api/trip/flights', authRequiredApi, requireCsrfToken, (req, res) => {
+    const payload = req.body || {};
+    const tripId = getOrCreateTripId(req.user.sub);
+    const id = payload.id || generateTripItemId();
+    db.prepare(`
+        INSERT INTO trip_flights (id, trip_id, airline, pnr, group_name, cost, currency, from_city, to_city, depart_at, arrive_at, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+        id,
+        tripId,
+        payload.airline || null,
+        payload.pnr || null,
+        payload.group || null,
+        payload.cost ?? null,
+        payload.currency || null,
+        payload.from || null,
+        payload.to || null,
+        payload.departAt || null,
+        payload.arriveAt || null,
+        payload.notes || null
+    );
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true, id });
+});
+
+app.put('/api/trip/flights/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const payload = req.body || {};
+    const result = db.prepare(`
+        UPDATE trip_flights
+        SET airline = ?, pnr = ?, group_name = ?, cost = ?, currency = ?, from_city = ?, to_city = ?, depart_at = ?, arrive_at = ?, notes = ?
+        WHERE id = ? AND trip_id = ?
+    `).run(
+        payload.airline || null,
+        payload.pnr || null,
+        payload.group || null,
+        payload.cost ?? null,
+        payload.currency || null,
+        payload.from || null,
+        payload.to || null,
+        payload.departAt || null,
+        payload.arriveAt || null,
+        payload.notes || null,
+        req.params.id,
+        tripId
+    );
+    if (result.changes === 0) return res.status(404).json({ error: 'Flight not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.delete('/api/trip/flights/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const result = db.prepare('DELETE FROM trip_flights WHERE id = ? AND trip_id = ?').run(req.params.id, tripId);
+    if (result.changes === 0) return res.status(404).json({ error: 'Flight not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.get('/api/trip/lodgings', authRequiredApi, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.json({ ok: true, data: [] });
+    const rows = db.prepare('SELECT * FROM trip_lodgings WHERE trip_id = ?').all(tripId);
+    return res.json({ ok: true, data: rows.map(mapLodgingRow) });
+});
+
+app.post('/api/trip/lodgings', authRequiredApi, requireCsrfToken, (req, res) => {
+    const payload = req.body || {};
+    const tripId = getOrCreateTripId(req.user.sub);
+    const id = payload.id || generateTripItemId();
+    db.prepare(`
+        INSERT INTO trip_lodgings (id, trip_id, name, address, check_in, check_out, cost, currency, host, contact, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+        id,
+        tripId,
+        payload.name || null,
+        payload.address || null,
+        payload.checkIn || null,
+        payload.checkOut || null,
+        payload.cost ?? null,
+        payload.currency || null,
+        payload.host || null,
+        payload.contact || null,
+        payload.notes || null
+    );
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true, id });
+});
+
+app.put('/api/trip/lodgings/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const payload = req.body || {};
+    const result = db.prepare(`
+        UPDATE trip_lodgings
+        SET name = ?, address = ?, check_in = ?, check_out = ?, cost = ?, currency = ?, host = ?, contact = ?, notes = ?
+        WHERE id = ? AND trip_id = ?
+    `).run(
+        payload.name || null,
+        payload.address || null,
+        payload.checkIn || null,
+        payload.checkOut || null,
+        payload.cost ?? null,
+        payload.currency || null,
+        payload.host || null,
+        payload.contact || null,
+        payload.notes || null,
+        req.params.id,
+        tripId
+    );
+    if (result.changes === 0) return res.status(404).json({ error: 'Lodging not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.delete('/api/trip/lodgings/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const result = db.prepare('DELETE FROM trip_lodgings WHERE id = ? AND trip_id = ?').run(req.params.id, tripId);
+    if (result.changes === 0) return res.status(404).json({ error: 'Lodging not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.get('/api/trip/cars', authRequiredApi, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.json({ ok: true, data: [] });
+    const rows = db.prepare('SELECT * FROM trip_cars WHERE trip_id = ?').all(tripId);
+    return res.json({ ok: true, data: rows.map(mapCarRow) });
+});
+
+app.post('/api/trip/cars', authRequiredApi, requireCsrfToken, (req, res) => {
+    const payload = req.body || {};
+    const tripId = getOrCreateTripId(req.user.sub);
+    const id = payload.id || generateTripItemId();
+    db.prepare(`
+        INSERT INTO trip_cars (id, trip_id, vehicle, provider, cost, currency, pickup, dropoff, location, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+        id,
+        tripId,
+        payload.vehicle || null,
+        payload.provider || null,
+        payload.cost ?? null,
+        payload.currency || null,
+        payload.pickup || null,
+        payload.dropoff || null,
+        payload.location || null,
+        payload.notes || null
+    );
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true, id });
+});
+
+app.put('/api/trip/cars/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const payload = req.body || {};
+    const result = db.prepare(`
+        UPDATE trip_cars
+        SET vehicle = ?, provider = ?, cost = ?, currency = ?, pickup = ?, dropoff = ?, location = ?, notes = ?
+        WHERE id = ? AND trip_id = ?
+    `).run(
+        payload.vehicle || null,
+        payload.provider || null,
+        payload.cost ?? null,
+        payload.currency || null,
+        payload.pickup || null,
+        payload.dropoff || null,
+        payload.location || null,
+        payload.notes || null,
+        req.params.id,
+        tripId
+    );
+    if (result.changes === 0) return res.status(404).json({ error: 'Car not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.delete('/api/trip/cars/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const result = db.prepare('DELETE FROM trip_cars WHERE id = ? AND trip_id = ?').run(req.params.id, tripId);
+    if (result.changes === 0) return res.status(404).json({ error: 'Car not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.get('/api/trip/expenses', authRequiredApi, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.json({ ok: true, data: [] });
+    const rows = db.prepare('SELECT * FROM trip_expenses WHERE trip_id = ?').all(tripId);
+    return res.json({ ok: true, data: rows.map(mapExpenseRow) });
+});
+
+app.post('/api/trip/expenses', authRequiredApi, requireCsrfToken, (req, res) => {
+    const payload = req.body || {};
+    const tripId = getOrCreateTripId(req.user.sub);
+    const id = payload.id || generateTripItemId();
+    db.prepare(`
+        INSERT INTO trip_expenses (id, trip_id, category, amount, currency, status, due_date, group_name, split, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+        id,
+        tripId,
+        payload.category || null,
+        payload.amount ?? null,
+        payload.currency || null,
+        payload.status || null,
+        payload.dueDate || null,
+        payload.group || null,
+        payload.split || null,
+        payload.notes || null
+    );
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true, id });
+});
+
+app.put('/api/trip/expenses/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const payload = req.body || {};
+    const result = db.prepare(`
+        UPDATE trip_expenses
+        SET category = ?, amount = ?, currency = ?, status = ?, due_date = ?, group_name = ?, split = ?, notes = ?
+        WHERE id = ? AND trip_id = ?
+    `).run(
+        payload.category || null,
+        payload.amount ?? null,
+        payload.currency || null,
+        payload.status || null,
+        payload.dueDate || null,
+        payload.group || null,
+        payload.split || null,
+        payload.notes || null,
+        req.params.id,
+        tripId
+    );
+    if (result.changes === 0) return res.status(404).json({ error: 'Expense not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.delete('/api/trip/expenses/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const result = db.prepare('DELETE FROM trip_expenses WHERE id = ? AND trip_id = ?').run(req.params.id, tripId);
+    if (result.changes === 0) return res.status(404).json({ error: 'Expense not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.get('/api/trip/transports', authRequiredApi, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.json({ ok: true, data: [] });
+    const rows = db.prepare('SELECT * FROM trip_transports WHERE trip_id = ?').all(tripId);
+    return res.json({ ok: true, data: rows.map(mapTransportRow) });
+});
+
+app.post('/api/trip/transports', authRequiredApi, requireCsrfToken, (req, res) => {
+    const payload = req.body || {};
+    const tripId = getOrCreateTripId(req.user.sub);
+    const id = payload.id || generateTripItemId();
+    db.prepare(`
+        INSERT INTO trip_transports (id, trip_id, type, date, amount, currency, group_name, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+        id,
+        tripId,
+        payload.type || null,
+        payload.date || null,
+        payload.amount ?? null,
+        payload.currency || null,
+        payload.group || null,
+        payload.notes || null
+    );
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true, id });
+});
+
+app.put('/api/trip/transports/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const payload = req.body || {};
+    const result = db.prepare(`
+        UPDATE trip_transports
+        SET type = ?, date = ?, amount = ?, currency = ?, group_name = ?, notes = ?
+        WHERE id = ? AND trip_id = ?
+    `).run(
+        payload.type || null,
+        payload.date || null,
+        payload.amount ?? null,
+        payload.currency || null,
+        payload.group || null,
+        payload.notes || null,
+        req.params.id,
+        tripId
+    );
+    if (result.changes === 0) return res.status(404).json({ error: 'Transport not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.delete('/api/trip/transports/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const result = db.prepare('DELETE FROM trip_transports WHERE id = ? AND trip_id = ?').run(req.params.id, tripId);
+    if (result.changes === 0) return res.status(404).json({ error: 'Transport not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.get('/api/trip/timeline', authRequiredApi, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.json({ ok: true, data: [] });
+    const rows = db.prepare('SELECT * FROM trip_timeline WHERE trip_id = ?').all(tripId);
+    return res.json({ ok: true, data: rows.map(mapTimelineRow) });
+});
+
+app.post('/api/trip/timeline', authRequiredApi, requireCsrfToken, (req, res) => {
+    const payload = req.body || {};
+    const tripId = getOrCreateTripId(req.user.sub);
+    const id = payload.id || generateTripItemId();
+    db.prepare(`
+        INSERT INTO trip_timeline (id, trip_id, date, time, title, notes)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `).run(
+        id,
+        tripId,
+        payload.date || null,
+        payload.time || null,
+        payload.title || null,
+        payload.notes || null
+    );
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true, id });
+});
+
+app.put('/api/trip/timeline/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const payload = req.body || {};
+    const result = db.prepare(`
+        UPDATE trip_timeline
+        SET date = ?, time = ?, title = ?, notes = ?
+        WHERE id = ? AND trip_id = ?
+    `).run(
+        payload.date || null,
+        payload.time || null,
+        payload.title || null,
+        payload.notes || null,
+        req.params.id,
+        tripId
+    );
+    if (result.changes === 0) return res.status(404).json({ error: 'Timeline item not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.delete('/api/trip/timeline/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const result = db.prepare('DELETE FROM trip_timeline WHERE id = ? AND trip_id = ?').run(req.params.id, tripId);
+    if (result.changes === 0) return res.status(404).json({ error: 'Timeline item not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.get('/api/trip/reminders', authRequiredApi, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.json({ ok: true, data: [] });
+    const rows = db.prepare('SELECT * FROM trip_reminders WHERE trip_id = ?').all(tripId);
+    return res.json({ ok: true, data: rows.map(mapReminderRow) });
+});
+
+app.post('/api/trip/reminders', authRequiredApi, requireCsrfToken, (req, res) => {
+    const payload = req.body || {};
+    const tripId = getOrCreateTripId(req.user.sub);
+    const id = payload.id || generateTripItemId();
+    db.prepare(`
+        INSERT INTO trip_reminders (id, trip_id, date, title, description)
+        VALUES (?, ?, ?, ?, ?)
+    `).run(
+        id,
+        tripId,
+        payload.date || null,
+        payload.title || null,
+        payload.description || null
+    );
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true, id });
+});
+
+app.put('/api/trip/reminders/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const payload = req.body || {};
+    const result = db.prepare(`
+        UPDATE trip_reminders
+        SET date = ?, title = ?, description = ?
+        WHERE id = ? AND trip_id = ?
+    `).run(
+        payload.date || null,
+        payload.title || null,
+        payload.description || null,
+        req.params.id,
+        tripId
+    );
+    if (result.changes === 0) return res.status(404).json({ error: 'Reminder not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
+});
+
+app.delete('/api/trip/reminders/:id', authRequiredApi, requireCsrfToken, (req, res) => {
+    const tripId = fetchTripId(req.user.sub);
+    if (!tripId) return res.status(404).json({ error: 'Trip not found.' });
+    const result = db.prepare('DELETE FROM trip_reminders WHERE id = ? AND trip_id = ?').run(req.params.id, tripId);
+    if (result.changes === 0) return res.status(404).json({ error: 'Reminder not found.' });
+    touchTripRecord.run(new Date().toISOString(), tripId);
+    return res.json({ ok: true });
 });
 
 app.post('/api/refresh', originGuard, requireCsrfToken, (req, res) => {
