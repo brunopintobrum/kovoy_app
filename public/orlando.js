@@ -143,6 +143,17 @@
         if (el) el.textContent = text;
     };
 
+    const loadUserEmail = async () => {
+        try {
+            const res = await apiRequest('/api/me');
+            if (res && res.email) {
+                setText('userEmail', res.email);
+            }
+        } catch (err) {
+            // Keep placeholder if not authenticated.
+        }
+    };
+
     const calcCountdown = (startDate) => {
         if (!startDate) return null;
         const now = new Date();
@@ -717,7 +728,32 @@
         }
     };
 
-    const resetForm = (form, editingKey) => {
+    
+    const bindLogout = () => {
+        const targets = [
+            document.getElementById('logoutButton'),
+            document.getElementById('logoutLink')
+        ].filter(Boolean);
+        if (!targets.length) return;
+        targets.forEach((target) => {
+            target.addEventListener('click', async (event) => {
+                if (target.tagName === 'A') {
+                    event.preventDefault();
+                }
+                if (target.tagName === 'BUTTON') {
+                    target.disabled = true;
+                }
+                try {
+                    await apiRequest('/api/logout', { method: 'POST' });
+                } catch (err) {
+                    // Ignore logout errors and force redirect to login.
+                }
+                window.location.href = '/login';
+            });
+        });
+    };
+
+const resetForm = (form, editingKey) => {
         form.reset();
         state.editing[editingKey] = null;
     };
@@ -829,6 +865,7 @@
         const remote = await fetchRemoteData();
         state.data = remote || loadData();
         renderAll();
+        loadUserEmail();
 
         bindForm('flightForm', 'flights', { numeric: ['cost'] });
         bindForm('lodgingForm', 'lodgings', { numeric: ['cost'] });
@@ -848,6 +885,7 @@
 
         bindListActions();
         bindExportImport();
+        bindLogout();
     };
 
     init();
