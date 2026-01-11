@@ -859,7 +859,7 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
         const refreshToken = createRefreshToken(user.id, remember, req);
         setRefreshCookie(res, refreshToken.rawToken, refreshToken.ttlDays);
 
-        return res.redirect('/orlando.html');
+        return res.redirect('/orlando.html#dashboard');
     } catch (err) {
         console.error('Google auth error:', err);
         return res.redirect('/login?google=error');

@@ -308,6 +308,7 @@
         <div class="main-content">
             <div class="page-content">
                 <div class="container-fluid py-4">
+                    <div id="module-dashboard">
                     <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
             <div>
                 <span class="badge bg-primary" id="tripNamePill">Trip</span>
@@ -423,7 +424,12 @@
             </div>
         </div>
 
-        <div class="card mt-4" id="voos">
+                    <div class="text-center text-muted my-4" id="footerNote">
+                        Consolidated document based on bookings and receipts. Values shown in original currency.
+                    </div>
+                </div>
+
+        <div class="card mt-4" id="voos" hidden>
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h5 class="mb-0">1. Flight details</h5>
@@ -482,7 +488,7 @@
             </div>
         </div>
 
-        <div class="card mt-4" id="hospedagem">
+        <div class="card mt-4" id="hospedagem" hidden>
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h5 class="mb-0">2. Lodging</h5>
@@ -537,7 +543,7 @@
             </div>
         </div>
 
-        <div class="card mt-4" id="turo">
+        <div class="card mt-4" id="turo" hidden>
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h5 class="mb-0">3. Car</h5>
@@ -588,7 +594,7 @@
             </div>
         </div>
 
-        <div class="card mt-4" id="financeiro">
+        <div class="card mt-4" id="financeiro" hidden>
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h5 class="mb-0">4. Trip costs</h5>
@@ -716,7 +722,7 @@
             </div>
         </div>
 
-        <div class="card mt-4" id="linha-tempo">
+        <div class="card mt-4" id="linha-tempo" hidden>
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h5 class="mb-0">5. Trip timeline</h5>
@@ -747,7 +753,7 @@
             </div>
         </div>
 
-        <div class="card mt-4" id="lembretes">
+        <div class="card mt-4" id="lembretes" hidden>
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h5 class="mb-0">6. Created reminders</h5>
@@ -786,9 +792,6 @@
             </div>
         </div>
 
-                    <div class="text-center text-muted my-4" id="footerNote">
-                        Consolidated document based on bookings and receipts. Values shown in original currency.
-                    </div>
                 </div>
             </div>
         </div>

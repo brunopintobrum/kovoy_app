@@ -58,7 +58,7 @@
                 return;
             }
 
-            window.location.href = '/orlando.html';
+            window.location.href = '/orlando.html#dashboard';
         } catch (err) {
             setMessage('Unable to verify the code. Please try again.');
             setDisabled(false);

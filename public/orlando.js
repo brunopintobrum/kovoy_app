@@ -24,6 +24,7 @@
         data: null,
         useRemote: false,
         syncStatus: 'Local',
+        activeModule: 'dashboard',
         editing: {
             flights: null,
             lodgings: null,
@@ -34,6 +35,9 @@
             reminders: null
         }
     };
+
+    const MODULE_IDS = ['dashboard', 'voos', 'hospedagem', 'turo', 'financeiro', 'linha-tempo', 'lembretes'];
+    const DEFAULT_MODULE = 'dashboard';
 
     const generateId = () => {
         if (crypto && typeof crypto.randomUUID === 'function') {
@@ -70,6 +74,38 @@
         if (badge) badge.textContent = value;
     };
 
+    // Previously all modules rendered together; now we show one module at a time for a cleaner shell-first flow.
+    const getModuleFromHash = () => {
+        const hash = window.location.hash.replace('#', '').trim();
+        return MODULE_IDS.includes(hash) ? hash : DEFAULT_MODULE;
+    };
+
+    const getModuleElement = (moduleId) => {
+        if (moduleId === 'dashboard') {
+            return document.getElementById('module-dashboard');
+        }
+        return document.getElementById(moduleId);
+    };
+
+    const showModule = (moduleId) => {
+        MODULE_IDS.forEach((id) => {
+            const target = getModuleElement(id);
+            if (target) {
+                target.hidden = id !== moduleId;
+            }
+        });
+        state.activeModule = moduleId;
+    };
+
+    const setActiveMenu = (moduleId) => {
+        const links = document.querySelectorAll('#side-menu a[href^=\"#\"]');
+        links.forEach((link) => {
+            const match = link.getAttribute('href') === `#${moduleId}`;
+            link.classList.toggle('active', match);
+            const li = link.closest('li');
+            if (li) li.classList.toggle('mm-active', match);
+        });
+    };
 
     const apiRequest = async (url, options = {}) => {
         const method = (options.method || 'GET').toUpperCase();
@@ -628,21 +664,48 @@
         });
     };
 
-    const renderAll = () => {
-        renderTripMeta();
-        renderHeroMetrics();
-        renderDashboard();
-        renderFinanceLanes();
-        renderChecklist();
-        renderTotals();
-        renderFlights();
-        renderLodgings();
-        renderCars();
-        renderExpenses();
-        renderTransports();
-        renderTimeline();
-        renderReminders();
-        setText('footerNote', 'Auto-updated summary based on saved data.');
+    const renderModule = (moduleId) => {
+        switch (moduleId) {
+            case 'dashboard':
+                renderTripMeta();
+                renderHeroMetrics();
+                renderDashboard();
+                renderFinanceLanes();
+                renderChecklist();
+                setText('footerNote', 'Auto-updated summary based on saved data.');
+                break;
+            case 'voos':
+                renderFlights();
+                break;
+            case 'hospedagem':
+                renderLodgings();
+                break;
+            case 'turo':
+                renderCars();
+                break;
+            case 'financeiro':
+                renderTotals();
+                renderExpenses();
+                renderTransports();
+                break;
+            case 'linha-tempo':
+                renderTimeline();
+                break;
+            case 'lembretes':
+                renderReminders();
+                break;
+            default:
+                renderTripMeta();
+                renderHeroMetrics();
+                renderDashboard();
+                renderFinanceLanes();
+                renderChecklist();
+                setText('footerNote', 'Auto-updated summary based on saved data.');
+        }
+    };
+
+    const renderActiveModule = () => {
+        renderModule(state.activeModule || DEFAULT_MODULE);
     };
 
 
@@ -718,7 +781,7 @@
                         await replaceRemoteEntity('reminders', state.data.reminders);
                     }
                     saveData();
-                    renderAll();
+                    renderActiveModule();
                 } catch (err) {
                     alert('Invalid file. Check the JSON.');
                 } finally {
@@ -818,7 +881,7 @@ const resetForm = (form, editingKey) => {
             }
 
             saveData();
-            renderAll();
+            renderActiveModule();
             resetForm(form, dataKey);
         });
     };
@@ -858,7 +921,7 @@ const resetForm = (form, editingKey) => {
                 }
                 state.data[key] = state.data[key].filter((item) => item.id !== id);
                 saveData();
-                renderAll();
+                renderActiveModule();
                 return;
             }
 
@@ -878,7 +941,6 @@ const resetForm = (form, editingKey) => {
     const init = async () => {
         const remote = await fetchRemoteData();
         state.data = remote || loadData();
-        renderAll();
         loadUserEmail();
 
         bindForm('flightForm', 'flights', { numeric: ['cost'] });
@@ -901,6 +963,21 @@ const resetForm = (form, editingKey) => {
         bindExportImport();
         bindLogout();
         bindVerticalMenuToggle();
+
+        const initialModule = getModuleFromHash();
+        if (!window.location.hash) {
+            history.replaceState(null, '', `#${DEFAULT_MODULE}`);
+        }
+        showModule(initialModule);
+        setActiveMenu(initialModule);
+        renderModule(initialModule);
+
+        window.addEventListener('hashchange', () => {
+            const nextModule = getModuleFromHash();
+            showModule(nextModule);
+            setActiveMenu(nextModule);
+            renderModule(nextModule);
+        });
     };
 
     init();
