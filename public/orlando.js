@@ -753,6 +753,20 @@
         });
     };
 
+    const bindVerticalMenuToggle = () => {
+        const button = document.getElementById('vertical-menu-btn');
+        if (!button) return;
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            document.body.classList.toggle('sidebar-enable');
+            if (window.innerWidth >= 992) {
+                document.body.classList.toggle('vertical-collpsed');
+            } else {
+                document.body.classList.remove('vertical-collpsed');
+            }
+        });
+    };
+
 const resetForm = (form, editingKey) => {
         form.reset();
         state.editing[editingKey] = null;
@@ -886,6 +900,7 @@ const resetForm = (form, editingKey) => {
         bindListActions();
         bindExportImport();
         bindLogout();
+        bindVerticalMenuToggle();
     };
 
     init();
