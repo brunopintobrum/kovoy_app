@@ -1,6 +1,7 @@
 (() => {
     const form = document.querySelector('form.needs-validation');
     const emailInput = form ? form.querySelector('#useremail') : null;
+    const displayNameInput = form ? form.querySelector('#displayname') : null;
     const passwordInput = form ? form.querySelector('#userpassword') : null;
     const passwordToggle = document.getElementById('password-addon');
     const submitButton = form ? form.querySelector('button[type="submit"]') : null;
@@ -160,6 +161,7 @@
             event.preventDefault();
             setAlert('');
             const emailValue = emailInput ? emailInput.value.trim() : '';
+            const displayNameValue = displayNameInput ? displayNameInput.value.trim() : '';
             const passwordValue = passwordInput ? passwordInput.value : '';
 
             if (!emailValue) {
@@ -168,6 +170,10 @@
             }
             if (!isValidEmail(emailValue)) {
                 setAlert('Please enter a valid email address.', 'error');
+                return;
+            }
+            if (displayNameValue && (displayNameValue.length < 2 || displayNameValue.length > 60)) {
+                setAlert('Display name must be between 2 and 60 characters.', 'error');
                 return;
             }
             if (!passwordValue) {
@@ -184,6 +190,9 @@
                 email: emailValue,
                 password: passwordValue
             };
+            if (displayNameValue) {
+                payload.displayName = displayNameValue;
+            }
 
             try {
                 const res = await fetch('/api/register', {

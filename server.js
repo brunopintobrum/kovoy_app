@@ -90,6 +90,7 @@ db.exec(`
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         google_sub TEXT,
+        display_name TEXT,
         created_at TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS reset_tokens (
@@ -237,6 +238,7 @@ const userColumns = db.prepare('PRAGMA table_info(users)').all();
 const hasGoogleSub = userColumns.some((column) => column.name === 'google_sub');
 const hasEmailVerifiedAt = userColumns.some((column) => column.name === 'email_verified_at');
 const hasTwoFactorEnabled = userColumns.some((column) => column.name === 'two_factor_enabled');
+const hasDisplayName = userColumns.some((column) => column.name === 'display_name');
 if (!hasGoogleSub) {
     db.exec('ALTER TABLE users ADD COLUMN google_sub TEXT');
 }
@@ -245,6 +247,9 @@ if (!hasEmailVerifiedAt) {
 }
 if (!hasTwoFactorEnabled) {
     db.exec('ALTER TABLE users ADD COLUMN two_factor_enabled INTEGER DEFAULT 0');
+}
+if (!hasDisplayName) {
+    db.exec('ALTER TABLE users ADD COLUMN display_name TEXT');
 }
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL');
 db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user ON email_verification_tokens(user_id)');
@@ -336,6 +341,17 @@ const isValidEmail = (email) => {
     if (!email || typeof email !== 'string') return false;
     const normalized = email.trim().toLowerCase();
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+};
+
+const normalizeDisplayName = (value) => {
+    if (value === undefined || value === null) return { value: null };
+    if (typeof value !== 'string') return { error: 'Display name must be a string.' };
+    const trimmed = value.trim();
+    if (!trimmed) return { value: null };
+    if (trimmed.length < 2 || trimmed.length > 60) {
+        return { error: 'Display name must be between 2 and 60 characters.' };
+    }
+    return { value: trimmed };
 };
 
 const validatePassword = (email, password) => {
@@ -791,6 +807,13 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
     const email = tokenInfoResponse.data && tokenInfoResponse.data.email;
     const emailVerified = tokenInfoResponse.data && tokenInfoResponse.data.email_verified;
     const googleSub = tokenInfoResponse.data && tokenInfoResponse.data.sub;
+    const rawDisplayName = tokenInfoResponse.data && tokenInfoResponse.data.name;
+    const fallbackDisplayName = email ? email.split('@')[0] : null;
+    const displayNameResult = normalizeDisplayName(rawDisplayName);
+    const fallbackResult = normalizeDisplayName(fallbackDisplayName);
+    const normalizedDisplayName = displayNameResult.error || !displayNameResult.value
+        ? (fallbackResult.error ? null : fallbackResult.value)
+        : displayNameResult.value;
     const tokenAud = tokenInfoResponse.data && tokenInfoResponse.data.aud;
     const tokenIss = tokenInfoResponse.data && tokenInfoResponse.data.iss;
     const issOk = tokenIss === 'https://accounts.google.com' || tokenIss === 'accounts.google.com';
@@ -812,19 +835,27 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
                 db.prepare('UPDATE users SET email = ? WHERE id = ?').run(email, user.id);
                 user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
             }
+            if (!user.display_name && normalizedDisplayName) {
+                db.prepare('UPDATE users SET display_name = ? WHERE id = ?').run(normalizedDisplayName, user.id);
+                user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+            }
         } else if (userByEmail) {
             if (userByEmail.google_sub) {
                 return res.redirect('/login?google=conflict');
             }
             db.prepare('UPDATE users SET google_sub = ? WHERE id = ?').run(googleSub, userByEmail.id);
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(userByEmail.id);
+            if (!user.display_name && normalizedDisplayName) {
+                db.prepare('UPDATE users SET display_name = ? WHERE id = ?').run(normalizedDisplayName, user.id);
+                user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+            }
         } else {
             const randomPassword = crypto.randomBytes(32).toString('hex');
             const passwordHash = bcrypt.hashSync(randomPassword, 10);
             const insert = db.prepare(
-                'INSERT INTO users (email, password_hash, google_sub, created_at) VALUES (?, ?, ?, ?)'
+                'INSERT INTO users (email, password_hash, google_sub, display_name, created_at) VALUES (?, ?, ?, ?, ?)'
             );
-            insert.run(email, passwordHash, googleSub, new Date().toISOString());
+            insert.run(email, passwordHash, googleSub, normalizedDisplayName, new Date().toISOString());
             user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
         }
 
@@ -2153,12 +2184,16 @@ app.post('/api/refresh', originGuard, requireCsrfToken, (req, res) => {
 });
 
 app.post('/api/register', sensitiveLimiter, originGuard, async (req, res) => {
-    const { email, password } = req.body || {};
+    const { email, password, displayName } = req.body || {};
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required.' });
     }
     if (!isValidEmail(email)) {
         return res.status(400).json({ error: 'Invalid email address.' });
+    }
+    const displayNameResult = normalizeDisplayName(displayName);
+    if (displayNameResult.error) {
+        return res.status(400).json({ error: displayNameResult.error });
     }
     const passwordErrors = validatePassword(email, password);
     if (passwordErrors.length) {
@@ -2172,9 +2207,12 @@ app.post('/api/register', sensitiveLimiter, originGuard, async (req, res) => {
         }
 
         const passwordHash = bcrypt.hashSync(password, 10);
-        const insert = db.prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)').run(
+        const insert = db.prepare(
+            'INSERT INTO users (email, password_hash, display_name, created_at) VALUES (?, ?, ?, ?)'
+        ).run(
             email,
             passwordHash,
+            displayNameResult.value,
             new Date().toISOString()
         );
         if (EMAIL_VERIFICATION_REQUIRED) {

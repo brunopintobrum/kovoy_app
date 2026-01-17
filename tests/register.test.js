@@ -24,6 +24,7 @@ describe('Register page', () => {
   test('renders email, password and submit button', () => {
     setupRegister();
     expect(screen.getByLabelText(/email/i)).toBeTruthy();
+    expect(screen.getByLabelText(/display name/i)).toBeTruthy();
     expect(screen.getByLabelText(/^password$/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /register/i })).toBeTruthy();
   });
@@ -75,13 +76,14 @@ describe('Register page', () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
     await user.type(screen.getByLabelText(/email/i), ' user@example.com ');
+    await user.type(screen.getByLabelText(/display name/i), 'Taylor Example');
     await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!');
     await user.click(screen.getByRole('button', { name: /register/i }));
 
     expect(global.fetch).toHaveBeenCalledWith('/api/register', expect.objectContaining({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'user@example.com', password: 'Abcdef1!' })
+      body: JSON.stringify({ email: 'user@example.com', password: 'Abcdef1!', displayName: 'Taylor Example' })
     }));
 
     jest.runAllTimers();
@@ -129,6 +131,19 @@ describe('Register page', () => {
 
     expect(submitButton.disabled).toBe(true);
     resolveFetch({ ok: false, json: async () => ({ error: 'Email already registered.' }) });
+  });
+
+  test('invalid display name shows error and does not call register', async () => {
+    setupRegister();
+    const user = userEvent.setup();
+
+    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
+    await user.type(screen.getByLabelText(/display name/i), 'A');
+    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!');
+    await user.click(screen.getByRole('button', { name: /register/i }));
+
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(screen.getByRole('status').textContent).toMatch(/display name must be between 2 and 60/i);
   });
 
   test('toggles password visibility', async () => {
