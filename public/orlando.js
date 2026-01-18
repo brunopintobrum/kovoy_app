@@ -179,11 +179,31 @@
         if (el) el.textContent = text;
     };
 
+    const setHeaderAvatar = (url) => {
+        const img = document.querySelector('.header-profile-user');
+        if (!img) return;
+        if (!img.dataset.fallbackSrc) {
+            img.dataset.fallbackSrc = img.getAttribute('src') || '';
+        }
+        if (!url) return;
+        img.onerror = () => {
+            img.onerror = null;
+            if (img.dataset.fallbackSrc) {
+                img.src = img.dataset.fallbackSrc;
+            }
+        };
+        img.referrerPolicy = 'no-referrer';
+        img.src = url;
+    };
+
     const loadUserEmail = async () => {
         try {
             const res = await apiRequest('/api/me');
             if (res && res.email) {
                 setText('userEmail', res.email);
+                if (res.avatarUrl) {
+                    setHeaderAvatar(res.avatarUrl);
+                }
             }
         } catch (err) {
             // Keep placeholder if not authenticated.

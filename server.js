@@ -311,7 +311,7 @@ app.use(helmet({
             'default-src': ["'self'"],
             'base-uri': ["'self'"],
             'frame-ancestors': ["'none'"],
-            'img-src': ["'self'", 'data:'],
+            'img-src': ["'self'", 'data:', 'https://lh3.googleusercontent.com'],
             'script-src': ["'self'"],
             'style-src': ["'self'", 'https://fonts.googleapis.com'],
             'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:']
@@ -1076,7 +1076,17 @@ app.get('/api/me', (req, res) => {
     if (!token) return res.status(401).json({ error: 'Não autenticado.' });
     try {
         const payload = jwt.verify(token, JWT_SECRET);
-        return res.json({ email: payload.email });
+        const user = db.prepare(
+            'SELECT email, first_name, last_name, display_name, avatar_url FROM users WHERE id = ?'
+        ).get(payload.sub);
+        if (!user) return res.status(401).json({ error: 'NÃ£o autenticado.' });
+        return res.json({
+            email: user.email,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            displayName: user.display_name,
+            avatarUrl: user.avatar_url
+        });
     } catch (err) {
         return res.status(401).json({ error: 'Não autenticado.' });
     }
