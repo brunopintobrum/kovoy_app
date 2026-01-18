@@ -113,7 +113,8 @@
         if (method !== 'GET') {
             headers['x-csrf-token'] = getCookie('csrf_token') || '';
         }
-        if (options.body && !headers['Content-Type']) {
+        const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+        if (options.body && !headers['Content-Type'] && !isFormData) {
             headers['Content-Type'] = 'application/json';
         }
         const res = await fetch(url, { ...options, method, headers });
@@ -814,7 +815,93 @@
         }
     };
 
-    
+    const bindAvatarChange = () => {
+        const trigger = document.getElementById('changeAvatarLink');
+        const modalEl = document.getElementById('avatarModal');
+        const fileInput = document.getElementById('avatarFile');
+        const preview = document.getElementById('avatarPreview');
+        const saveButton = document.getElementById('avatarSaveBtn');
+        const errorEl = document.getElementById('avatarError');
+        if (!trigger || !modalEl || !fileInput || !preview || !saveButton) return;
+
+        const modal = window.bootstrap && window.bootstrap.Modal
+            ? new window.bootstrap.Modal(modalEl)
+            : null;
+
+        const setError = (message) => {
+            if (!errorEl) return;
+            errorEl.textContent = message || '';
+            errorEl.classList.toggle('d-none', !message);
+        };
+
+        const resetModal = () => {
+            const headerImg = document.querySelector('.header-profile-user');
+            const fallback = preview.getAttribute('src');
+            preview.src = headerImg ? headerImg.src : fallback;
+            fileInput.value = '';
+            setError('');
+        };
+
+        trigger.addEventListener('click', (event) => {
+            event.preventDefault();
+            resetModal();
+            if (modal) {
+                modal.show();
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) return;
+            const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowed.includes(file.type)) {
+                setError('Formato invalido. Use JPG, PNG ou WEBP.');
+                fileInput.value = '';
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                setError('Imagem acima de 2MB. Selecione uma menor.');
+                fileInput.value = '';
+                return;
+            }
+            setError('');
+            const reader = new FileReader();
+            reader.onload = () => {
+                preview.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        saveButton.addEventListener('click', async () => {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) {
+                setError('Selecione uma imagem para continuar.');
+                return;
+            }
+            setError('');
+            saveButton.disabled = true;
+            const originalLabel = saveButton.textContent;
+            saveButton.textContent = 'Salvando...';
+            try {
+                const formData = new FormData();
+                formData.append('avatar', file);
+                const res = await apiRequest('/api/me/avatar', { method: 'POST', body: formData });
+                if (res && res.avatarUrl) {
+                    setHeaderAvatar(res.avatarUrl);
+                    preview.src = res.avatarUrl;
+                }
+                if (modal) {
+                    modal.hide();
+                }
+            } catch (err) {
+                setError('Nao foi possivel atualizar a foto. Tente novamente.');
+            } finally {
+                saveButton.disabled = false;
+                saveButton.textContent = originalLabel;
+            }
+        });
+    };
+
     const bindLogout = () => {
         const targets = [
             document.getElementById('logoutButton'),
@@ -984,6 +1071,7 @@ const resetForm = (form, editingKey) => {
 
         bindListActions();
         bindExportImport();
+        bindAvatarChange();
         bindLogout();
         bindVerticalMenuToggle();
 

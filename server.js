@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
 const Database = require('better-sqlite3');
 
 const ROOT_DIR = __dirname;
@@ -47,6 +48,8 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(ROOT_DIR, 'data');
 const DB_PATH = process.env.DB_PATH || path.join(DATA_DIR, 'app.db');
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
+const UPLOADS_DIR = path.join(PUBLIC_DIR, 'uploads');
+const AVATAR_UPLOAD_DIR = path.join(UPLOADS_DIR, 'avatars');
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 const IS_PROD = process.env.NODE_ENV === 'production';
 const EMAIL_VERIFICATION_REQUIRED = process.env.EMAIL_VERIFICATION_REQUIRED !== 'false';
@@ -79,6 +82,9 @@ if (JWT_SECRET === 'change-this-secret') {
 
 if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+if (!fs.existsSync(AVATAR_UPLOAD_DIR)) {
+    fs.mkdirSync(AVATAR_UPLOAD_DIR, { recursive: true });
 }
 
 const db = new Database(DB_PATH);
@@ -389,6 +395,15 @@ const normalizeOptionalUrl = (value) => {
     return { value: trimmed };
 };
 
+const resolveAvatarUrl = (filename) => `/uploads/avatars/${filename}`;
+const isLocalAvatarUrl = (value) => typeof value === 'string' && value.startsWith('/uploads/avatars/');
+const resolveLocalAvatarPath = (value) => {
+    if (!isLocalAvatarUrl(value)) return null;
+    const trimmed = value.replace(/^\/+/, '');
+    if (!trimmed.startsWith('uploads/avatars/')) return null;
+    return path.join(PUBLIC_DIR, trimmed);
+};
+
 const splitFullName = (value) => {
     if (!value || typeof value !== 'string') return { first: null, last: null };
     const parts = value.trim().split(/\s+/).filter(Boolean);
@@ -430,6 +445,29 @@ const validatePassword = (email, password) => {
     }
     return errors;
 };
+
+const AVATAR_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+const avatarStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, AVATAR_UPLOAD_DIR),
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname || '').toLowerCase();
+        const safeExt = ['.png', '.jpg', '.jpeg', '.webp'].includes(ext) ? ext : '.png';
+        const suffix = crypto.randomBytes(6).toString('hex');
+        const fileName = `avatar-${Date.now()}-${suffix}${safeExt}`;
+        cb(null, fileName);
+    }
+});
+const avatarUpload = multer({
+    storage: avatarStorage,
+    limits: { fileSize: MAX_AVATAR_SIZE },
+    fileFilter: (req, file, cb) => {
+        if (!AVATAR_MIME_TYPES.has(file.mimetype)) {
+            return cb(new Error('INVALID_AVATAR_TYPE'));
+        }
+        return cb(null, true);
+    }
+});
 
 const originGuard = (req, res, next) => {
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
@@ -1090,6 +1128,36 @@ app.get('/api/me', (req, res) => {
     } catch (err) {
         return res.status(401).json({ error: 'Não autenticado.' });
     }
+});
+
+app.post('/api/me/avatar', authRequiredApi, requireCsrfToken, (req, res) => {
+    avatarUpload.single('avatar')(req, res, (err) => {
+        if (err) {
+            const message = err.code === 'LIMIT_FILE_SIZE'
+                ? 'Avatar must be 2MB or less.'
+                : 'Invalid avatar file.';
+            return res.status(400).json({ error: message });
+        }
+        if (!req.file) {
+            return res.status(400).json({ error: 'Avatar file is required.' });
+        }
+        const user = db.prepare('SELECT avatar_url FROM users WHERE id = ?').get(req.user.sub);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        const newAvatarUrl = resolveAvatarUrl(req.file.filename);
+        db.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').run(newAvatarUrl, req.user.sub);
+
+        if (user.avatar_url && user.avatar_url !== newAvatarUrl) {
+            const previousPath = resolveLocalAvatarPath(user.avatar_url);
+            if (previousPath) {
+                fs.unlink(previousPath, () => {});
+            }
+        }
+
+        return res.json({ ok: true, avatarUrl: newAvatarUrl });
+    });
 });
 
 const generateTripItemId = () => {

@@ -370,3 +370,4 @@ data/
 .env
 .env.*
 npm-debug.log*
+public/uploads/
