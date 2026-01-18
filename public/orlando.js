@@ -894,7 +894,7 @@
                     modal.hide();
                 }
             } catch (err) {
-                setError('Nao foi possivel atualizar a foto. Tente novamente.');
+                setError('Unable to update the photo. Please try again.');
             } finally {
                 saveButton.disabled = false;
                 saveButton.textContent = originalLabel;
