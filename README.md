@@ -296,3 +296,9 @@ Nao definida. Adicione um `LICENSE` quando decidir.
 
 Mantenedor: Bruno Pinto Brum
 Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
+
+## Atualizacoes recentes
+
+- Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
+- `npm audit fix --force` aplicado para zerar vulnerabilidades.
+- `npm test` executado com sucesso.

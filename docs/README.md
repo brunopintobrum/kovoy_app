@@ -12,3 +12,8 @@ Sugestao de nomes:
 
 Observacao:
 - O screenshot de `register.png` deve refletir os campos obrigatorios atuais (email, first name, last name, password, confirm password).
+
+## Atualizacoes recentes
+- Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
+- `npm audit fix --force` aplicado para zerar vulnerabilidades.
+- `npm test` executado com sucesso.

@@ -52,3 +52,8 @@
 
 ## Open Decisions
 - CI/CD, licenca, observabilidade e politicas de contribuicao.
+
+## Atualizacoes recentes
+- Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
+- `npm audit fix --force` aplicado para zerar vulnerabilidades.
+- `npm test` executado com sucesso.

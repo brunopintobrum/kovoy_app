@@ -18,3 +18,8 @@
 - Commits e mensagens em pt-BR.
 - Verifique `git status -sb` antes de commitar.
 - Quando o usuario pedir commit e push, executar ambos diretamente sem solicitar confirmacao adicional.
+
+## Atualizacoes recentes
+- Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
+- `npm audit fix --force` aplicado para zerar vulnerabilidades.
+- `npm test` executado com sucesso.
