@@ -90,6 +90,8 @@ db.exec(`
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         google_sub TEXT,
+        first_name TEXT,
+        last_name TEXT,
         display_name TEXT,
         created_at TEXT NOT NULL
     );
@@ -239,6 +241,8 @@ const hasGoogleSub = userColumns.some((column) => column.name === 'google_sub');
 const hasEmailVerifiedAt = userColumns.some((column) => column.name === 'email_verified_at');
 const hasTwoFactorEnabled = userColumns.some((column) => column.name === 'two_factor_enabled');
 const hasDisplayName = userColumns.some((column) => column.name === 'display_name');
+const hasFirstName = userColumns.some((column) => column.name === 'first_name');
+const hasLastName = userColumns.some((column) => column.name === 'last_name');
 if (!hasGoogleSub) {
     db.exec('ALTER TABLE users ADD COLUMN google_sub TEXT');
 }
@@ -250,6 +254,12 @@ if (!hasTwoFactorEnabled) {
 }
 if (!hasDisplayName) {
     db.exec('ALTER TABLE users ADD COLUMN display_name TEXT');
+}
+if (!hasFirstName) {
+    db.exec('ALTER TABLE users ADD COLUMN first_name TEXT');
+}
+if (!hasLastName) {
+    db.exec('ALTER TABLE users ADD COLUMN last_name TEXT');
 }
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL');
 db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user ON email_verification_tokens(user_id)');
@@ -343,6 +353,36 @@ const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
 };
 
+const normalizeName = (value, fieldLabel) => {
+    if (typeof value !== 'string') return { error: `${fieldLabel} is required.` };
+    const trimmed = value.trim();
+    if (!trimmed) return { error: `${fieldLabel} is required.` };
+    if (trimmed.length > 80) {
+        return { error: `${fieldLabel} must be 80 characters or fewer.` };
+    }
+    return { value: trimmed };
+};
+
+const normalizeOptionalName = (value) => {
+    if (value === undefined || value === null) return { value: null };
+    if (typeof value !== 'string') return { error: 'Invalid name.' };
+    const trimmed = value.trim();
+    if (!trimmed) return { value: null };
+    if (trimmed.length < 2) return { value: null };
+    if (trimmed.length > 80) {
+        return { error: 'Name must be 80 characters or fewer.' };
+    }
+    return { value: trimmed };
+};
+
+const splitFullName = (value) => {
+    if (!value || typeof value !== 'string') return { first: null, last: null };
+    const parts = value.trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return { first: null, last: null };
+    if (parts.length === 1) return { first: parts[0], last: parts[0] };
+    return { first: parts[0], last: parts.slice(1).join(' ') };
+};
+
 const normalizeDisplayName = (value) => {
     if (value === undefined || value === null) return { value: null };
     if (typeof value !== 'string') return { error: 'Display name must be a string.' };
@@ -359,8 +399,8 @@ const validatePassword = (email, password) => {
     if (typeof password !== 'string') {
         return ['Invalid password.'];
     }
-    if (password.length < 8 || password.length > 64) {
-        errors.push('Password must be between 8 and 64 characters.');
+    if (password.length < 9) {
+        errors.push('Password must be at least 9 characters.');
     }
     if (!/[A-Z]/.test(password)) {
         errors.push('Password must include 1 uppercase letter.');
@@ -373,23 +413,6 @@ const validatePassword = (email, password) => {
     }
     if (!/[!@#$%^&*()_+\-=[\]{};':",.<>/?\\|]/.test(password)) {
         errors.push('Password must include 1 special character.');
-    }
-    if (password.trim() !== password) {
-        errors.push('Password cannot start or end with spaces.');
-    }
-    const commonPasswords = [
-        '123456', '12345678', 'password', 'qwerty', 'abc123',
-        '111111', '123123', 'qwerty123', 'admin', 'letmein'
-    ];
-    const lowered = password.toLowerCase();
-    if (commonPasswords.some((item) => lowered.includes(item))) {
-        errors.push('Password is too common.');
-    }
-    if (email && typeof email === 'string') {
-        const normalizedEmail = email.trim().toLowerCase();
-        if (normalizedEmail && lowered === normalizedEmail) {
-            errors.push('Password cannot match the email.');
-        }
     }
     return errors;
 };
@@ -808,11 +831,23 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
     const emailVerified = tokenInfoResponse.data && tokenInfoResponse.data.email_verified;
     const googleSub = tokenInfoResponse.data && tokenInfoResponse.data.sub;
     const rawDisplayName = tokenInfoResponse.data && tokenInfoResponse.data.name;
-    const fallbackDisplayName = email ? email.split('@')[0] : null;
-    const displayNameResult = normalizeDisplayName(rawDisplayName);
-    const fallbackResult = normalizeDisplayName(fallbackDisplayName);
+    const givenName = tokenInfoResponse.data && tokenInfoResponse.data.given_name;
+    const familyName = tokenInfoResponse.data && tokenInfoResponse.data.family_name;
+    const nameParts = splitFullName(rawDisplayName);
+    const emailPrefix = email ? email.split('@')[0] : null;
+    const firstNameResult = normalizeOptionalName(givenName || nameParts.first || emailPrefix);
+    const lastNameResult = normalizeOptionalName(familyName || nameParts.last || (firstNameResult.value || emailPrefix));
+    const firstNameValue = firstNameResult.error || !firstNameResult.value
+        ? (emailPrefix || 'User')
+        : firstNameResult.value;
+    const lastNameValue = lastNameResult.error || !lastNameResult.value
+        ? firstNameValue
+        : lastNameResult.value;
+    const displayNameSource = rawDisplayName || emailPrefix || `${firstNameValue} ${lastNameValue}`.trim();
+    const displayNameResult = normalizeDisplayName(displayNameSource);
+    const fallbackDisplayNameResult = normalizeDisplayName(emailPrefix);
     const normalizedDisplayName = displayNameResult.error || !displayNameResult.value
-        ? (fallbackResult.error ? null : fallbackResult.value)
+        ? (fallbackDisplayNameResult.error ? null : fallbackDisplayNameResult.value)
         : displayNameResult.value;
     const tokenAud = tokenInfoResponse.data && tokenInfoResponse.data.aud;
     const tokenIss = tokenInfoResponse.data && tokenInfoResponse.data.iss;
@@ -835,8 +870,23 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
                 db.prepare('UPDATE users SET email = ? WHERE id = ?').run(email, user.id);
                 user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
             }
+            const updates = [];
+            const values = [];
+            if (!user.first_name) {
+                updates.push('first_name = ?');
+                values.push(firstNameValue);
+            }
+            if (!user.last_name) {
+                updates.push('last_name = ?');
+                values.push(lastNameValue);
+            }
             if (!user.display_name && normalizedDisplayName) {
-                db.prepare('UPDATE users SET display_name = ? WHERE id = ?').run(normalizedDisplayName, user.id);
+                updates.push('display_name = ?');
+                values.push(normalizedDisplayName);
+            }
+            if (updates.length) {
+                values.push(user.id);
+                db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`).run(...values);
                 user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
             }
         } else if (userByEmail) {
@@ -845,17 +895,40 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
             }
             db.prepare('UPDATE users SET google_sub = ? WHERE id = ?').run(googleSub, userByEmail.id);
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(userByEmail.id);
+            const updates = [];
+            const values = [];
+            if (!user.first_name) {
+                updates.push('first_name = ?');
+                values.push(firstNameValue);
+            }
+            if (!user.last_name) {
+                updates.push('last_name = ?');
+                values.push(lastNameValue);
+            }
             if (!user.display_name && normalizedDisplayName) {
-                db.prepare('UPDATE users SET display_name = ? WHERE id = ?').run(normalizedDisplayName, user.id);
+                updates.push('display_name = ?');
+                values.push(normalizedDisplayName);
+            }
+            if (updates.length) {
+                values.push(user.id);
+                db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`).run(...values);
                 user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
             }
         } else {
             const randomPassword = crypto.randomBytes(32).toString('hex');
             const passwordHash = bcrypt.hashSync(randomPassword, 10);
             const insert = db.prepare(
-                'INSERT INTO users (email, password_hash, google_sub, display_name, created_at) VALUES (?, ?, ?, ?, ?)'
+                'INSERT INTO users (email, password_hash, google_sub, first_name, last_name, display_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
             );
-            insert.run(email, passwordHash, googleSub, normalizedDisplayName, new Date().toISOString());
+            insert.run(
+                email,
+                passwordHash,
+                googleSub,
+                firstNameValue,
+                lastNameValue,
+                normalizedDisplayName,
+                new Date().toISOString()
+            );
             user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
         }
 
@@ -2184,21 +2257,29 @@ app.post('/api/refresh', originGuard, requireCsrfToken, (req, res) => {
 });
 
 app.post('/api/register', sensitiveLimiter, originGuard, async (req, res) => {
-    const { email, password, displayName } = req.body || {};
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required.' });
+    const { email, password, confirmPassword, firstName, lastName } = req.body || {};
+    if (!email || !password || !confirmPassword || !firstName || !lastName) {
+        return res.status(400).json({ error: 'Email, first name, last name, password, and confirm password are required.' });
     }
     if (!isValidEmail(email)) {
         return res.status(400).json({ error: 'Invalid email address.' });
     }
-    const displayNameResult = normalizeDisplayName(displayName);
-    if (displayNameResult.error) {
-        return res.status(400).json({ error: displayNameResult.error });
+    if (password !== confirmPassword) {
+        return res.status(400).json({ error: 'Passwords do not match.' });
+    }
+    const firstNameResult = normalizeName(firstName, 'First name');
+    if (firstNameResult.error) {
+        return res.status(400).json({ error: firstNameResult.error });
+    }
+    const lastNameResult = normalizeName(lastName, 'Last name');
+    if (lastNameResult.error) {
+        return res.status(400).json({ error: lastNameResult.error });
     }
     const passwordErrors = validatePassword(email, password);
     if (passwordErrors.length) {
         return res.status(400).json({ error: passwordErrors[0] });
     }
+    const displayName = `${firstNameResult.value} ${lastNameResult.value}`.trim();
 
     try {
         const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
@@ -2208,11 +2289,13 @@ app.post('/api/register', sensitiveLimiter, originGuard, async (req, res) => {
 
         const passwordHash = bcrypt.hashSync(password, 10);
         const insert = db.prepare(
-            'INSERT INTO users (email, password_hash, display_name, created_at) VALUES (?, ?, ?, ?)'
+            'INSERT INTO users (email, password_hash, first_name, last_name, display_name, created_at) VALUES (?, ?, ?, ?, ?, ?)'
         ).run(
             email,
             passwordHash,
-            displayNameResult.value,
+            firstNameResult.value,
+            lastNameResult.value,
+            displayName,
             new Date().toISOString()
         );
         if (EMAIL_VERIFICATION_REQUIRED) {

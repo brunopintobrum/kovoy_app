@@ -74,7 +74,9 @@ describe('Google OAuth flow', () => {
             sub: 'google-sub-123',
             aud: process.env.GOOGLE_CLIENT_ID,
             iss: 'https://accounts.google.com',
-            name: 'Google User'
+            name: 'Google User',
+            given_name: 'Google',
+            family_name: 'User'
         };
         db.prepare('DELETE FROM users').run();
     });
@@ -118,6 +120,8 @@ describe('Google OAuth flow', () => {
         const user = db.prepare('SELECT * FROM users WHERE google_sub = ?').get('google-sub-123');
         expect(user).toBeTruthy();
         expect(user.email).toBe('google.user@example.com');
+        expect(user.first_name).toBe('Google');
+        expect(user.last_name).toBe('User');
         expect(user.display_name).toBe('Google User');
         expect(user.email_verified_at).toBeTruthy();
     });
@@ -147,16 +151,20 @@ describe('Google OAuth flow', () => {
         expect(callbackRes.status).toBe(302);
         const user = db.prepare('SELECT * FROM users WHERE google_sub = ?').get('google-sub-456');
         expect(user).toBeTruthy();
+        expect(user.first_name).toBe('go');
+        expect(user.last_name).toBe('go');
         expect(user.display_name).toBe('go');
     });
 
     test('rejects Google login when email is already linked to another Google account', async () => {
         db.prepare(
-            'INSERT INTO users (email, password_hash, google_sub, display_name, created_at) VALUES (?, ?, ?, ?, ?)'
+            'INSERT INTO users (email, password_hash, google_sub, first_name, last_name, display_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
         ).run(
             'conflict@example.com',
             'hash',
             'google-sub-existing',
+            'Existing',
+            'User',
             'Existing User',
             new Date().toISOString()
         );
@@ -213,6 +221,8 @@ describe('Google OAuth flow', () => {
         expect(callbackRes.status).toBe(302);
         const user = db.prepare('SELECT * FROM users WHERE google_sub = ?').get('google-sub-short');
         expect(user).toBeTruthy();
+        expect(user.first_name).toBe('short');
+        expect(user.last_name).toBe('short');
         expect(user.display_name).toBe('short');
     });
 });

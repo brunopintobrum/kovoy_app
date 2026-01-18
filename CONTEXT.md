@@ -15,7 +15,7 @@
 - Seguranca: Helmet, rate limit, CSRF para operacoes de escrita.
 
 ## Data Model
-- users: id, email, password_hash, google_sub, display_name, email_verified_at, two_factor_enabled, created_at.
+- users: id, email, password_hash, google_sub, first_name, last_name, display_name, email_verified_at, two_factor_enabled, created_at.
 - tokens: refresh_tokens, email_verification_tokens, reset_tokens, two_factor_codes.
 - viagem: trips, trip_flights, trip_lodgings, trip_cars, trip_expenses, trip_transports, trip_timeline, trip_reminders.
 
@@ -23,12 +23,12 @@
 - Register/login via `/api/register` e `/api/login`.
 - Email verification opcional por `EMAIL_VERIFICATION_REQUIRED`.
 - Two-factor por email opcional por `TWO_FACTOR_REQUIRED` ou flag do usuario.
-- Google OAuth com scope `openid email profile`, mapeando `name` para `display_name` com fallback para prefixo do email.
+- Google OAuth com scope `openid email profile`, mapeando `given_name` e `family_name` para `first_name` e `last_name`.
 - CSRF: header `x-csrf-token` deve bater com cookie `csrf_token` em operacoes de escrita.
 
 ## UI/UX Guidelines
 - UI baseada no template Skote; manter consistencia visual.
-- Cadastro deve ser simples: email/senha e `displayName` opcional.
+- Cadastro deve conter: email, first name, last name, password e confirm password.
 - O template Skote (ASP.NET Core) e a fonte da verdade para UI/UX, estruturas, componentes e nomenclaturas.
 
 ## Conventions
@@ -37,7 +37,7 @@
 - Colunas de banco em snake_case.
 
 ## Skote Template (Regra Absoluta)
-- Caminho do template: `F:\OneDrive\PCTECH\Skote_Asp.net_v3.2.0\Skote Asp.net Core\Skoteesse UI`.
+- Caminho do template: `F:\OneDrive\PCTECH\Skote_Asp.net_v3.2.0\Skote Asp.net Core\Skote`.
 - Antes de qualquer implementacao: analisar estrutura, Controllers/Views/ViewModels/Services, layouts, componentes, CSS/JS, validacoes e mensagens.
 - Replicar organizacao de pastas e padroes visuais/estruturais do Skote no projeto atual.
 - Nao criar estruturas novas se ja existir equivalente no Skote; nao mudar nomenclaturas sem justificativa tecnica.

@@ -73,12 +73,19 @@ describe('auth flow', () => {
         const jar = {};
         const email = `user${Date.now()}@example.com`;
         const password = 'StrongPass!123';
-        const displayName = 'Taylor Example';
+        const firstName = 'Taylor';
+        const lastName = 'Example';
 
         const registerRes = await fetch(`${baseUrl}/api/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, displayName })
+            body: JSON.stringify({
+                email,
+                firstName,
+                lastName,
+                password,
+                confirmPassword: password
+            })
         });
         expect(registerRes.status).toBe(201);
         const registerBody = await registerRes.json();
@@ -95,7 +102,8 @@ describe('auth flow', () => {
 
         const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
         expect(user).toBeTruthy();
-        expect(user.display_name).toBe(displayName);
+        expect(user.first_name).toBe(firstName);
+        expect(user.last_name).toBe(lastName);
         const rawToken = createEmailVerificationToken(user.id);
         const confirmRes = await fetch(`${baseUrl}/confirm-mail?token=${encodeURIComponent(rawToken)}`);
         expect(confirmRes.url).toContain('status=success');

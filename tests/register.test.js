@@ -24,8 +24,10 @@ describe('Register page', () => {
   test('renders email, password and submit button', () => {
     setupRegister();
     expect(screen.getByLabelText(/email/i)).toBeTruthy();
-    expect(screen.getByLabelText(/display name/i)).toBeTruthy();
+    expect(screen.getByLabelText(/first name/i)).toBeTruthy();
+    expect(screen.getByLabelText(/last name/i)).toBeTruthy();
     expect(screen.getByLabelText(/^password$/i)).toBeTruthy();
+    expect(screen.getByLabelText(/confirm password/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /register/i })).toBeTruthy();
   });
 
@@ -41,7 +43,10 @@ describe('Register page', () => {
     setupRegister();
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/email/i), 'invalid');
-    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!');
+    await user.type(screen.getByLabelText(/first name/i), 'Test');
+    await user.type(screen.getByLabelText(/last name/i), 'User');
+    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!x');
+    await user.type(screen.getByLabelText(/confirm password/i), 'Abcdef1!x');
     await user.click(screen.getByRole('button', { name: /register/i }));
     expect(global.fetch).not.toHaveBeenCalled();
     expect(screen.getByRole('status').textContent).toMatch(/valid email address/i);
@@ -51,19 +56,22 @@ describe('Register page', () => {
     setupRegister();
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/email/i), 'user@example.com');
+    await user.type(screen.getByLabelText(/first name/i), 'Test');
+    await user.type(screen.getByLabelText(/last name/i), 'User');
     await user.type(screen.getByLabelText(/^password$/i), 'short');
+    await user.type(screen.getByLabelText(/confirm password/i), 'short');
     await user.click(screen.getByRole('button', { name: /register/i }));
 
     expect(global.fetch).not.toHaveBeenCalled();
     expect(screen.getByRole('status').textContent).toMatch(/does not meet all requirements/i);
-    expect(screen.getByText(/NO 8 to 64 characters/i)).toBeTruthy();
+    expect(screen.getByText(/NO at least 9 characters/i)).toBeTruthy();
   });
 
   test('strong password updates strength indicator', async () => {
     setupRegister();
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!');
+    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!x');
 
     expect(screen.getByText(/strength: strong/i)).toBeTruthy();
     expect(document.getElementById('rule-upper').textContent).toMatch(/^OK /);
@@ -76,14 +84,22 @@ describe('Register page', () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
     await user.type(screen.getByLabelText(/email/i), ' user@example.com ');
-    await user.type(screen.getByLabelText(/display name/i), 'Taylor Example');
-    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!');
+    await user.type(screen.getByLabelText(/first name/i), 'Taylor');
+    await user.type(screen.getByLabelText(/last name/i), 'Example');
+    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!x');
+    await user.type(screen.getByLabelText(/confirm password/i), 'Abcdef1!x');
     await user.click(screen.getByRole('button', { name: /register/i }));
 
     expect(global.fetch).toHaveBeenCalledWith('/api/register', expect.objectContaining({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'user@example.com', password: 'Abcdef1!', displayName: 'Taylor Example' })
+      body: JSON.stringify({
+        email: 'user@example.com',
+        firstName: 'Taylor',
+        lastName: 'Example',
+        password: 'Abcdef1!x',
+        confirmPassword: 'Abcdef1!x'
+      })
     }));
 
     jest.runAllTimers();
@@ -100,7 +116,10 @@ describe('Register page', () => {
     const user = userEvent.setup();
 
     await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!');
+    await user.type(screen.getByLabelText(/first name/i), 'Test');
+    await user.type(screen.getByLabelText(/last name/i), 'User');
+    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!x');
+    await user.type(screen.getByLabelText(/confirm password/i), 'Abcdef1!x');
     await user.click(screen.getByRole('button', { name: /register/i }));
 
     expect(screen.getByRole('status').textContent).toMatch(/already registered/i);
@@ -112,7 +131,10 @@ describe('Register page', () => {
     const user = userEvent.setup();
 
     await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!');
+    await user.type(screen.getByLabelText(/first name/i), 'Test');
+    await user.type(screen.getByLabelText(/last name/i), 'User');
+    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!x');
+    await user.type(screen.getByLabelText(/confirm password/i), 'Abcdef1!x');
     await user.click(screen.getByRole('button', { name: /register/i }));
 
     expect(screen.getByRole('status').textContent).toMatch(/connection error/i);
@@ -125,7 +147,10 @@ describe('Register page', () => {
     const user = userEvent.setup();
 
     await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!');
+    await user.type(screen.getByLabelText(/first name/i), 'Test');
+    await user.type(screen.getByLabelText(/last name/i), 'User');
+    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!x');
+    await user.type(screen.getByLabelText(/confirm password/i), 'Abcdef1!x');
     const submitButton = screen.getByRole('button', { name: /register/i });
     await user.click(submitButton);
 
@@ -133,17 +158,19 @@ describe('Register page', () => {
     resolveFetch({ ok: false, json: async () => ({ error: 'Email already registered.' }) });
   });
 
-  test('invalid display name shows error and does not call register', async () => {
+  test('confirm password mismatch shows error and does not call register', async () => {
     setupRegister();
     const user = userEvent.setup();
 
     await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/display name/i), 'A');
-    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!');
+    await user.type(screen.getByLabelText(/first name/i), 'Test');
+    await user.type(screen.getByLabelText(/last name/i), 'User');
+    await user.type(screen.getByLabelText(/^password$/i), 'Abcdef1!x');
+    await user.type(screen.getByLabelText(/confirm password/i), 'Abcdef1!y');
     await user.click(screen.getByRole('button', { name: /register/i }));
 
     expect(global.fetch).not.toHaveBeenCalled();
-    expect(screen.getByRole('status').textContent).toMatch(/display name must be between 2 and 60/i);
+    expect(screen.getByRole('status').textContent).toMatch(/passwords do not match/i);
   });
 
   test('toggles password visibility', async () => {

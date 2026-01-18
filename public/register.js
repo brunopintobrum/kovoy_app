@@ -1,9 +1,12 @@
 (() => {
     const form = document.querySelector('form.needs-validation');
     const emailInput = form ? form.querySelector('#useremail') : null;
-    const displayNameInput = form ? form.querySelector('#displayname') : null;
+    const firstNameInput = form ? form.querySelector('#firstname') : null;
+    const lastNameInput = form ? form.querySelector('#lastname') : null;
     const passwordInput = form ? form.querySelector('#userpassword') : null;
+    const confirmPasswordInput = form ? form.querySelector('#userpasswordconfirm') : null;
     const passwordToggle = document.getElementById('password-addon');
+    const confirmPasswordToggle = document.getElementById('password-confirm-addon');
     const submitButton = form ? form.querySelector('button[type="submit"]') : null;
     const strengthBar = document.getElementById('passwordStrengthBar');
     const strengthText = document.getElementById('passwordStrengthText');
@@ -12,11 +15,7 @@
         upper: document.getElementById('rule-upper'),
         lower: document.getElementById('rule-lower'),
         number: document.getElementById('rule-number'),
-        special: document.getElementById('rule-special'),
-        trim: document.getElementById('rule-trim'),
-        common: document.getElementById('rule-common'),
-        email: document.getElementById('rule-email'),
-        confirm: null
+        special: document.getElementById('rule-special')
     };
     let alertBox = document.getElementById('registerAlert');
     const googleButton = document.querySelector('.social-list-item.bg-danger');
@@ -72,28 +71,13 @@
         submitButton.setAttribute('aria-busy', isSubmitting ? 'true' : 'false');
     };
 
-    const commonPasswords = [
-        '123456', '12345678', 'password', 'qwerty', 'abc123',
-        '111111', '123123', 'qwerty123', 'admin', 'letmein'
-    ];
-
     const evaluatePassword = () => {
-        const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
         const password = passwordInput ? passwordInput.value : '';
-        const trimmed = password.trim();
-        const hasLength = password.length >= 8 && password.length <= 64;
+        const hasLength = password.length >= 9;
         const hasUpper = /[A-Z]/.test(password);
         const hasLower = /[a-z]/.test(password);
         const hasNumber = /[0-9]/.test(password);
         const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':",.<>/?\\|]/.test(password);
-        const noTrimIssue = password === trimmed;
-        const notCommon = password.length > 0
-            ? !commonPasswords.some((item) => password.toLowerCase().includes(item))
-            : false;
-        const notEmail = email.length > 0
-            ? password.toLowerCase() !== email
-            : false;
-        const confirmOk = true;
 
         const applyRule = (node, ok) => {
             if (!node) return;
@@ -106,10 +90,6 @@
         applyRule(rules.lower, hasLower);
         applyRule(rules.number, hasNumber);
         applyRule(rules.special, hasSpecial);
-        applyRule(rules.trim, noTrimIssue);
-        applyRule(rules.common, notCommon);
-        applyRule(rules.email, notEmail);
-
         let score = 0;
         if (hasUpper) score += 1;
         if (hasLower) score += 1;
@@ -128,7 +108,7 @@
             percent = 60;
             tip = 'Use a longer password and mix more character types.';
         }
-        if (score >= 4 && hasLength && notCommon && notEmail) {
+        if (score >= 4 && hasLength) {
             strength = 'strong';
             strengthClass = 'bg-success';
             percent = 100;
@@ -144,7 +124,7 @@
             strengthText.textContent = `Strength: ${strength}. ${tip}`;
         }
 
-        const valid = hasLength && hasUpper && hasLower && hasNumber && hasSpecial && noTrimIssue && notCommon && notEmail && confirmOk;
+        const valid = hasLength && hasUpper && hasLower && hasNumber && hasSpecial;
         return { valid, message: tip };
     };
 
@@ -161,8 +141,10 @@
             event.preventDefault();
             setAlert('');
             const emailValue = emailInput ? emailInput.value.trim() : '';
-            const displayNameValue = displayNameInput ? displayNameInput.value.trim() : '';
+            const firstNameValue = firstNameInput ? firstNameInput.value.trim() : '';
+            const lastNameValue = lastNameInput ? lastNameInput.value.trim() : '';
             const passwordValue = passwordInput ? passwordInput.value : '';
+            const confirmPasswordValue = confirmPasswordInput ? confirmPasswordInput.value : '';
 
             if (!emailValue) {
                 setAlert('Email is required.', 'error');
@@ -172,12 +154,32 @@
                 setAlert('Please enter a valid email address.', 'error');
                 return;
             }
-            if (displayNameValue && (displayNameValue.length < 2 || displayNameValue.length > 60)) {
-                setAlert('Display name must be between 2 and 60 characters.', 'error');
+            if (!firstNameValue) {
+                setAlert('First name is required.', 'error');
+                return;
+            }
+            if (firstNameValue.length > 80) {
+                setAlert('First name must be 80 characters or fewer.', 'error');
+                return;
+            }
+            if (!lastNameValue) {
+                setAlert('Last name is required.', 'error');
+                return;
+            }
+            if (lastNameValue.length > 80) {
+                setAlert('Last name must be 80 characters or fewer.', 'error');
                 return;
             }
             if (!passwordValue) {
                 setAlert('Password is required.', 'error');
+                return;
+            }
+            if (!confirmPasswordValue) {
+                setAlert('Confirm password is required.', 'error');
+                return;
+            }
+            if (passwordValue !== confirmPasswordValue) {
+                setAlert('Passwords do not match.', 'error');
                 return;
             }
             const { valid } = evaluatePassword();
@@ -188,11 +190,11 @@
             setSubmitting(true);
             const payload = {
                 email: emailValue,
-                password: passwordValue
+                firstName: firstNameValue,
+                lastName: lastNameValue,
+                password: passwordValue,
+                confirmPassword: confirmPasswordValue
             };
-            if (displayNameValue) {
-                payload.displayName = displayNameValue;
-            }
 
             try {
                 const res = await fetch('/api/register', {
@@ -232,6 +234,19 @@
             passwordInput.setAttribute('type', isHidden ? 'text' : 'password');
             passwordToggle.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
             const icon = passwordToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('mdi-eye-outline', !isHidden);
+                icon.classList.toggle('mdi-eye-off-outline', isHidden);
+            }
+        });
+    }
+
+    if (confirmPasswordToggle && confirmPasswordInput) {
+        confirmPasswordToggle.addEventListener('click', () => {
+            const isHidden = confirmPasswordInput.getAttribute('type') === 'password';
+            confirmPasswordInput.setAttribute('type', isHidden ? 'text' : 'password');
+            confirmPasswordToggle.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+            const icon = confirmPasswordToggle.querySelector('i');
             if (icon) {
                 icon.classList.toggle('mdi-eye-outline', !isHidden);
                 icon.classList.toggle('mdi-eye-off-outline', isHidden);
