@@ -9,3 +9,6 @@ Sugestao de nomes:
 - flights.png
 - lodgings.png
 - cars.png
+
+Observacao:
+- O screenshot de `register.png` deve refletir os campos obrigatorios atuais (email, first name, last name, password, confirm password).

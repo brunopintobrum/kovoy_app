@@ -15,7 +15,7 @@
 - Seguranca: Helmet, rate limit, CSRF para operacoes de escrita.
 
 ## Data Model
-- users: id, email, password_hash, google_sub, first_name, last_name, display_name, email_verified_at, two_factor_enabled, created_at.
+- users: id, email, password_hash, google_sub, first_name, last_name, display_name, avatar_url, email_verified_at, two_factor_enabled, created_at.
 - tokens: refresh_tokens, email_verification_tokens, reset_tokens, two_factor_codes.
 - viagem: trips, trip_flights, trip_lodgings, trip_cars, trip_expenses, trip_transports, trip_timeline, trip_reminders.
 
@@ -23,8 +23,9 @@
 - Register/login via `/api/register` e `/api/login`.
 - Email verification opcional por `EMAIL_VERIFICATION_REQUIRED`.
 - Two-factor por email opcional por `TWO_FACTOR_REQUIRED` ou flag do usuario.
-- Google OAuth com scope `openid email profile`, mapeando `given_name` e `family_name` para `first_name` e `last_name`.
+- Google OAuth com scope `openid email profile`, mapeando `given_name` e `family_name` para `first_name` e `last_name`, e `picture` para `avatar_url`.
 - CSRF: header `x-csrf-token` deve bater com cookie `csrf_token` em operacoes de escrita.
+- Regras de senha no cadastro: minimo 9 caracteres, 1 maiuscula, 1 minuscula, 1 numero, 1 especial.
 
 ## UI/UX Guidelines
 - UI baseada no template Skote; manter consistencia visual.

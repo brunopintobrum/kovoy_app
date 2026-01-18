@@ -19,8 +19,10 @@ Deploy: sem deploy publico no momento.
 - Two-factor por email (opcional por config)
 - Refresh tokens e expiracao configuravel
 - Tela de login baseada no template Skote (UI fiel)
-- Cadastro, logout, perfil e recuperacao de senha
+- Cadastro com email, primeiro nome, sobrenome, senha e confirmacao de senha
+- Logout, perfil e recuperacao de senha
 - Login social via Google OAuth
+- Foto do usuario via Google (campo `avatar_url`)
 - Painel protegido `orlando.html` com dados da viagem
 - CRUD completo de viagem: voos, hospedagens, carros, despesas, transportes, timeline e lembretes
 - Protecao CSRF para operacoes de escrita
@@ -55,6 +57,12 @@ Schema criado automaticamente no boot. Tabelas principais:
 - `users`, `refresh_tokens`, `email_verification_tokens`, `reset_tokens`, `two_factor_codes`
 - `trips`, `trip_flights`, `trip_lodgings`, `trip_cars`
 - `trip_expenses`, `trip_transports`, `trip_timeline`, `trip_reminders`
+
+Campos relevantes em `users`:
+
+- `email`, `password_hash`, `google_sub`
+- `first_name`, `last_name`, `display_name`, `avatar_url`
+- `email_verified_at`, `two_factor_enabled`, `created_at`
 
 ## Requisitos
 
@@ -182,7 +190,7 @@ Auth:
 Principais endpoints:
 
 - `POST /login` { `email`, `password` }
-- `POST /register` { `email`, `password` }
+- `POST /register` { `email`, `firstName`, `lastName`, `password`, `confirmPassword` }
 - `POST /logout`
 - `GET /me`
 - `POST /forgot` { `email` }

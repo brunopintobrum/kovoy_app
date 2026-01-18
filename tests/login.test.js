@@ -98,6 +98,7 @@ describe('Login page', () => {
     });
 
     test('submits payload with remember me', async () => {
+        jest.useFakeTimers();
         let payload;
         setupLoginPage({
             match: (url) => url === '/api/login',
@@ -107,16 +108,20 @@ describe('Login page', () => {
             }
         });
 
-        await userEvent.type(screen.getByLabelText('Email'), 'user@example.com');
-        await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
-        await userEvent.click(screen.getByLabelText('Remember me'));
-        await userEvent.click(screen.getByRole('button', { name: /log in/i }));
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+        await user.type(screen.getByLabelText('Email'), 'user@example.com');
+        await user.type(screen.getByLabelText('Password'), 'Password123!');
+        await user.click(screen.getByLabelText('Remember me'));
+        await user.click(screen.getByRole('button', { name: /log in/i }));
 
         expect(payload).toMatchObject({
             email: 'user@example.com',
             password: 'Password123!',
             remember: true
         });
+
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
     });
 
     test('shows error on invalid credentials (401)', async () => {

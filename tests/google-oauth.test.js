@@ -76,7 +76,8 @@ describe('Google OAuth flow', () => {
             iss: 'https://accounts.google.com',
             name: 'Google User',
             given_name: 'Google',
-            family_name: 'User'
+            family_name: 'User',
+            picture: 'https://lh3.googleusercontent.com/avatar.jpg'
         };
         db.prepare('DELETE FROM users').run();
     });
@@ -123,6 +124,7 @@ describe('Google OAuth flow', () => {
         expect(user.first_name).toBe('Google');
         expect(user.last_name).toBe('User');
         expect(user.display_name).toBe('Google User');
+        expect(user.avatar_url).toBe('https://lh3.googleusercontent.com/avatar.jpg');
         expect(user.email_verified_at).toBeTruthy();
     });
 

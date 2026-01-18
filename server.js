@@ -93,6 +93,7 @@ db.exec(`
         first_name TEXT,
         last_name TEXT,
         display_name TEXT,
+        avatar_url TEXT,
         created_at TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS reset_tokens (
@@ -243,6 +244,7 @@ const hasTwoFactorEnabled = userColumns.some((column) => column.name === 'two_fa
 const hasDisplayName = userColumns.some((column) => column.name === 'display_name');
 const hasFirstName = userColumns.some((column) => column.name === 'first_name');
 const hasLastName = userColumns.some((column) => column.name === 'last_name');
+const hasAvatarUrl = userColumns.some((column) => column.name === 'avatar_url');
 if (!hasGoogleSub) {
     db.exec('ALTER TABLE users ADD COLUMN google_sub TEXT');
 }
@@ -260,6 +262,9 @@ if (!hasFirstName) {
 }
 if (!hasLastName) {
     db.exec('ALTER TABLE users ADD COLUMN last_name TEXT');
+}
+if (!hasAvatarUrl) {
+    db.exec('ALTER TABLE users ADD COLUMN avatar_url TEXT');
 }
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL');
 db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user ON email_verification_tokens(user_id)');
@@ -372,6 +377,15 @@ const normalizeOptionalName = (value) => {
     if (trimmed.length > 80) {
         return { error: 'Name must be 80 characters or fewer.' };
     }
+    return { value: trimmed };
+};
+
+const normalizeOptionalUrl = (value) => {
+    if (value === undefined || value === null) return { value: null };
+    if (typeof value !== 'string') return { value: null };
+    const trimmed = value.trim();
+    if (!trimmed) return { value: null };
+    if (trimmed.length > 500) return { value: null };
     return { value: trimmed };
 };
 
@@ -833,6 +847,7 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
     const rawDisplayName = tokenInfoResponse.data && tokenInfoResponse.data.name;
     const givenName = tokenInfoResponse.data && tokenInfoResponse.data.given_name;
     const familyName = tokenInfoResponse.data && tokenInfoResponse.data.family_name;
+    const avatarUrlRaw = tokenInfoResponse.data && tokenInfoResponse.data.picture;
     const nameParts = splitFullName(rawDisplayName);
     const emailPrefix = email ? email.split('@')[0] : null;
     const firstNameResult = normalizeOptionalName(givenName || nameParts.first || emailPrefix);
@@ -849,6 +864,8 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
     const normalizedDisplayName = displayNameResult.error || !displayNameResult.value
         ? (fallbackDisplayNameResult.error ? null : fallbackDisplayNameResult.value)
         : displayNameResult.value;
+    const avatarUrlResult = normalizeOptionalUrl(avatarUrlRaw);
+    const normalizedAvatarUrl = avatarUrlResult.value;
     const tokenAud = tokenInfoResponse.data && tokenInfoResponse.data.aud;
     const tokenIss = tokenInfoResponse.data && tokenInfoResponse.data.iss;
     const issOk = tokenIss === 'https://accounts.google.com' || tokenIss === 'accounts.google.com';
@@ -884,6 +901,10 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
                 updates.push('display_name = ?');
                 values.push(normalizedDisplayName);
             }
+            if (!user.avatar_url && normalizedAvatarUrl) {
+                updates.push('avatar_url = ?');
+                values.push(normalizedAvatarUrl);
+            }
             if (updates.length) {
                 values.push(user.id);
                 db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`).run(...values);
@@ -909,6 +930,10 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
                 updates.push('display_name = ?');
                 values.push(normalizedDisplayName);
             }
+            if (!user.avatar_url && normalizedAvatarUrl) {
+                updates.push('avatar_url = ?');
+                values.push(normalizedAvatarUrl);
+            }
             if (updates.length) {
                 values.push(user.id);
                 db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`).run(...values);
@@ -918,7 +943,7 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
             const randomPassword = crypto.randomBytes(32).toString('hex');
             const passwordHash = bcrypt.hashSync(randomPassword, 10);
             const insert = db.prepare(
-                'INSERT INTO users (email, password_hash, google_sub, first_name, last_name, display_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+                'INSERT INTO users (email, password_hash, google_sub, first_name, last_name, display_name, avatar_url, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
             );
             insert.run(
                 email,
@@ -927,6 +952,7 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
                 firstNameValue,
                 lastNameValue,
                 normalizedDisplayName,
+                normalizedAvatarUrl,
                 new Date().toISOString()
             );
             user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
