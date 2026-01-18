@@ -200,7 +200,10 @@
         try {
             const res = await apiRequest('/api/me');
             if (res && res.email) {
-                setText('userEmail', res.email);
+                const firstName = res.firstName || '';
+                const lastName = res.lastName || '';
+                const displayName = res.displayName || `${firstName} ${lastName}`.trim();
+                setText('userEmail', displayName || res.email);
                 if (res.avatarUrl) {
                     setHeaderAvatar(res.avatarUrl);
                 }

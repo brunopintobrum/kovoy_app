@@ -17,3 +17,4 @@
 ## PR instructions
 - Commits e mensagens em pt-BR.
 - Verifique `git status -sb` antes de commitar.
+- Quando o usuario pedir commit e push, executar ambos diretamente sem solicitar confirmacao adicional.
