@@ -28,22 +28,22 @@
 - Regras de senha no cadastro: minimo 9 caracteres, 1 maiuscula, 1 minuscula, 1 numero, 1 especial.
 
 ## UI/UX Guidelines
-- UI baseada no template Skote; manter consistencia visual.
+- UI baseada no template Kovoy; manter consistencia visual.
 - Cadastro deve conter: email, first name, last name, password e confirm password.
-- O template Skote (ASP.NET Core) e a fonte da verdade para UI/UX, estruturas, componentes e nomenclaturas.
+- O template Kovoy (ASP.NET Core) e a fonte da verdade para UI/UX, estruturas, componentes e nomenclaturas.
 
 ## Conventions
 - Backend principal em `server.js`.
 - Frontend em `public/*.html` e `public/*.js`.
 - Colunas de banco em snake_case.
 
-## Skote Template (Regra Absoluta)
-- Caminho do template: `F:\OneDrive\PCTECH\Skote_Asp.net_v3.2.0\Skote Asp.net Core\Skote`.
+## Kovoy Template (Regra Absoluta)
+- Caminho do template: `F:\OneDrive\PCTECH\Kovoy_Asp.net_v3.2.0\Kovoy Asp.net Core\Kovoy`.
 - Antes de qualquer implementacao: analisar estrutura, Controllers/Views/ViewModels/Services, layouts, componentes, CSS/JS, validacoes e mensagens.
-- Replicar organizacao de pastas e padroes visuais/estruturais do Skote no projeto atual.
-- Nao criar estruturas novas se ja existir equivalente no Skote; nao mudar nomenclaturas sem justificativa tecnica.
-- Se algo nao existir no Skote: solucao mais simples, alinhada ao visual/arquitetura, com comentario curto justificando.
-- Validar antes de entregar: consistencia visual com Skote e padroes de codigo.
+- Replicar organizacao de pastas e padroes visuais/estruturais do Kovoy no projeto atual.
+- Nao criar estruturas novas se ja existir equivalente no Kovoy; nao mudar nomenclaturas sem justificativa tecnica.
+- Se algo nao existir no Kovoy: solucao mais simples, alinhada ao visual/arquitetura, com comentario curto justificando.
+- Validar antes de entregar: consistencia visual com Kovoy e padroes de codigo.
 
 ## Operations
 - Local: `npm start` (porta default 3000).
@@ -57,3 +57,5 @@
 - Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
 - `npm audit fix --force` aplicado para zerar vulnerabilidades.
 - `npm test` executado com sucesso.
+- Referencias ao template Skote atualizadas para Kovoy.
+

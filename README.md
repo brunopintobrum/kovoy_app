@@ -18,7 +18,7 @@ Deploy: sem deploy publico no momento.
 - Verificacao de email (opcional por config)
 - Two-factor por email (opcional por config)
 - Refresh tokens e expiracao configuravel
-- Tela de login baseada no template Skote (UI fiel)
+- Tela de login baseada no template Kovoy (UI fiel)
 - Cadastro com email, primeiro nome, sobrenome, senha e confirmacao de senha
 - Logout, perfil e recuperacao de senha
 - Login social via Google OAuth
@@ -302,3 +302,4 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
 - `npm audit fix --force` aplicado para zerar vulnerabilidades.
 - `npm test` executado com sucesso.
+
