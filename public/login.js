@@ -66,7 +66,7 @@
         try {
             const res = await fetch('/api/me');
             if (res.ok) {
-                window.location.href = '/orlando.html#dashboard';
+                window.location.href = '/dashboard#dashboard';
                 return;
             }
             if (res.status === 401) {
@@ -74,7 +74,7 @@
                 if (refreshed) {
                     const retry = await fetch('/api/me');
                     if (retry.ok) {
-                        window.location.href = '/orlando.html#dashboard';
+                        window.location.href = '/dashboard#dashboard';
                     }
                 }
             }
@@ -166,7 +166,7 @@
 
                 setAlert('Signed in successfully. Redirecting...', 'success');
                 setTimeout(() => {
-                    window.location.href = '/orlando.html#dashboard';
+                    window.location.href = '/dashboard#dashboard';
                 }, 600);
             } catch (err) {
                 setAlert('Connection error. Please try again.', 'error');

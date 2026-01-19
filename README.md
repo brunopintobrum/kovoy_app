@@ -23,7 +23,7 @@ Deploy: sem deploy publico no momento.
 - Logout, perfil e recuperacao de senha
 - Login social via Google OAuth
 - Foto do usuario via Google (campo `avatar_url`)
-- Painel protegido `orlando.html` com dados da viagem
+- Painel protegido `dashboard` com dados da viagem
 - CRUD completo de viagem: voos, hospedagens, carros, despesas, transportes, timeline e lembretes
 - Protecao CSRF para operacoes de escrita
 - Rate limiting e headers de seguranca
@@ -31,7 +31,7 @@ Deploy: sem deploy publico no momento.
 ### Roadmap
 
 - Envio real de email para reset de senha
-- Testes automatizados (unit/integration/e2e)
+- Ampliar cobertura E2E e testes de seguranca
 - CI/CD basico com lint/test/build
 - Observabilidade (logs estruturados/metrics)
 
@@ -84,7 +84,7 @@ URLs locais:
 - http://localhost:3000/register
 - http://localhost:3000/forgot
 - http://localhost:3000/reset
-- http://localhost:3000/orlando.html (protegida)
+- http://localhost:3000/dashboard (protegida)
 
 ## Configuracao de ambiente (.env)
 
@@ -158,12 +158,24 @@ REFRESH_TOKEN_TTL_DAYS_REMEMBER=30
 
 ## Testes
 
-Suite de testes com Jest.
+Suite de testes com Jest + Playwright.
 
 Rodar testes:
 
 ```bash
 npm test
+```
+
+Instalar navegadores do Playwright (primeira vez):
+
+```bash
+npx playwright install
+```
+
+Rodar E2E:
+
+```bash
+npm run test:e2e
 ```
 
 No Windows, se houver travamento, use:
@@ -265,9 +277,10 @@ Checklist de producao:
 
 ## CI/CD
 
-Pipeline ainda nao definido. Sugestao:
+Pipeline basico via GitHub Actions:
 
-- Lint + testes
+- npm test
+- npm run test:e2e
 - Build (se existir)
 - Deploy automatico
 
@@ -302,4 +315,5 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
 - `npm audit fix --force` aplicado para zerar vulnerabilidades.
 - `npm test` executado com sucesso.
+- Playwright E2E e pipeline CI adicionados.
 

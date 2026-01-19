@@ -810,10 +810,11 @@ app.get('/two-step-verification', (req, res) => {
     }
     return res.sendFile(path.join(PUBLIC_DIR, 'two-step-verification.html'));
 });
-app.get('/orlando.html', authRequired, (req, res) => {
+app.get('/dashboard', authRequired, (req, res) => {
     ensureCsrfCookie(req, res);
     return res.sendFile(path.join(ROOT_DIR, 'orlando.html'));
 });
+app.get('/orlando.html', (req, res) => res.redirect('/dashboard'));
 
 app.get('/api/auth/google', authLimiter, (req, res) => {
     const { clientId, clientSecret, redirectUri } = getGoogleConfig(req);
@@ -1027,7 +1028,7 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
         const refreshToken = createRefreshToken(user.id, remember, req);
         setRefreshCookie(res, refreshToken.rawToken, refreshToken.ttlDays);
 
-        return res.redirect('/orlando.html#dashboard');
+        return res.redirect('/dashboard#dashboard');
     } catch (err) {
         console.error('Google auth error:', err);
         return res.redirect('/login?google=error');
@@ -2615,5 +2616,16 @@ module.exports = {
     db,
     startServer,
     createEmailVerificationToken,
-    createTwoFactorCode
+    createTwoFactorCode,
+    splitFullName,
+    normalizeDisplayName,
+    validatePassword,
+    validateFlightPayload,
+    validateLodgingPayload,
+    validateCarPayload,
+    validateExpensePayload,
+    validateTransportPayload,
+    validateTimelinePayload,
+    validateReminderPayload,
+    validateTripMetaPayload
 };

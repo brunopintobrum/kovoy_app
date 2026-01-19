@@ -116,7 +116,7 @@ describe('Google OAuth flow', () => {
         );
 
         expect(callbackRes.status).toBe(302);
-        expect(callbackRes.headers.get('location')).toBe('/orlando.html#dashboard');
+        expect(callbackRes.headers.get('location')).toBe('/dashboard#dashboard');
 
         const user = db.prepare('SELECT * FROM users WHERE google_sub = ?').get('google-sub-123');
         expect(user).toBeTruthy();
