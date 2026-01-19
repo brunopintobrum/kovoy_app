@@ -371,3 +371,4 @@ data/
 .env.*
 npm-debug.log*
 public/uploads/
+test-results/
