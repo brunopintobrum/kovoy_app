@@ -940,6 +940,56 @@
         });
     };
 
+    const bindRightSidebarToggle = () => {
+        const toggles = document.querySelectorAll('.right-bar-toggle');
+        if (!toggles.length) return;
+
+        const handleToggle = (event) => {
+            event.preventDefault();
+            document.body.classList.toggle('right-bar-enabled');
+        };
+
+        toggles.forEach((toggle) => toggle.addEventListener('click', handleToggle));
+
+        document.addEventListener('click', (event) => {
+            if (event.target.closest('.right-bar-toggle, .right-bar')) {
+                return;
+            }
+            document.body.classList.remove('right-bar-enabled');
+        });
+    };
+
+    const bindThemeSwitch = () => {
+        const lightSwitch = document.getElementById('light-mode-switch');
+        const darkSwitch = document.getElementById('dark-mode-switch');
+        const bootstrapStyle = document.getElementById('bootstrap-style');
+        const appStyle = document.getElementById('app-style');
+        if (!lightSwitch || !darkSwitch || !bootstrapStyle || !appStyle) return;
+
+        const applyTheme = (mode) => {
+            if (mode === 'dark') {
+                darkSwitch.checked = true;
+                lightSwitch.checked = false;
+                bootstrapStyle.setAttribute('href', 'assets/css/bootstrap-dark.min.css');
+                appStyle.setAttribute('href', 'assets/css/app-dark.min.css');
+                localStorage.setItem('theme_mode', 'dark');
+            } else {
+                lightSwitch.checked = true;
+                darkSwitch.checked = false;
+                bootstrapStyle.setAttribute('href', 'assets/css/bootstrap.min.css');
+                appStyle.setAttribute('href', 'assets/css/app.min.css');
+                localStorage.setItem('theme_mode', 'light');
+            }
+            document.documentElement.removeAttribute('dir');
+        };
+
+        const stored = localStorage.getItem('theme_mode');
+        applyTheme(stored === 'dark' ? 'dark' : 'light');
+
+        lightSwitch.addEventListener('change', () => applyTheme('light'));
+        darkSwitch.addEventListener('change', () => applyTheme('dark'));
+    };
+
 const resetForm = (form, editingKey) => {
         form.reset();
         state.editing[editingKey] = null;
@@ -1074,6 +1124,8 @@ const resetForm = (form, editingKey) => {
         bindAvatarChange();
         bindLogout();
         bindVerticalMenuToggle();
+        bindRightSidebarToggle();
+        bindThemeSwitch();
 
         const initialModule = getModuleFromHash();
         if (!window.location.hash) {
