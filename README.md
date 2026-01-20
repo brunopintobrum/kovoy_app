@@ -9,7 +9,7 @@ Deploy: sem deploy publico no momento.
 - Screenshots/GIF (adicione em `docs/` e atualize os links abaixo):
   - `docs/login.png`
   - `docs/register.png`
-  - `docs/orlando.png`
+  - `docs/dashboard.png`
 - Video curto (opcional): (adicione o link aqui)
 
 ## Features
