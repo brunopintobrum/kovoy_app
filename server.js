@@ -1615,6 +1615,136 @@ const saveExpenseWithSplits = db.transaction((expenseId, splitType, splitRows) =
     });
 });
 
+const toCents = (amount) => Math.round(Number(amount || 0) * 100);
+const fromCents = (cents) => Number((cents / 100).toFixed(2));
+
+const buildEqualCentsSplits = (totalCents, targetIds) => {
+    const count = targetIds.length;
+    const base = Math.floor(totalCents / count);
+    const remainder = totalCents % count;
+    return targetIds.map((targetId, index) => ({
+        targetId,
+        cents: base + (index < remainder ? 1 : 0)
+    }));
+};
+
+const buildBalanceState = ({ participants, families, expenses, expenseSplits }) => {
+    const participantById = new Map();
+    const familyById = new Map();
+    const participantBalances = new Map();
+    const familyBalances = new Map();
+
+    (participants || []).forEach((participant) => {
+        participantById.set(participant.id, participant);
+        participantBalances.set(participant.id, 0);
+    });
+
+    (families || []).forEach((family) => {
+        familyById.set(family.id, family);
+        familyBalances.set(family.id, 0);
+    });
+
+    const participantsByFamily = new Map();
+    (participants || []).forEach((participant) => {
+        if (!participant.familyId) return;
+        if (!participantsByFamily.has(participant.familyId)) {
+            participantsByFamily.set(participant.familyId, []);
+        }
+        participantsByFamily.get(participant.familyId).push(participant.id);
+    });
+
+    (expenses || []).forEach((expense) => {
+        const expenseSplitsList = expenseSplits.get(expense.id) || [];
+        const amountCents = toCents(expense.amount);
+        if (participantBalances.has(expense.payerParticipantId)) {
+            participantBalances.set(
+                expense.payerParticipantId,
+                participantBalances.get(expense.payerParticipantId) + amountCents
+            );
+        }
+
+        expenseSplitsList.forEach((split) => {
+            const splitCents = toCents(split.amount);
+            if (split.targetType === 'participant') {
+                if (participantBalances.has(split.targetId)) {
+                    participantBalances.set(
+                        split.targetId,
+                        participantBalances.get(split.targetId) - splitCents
+                    );
+                }
+                return;
+            }
+
+            if (split.targetType === 'family') {
+                if (familyBalances.has(split.targetId)) {
+                    familyBalances.set(
+                        split.targetId,
+                        familyBalances.get(split.targetId) - splitCents
+                    );
+                }
+                const familyParticipants = participantsByFamily.get(split.targetId) || [];
+                if (!familyParticipants.length) return;
+                const distributed = buildEqualCentsSplits(splitCents, familyParticipants);
+                distributed.forEach((share) => {
+                    participantBalances.set(
+                        share.targetId,
+                        participantBalances.get(share.targetId) - share.cents
+                    );
+                });
+            }
+        });
+    });
+
+    return {
+        participantBalances,
+        familyBalances,
+        participantById,
+        familyById
+    };
+};
+
+const buildDebtPlan = (participantBalances) => {
+    const creditors = [];
+    const debtors = [];
+
+    participantBalances.forEach((balance, participantId) => {
+        if (balance > 0) {
+            creditors.push({ participantId, balance });
+        } else if (balance < 0) {
+            debtors.push({ participantId, balance: Math.abs(balance) });
+        }
+    });
+
+    creditors.sort((a, b) => b.balance - a.balance);
+    debtors.sort((a, b) => b.balance - a.balance);
+
+    const transfers = [];
+    let creditorIndex = 0;
+    let debtorIndex = 0;
+
+    while (creditorIndex < creditors.length && debtorIndex < debtors.length) {
+        const creditor = creditors[creditorIndex];
+        const debtor = debtors[debtorIndex];
+        const amount = Math.min(creditor.balance, debtor.balance);
+
+        if (amount > 0) {
+            transfers.push({
+                fromParticipantId: debtor.participantId,
+                toParticipantId: creditor.participantId,
+                amount: fromCents(amount)
+            });
+        }
+
+        creditor.balance -= amount;
+        debtor.balance -= amount;
+
+        if (creditor.balance === 0) creditorIndex += 1;
+        if (debtor.balance === 0) debtorIndex += 1;
+    }
+
+    return transfers;
+};
+
 app.get('/api/groups/:groupId/expenses', authRequiredApi, requireGroupMember, (req, res) => {
     const expenses = listExpenses.all(req.groupId).map((row) => {
         const splits = listExpenseSplits.all(row.id).map((split) => ({
@@ -1728,6 +1858,55 @@ app.delete(
         return res.json({ ok: true });
     }
 );
+
+app.get('/api/groups/:groupId/summary', authRequiredApi, requireGroupMember, (req, res) => {
+    const participants = listParticipants.all(req.groupId).map((row) => ({
+        id: row.id,
+        familyId: row.family_id,
+        displayName: row.display_name
+    }));
+    const families = listFamilies.all(req.groupId).map((row) => ({
+        id: row.id,
+        name: row.name
+    }));
+    const expenses = listExpenses.all(req.groupId).map((row) => ({
+        id: row.id,
+        amount: row.amount,
+        payerParticipantId: row.payer_participant_id
+    }));
+    const expenseSplits = new Map();
+    expenses.forEach((expense) => {
+        const splits = listExpenseSplits.all(expense.id).map((split) => ({
+            targetType: split.target_type,
+            targetId: split.target_id,
+            amount: split.amount
+        }));
+        expenseSplits.set(expense.id, splits);
+    });
+
+    const state = buildBalanceState({ participants, families, expenses, expenseSplits });
+    const participantBalances = participants.map((participant) => ({
+        participantId: participant.id,
+        displayName: participant.displayName,
+        familyId: participant.familyId,
+        balance: fromCents(state.participantBalances.get(participant.id) || 0)
+    }));
+    const familyBalances = families.map((family) => ({
+        familyId: family.id,
+        name: family.name,
+        balance: fromCents(state.familyBalances.get(family.id) || 0)
+    }));
+    const debts = buildDebtPlan(state.participantBalances);
+
+    return res.json({
+        ok: true,
+        data: {
+            participantBalances,
+            familyBalances,
+            debts
+        }
+    });
+});
 
 app.post(
     '/api/groups/:groupId/invitations',
@@ -3382,6 +3561,8 @@ module.exports = {
     validateFamilyPayload,
     validateParticipantPayload,
     validateExpenseSplitPayload,
+    buildBalanceState,
+    buildDebtPlan,
     validateFlightPayload,
     validateLodgingPayload,
     validateCarPayload,
