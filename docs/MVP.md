@@ -5,7 +5,7 @@
 - [x] Estrutura multi-grupo (groupId em todas as entidades)
 - [x] Familias e participantes (pessoas podem existir sem login)
 - [x] Despesas com split igual por pessoa e por familia
-- [ ] Dashboard de saldos e "quem deve pra quem"
+- [x] Dashboard de saldos e "quem deve pra quem" (backend)
 
 ## Modulos do sistema
 - [x] Auth
@@ -41,10 +41,10 @@
   - [x] Split igual por familia
   - [ ] Split manual (V1.1)
 - [ ] Dashboard
-  - [ ] Total do grupo
-  - [ ] Saldo por participant
-  - [ ] Saldo por familia
-  - [ ] Lista "quem deve pra quem"
+  - [ ] Total do grupo (UI)
+  - [x] Saldo por participant (backend)
+  - [x] Saldo por familia (backend)
+  - [x] Lista "quem deve pra quem" (backend)
 
 ## Regras de negocio (MVP)
 - [x] Tudo pertence a um groupId
@@ -53,7 +53,7 @@
 - [x] Participant pode existir sem login
 - [x] Family e agrupador de participants
 - [x] Despesa tem pagador + split
-- [ ] Split soma exatamente o total (validacao e teste dedicado)
+- [x] Split soma exatamente o total (validacao e teste dedicado)
 
 ## Modelo de dados (MVP)
 - [x] User
@@ -70,7 +70,7 @@
 - [ ] Fluxo B: Convidar e entrar no grupo
 - [ ] Fluxo C: Montar familias e participantes
 - [ ] Fluxo D: Criar despesa e dividir
-- [ ] Fluxo E: Ver saldos e "quem deve pra quem"
+- [x] Fluxo E: Ver saldos e "quem deve pra quem" (backend)
 
 ## UI (Skote)
 - [ ] Tela "Meus grupos"
@@ -89,8 +89,8 @@
 - [ ] Split por pessoa (unit)
 - [ ] Split por familia (unit)
 - [ ] Validacao de soma do split (unit)
-- [ ] Saldo por participant (unit)
-- [ ] Quem deve pra quem (unit)
+- [x] Saldo por participant (unit)
+- [x] Quem deve pra quem (unit)
 - [ ] Convite expira (integration)
 - [ ] Convite nao pode ser reutilizado (integration)
 
