@@ -15,7 +15,7 @@
   - [x] Criar grupo (nome, moeda)
   - [x] Listar meus grupos
   - [x] Membership por groupId
-  - [ ] Selecionar grupo ativo (UI)
+  - [x] Selecionar grupo ativo (UI)
 - [x] Convites
   - [x] Criar convite (email + role)
   - [x] Aceitar convite
@@ -41,7 +41,7 @@
   - [x] Split igual por familia
   - [ ] Split manual (V1.1)
 - [ ] Dashboard
-  - [ ] Total do grupo (UI)
+  - [x] Total do grupo (UI)
   - [x] Saldo por participant (backend)
   - [x] Saldo por familia (backend)
   - [x] Lista "quem deve pra quem" (backend)
@@ -73,17 +73,17 @@
 - [x] Fluxo E: Ver saldos e "quem deve pra quem" (backend)
 
 ## UI (Skote)
-- [ ] Tela "Meus grupos"
-  - [ ] Criar grupo
-  - [ ] Entrar por convite
-  - [ ] Listar grupos do usuario
-- [ ] Tela "Grupo"
-  - [ ] Bloco de participantes/familias
-  - [ ] Bloco de despesas
-  - [ ] Bloco de dashboard
-- [ ] Dashboard do grupo
-  - [ ] Cards de saldo
-  - [ ] Lista de dividas (quem deve pra quem)
+- [x] Tela "Meus grupos"
+  - [x] Criar grupo
+  - [x] Entrar por convite
+  - [x] Listar grupos do usuario
+- [x] Tela "Grupo"
+  - [x] Bloco de participantes/familias
+  - [x] Bloco de despesas
+  - [x] Bloco de dashboard
+- [x] Dashboard do grupo
+  - [x] Cards de saldo
+  - [x] Lista de dividas (quem deve pra quem)
 
 ## Testes
 - [ ] Split por pessoa (unit)
