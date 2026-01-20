@@ -1,6 +1,6 @@
 # Orlando 2026
 
-App web com autenticacao (email/senha e Google OAuth) e painel protegido para organizar a viagem (voos, hospedagens, carros, despesas, transportes, timeline e lembretes).
+App web com autenticacao (email/senha e Google OAuth) e painel protegido para organizar viagens em grupo (grupos, participantes, despesas, saldos e quem deve pra quem).
 
 Deploy: sem deploy publico no momento.
 
@@ -18,19 +18,23 @@ Deploy: sem deploy publico no momento.
 - Verificacao de email (opcional por config)
 - Two-factor por email (opcional por config)
 - Refresh tokens e expiracao configuravel
-- Tela de login baseada no template Kovoy (UI fiel)
+- Tela de login baseada no template Skote (UI fiel)
 - Cadastro com email, primeiro nome, sobrenome, senha e confirmacao de senha
 - Logout, perfil e recuperacao de senha
 - Login social via Google OAuth
 - Foto do usuario via Google (campo `avatar_url`)
-- Painel protegido `dashboard` com dados da viagem
-- CRUD completo de viagem: voos, hospedagens, carros, despesas, transportes, timeline e lembretes
+- Grupos: criar e listar, membership por groupId
+- Convites: criar e aceitar convite
+- Familias e participantes (pessoas sem login)
+- Despesas com split igual por pessoa ou por familia
+- Dashboard do grupo com saldos e "quem deve pra quem"
 - Protecao CSRF para operacoes de escrita
 - Rate limiting e headers de seguranca
 
 ### Roadmap
 
-- Envio real de email para reset de senha
+- V2: voos/hospedagens/transporte/tickets como modulos por grupo
+- Anexos/recibos e categorias avancadas
 - Ampliar cobertura E2E e testes de seguranca
 - CI/CD basico com lint/test/build
 - Observabilidade (logs estruturados/metrics)
@@ -55,8 +59,10 @@ Diagrama simples:
 Schema criado automaticamente no boot. Tabelas principais:
 
 - `users`, `refresh_tokens`, `email_verification_tokens`, `reset_tokens`, `two_factor_codes`
-- `trips`, `trip_flights`, `trip_lodgings`, `trip_cars`
-- `trip_expenses`, `trip_transports`, `trip_timeline`, `trip_reminders`
+- `groups`, `group_members`, `invitations`
+- `families`, `participants`
+- `expenses`, `expense_splits`
+- (legado) `trips`, `trip_flights`, `trip_lodgings`, `trip_cars`, `trip_expenses`, `trip_transports`, `trip_timeline`, `trip_reminders`
 
 Campos relevantes em `users`:
 
@@ -84,7 +90,8 @@ URLs locais:
 - http://localhost:3000/register
 - http://localhost:3000/forgot
 - http://localhost:3000/reset
-- http://localhost:3000/dashboard (protegida)
+- http://localhost:3000/groups (protegida)
+- http://localhost:3000/dashboard?groupId=1 (protegida)
 
 ## Configuracao de ambiente (.env)
 
@@ -188,7 +195,7 @@ Sugestao de padrao:
 
 - Unit: autenticacao, tokens e validacoes
 - Integration: rotas `/api/*`
-- E2E: fluxo login/cadastro/reset
+- E2E: fluxo login/cadastro/grupo/despesa
 
 ## Documentacao da API
 
@@ -201,46 +208,34 @@ Auth:
 
 Principais endpoints:
 
-- `POST /login` { `email`, `password` }
-- `POST /register` { `email`, `firstName`, `lastName`, `password`, `confirmPassword` }
-- `POST /logout`
-- `GET /me`
-- `POST /forgot` { `email` }
-- `POST /reset` { `token`, `password` }
-- `GET /auth/google`
-- `GET /auth/google/callback`
-- `GET /trip`
-- `POST /trip`
-- `GET /trip/meta`
-- `PUT /trip/meta`
-- `GET /trip/flights`
-- `POST /trip/flights`
-- `PUT /trip/flights/:id`
-- `DELETE /trip/flights/:id`
-- `GET /trip/lodgings`
-- `POST /trip/lodgings`
-- `PUT /trip/lodgings/:id`
-- `DELETE /trip/lodgings/:id`
-- `GET /trip/cars`
-- `POST /trip/cars`
-- `PUT /trip/cars/:id`
-- `DELETE /trip/cars/:id`
-- `GET /trip/expenses`
-- `POST /trip/expenses`
-- `PUT /trip/expenses/:id`
-- `DELETE /trip/expenses/:id`
-- `GET /trip/transports`
-- `POST /trip/transports`
-- `PUT /trip/transports/:id`
-- `DELETE /trip/transports/:id`
-- `GET /trip/timeline`
-- `POST /trip/timeline`
-- `PUT /trip/timeline/:id`
-- `DELETE /trip/timeline/:id`
-- `GET /trip/reminders`
-- `POST /trip/reminders`
-- `PUT /trip/reminders/:id`
-- `DELETE /trip/reminders/:id`
+- `POST /api/login` { `email`, `password` }
+- `POST /api/register` { `email`, `firstName`, `lastName`, `password`, `confirmPassword` }
+- `POST /api/logout`
+- `GET /api/me`
+- `POST /api/forgot` { `email` }
+- `POST /api/reset` { `token`, `password` }
+- `GET /api/auth/google`
+- `GET /api/auth/google/callback`
+- `POST /api/groups`
+- `GET /api/groups`
+- `GET /api/groups/:groupId/members`
+- `POST /api/groups/:groupId/invitations`
+- `POST /api/invitations/accept`
+- `GET /api/groups/:groupId/families`
+- `POST /api/groups/:groupId/families`
+- `PUT /api/groups/:groupId/families/:familyId`
+- `DELETE /api/groups/:groupId/families/:familyId`
+- `GET /api/groups/:groupId/participants`
+- `POST /api/groups/:groupId/participants`
+- `PUT /api/groups/:groupId/participants/:participantId`
+- `DELETE /api/groups/:groupId/participants/:participantId`
+- `GET /api/groups/:groupId/expenses`
+- `POST /api/groups/:groupId/expenses`
+- `PUT /api/groups/:groupId/expenses/:expenseId`
+- `DELETE /api/groups/:groupId/expenses/:expenseId`
+- `GET /api/groups/:groupId/summary`
+
+Endpoints legado (viagem) ainda existem, mas nao fazem parte do MVP atual.
 
 Exemplo rapido:
 

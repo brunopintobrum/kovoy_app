@@ -86,8 +86,8 @@
   - [x] Lista de dividas (quem deve pra quem)
 
 ## Testes
-- [ ] Split por pessoa (unit)
-- [ ] Split por familia (unit)
+- [x] Split por pessoa (unit)
+- [x] Split por familia (unit)
 - [ ] Validacao de soma do split (unit)
 - [x] Saldo por participant (unit)
 - [x] Quem deve pra quem (unit)

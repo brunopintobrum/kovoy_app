@@ -1,11 +1,11 @@
 # Project Context
 
 ## Overview
-- App web para organizar a viagem Orlando 2026, com cadastro/login (email/senha e Google OAuth) e painel protegido.
+- App web para organizar viagens em grupo (Orlando 2026), com cadastro/login (email/senha e Google OAuth) e painel protegido por grupo.
 - Usuario final: equipe/familia planejando viagem, com foco em cadastro simples e seguranca basica.
 
 ## Scope
-- In scope: autenticacao, verificacao de email, two-factor por email, painel protegido e CRUD de viagem.
+- In scope: autenticacao, verificacao de email, two-factor por email, grupos, convites, familias, participantes, despesas e dashboard de saldos.
 - Out of scope (por enquanto): deploy publico, pagamentos, integracoes externas alem de Google OAuth, app mobile.
 
 ## Architecture
@@ -17,7 +17,8 @@
 ## Data Model
 - users: id, email, password_hash, google_sub, first_name, last_name, display_name, avatar_url, email_verified_at, two_factor_enabled, created_at.
 - tokens: refresh_tokens, email_verification_tokens, reset_tokens, two_factor_codes.
-- viagem: trips, trip_flights, trip_lodgings, trip_cars, trip_expenses, trip_transports, trip_timeline, trip_reminders.
+- grupos: groups, group_members, invitations, families, participants, expenses, expense_splits.
+- legado: trips, trip_flights, trip_lodgings, trip_cars, trip_expenses, trip_transports, trip_timeline, trip_reminders.
 
 ## Auth & Security
 - Register/login via `/api/register` e `/api/login`.
@@ -28,9 +29,9 @@
 - Regras de senha no cadastro: minimo 9 caracteres, 1 maiuscula, 1 minuscula, 1 numero, 1 especial.
 
 ## UI/UX Guidelines
-- UI baseada no template Kovoy; manter consistencia visual.
+- UI baseada no template Skote; manter consistencia visual.
 - Cadastro deve conter: email, first name, last name, password e confirm password.
-- O template Kovoy (ASP.NET Core) e a fonte da verdade para UI/UX, estruturas, componentes e nomenclaturas.
+- O template Skote (ASP.NET Core) e a fonte da verdade para UI/UX, estruturas, componentes e nomenclaturas.
 
 ## Conventions
 - Backend principal em `server.js`.
@@ -57,6 +58,6 @@
 - Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
 - `npm audit fix --force` aplicado para zerar vulnerabilidades.
 - `npm test` executado com sucesso.
-- Referencias ao template Skote atualizadas para Kovoy.
 - Playwright E2E e pipeline CI adicionados.
+- E2E atualizado para fluxo de grupos e webserver dedicado.
 
