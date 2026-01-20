@@ -1316,6 +1316,36 @@ const countParticipantsByFamily = db.prepare(`
     FROM participants
     WHERE family_id = ? AND group_id = ?
 `);
+const listExpenses = db.prepare(`
+    SELECT id, description, amount, currency, date, category, payer_participant_id, created_at
+    FROM expenses
+    WHERE group_id = ?
+    ORDER BY date DESC, id DESC
+`);
+const getExpense = db.prepare('SELECT id FROM expenses WHERE id = ? AND group_id = ?');
+const insertExpense = db.prepare(`
+    INSERT INTO expenses (group_id, description, amount, currency, date, category, payer_participant_id, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+`);
+const updateExpense = db.prepare(`
+    UPDATE expenses
+    SET description = ?, amount = ?, currency = ?, date = ?, category = ?, payer_participant_id = ?
+    WHERE id = ? AND group_id = ?
+`);
+const deleteExpense = db.prepare('DELETE FROM expenses WHERE id = ? AND group_id = ?');
+const listExpenseSplits = db.prepare(`
+    SELECT target_type, target_id, amount
+    FROM expense_splits
+    WHERE expense_id = ?
+    ORDER BY id
+`);
+const insertExpenseSplit = db.prepare(`
+    INSERT INTO expense_splits (expense_id, target_type, target_id, amount)
+    VALUES (?, ?, ?, ?)
+`);
+const deleteExpenseSplits = db.prepare('DELETE FROM expense_splits WHERE expense_id = ?');
+const listParticipantIds = db.prepare('SELECT id FROM participants WHERE group_id = ?');
+const listFamilyIds = db.prepare('SELECT id FROM families WHERE group_id = ?');
 const insertInvitation = db.prepare(`
     INSERT INTO invitations
     (group_id, email, role, token, expires_at, status, invited_by_user_id, created_at)
@@ -1555,6 +1585,146 @@ app.delete(
             return res.status(404).json({ error: 'Participant not found.' });
         }
         deleteParticipant.run(participantId, req.groupId);
+        return res.json({ ok: true });
+    }
+);
+
+const buildEqualSplits = (totalAmount, targetIds) => {
+    const totalCents = Math.round(totalAmount * 100);
+    const count = targetIds.length;
+    const base = Math.floor(totalCents / count);
+    const remainder = totalCents % count;
+    return targetIds.map((targetId, index) => ({
+        targetId,
+        amount: (base + (index < remainder ? 1 : 0)) / 100
+    }));
+};
+
+const validateSplitTargets = (groupId, splitType, targetIds) => {
+    const available = splitType === 'participants'
+        ? listParticipantIds.all(groupId).map((row) => row.id)
+        : listFamilyIds.all(groupId).map((row) => row.id);
+    const availableSet = new Set(available);
+    return targetIds.every((id) => availableSet.has(id));
+};
+
+const saveExpenseWithSplits = db.transaction((expenseId, splitType, splitRows) => {
+    deleteExpenseSplits.run(expenseId);
+    splitRows.forEach((row) => {
+        insertExpenseSplit.run(expenseId, splitType, row.targetId, row.amount);
+    });
+});
+
+app.get('/api/groups/:groupId/expenses', authRequiredApi, requireGroupMember, (req, res) => {
+    const expenses = listExpenses.all(req.groupId).map((row) => {
+        const splits = listExpenseSplits.all(row.id).map((split) => ({
+            targetType: split.target_type,
+            targetId: split.target_id,
+            amount: split.amount
+        }));
+        return {
+            id: row.id,
+            description: row.description,
+            amount: row.amount,
+            currency: row.currency,
+            date: row.date,
+            category: row.category,
+            payerParticipantId: row.payer_participant_id,
+            splits
+        };
+    });
+    return res.json({ ok: true, data: expenses });
+});
+
+app.post(
+    '/api/groups/:groupId/expenses',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const normalized = validateExpenseSplitPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        if (!getParticipant.get(normalized.value.payerParticipantId, req.groupId)) {
+            return res.status(404).json({ error: 'Payer participant not found.' });
+        }
+        if (!validateSplitTargets(req.groupId, normalized.value.splitType, normalized.value.targetIds)) {
+            return res.status(400).json({ error: 'Split targets are invalid.' });
+        }
+        const now = new Date().toISOString();
+        const result = insertExpense.run(
+            req.groupId,
+            normalized.value.description,
+            normalized.value.amount,
+            normalized.value.currency,
+            normalized.value.date,
+            normalized.value.category,
+            normalized.value.payerParticipantId,
+            now
+        );
+        const splitRows = buildEqualSplits(normalized.value.amount, normalized.value.targetIds);
+        saveExpenseWithSplits(result.lastInsertRowid, normalized.value.splitType, splitRows);
+        return res.json({ ok: true, expenseId: result.lastInsertRowid });
+    }
+);
+
+app.put(
+    '/api/groups/:groupId/expenses/:expenseId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const expenseId = parseGroupId(req.params.expenseId);
+        if (!expenseId) {
+            return res.status(400).json({ error: 'Invalid expense id.' });
+        }
+        if (!getExpense.get(expenseId, req.groupId)) {
+            return res.status(404).json({ error: 'Expense not found.' });
+        }
+        const normalized = validateExpenseSplitPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        if (!getParticipant.get(normalized.value.payerParticipantId, req.groupId)) {
+            return res.status(404).json({ error: 'Payer participant not found.' });
+        }
+        if (!validateSplitTargets(req.groupId, normalized.value.splitType, normalized.value.targetIds)) {
+            return res.status(400).json({ error: 'Split targets are invalid.' });
+        }
+        updateExpense.run(
+            normalized.value.description,
+            normalized.value.amount,
+            normalized.value.currency,
+            normalized.value.date,
+            normalized.value.category,
+            normalized.value.payerParticipantId,
+            expenseId,
+            req.groupId
+        );
+        const splitRows = buildEqualSplits(normalized.value.amount, normalized.value.targetIds);
+        saveExpenseWithSplits(expenseId, normalized.value.splitType, splitRows);
+        return res.json({ ok: true });
+    }
+);
+
+app.delete(
+    '/api/groups/:groupId/expenses/:expenseId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const expenseId = parseGroupId(req.params.expenseId);
+        if (!expenseId) {
+            return res.status(400).json({ error: 'Invalid expense id.' });
+        }
+        if (!getExpense.get(expenseId, req.groupId)) {
+            return res.status(404).json({ error: 'Expense not found.' });
+        }
+        deleteExpense.run(expenseId, req.groupId);
         return res.json({ ok: true });
     }
 );
@@ -2088,6 +2258,77 @@ const validateParticipantPayload = (payload) => {
         return { error: 'Family id is invalid.' };
     }
     return { value: { displayName, type, familyId } };
+};
+
+const normalizeSplitType = (value) => {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim().toLowerCase();
+    return trimmed || null;
+};
+
+const requireCurrencyCode = (value) => {
+    const trimmed = typeof value === 'string' ? value.trim().toUpperCase() : '';
+    if (!/^[A-Z]{3}$/.test(trimmed)) {
+        return { error: 'Currency is invalid.' };
+    }
+    return { value: trimmed };
+};
+
+const parseIdArray = (items) => {
+    if (!Array.isArray(items)) return [];
+    const output = [];
+    items.forEach((item) => {
+        const id = parseGroupId(item);
+        if (id && !output.includes(id)) {
+            output.push(id);
+        }
+    });
+    return output;
+};
+
+const validateExpenseSplitPayload = (payload) => {
+    const description = typeof payload?.description === 'string' ? payload.description.trim() : '';
+    if (!description) {
+        return { error: 'Description is required.' };
+    }
+    if (description.length > 140) {
+        return { error: 'Description must be 140 characters or less.' };
+    }
+    const amount = Number(payload?.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+        return { error: 'Amount must be greater than zero.' };
+    }
+    const currency = requireCurrencyCode(payload?.currency);
+    if (currency.error) return currency;
+    const date = requireDate(payload?.date, 'Date');
+    if (date.error) return date;
+    const category = optionalString(payload?.category);
+    const payerParticipantId = parseGroupId(payload?.payerParticipantId);
+    if (!payerParticipantId) {
+        return { error: 'Payer participant is required.' };
+    }
+    const splitType = normalizeSplitType(payload?.splitType);
+    if (!splitType || !['participants', 'families'].includes(splitType)) {
+        return { error: 'Split type is invalid.' };
+    }
+    const targetIds = splitType === 'participants'
+        ? parseIdArray(payload?.participantIds)
+        : parseIdArray(payload?.familyIds);
+    if (!targetIds.length) {
+        return { error: 'Split targets are required.' };
+    }
+    return {
+        value: {
+            description,
+            amount,
+            currency: currency.value,
+            date: date.value,
+            category,
+            payerParticipantId,
+            splitType,
+            targetIds
+        }
+    };
 };
 
 const requireNumber = (value, field) => {
@@ -3140,6 +3381,7 @@ module.exports = {
     validateGroupPayload,
     validateFamilyPayload,
     validateParticipantPayload,
+    validateExpenseSplitPayload,
     validateFlightPayload,
     validateLodgingPayload,
     validateCarPayload,
