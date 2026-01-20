@@ -2,8 +2,12 @@ const fs = require('fs');
 const path = require('path');
 
 const removeIfExists = (filePath) => {
-    if (fs.existsSync(filePath)) {
+    if (!fs.existsSync(filePath)) return;
+    try {
         fs.unlinkSync(filePath);
+    } catch (err) {
+        if (err.code !== 'EBUSY') throw err;
+        console.warn(`Arquivo em uso, ignorando limpeza: ${filePath}`);
     }
 };
 
