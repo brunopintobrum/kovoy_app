@@ -60,4 +60,6 @@
 - `npm test` executado com sucesso.
 - Playwright E2E e pipeline CI adicionados.
 - E2E atualizado para fluxo de grupos e webserver dedicado.
+- Fluxo de grupos no painel fechado com validacoes e convites.
+- Validacao da soma do split e testes de convites adicionados.
 

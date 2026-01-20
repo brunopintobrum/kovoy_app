@@ -9,7 +9,8 @@ Deploy: sem deploy publico no momento.
 - Screenshots/GIF (adicione em `docs/` e atualize os links abaixo):
   - `docs/login.png`
   - `docs/register.png`
-  - `docs/dashboard.png`
+  - `docs/groups.png`
+  - `docs/group-dashboard.png`
 - Video curto (opcional): (adicione o link aqui)
 
 ## Features
@@ -25,8 +26,10 @@ Deploy: sem deploy publico no momento.
 - Foto do usuario via Google (campo `avatar_url`)
 - Grupos: criar e listar, membership por groupId
 - Convites: criar e aceitar convite
+- Convites: expiracao e bloqueio de reuso
 - Familias e participantes (pessoas sem login)
 - Despesas com split igual por pessoa ou por familia
+- Validacao da soma do split
 - Dashboard do grupo com saldos e "quem deve pra quem"
 - Protecao CSRF para operacoes de escrita
 - Rate limiting e headers de seguranca
@@ -311,4 +314,6 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - `npm audit fix --force` aplicado para zerar vulnerabilidades.
 - `npm test` executado com sucesso.
 - Playwright E2E e pipeline CI adicionados.
+- Fluxo de grupos finalizado (convites, validacoes e UX do painel).
+- Validacao de split e testes de convites adicionados.
 
