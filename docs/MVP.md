@@ -88,7 +88,7 @@
 ## Testes
 - [x] Split por pessoa (unit)
 - [x] Split por familia (unit)
-- [ ] Validacao de soma do split (unit)
+- [x] Validacao de soma do split (unit)
 - [x] Saldo por participant (unit)
 - [x] Quem deve pra quem (unit)
 - [x] Convite expira (integration)
