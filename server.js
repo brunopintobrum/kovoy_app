@@ -72,6 +72,7 @@ const SMTP_PASS = process.env.SMTP_PASS;
 const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
 const SMTP_FROM = process.env.SMTP_FROM || 'no-reply@example.com';
 const APP_BASE_URL = process.env.APP_BASE_URL;
+const INVITE_TOKEN_TTL_DAYS = Number(process.env.INVITE_TOKEN_TTL_DAYS || 7);
 
 if (JWT_SECRET === 'change-this-secret') {
     if (IS_PROD) {
@@ -142,6 +143,76 @@ db.exec(`
         user_agent TEXT,
         ip_addr TEXT,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS groups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        default_currency TEXT NOT NULL,
+        created_by_user_id INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS group_members (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        role TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS invitations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        email TEXT NOT NULL,
+        role TEXT NOT NULL,
+        token TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        status TEXT NOT NULL,
+        invited_by_user_id INTEGER NOT NULL,
+        accepted_by_user_id INTEGER,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (invited_by_user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (accepted_by_user_id) REFERENCES users(id) ON DELETE SET NULL
+    );
+    CREATE TABLE IF NOT EXISTS families (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS participants (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        family_id INTEGER,
+        display_name TEXT NOT NULL,
+        type TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (family_id) REFERENCES families(id) ON DELETE SET NULL
+    );
+    CREATE TABLE IF NOT EXISTS expenses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        description TEXT NOT NULL,
+        amount REAL NOT NULL,
+        currency TEXT NOT NULL,
+        date TEXT NOT NULL,
+        category TEXT,
+        payer_participant_id INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (payer_participant_id) REFERENCES participants(id) ON DELETE RESTRICT
+    );
+    CREATE TABLE IF NOT EXISTS expense_splits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        expense_id INTEGER NOT NULL,
+        target_type TEXT NOT NULL,
+        target_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE CASCADE
     );
     CREATE TABLE IF NOT EXISTS trips (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -280,6 +351,17 @@ db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_hash ON email_
 db.exec('CREATE INDEX IF NOT EXISTS idx_two_factor_codes_hash ON two_factor_codes(code_hash)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_hash ON refresh_tokens(token_hash)');
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_group_members_unique ON group_members(group_id, user_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_members_group ON group_members(group_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_members_user ON group_members(user_id)');
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_token ON invitations(token)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_invitations_group ON invitations(group_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_families_group ON families(group_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_participants_group ON participants(group_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_participants_family ON participants(family_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_expenses_group ON expenses(group_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_expenses_payer ON expenses(payer_participant_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_expense_splits_expense ON expense_splits(expense_id)');
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_trips_user ON trips(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_trip_flights_trip ON trip_flights(trip_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_trip_lodgings_trip ON trip_lodgings(trip_id)');
@@ -1160,6 +1242,181 @@ app.post('/api/me/avatar', authRequiredApi, requireCsrfToken, (req, res) => {
     });
 });
 
+const INVITABLE_ROLES = ['admin', 'member', 'viewer'];
+
+const parseGroupId = (value) => {
+    const id = Number(value);
+    return Number.isInteger(id) && id > 0 ? id : null;
+};
+
+const getGroupById = db.prepare('SELECT * FROM groups WHERE id = ?');
+const getGroupMember = db.prepare('SELECT role FROM group_members WHERE group_id = ? AND user_id = ?');
+const listGroupsForUser = db.prepare(`
+    SELECT g.id, g.name, g.default_currency, g.created_by_user_id, g.created_at, gm.role
+    FROM groups g
+    JOIN group_members gm ON gm.group_id = g.id
+    WHERE gm.user_id = ?
+    ORDER BY g.created_at DESC
+`);
+const insertGroup = db.prepare(`
+    INSERT INTO groups (name, default_currency, created_by_user_id, created_at)
+    VALUES (?, ?, ?, ?)
+`);
+const insertGroupMember = db.prepare(`
+    INSERT INTO group_members (group_id, user_id, role, created_at)
+    VALUES (?, ?, ?, ?)
+`);
+const insertGroupMemberIfMissing = db.prepare(`
+    INSERT OR IGNORE INTO group_members (group_id, user_id, role, created_at)
+    VALUES (?, ?, ?, ?)
+`);
+const listGroupMembers = db.prepare(`
+    SELECT gm.role, u.id as user_id, u.email, u.first_name, u.last_name, u.display_name
+    FROM group_members gm
+    JOIN users u ON u.id = gm.user_id
+    WHERE gm.group_id = ?
+    ORDER BY u.first_name, u.last_name, u.email
+`);
+const insertInvitation = db.prepare(`
+    INSERT INTO invitations
+    (group_id, email, role, token, expires_at, status, invited_by_user_id, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+`);
+const getInvitationByToken = db.prepare('SELECT * FROM invitations WHERE token = ?');
+const updateInvitationStatus = db.prepare('UPDATE invitations SET status = ?, accepted_by_user_id = ? WHERE id = ?');
+const markInvitationExpired = db.prepare('UPDATE invitations SET status = ? WHERE id = ?');
+const getUserEmail = db.prepare('SELECT email FROM users WHERE id = ?');
+
+const requireGroupMember = (req, res, next) => {
+    const groupId = parseGroupId(req.params.groupId || req.params.id);
+    if (!groupId) {
+        return res.status(400).json({ error: 'Invalid group id.' });
+    }
+    const group = getGroupById.get(groupId);
+    if (!group) {
+        return res.status(404).json({ error: 'Group not found.' });
+    }
+    const member = getGroupMember.get(groupId, req.user.sub);
+    if (!member) {
+        return res.status(403).json({ error: 'Not a member of this group.' });
+    }
+    req.group = group;
+    req.groupMember = member;
+    req.groupId = groupId;
+    return next();
+};
+
+const requireGroupRole = (roles) => (req, res, next) => {
+    if (!req.groupMember || !roles.includes(req.groupMember.role)) {
+        return res.status(403).json({ error: 'Insufficient permissions.' });
+    }
+    return next();
+};
+
+app.post('/api/groups', authRequiredApi, requireCsrfToken, (req, res) => {
+    const payload = req.body || {};
+    const normalized = validateGroupPayload(payload);
+    if (normalized.error) {
+        return res.status(400).json({ error: normalized.error });
+    }
+    const now = new Date().toISOString();
+    const result = insertGroup.run(
+        normalized.value.name,
+        normalized.value.defaultCurrency,
+        req.user.sub,
+        now
+    );
+    insertGroupMember.run(result.lastInsertRowid, req.user.sub, 'owner', now);
+    return res.json({ ok: true, groupId: result.lastInsertRowid });
+});
+
+app.get('/api/groups', authRequiredApi, (req, res) => {
+    const groups = listGroupsForUser.all(req.user.sub).map((row) => ({
+        id: row.id,
+        name: row.name,
+        defaultCurrency: row.default_currency,
+        createdByUserId: row.created_by_user_id,
+        createdAt: row.created_at,
+        role: row.role
+    }));
+    return res.json({ ok: true, data: groups });
+});
+
+app.get('/api/groups/:groupId/members', authRequiredApi, requireGroupMember, (req, res) => {
+    const members = listGroupMembers.all(req.groupId).map((row) => ({
+        userId: row.user_id,
+        email: row.email,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        displayName: row.display_name,
+        role: row.role
+    }));
+    return res.json({ ok: true, data: members });
+});
+
+app.post(
+    '/api/groups/:groupId/invitations',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const emailRaw = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+        if (!emailRaw || !isValidEmail(emailRaw)) {
+            return res.status(400).json({ error: 'Valid email is required.' });
+        }
+        const role = normalizeGroupRole(req.body?.role) || 'member';
+        if (!INVITABLE_ROLES.includes(role)) {
+            return res.status(400).json({ error: 'Invalid role for invitation.' });
+        }
+        const token = crypto.randomBytes(24).toString('hex');
+        const expiresAt = Date.now() + INVITE_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000;
+        const now = new Date().toISOString();
+        insertInvitation.run(
+            req.groupId,
+            emailRaw.toLowerCase(),
+            role,
+            token,
+            expiresAt,
+            'pending',
+            req.user.sub,
+            now
+        );
+        const baseUrl = APP_BASE_URL || `http://localhost:${PORT}`;
+        const inviteUrl = `${baseUrl}/invite?token=${token}`;
+        return res.json({ ok: true, token, inviteUrl, expiresAt });
+    }
+);
+
+app.post('/api/invitations/accept', authRequiredApi, requireCsrfToken, (req, res) => {
+    const token = typeof req.body?.token === 'string' ? req.body.token.trim() : '';
+    if (!token) {
+        return res.status(400).json({ error: 'Invitation token is required.' });
+    }
+    const invitation = getInvitationByToken.get(token);
+    if (!invitation) {
+        return res.status(404).json({ error: 'Invitation not found.' });
+    }
+    if (invitation.status !== 'pending') {
+        return res.status(400).json({ error: 'Invitation is no longer available.' });
+    }
+    if (Date.now() > invitation.expires_at) {
+        markInvitationExpired.run('expired', invitation.id);
+        return res.status(400).json({ error: 'Invitation has expired.' });
+    }
+    const userRecord = getUserEmail.get(req.user.sub);
+    if (!userRecord || !userRecord.email) {
+        return res.status(401).json({ error: 'Not authenticated.' });
+    }
+    if (userRecord.email.toLowerCase() !== invitation.email.toLowerCase()) {
+        return res.status(403).json({ error: 'Invitation email does not match your account.' });
+    }
+    const now = new Date().toISOString();
+    insertGroupMemberIfMissing.run(invitation.group_id, req.user.sub, invitation.role, now);
+    updateInvitationStatus.run('accepted', req.user.sub, invitation.id);
+    return res.json({ ok: true, groupId: invitation.group_id });
+});
+
 const generateTripItemId = () => {
     if (crypto.randomUUID) return crypto.randomUUID();
     return crypto.randomBytes(16).toString('hex');
@@ -1570,6 +1827,29 @@ const requireString = (value, field) => {
 const optionalString = (value) => {
     const trimmed = trimString(value);
     return trimmed ? trimmed : null;
+};
+
+const normalizeGroupRole = (value) => {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim().toLowerCase();
+    return trimmed || null;
+};
+
+const validateGroupPayload = (payload) => {
+    const name = typeof payload?.name === 'string' ? payload.name.trim() : '';
+    if (!name) {
+        return { error: 'Group name is required.' };
+    }
+    if (name.length > 80) {
+        return { error: 'Group name must be 80 characters or less.' };
+    }
+    const currencyRaw = typeof payload?.defaultCurrency === 'string'
+        ? payload.defaultCurrency.trim().toUpperCase()
+        : '';
+    if (!/^[A-Z]{3}$/.test(currencyRaw)) {
+        return { error: 'Default currency must be a 3-letter code.' };
+    }
+    return { value: { name, defaultCurrency: currencyRaw } };
 };
 
 const requireNumber = (value, field) => {
@@ -2619,6 +2899,7 @@ module.exports = {
     splitFullName,
     normalizeDisplayName,
     validatePassword,
+    validateGroupPayload,
     validateFlightPayload,
     validateLodgingPayload,
     validateCarPayload,

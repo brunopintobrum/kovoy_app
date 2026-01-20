@@ -37,13 +37,13 @@
 - Frontend em `public/*.html` e `public/*.js`.
 - Colunas de banco em snake_case.
 
-## Kovoy Template (Regra Absoluta)
-- Caminho do template: `F:\OneDrive\PCTECH\Kovoy_Asp.net_v3.2.0\Kovoy Asp.net Core\Kovoy`.
+## Skote Template (Regra Absoluta)
+- Caminho do template: `D:\ChatGPT\Skote_Asp.net_v3.2.0\Skote Asp.net Core\Skote`.
 - Antes de qualquer implementacao: analisar estrutura, Controllers/Views/ViewModels/Services, layouts, componentes, CSS/JS, validacoes e mensagens.
-- Replicar organizacao de pastas e padroes visuais/estruturais do Kovoy no projeto atual.
-- Nao criar estruturas novas se ja existir equivalente no Kovoy; nao mudar nomenclaturas sem justificativa tecnica.
-- Se algo nao existir no Kovoy: solucao mais simples, alinhada ao visual/arquitetura, com comentario curto justificando.
-- Validar antes de entregar: consistencia visual com Kovoy e padroes de codigo.
+- Replicar organizacao de pastas e padroes visuais/estruturais do Skote no projeto atual.
+- Nao criar estruturas novas se ja existir equivalente no Skote; nao mudar nomenclaturas sem justificativa tecnica.
+- Se algo nao existir no Skote: solucao mais simples, alinhada ao visual/arquitetura, com comentario curto justificando.
+- Validar antes de entregar: consistencia visual com Skote e padroes de codigo.
 
 ## Operations
 - Local: `npm start` (porta default 3000).
