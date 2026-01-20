@@ -814,7 +814,6 @@ app.get('/dashboard', authRequired, (req, res) => {
     ensureCsrfCookie(req, res);
     return res.sendFile(path.join(ROOT_DIR, 'dashboard.html'));
 });
-app.get('/orlando.html', (req, res) => res.redirect('/dashboard'));
 
 app.get('/api/auth/google', authLimiter, (req, res) => {
     const { clientId, clientSecret, redirectUri } = getGoogleConfig(req);
