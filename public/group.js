@@ -283,7 +283,11 @@
         }
         const participantMap = new Map(state.participants.map((p) => [p.id, p.displayName]));
         state.expenses.forEach((expense) => {
-            const splitType = expense.splits && expense.splits.length ? expense.splits[0].targetType : '-';
+            const rawSplitType = expense.splits && expense.splits.length ? expense.splits[0].targetType : '-';
+            const splitType = rawSplitType === 'participant' ? 'participants'
+                : rawSplitType === 'family'
+                    ? 'families'
+                    : rawSplitType;
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${expense.description}</td>

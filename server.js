@@ -1612,10 +1612,17 @@ const validateSplitTargets = (groupId, splitType, targetIds) => {
     return targetIds.every((id) => availableSet.has(id));
 };
 
+const normalizeStoredSplitType = (value) => {
+    if (value === 'participants') return 'participant';
+    if (value === 'families') return 'family';
+    return value;
+};
+
 const saveExpenseWithSplits = db.transaction((expenseId, splitType, splitRows) => {
     deleteExpenseSplits.run(expenseId);
+    const storedSplitType = normalizeStoredSplitType(splitType);
     splitRows.forEach((row) => {
-        insertExpenseSplit.run(expenseId, splitType, row.targetId, row.amount);
+        insertExpenseSplit.run(expenseId, storedSplitType, row.targetId, row.amount);
     });
 });
 
@@ -1668,8 +1675,9 @@ const buildBalanceState = ({ participants, families, expenses, expenseSplits }) 
         }
 
         expenseSplitsList.forEach((split) => {
+            const splitType = normalizeStoredSplitType(split.targetType);
             const splitCents = toCents(split.amount);
-            if (split.targetType === 'participant') {
+            if (splitType === 'participant') {
                 if (participantBalances.has(split.targetId)) {
                     participantBalances.set(
                         split.targetId,
@@ -1679,7 +1687,7 @@ const buildBalanceState = ({ participants, families, expenses, expenseSplits }) 
                 return;
             }
 
-            if (split.targetType === 'family') {
+            if (splitType === 'family') {
                 if (familyBalances.has(split.targetId)) {
                     familyBalances.set(
                         split.targetId,
