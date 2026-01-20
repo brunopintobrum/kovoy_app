@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Groups | Orlando 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Group travel management" name="description" />
+    <meta content="Bruno Pinto Brum" name="author" />
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <link href="assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" />
+    <link href="assets/css/icons.min.css" rel="stylesheet" />
+    <link href="assets/css/app.min.css" id="app-style" rel="stylesheet" />
+</head>
+<body data-layout-mode="light" data-topbar="light" data-sidebar="dark">
+    <div id="layout-wrapper">
+        <header id="page-topbar">
+            <div class="navbar-header">
+                <div class="d-flex">
+                    <div class="navbar-brand-box">
+                        <a href="/groups" class="logo logo-dark">
+                            <span class="logo-sm">
+                                <img src="/assets/images/logo.svg" alt="" height="22">
+                            </span>
+                            <span class="logo-lg">
+                                <img src="/assets/images/logo-dark.png" alt="" height="17">
+                            </span>
+                        </a>
+
+                        <a href="/groups" class="logo logo-light">
+                            <span class="logo-sm">
+                                <img src="/assets/images/logo-light.svg" alt="" height="22">
+                            </span>
+                            <span class="logo-lg">
+                                <img src="/assets/images/logo-light.png" alt="" height="36">
+                            </span>
+                        </a>
+                    </div>
+
+                    <button type="button" class="btn btn-sm px-3 font-size-16 header-item waves-effect" id="vertical-menu-btn">
+                        <i class="fa fa-fw fa-bars"></i>
+                    </button>
+
+                    <div class="dropdown dropdown-mega d-none d-lg-block ms-2">
+                        <button type="button" class="btn header-item waves-effect" data-bs-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+                            <span>Group Actions</span>
+                            <i class="mdi mdi-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-megamenu">
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5 class="font-size-14">Groups</h5>
+                                            <ul class="list-unstyled megamenu-list">
+                                                <li><a href="#createGroup">Create group</a></li>
+                                                <li><a href="#groupList">My groups</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5 class="font-size-14">Invites</h5>
+                                            <ul class="list-unstyled megamenu-list">
+                                                <li><a href="#acceptInvite">Accept invite</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <h5 class="font-size-14">Shortcuts</h5>
+                                            <ul class="list-unstyled megamenu-list">
+                                                <li><a href="/dashboard">Group dashboard</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <div>
+                                                <img src="/assets/images/megamenu-img.png" alt="" class="img-fluid mx-auto d-block">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex">
+                    <div class="dropdown d-inline-block">
+                        <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <img class="rounded-circle header-profile-user" id="userAvatar" src="/assets/images/users/avatar-1.jpg" alt="Header Avatar" data-fallback-src="/assets/images/users/avatar-1.jpg">
+                            <span class="d-none d-xl-inline-block ms-1" id="userEmail">Account</span>
+                            <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="/groups"><i class="bx bx-group font-size-16 align-middle me-1"></i> My groups</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="javascript:void(0);" id="logoutLink">
+                                <i class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="dropdown d-inline-block">
+                        <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect">
+                            <i class="bx bx-cog bx-spin"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="vertical-menu">
+            <div data-simplebar class="h-100">
+                <div id="sidebar-menu">
+                    <ul class="metismenu list-unstyled" id="side-menu">
+                        <li class="menu-title">Groups</li>
+                        <li><a href="/groups" class="waves-effect"><i class="bx bx-group"></i><span>My groups</span></a></li>
+                        <li><a href="/dashboard" class="waves-effect"><i class="bx bx-bar-chart-alt-2"></i><span>Group dashboard</span></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="page-content">
+                <div class="container-fluid py-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="page-title-box d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0 font-size-18">My groups</h4>
+                                <div class="page-title-right">
+                                    <ol class="breadcrumb m-0">
+                                        <li class="breadcrumb-item"><a href="javascript:void(0);">Groups</a></li>
+                                        <li class="breadcrumb-item active">My groups</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <div class="card" id="createGroup">
+                                <div class="card-body">
+                                    <h5 class="card-title">Create group</h5>
+                                    <p class="text-muted">Start a new trip group.</p>
+                                    <form id="createGroupForm">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="groupName">Group name</label>
+                                            <input class="form-control" id="groupName" name="name" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" for="groupCurrency">Default currency</label>
+                                            <select class="form-select" id="groupCurrency" name="defaultCurrency" required>
+                                                <option value="USD">USD</option>
+                                                <option value="CAD">CAD</option>
+                                                <option value="BRL">BRL</option>
+                                            </select>
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <button class="btn btn-primary" type="submit">Create group</button>
+                                        </div>
+                                    </form>
+                                    <div class="alert alert-danger d-none mt-3" id="createGroupError"></div>
+                                </div>
+                            </div>
+
+                            <div class="card" id="acceptInvite">
+                                <div class="card-body">
+                                    <h5 class="card-title">Accept invite</h5>
+                                    <p class="text-muted">Paste your invite token.</p>
+                                    <form id="acceptInviteForm">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="inviteToken">Invite token</label>
+                                            <input class="form-control" id="inviteToken" name="token" required>
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <button class="btn btn-outline-primary" type="submit">Join group</button>
+                                        </div>
+                                    </form>
+                                    <div class="alert alert-danger d-none mt-3" id="acceptInviteError"></div>
+                                    <div class="alert alert-success d-none mt-3" id="acceptInviteSuccess"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-8">
+                            <div class="card" id="groupList">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <h5 class="card-title mb-0">Your groups</h5>
+                                        <span class="badge bg-soft-primary text-primary" id="groupCount">0 groups</span>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table align-middle table-nowrap mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Group</th>
+                                                    <th>Currency</th>
+                                                    <th>Role</th>
+                                                    <th>Created</th>
+                                                    <th class="text-end">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="groupRows">
+                                                <tr>
+                                                    <td colspan="5" class="text-muted text-center">No groups yet.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <script>document.write(new Date().getFullYear())</script> © Orlando 2026
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-sm-end d-none d-sm-block">
+                                Group travel dashboard
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="rightbar-overlay"></div>
+
+    <script src="assets/libs/jquery/jquery.min.js"></script>
+    <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/libs/metismenu/metisMenu.min.js"></script>
+    <script src="assets/libs/simplebar/simplebar.min.js"></script>
+    <script src="assets/libs/node-waves/waves.min.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="groups.js" defer></script>
+</body>
+</html>

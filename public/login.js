@@ -66,7 +66,7 @@
         try {
             const res = await fetch('/api/me');
             if (res.ok) {
-                window.location.href = '/dashboard';
+                window.location.href = '/groups';
                 return;
             }
             if (res.status === 401) {
@@ -74,7 +74,7 @@
                 if (refreshed) {
                     const retry = await fetch('/api/me');
                     if (retry.ok) {
-                        window.location.href = '/dashboard';
+                        window.location.href = '/groups';
                     }
                 }
             }
@@ -166,7 +166,7 @@
 
                 setAlert('Signed in successfully. Redirecting...', 'success');
                 setTimeout(() => {
-                    window.location.href = '/dashboard';
+                    window.location.href = '/groups';
                 }, 600);
             } catch (err) {
                 setAlert('Connection error. Please try again.', 'error');
