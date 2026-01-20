@@ -1277,6 +1277,45 @@ const listGroupMembers = db.prepare(`
     WHERE gm.group_id = ?
     ORDER BY u.first_name, u.last_name, u.email
 `);
+const listFamilies = db.prepare(`
+    SELECT id, name, created_at
+    FROM families
+    WHERE group_id = ?
+    ORDER BY name
+`);
+const getFamily = db.prepare('SELECT id, name FROM families WHERE id = ? AND group_id = ?');
+const insertFamily = db.prepare(`
+    INSERT INTO families (group_id, name, created_at)
+    VALUES (?, ?, ?)
+`);
+const updateFamily = db.prepare(`
+    UPDATE families
+    SET name = ?
+    WHERE id = ? AND group_id = ?
+`);
+const deleteFamily = db.prepare('DELETE FROM families WHERE id = ? AND group_id = ?');
+const listParticipants = db.prepare(`
+    SELECT id, family_id, display_name, type, created_at
+    FROM participants
+    WHERE group_id = ?
+    ORDER BY display_name
+`);
+const getParticipant = db.prepare('SELECT id FROM participants WHERE id = ? AND group_id = ?');
+const insertParticipant = db.prepare(`
+    INSERT INTO participants (group_id, family_id, display_name, type, created_at)
+    VALUES (?, ?, ?, ?, ?)
+`);
+const updateParticipant = db.prepare(`
+    UPDATE participants
+    SET family_id = ?, display_name = ?, type = ?
+    WHERE id = ? AND group_id = ?
+`);
+const deleteParticipant = db.prepare('DELETE FROM participants WHERE id = ? AND group_id = ?');
+const countParticipantsByFamily = db.prepare(`
+    SELECT COUNT(*) as count
+    FROM participants
+    WHERE family_id = ? AND group_id = ?
+`);
 const insertInvitation = db.prepare(`
     INSERT INTO invitations
     (group_id, email, role, token, expires_at, status, invited_by_user_id, created_at)
@@ -1353,6 +1392,172 @@ app.get('/api/groups/:groupId/members', authRequiredApi, requireGroupMember, (re
     }));
     return res.json({ ok: true, data: members });
 });
+
+app.get('/api/groups/:groupId/families', authRequiredApi, requireGroupMember, (req, res) => {
+    const families = listFamilies.all(req.groupId).map((row) => ({
+        id: row.id,
+        name: row.name,
+        createdAt: row.created_at
+    }));
+    return res.json({ ok: true, data: families });
+});
+
+app.post(
+    '/api/groups/:groupId/families',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const normalized = validateFamilyPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        const now = new Date().toISOString();
+        const result = insertFamily.run(req.groupId, normalized.value.name, now);
+        return res.json({ ok: true, familyId: result.lastInsertRowid });
+    }
+);
+
+app.put(
+    '/api/groups/:groupId/families/:familyId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const familyId = parseGroupId(req.params.familyId);
+        if (!familyId) {
+            return res.status(400).json({ error: 'Invalid family id.' });
+        }
+        if (!getFamily.get(familyId, req.groupId)) {
+            return res.status(404).json({ error: 'Family not found.' });
+        }
+        const normalized = validateFamilyPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        updateFamily.run(normalized.value.name, familyId, req.groupId);
+        return res.json({ ok: true });
+    }
+);
+
+app.delete(
+    '/api/groups/:groupId/families/:familyId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const familyId = parseGroupId(req.params.familyId);
+        if (!familyId) {
+            return res.status(400).json({ error: 'Invalid family id.' });
+        }
+        if (!getFamily.get(familyId, req.groupId)) {
+            return res.status(404).json({ error: 'Family not found.' });
+        }
+        const usage = countParticipantsByFamily.get(familyId, req.groupId);
+        if (usage && usage.count > 0) {
+            return res.status(400).json({ error: 'Family has participants.' });
+        }
+        deleteFamily.run(familyId, req.groupId);
+        return res.json({ ok: true });
+    }
+);
+
+app.get('/api/groups/:groupId/participants', authRequiredApi, requireGroupMember, (req, res) => {
+    const participants = listParticipants.all(req.groupId).map((row) => ({
+        id: row.id,
+        familyId: row.family_id,
+        displayName: row.display_name,
+        type: row.type,
+        createdAt: row.created_at
+    }));
+    return res.json({ ok: true, data: participants });
+});
+
+app.post(
+    '/api/groups/:groupId/participants',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const normalized = validateParticipantPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        if (normalized.value.familyId) {
+            const family = getFamily.get(normalized.value.familyId, req.groupId);
+            if (!family) {
+                return res.status(404).json({ error: 'Family not found.' });
+            }
+        }
+        const now = new Date().toISOString();
+        const result = insertParticipant.run(
+            req.groupId,
+            normalized.value.familyId,
+            normalized.value.displayName,
+            normalized.value.type,
+            now
+        );
+        return res.json({ ok: true, participantId: result.lastInsertRowid });
+    }
+);
+
+app.put(
+    '/api/groups/:groupId/participants/:participantId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const participantId = parseGroupId(req.params.participantId);
+        if (!participantId) {
+            return res.status(400).json({ error: 'Invalid participant id.' });
+        }
+        if (!getParticipant.get(participantId, req.groupId)) {
+            return res.status(404).json({ error: 'Participant not found.' });
+        }
+        const normalized = validateParticipantPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        if (normalized.value.familyId) {
+            const family = getFamily.get(normalized.value.familyId, req.groupId);
+            if (!family) {
+                return res.status(404).json({ error: 'Family not found.' });
+            }
+        }
+        updateParticipant.run(
+            normalized.value.familyId,
+            normalized.value.displayName,
+            normalized.value.type,
+            participantId,
+            req.groupId
+        );
+        return res.json({ ok: true });
+    }
+);
+
+app.delete(
+    '/api/groups/:groupId/participants/:participantId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const participantId = parseGroupId(req.params.participantId);
+        if (!participantId) {
+            return res.status(400).json({ error: 'Invalid participant id.' });
+        }
+        if (!getParticipant.get(participantId, req.groupId)) {
+            return res.status(404).json({ error: 'Participant not found.' });
+        }
+        deleteParticipant.run(participantId, req.groupId);
+        return res.json({ ok: true });
+    }
+);
 
 app.post(
     '/api/groups/:groupId/invitations',
@@ -1850,6 +2055,39 @@ const validateGroupPayload = (payload) => {
         return { error: 'Default currency must be a 3-letter code.' };
     }
     return { value: { name, defaultCurrency: currencyRaw } };
+};
+
+const validateFamilyPayload = (payload) => {
+    const name = typeof payload?.name === 'string' ? payload.name.trim() : '';
+    if (!name) {
+        return { error: 'Family name is required.' };
+    }
+    if (name.length > 80) {
+        return { error: 'Family name must be 80 characters or less.' };
+    }
+    return { value: { name } };
+};
+
+const validateParticipantPayload = (payload) => {
+    const displayName = typeof payload?.displayName === 'string' ? payload.displayName.trim() : '';
+    if (!displayName) {
+        return { error: 'Participant name is required.' };
+    }
+    if (displayName.length > 80) {
+        return { error: 'Participant name must be 80 characters or less.' };
+    }
+    const type = normalizeGroupRole(payload?.type);
+    const allowedTypes = ['adult', 'child', 'infant'];
+    if (type && !allowedTypes.includes(type)) {
+        return { error: 'Participant type is invalid.' };
+    }
+    const familyId = payload?.familyId === null || payload?.familyId === undefined
+        ? null
+        : parseGroupId(payload.familyId);
+    if (payload?.familyId && !familyId) {
+        return { error: 'Family id is invalid.' };
+    }
+    return { value: { displayName, type, familyId } };
 };
 
 const requireNumber = (value, field) => {
@@ -2900,6 +3138,8 @@ module.exports = {
     normalizeDisplayName,
     validatePassword,
     validateGroupPayload,
+    validateFamilyPayload,
+    validateParticipantPayload,
     validateFlightPayload,
     validateLodgingPayload,
     validateCarPayload,
