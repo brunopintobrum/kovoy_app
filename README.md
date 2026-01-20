@@ -6,12 +6,12 @@ Deploy: sem deploy publico no momento.
 
 ## Demo
 
-- Screenshots/GIF (adicione em `docs/` e atualize os links abaixo):
-  - `docs/login.png`
-  - `docs/register.png`
-  - `docs/groups.png`
-  - `docs/group-dashboard.png`
-- Video curto (opcional): (adicione o link aqui)
+![Login](docs/login.png)
+![Register](docs/register.png)
+![Groups](docs/groups.png)
+![Group dashboard](docs/group-dashboard.png)
+
+Video curto (opcional): (adicione o link aqui)
 
 ## Features
 
