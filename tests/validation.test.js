@@ -16,7 +16,8 @@ const {
     validatePassword,
     validateFlightPayload,
     validateExpensePayload,
-    validateTripMetaPayload
+    validateTripMetaPayload,
+    validateSplitSum
 } = require('../server');
 
 afterAll(() => {
@@ -119,6 +120,13 @@ describe('validation helpers', () => {
             familyOne: current.family_one,
             familyTwo: current.family_two,
             subtitle: current.subtitle
+        });
+    });
+
+    test('validateSplitSum ensures split total matches amount', () => {
+        expect(validateSplitSum(120, [{ amount: 60 }, { amount: 60 }])).toEqual({ ok: true });
+        expect(validateSplitSum(100, [{ amount: 30 }, { amount: 30 }])).toEqual({
+            error: 'Split totals must match the expense amount.'
         });
     });
 });

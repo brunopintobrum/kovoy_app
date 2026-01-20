@@ -1604,6 +1604,17 @@ const buildEqualSplits = (totalAmount, targetIds) => {
     }));
 };
 
+const validateSplitSum = (totalAmount, splitRows) => {
+    const totalCents = Math.round(Number(totalAmount || 0) * 100);
+    const splitCents = (splitRows || []).reduce((sum, row) => {
+        return sum + Math.round(Number(row.amount || 0) * 100);
+    }, 0);
+    if (totalCents !== splitCents) {
+        return { error: 'Split totals must match the expense amount.' };
+    }
+    return { ok: true };
+};
+
 const validateSplitTargets = (groupId, splitType, targetIds) => {
     const available = splitType === 'participants'
         ? listParticipantIds.all(groupId).map((row) => row.id)
@@ -1807,6 +1818,10 @@ app.post(
             now
         );
         const splitRows = buildEqualSplits(normalized.value.amount, normalized.value.targetIds);
+        const splitCheck = validateSplitSum(normalized.value.amount, splitRows);
+        if (splitCheck.error) {
+            return res.status(400).json({ error: splitCheck.error });
+        }
         saveExpenseWithSplits(result.lastInsertRowid, normalized.value.splitType, splitRows);
         return res.json({ ok: true, expenseId: result.lastInsertRowid });
     }
@@ -1847,6 +1862,10 @@ app.put(
             req.groupId
         );
         const splitRows = buildEqualSplits(normalized.value.amount, normalized.value.targetIds);
+        const splitCheck = validateSplitSum(normalized.value.amount, splitRows);
+        if (splitCheck.error) {
+            return res.status(400).json({ error: splitCheck.error });
+        }
         saveExpenseWithSplits(expenseId, normalized.value.splitType, splitRows);
         return res.json({ ok: true });
     }
@@ -3573,6 +3592,7 @@ module.exports = {
     validateFamilyPayload,
     validateParticipantPayload,
     validateExpenseSplitPayload,
+    validateSplitSum,
     buildBalanceState,
     buildDebtPlan,
     validateFlightPayload,
