@@ -58,7 +58,7 @@
                 return;
             }
 
-            window.location.href = '/dashboard#dashboard';
+            window.location.href = '/dashboard';
         } catch (err) {
             setMessage('Unable to verify the code. Please try again.');
             setDisabled(false);

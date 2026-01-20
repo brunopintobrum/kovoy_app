@@ -812,7 +812,7 @@ app.get('/two-step-verification', (req, res) => {
 });
 app.get('/dashboard', authRequired, (req, res) => {
     ensureCsrfCookie(req, res);
-    return res.sendFile(path.join(ROOT_DIR, 'orlando.html'));
+    return res.sendFile(path.join(ROOT_DIR, 'dashboard.html'));
 });
 app.get('/orlando.html', (req, res) => res.redirect('/dashboard'));
 
@@ -1028,7 +1028,7 @@ app.get('/api/auth/google/callback', authLimiter, async (req, res) => {
         const refreshToken = createRefreshToken(user.id, remember, req);
         setRefreshCookie(res, refreshToken.rawToken, refreshToken.ttlDays);
 
-        return res.redirect('/dashboard#dashboard');
+        return res.redirect('/dashboard');
     } catch (err) {
         console.error('Google auth error:', err);
         return res.redirect('/login?google=error');

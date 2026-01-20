@@ -732,6 +732,12 @@
         renderModule(state.activeModule || DEFAULT_MODULE);
     };
 
+    const cleanDashboardHash = () => {
+        if (window.location.hash === `#${DEFAULT_MODULE}`) {
+            history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+        }
+    };
+
 
     const entityEndpoints = {
         flights: 'flights',
@@ -1128,18 +1134,19 @@ const resetForm = (form, editingKey) => {
         bindThemeSwitch();
 
         const initialModule = getModuleFromHash();
-        if (!window.location.hash) {
-            history.replaceState(null, '', `#${DEFAULT_MODULE}`);
-        }
         showModule(initialModule);
         setActiveMenu(initialModule);
         renderModule(initialModule);
+        cleanDashboardHash();
 
         window.addEventListener('hashchange', () => {
             const nextModule = getModuleFromHash();
             showModule(nextModule);
             setActiveMenu(nextModule);
             renderModule(nextModule);
+            if (nextModule === DEFAULT_MODULE) {
+                cleanDashboardHash();
+            }
         });
     };
 
