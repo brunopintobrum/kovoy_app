@@ -19,8 +19,8 @@
 - [x] Convites
   - [x] Criar convite (email + role)
   - [x] Aceitar convite
-  - [ ] Expiracao aplicada no endpoint
-  - [ ] Bloqueio de reuso do convite
+- [x] Expiracao aplicada no endpoint
+- [x] Bloqueio de reuso do convite
 - [x] Participantes
   - [x] Criar familia
   - [x] Editar familia
@@ -91,8 +91,8 @@
 - [ ] Validacao de soma do split (unit)
 - [x] Saldo por participant (unit)
 - [x] Quem deve pra quem (unit)
-- [ ] Convite expira (integration)
-- [ ] Convite nao pode ser reutilizado (integration)
+- [x] Convite expira (integration)
+- [x] Convite nao pode ser reutilizado (integration)
 
 ## V2 (fora do MVP)
 - [ ] Voos, hospedagens, transporte e tickets (CRUD simples por grupo)
