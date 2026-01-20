@@ -82,6 +82,16 @@
         renderGroups(data.data || []);
     };
 
+    const validateForm = (form) => {
+        if (!form) return false;
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return false;
+        }
+        form.classList.remove('was-validated');
+        return true;
+    };
+
     const bindCreateGroup = () => {
         const form = document.getElementById('createGroupForm');
         const errorEl = document.getElementById('createGroupError');
@@ -89,14 +99,20 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             if (errorEl) errorEl.classList.add('d-none');
+            if (!validateForm(form)) return;
             const name = document.getElementById('groupName')?.value || '';
             const defaultCurrency = document.getElementById('groupCurrency')?.value || '';
             try {
-                await apiRequest('/api/groups', {
+                const res = await apiRequest('/api/groups', {
                     method: 'POST',
                     body: JSON.stringify({ name, defaultCurrency })
                 });
                 form.reset();
+                form.classList.remove('was-validated');
+                if (res && res.groupId) {
+                    window.location.href = `/dashboard?groupId=${res.groupId}`;
+                    return;
+                }
                 await loadGroups();
             } catch (err) {
                 if (errorEl) {
@@ -116,6 +132,7 @@
             event.preventDefault();
             if (errorEl) errorEl.classList.add('d-none');
             if (successEl) successEl.classList.add('d-none');
+            if (!validateForm(form)) return;
             const token = document.getElementById('inviteToken')?.value || '';
             try {
                 const res = await apiRequest('/api/invitations/accept', {

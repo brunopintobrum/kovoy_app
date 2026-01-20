@@ -94,6 +94,16 @@
         return true;
     };
 
+    const validateForm = (form) => {
+        if (!form) return false;
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return false;
+        }
+        form.classList.remove('was-validated');
+        return true;
+    };
+
     const loadGroupData = async () => {
         const [families, participants, expenses, summary] = await Promise.all([
             apiRequest(`/api/groups/${state.groupId}/families`),
@@ -308,15 +318,18 @@
 
     const renderSplitTargets = () => {
         const wrapper = document.getElementById('splitTargets');
+        const errorEl = document.getElementById('splitTargetsError');
         if (!wrapper) return;
         const type = document.querySelector('input[name="splitType"]:checked')?.value || 'participants';
         const targets = type === 'participants' ? state.participants : state.families;
 
         if (!targets.length) {
             wrapper.innerHTML = '<div class="text-muted">No targets available.</div>';
+            if (errorEl) errorEl.classList.add('d-none');
             return;
         }
         wrapper.innerHTML = '';
+        if (errorEl) errorEl.classList.add('d-none');
         targets.forEach((target) => {
             const label = document.createElement('label');
             label.className = 'form-check d-flex align-items-center gap-2';
@@ -324,6 +337,9 @@
             input.type = 'checkbox';
             input.className = 'form-check-input';
             input.value = target.id;
+            input.addEventListener('change', () => {
+                if (errorEl) errorEl.classList.add('d-none');
+            });
             label.appendChild(input);
             const span = document.createElement('span');
             span.textContent = target.displayName || target.name;
@@ -349,7 +365,7 @@
     };
 
     const applyPermissions = () => {
-        const forms = ['familyForm', 'participantForm', 'expenseForm'];
+        const forms = ['familyForm', 'participantForm', 'expenseForm', 'inviteForm'];
         forms.forEach((id) => {
             const form = document.getElementById(id);
             if (!form) return;
@@ -375,6 +391,7 @@
             familyForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 if (familyError) familyError.classList.add('d-none');
+                if (!validateForm(familyForm)) return;
                 const name = document.getElementById('familyName')?.value || '';
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/families`, {
@@ -382,6 +399,7 @@
                         body: JSON.stringify({ name })
                     });
                     familyForm.reset();
+                    familyForm.classList.remove('was-validated');
                     await refreshData();
                 } catch (err) {
                     if (familyError) {
@@ -398,6 +416,7 @@
             participantForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 if (participantError) participantError.classList.add('d-none');
+                if (!validateForm(participantForm)) return;
                 const displayName = document.getElementById('participantName')?.value || '';
                 const type = document.getElementById('participantType')?.value || '';
                 const familyIdValue = document.getElementById('participantFamily')?.value || '';
@@ -408,6 +427,7 @@
                         body: JSON.stringify({ displayName, type, familyId })
                     });
                     participantForm.reset();
+                    participantForm.classList.remove('was-validated');
                     await refreshData();
                 } catch (err) {
                     if (participantError) {
@@ -420,10 +440,13 @@
 
         const expenseForm = document.getElementById('expenseForm');
         const expenseError = document.getElementById('expenseError');
+        const splitTargetsError = document.getElementById('splitTargetsError');
         if (expenseForm) {
             expenseForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 if (expenseError) expenseError.classList.add('d-none');
+                if (splitTargetsError) splitTargetsError.classList.add('d-none');
+                if (!validateForm(expenseForm)) return;
                 const description = document.getElementById('expenseDescription')?.value || '';
                 const amount = document.getElementById('expenseAmount')?.value || '';
                 const currency = document.getElementById('expenseCurrency')?.value || '';
@@ -434,6 +457,10 @@
                 const targetIds = Array.from(document.querySelectorAll('#splitTargets input:checked'))
                     .map((input) => Number(input.value))
                     .filter((value) => value);
+                if (!targetIds.length) {
+                    if (splitTargetsError) splitTargetsError.classList.remove('d-none');
+                    return;
+                }
 
                 const payload = {
                     description,
@@ -456,6 +483,7 @@
                         body: JSON.stringify(payload)
                     });
                     expenseForm.reset();
+                    expenseForm.classList.remove('was-validated');
                     await refreshData();
                 } catch (err) {
                     if (expenseError) {
@@ -465,6 +493,46 @@
                 }
             });
         }
+    };
+
+    const bindInviteForm = () => {
+        const form = document.getElementById('inviteForm');
+        const errorEl = document.getElementById('inviteError');
+        const successEl = document.getElementById('inviteSuccess');
+        const linkEl = document.getElementById('inviteLink');
+        const tokenEl = document.getElementById('inviteToken');
+        const expiresEl = document.getElementById('inviteExpires');
+        if (!form) return;
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (errorEl) errorEl.classList.add('d-none');
+            if (successEl) successEl.classList.add('d-none');
+            if (!validateForm(form)) return;
+            const email = document.getElementById('inviteEmail')?.value || '';
+            const role = document.getElementById('inviteRole')?.value || 'member';
+            try {
+                const res = await apiRequest(`/api/groups/${state.groupId}/invitations`, {
+                    method: 'POST',
+                    body: JSON.stringify({ email, role })
+                });
+                if (linkEl) {
+                    linkEl.href = res.inviteUrl || '#';
+                    linkEl.textContent = res.inviteUrl || 'Invite link';
+                }
+                if (tokenEl) tokenEl.textContent = res.token || '';
+                if (expiresEl && res.expiresAt) {
+                    expiresEl.textContent = `Expires on ${new Date(res.expiresAt).toLocaleDateString('en-US')}`;
+                }
+                if (successEl) successEl.classList.remove('d-none');
+                form.reset();
+                form.classList.remove('was-validated');
+            } catch (err) {
+                if (errorEl) {
+                    errorEl.textContent = err.message;
+                    errorEl.classList.remove('d-none');
+                }
+            }
+        });
     };
 
     const bindDeleteActions = () => {
@@ -571,6 +639,7 @@
         if (!ok) return;
         bindGroupSelector();
         bindForms();
+        bindInviteForm();
         bindDeleteActions();
         bindSplitTypeToggle();
         bindLogout();

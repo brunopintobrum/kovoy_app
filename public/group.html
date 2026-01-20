@@ -62,6 +62,7 @@
                                             <ul class="list-unstyled megamenu-list">
                                                 <li><a href="#participants">Families</a></li>
                                                 <li><a href="#participants">Participants</a></li>
+                                                <li><a href="#invitations">Invites</a></li>
                                             </ul>
                                         </div>
                                         <div class="col-md-4">
@@ -127,6 +128,7 @@
                         <li><a href="/groups" class="waves-effect"><i class="bx bx-group"></i><span>My groups</span></a></li>
                         <li><a href="#dashboard" class="waves-effect"><i class="bx bx-bar-chart-alt-2"></i><span>Dashboard</span></a></li>
                         <li><a href="#participants" class="waves-effect"><i class="bx bx-user-circle"></i><span>Participants</span></a></li>
+                        <li><a href="#invitations" class="waves-effect"><i class="bx bx-mail-send"></i><span>Invites</span></a></li>
                         <li><a href="#expenses" class="waves-effect"><i class="bx bx-wallet"></i><span>Expenses</span></a></li>
                         <li><a href="#debts" class="waves-effect"><i class="bx bx-transfer"></i><span>Who owes</span></a></li>
                     </ul>
@@ -259,11 +261,12 @@
                             <div class="card h-100">
                                 <div class="card-body">
                                     <h5 class="card-title">Families</h5>
-                                    <form id="familyForm" class="mb-3">
+                                    <form id="familyForm" class="mb-3 needs-validation" novalidate>
                                         <div class="input-group">
-                                            <input class="form-control" id="familyName" placeholder="Family name">
+                                            <input class="form-control" id="familyName" placeholder="Family name" maxlength="80" required>
                                             <button class="btn btn-outline-primary" type="submit">Add</button>
                                         </div>
+                                        <div class="invalid-feedback">Enter a family name.</div>
                                     </form>
                                     <div class="alert alert-danger d-none" id="familyError"></div>
                                     <ul class="list-group" id="familyList">
@@ -276,9 +279,10 @@
                             <div class="card h-100">
                                 <div class="card-body">
                                     <h5 class="card-title">Participants</h5>
-                                    <form id="participantForm" class="row g-2 mb-3">
+                                    <form id="participantForm" class="row g-2 mb-3 needs-validation" novalidate>
                                         <div class="col-md-5">
-                                            <input class="form-control" id="participantName" placeholder="Participant name" required>
+                                            <input class="form-control" id="participantName" placeholder="Participant name" maxlength="80" required>
+                                            <div class="invalid-feedback">Enter a participant name.</div>
                                         </div>
                                         <div class="col-md-3">
                                             <select class="form-select" id="participantType">
@@ -318,38 +322,83 @@
                         </div>
                     </div>
 
+                    <div class="card mt-4" id="invitations">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h5 class="card-title mb-0">Invite members</h5>
+                                <span class="badge bg-soft-info text-info">Owner/Admin only</span>
+                            </div>
+                            <form id="inviteForm" class="row g-3 needs-validation" novalidate>
+                                <div class="col-md-5">
+                                    <label class="form-label" for="inviteEmail">Email</label>
+                                    <input class="form-control" id="inviteEmail" type="email" placeholder="name@email.com" required>
+                                    <div class="invalid-feedback">Enter a valid email.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="inviteRole">Role</label>
+                                    <select class="form-select" id="inviteRole" required>
+                                        <option value="member" selected>Member</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="viewer">Viewer</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a role.</div>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end justify-content-end">
+                                    <button class="btn btn-primary" type="submit">Generate invite</button>
+                                </div>
+                            </form>
+                            <div class="alert alert-danger d-none mt-3" id="inviteError"></div>
+                            <div class="alert alert-success d-none mt-3" id="inviteSuccess">
+                                <div class="fw-semibold">Invite created.</div>
+                                <div class="small text-muted">Share this link with the invited member.</div>
+                                <div class="mt-2">
+                                    <a href="#" id="inviteLink" target="_blank" rel="noreferrer">Invite link</a>
+                                </div>
+                                <div class="mt-1">
+                                    Token: <span class="font-monospace" id="inviteToken"></span>
+                                </div>
+                                <div class="mt-1 text-muted small" id="inviteExpires"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card mt-4" id="expenses">
                         <div class="card-body">
                             <h5 class="card-title">Expenses</h5>
-                            <form id="expenseForm" class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label" for="expenseDescription">Description</label>
-                                    <input class="form-control" id="expenseDescription" required>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="expenseAmount">Amount</label>
-                                    <input class="form-control" id="expenseAmount" type="number" step="0.01" required>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="expenseCurrency">Currency</label>
-                                    <select class="form-select" id="expenseCurrency" required>
-                                        <option value="USD">USD</option>
-                                        <option value="CAD">CAD</option>
-                                        <option value="BRL">BRL</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="expenseDate">Date</label>
-                                    <input class="form-control" id="expenseDate" type="date" required>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="expenseCategory">Category</label>
-                                    <input class="form-control" id="expenseCategory" placeholder="Lodging">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" for="expensePayer">Paid by</label>
-                                    <select class="form-select" id="expensePayer" required></select>
-                                </div>
+                                    <form id="expenseForm" class="row g-3 needs-validation" novalidate>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="expenseDescription">Description</label>
+                                            <input class="form-control" id="expenseDescription" maxlength="140" required>
+                                            <div class="invalid-feedback">Enter a description.</div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label" for="expenseAmount">Amount</label>
+                                            <input class="form-control" id="expenseAmount" type="number" step="0.01" min="0.01" required>
+                                            <div class="invalid-feedback">Enter a valid amount.</div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label" for="expenseCurrency">Currency</label>
+                                            <select class="form-select" id="expenseCurrency" required>
+                                                <option value="USD">USD</option>
+                                                <option value="CAD">CAD</option>
+                                                <option value="BRL">BRL</option>
+                                            </select>
+                                            <div class="invalid-feedback">Select a currency.</div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label" for="expenseDate">Date</label>
+                                            <input class="form-control" id="expenseDate" type="date" required>
+                                            <div class="invalid-feedback">Select a date.</div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label" for="expenseCategory">Category</label>
+                                            <input class="form-control" id="expenseCategory" placeholder="Lodging">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="expensePayer">Paid by</label>
+                                            <select class="form-select" id="expensePayer" required></select>
+                                            <div class="invalid-feedback">Select a payer.</div>
+                                        </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Split type</label>
                                     <div class="d-flex gap-3">
@@ -368,6 +417,7 @@
                                     <div class="border rounded p-2" id="splitTargets">
                                         <div class="text-muted">Select participants or families.</div>
                                     </div>
+                                    <div class="invalid-feedback d-block d-none" id="splitTargetsError">Select at least one target.</div>
                                 </div>
                                 <div class="col-md-12 d-flex justify-content-end">
                                     <button class="btn btn-primary" type="submit">Add expense</button>

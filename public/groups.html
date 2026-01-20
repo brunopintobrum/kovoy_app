@@ -145,10 +145,11 @@
                                 <div class="card-body">
                                     <h5 class="card-title">Create group</h5>
                                     <p class="text-muted">Start a new trip group.</p>
-                                    <form id="createGroupForm">
+                                    <form id="createGroupForm" class="needs-validation" novalidate>
                                         <div class="mb-3">
                                             <label class="form-label" for="groupName">Group name</label>
                                             <input class="form-control" id="groupName" name="name" required>
+                                            <div class="invalid-feedback">Enter a group name.</div>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label" for="groupCurrency">Default currency</label>
@@ -157,6 +158,7 @@
                                                 <option value="CAD">CAD</option>
                                                 <option value="BRL">BRL</option>
                                             </select>
+                                            <div class="invalid-feedback">Select a currency.</div>
                                         </div>
                                         <div class="d-flex justify-content-end">
                                             <button class="btn btn-primary" type="submit">Create group</button>
@@ -170,10 +172,11 @@
                                 <div class="card-body">
                                     <h5 class="card-title">Accept invite</h5>
                                     <p class="text-muted">Paste your invite token.</p>
-                                    <form id="acceptInviteForm">
+                                    <form id="acceptInviteForm" class="needs-validation" novalidate>
                                         <div class="mb-3">
                                             <label class="form-label" for="inviteToken">Invite token</label>
                                             <input class="form-control" id="inviteToken" name="token" required>
+                                            <div class="invalid-feedback">Enter an invite token.</div>
                                         </div>
                                         <div class="d-flex justify-content-end">
                                             <button class="btn btn-outline-primary" type="submit">Join group</button>

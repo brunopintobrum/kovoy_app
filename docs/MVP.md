@@ -40,7 +40,7 @@
   - [x] Split igual por pessoa
   - [x] Split igual por familia
   - [ ] Split manual (V1.1)
-- [ ] Dashboard
+- [x] Dashboard
   - [x] Total do grupo (UI)
   - [x] Saldo por participant (backend)
   - [x] Saldo por familia (backend)
@@ -66,10 +66,10 @@
 - [x] ExpenseSplit
 
 ## Fluxos principais
-- [ ] Fluxo A: Criar grupo e cair no dashboard do grupo
-- [ ] Fluxo B: Convidar e entrar no grupo
-- [ ] Fluxo C: Montar familias e participantes
-- [ ] Fluxo D: Criar despesa e dividir
+- [x] Fluxo A: Criar grupo e cair no dashboard do grupo
+- [x] Fluxo B: Convidar e entrar no grupo
+- [x] Fluxo C: Montar familias e participantes
+- [x] Fluxo D: Criar despesa e dividir
 - [x] Fluxo E: Ver saldos e "quem deve pra quem" (backend)
 
 ## UI (Skote)
