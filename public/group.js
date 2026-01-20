@@ -346,6 +346,7 @@
             label.appendChild(span);
             wrapper.appendChild(label);
         });
+        updateExpenseAvailability();
     };
 
     const populateExpenseSelectors = () => {
@@ -353,14 +354,43 @@
         const currencySelect = document.getElementById('expenseCurrency');
         if (!payerSelect) return;
         payerSelect.innerHTML = '';
-        state.participants.forEach((participant) => {
+        if (!state.participants.length) {
             const option = document.createElement('option');
-            option.value = participant.id;
-            option.textContent = participant.displayName;
+            option.value = '';
+            option.textContent = 'Add a participant first';
             payerSelect.appendChild(option);
-        });
+        } else {
+            state.participants.forEach((participant) => {
+                const option = document.createElement('option');
+                option.value = participant.id;
+                option.textContent = participant.displayName;
+                payerSelect.appendChild(option);
+            });
+        }
         if (currencySelect && state.group) {
             currencySelect.value = state.group.defaultCurrency;
+        }
+        updateExpenseAvailability();
+    };
+
+    const setReadOnlyBanner = (id, show) => {
+        const banner = document.getElementById(id);
+        if (!banner) return;
+        banner.classList.toggle('d-none', !show);
+    };
+
+    const updateExpenseAvailability = () => {
+        const submitBtn = document.querySelector('#expenseForm button[type="submit"]');
+        const hint = document.getElementById('expenseHint');
+        if (!submitBtn) return;
+        const type = document.querySelector('input[name="splitType"]:checked')?.value || 'participants';
+        const targets = type === 'participants' ? state.participants : state.families;
+        const hasParticipants = state.participants.length > 0;
+        const hasTargets = targets.length > 0;
+        const canSubmit = state.canEdit && hasParticipants && hasTargets;
+        submitBtn.disabled = !canSubmit;
+        if (hint) {
+            hint.classList.toggle('d-none', hasParticipants);
         }
     };
 
@@ -373,6 +403,11 @@
                 el.disabled = !state.canEdit;
             });
         });
+        setReadOnlyBanner('familyReadOnly', !state.canEdit);
+        setReadOnlyBanner('participantReadOnly', !state.canEdit);
+        setReadOnlyBanner('expenseReadOnly', !state.canEdit);
+        setReadOnlyBanner('inviteReadOnly', !state.canEdit);
+        updateExpenseAvailability();
     };
 
     const bindGroupSelector = () => {

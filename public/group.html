@@ -268,6 +268,9 @@
                                         </div>
                                         <div class="invalid-feedback">Enter a family name.</div>
                                     </form>
+                                    <div class="alert alert-warning d-none" id="familyReadOnly">
+                                        You have read-only access in this group.
+                                    </div>
                                     <div class="alert alert-danger d-none" id="familyError"></div>
                                     <ul class="list-group" id="familyList">
                                         <li class="list-group-item text-muted text-center">No families yet.</li>
@@ -301,6 +304,9 @@
                                             <button class="btn btn-outline-primary" type="submit">Add participant</button>
                                         </div>
                                     </form>
+                                    <div class="alert alert-warning d-none" id="participantReadOnly">
+                                        You have read-only access in this group.
+                                    </div>
                                     <div class="alert alert-danger d-none" id="participantError"></div>
                                     <div class="table-responsive">
                                         <table class="table table-sm align-middle mb-0">
@@ -347,6 +353,9 @@
                                     <button class="btn btn-primary" type="submit">Generate invite</button>
                                 </div>
                             </form>
+                            <div class="alert alert-warning d-none mt-3" id="inviteReadOnly">
+                                You have read-only access in this group.
+                            </div>
                             <div class="alert alert-danger d-none mt-3" id="inviteError"></div>
                             <div class="alert alert-success d-none mt-3" id="inviteSuccess">
                                 <div class="fw-semibold">Invite created.</div>
@@ -365,40 +374,40 @@
                     <div class="card mt-4" id="expenses">
                         <div class="card-body">
                             <h5 class="card-title">Expenses</h5>
-                                    <form id="expenseForm" class="row g-3 needs-validation" novalidate>
-                                        <div class="col-md-4">
-                                            <label class="form-label" for="expenseDescription">Description</label>
-                                            <input class="form-control" id="expenseDescription" maxlength="140" required>
-                                            <div class="invalid-feedback">Enter a description.</div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label" for="expenseAmount">Amount</label>
-                                            <input class="form-control" id="expenseAmount" type="number" step="0.01" min="0.01" required>
-                                            <div class="invalid-feedback">Enter a valid amount.</div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label" for="expenseCurrency">Currency</label>
-                                            <select class="form-select" id="expenseCurrency" required>
-                                                <option value="USD">USD</option>
-                                                <option value="CAD">CAD</option>
-                                                <option value="BRL">BRL</option>
-                                            </select>
-                                            <div class="invalid-feedback">Select a currency.</div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label" for="expenseDate">Date</label>
-                                            <input class="form-control" id="expenseDate" type="date" required>
-                                            <div class="invalid-feedback">Select a date.</div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label" for="expenseCategory">Category</label>
-                                            <input class="form-control" id="expenseCategory" placeholder="Lodging">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label" for="expensePayer">Paid by</label>
-                                            <select class="form-select" id="expensePayer" required></select>
-                                            <div class="invalid-feedback">Select a payer.</div>
-                                        </div>
+                            <form id="expenseForm" class="row g-3 needs-validation" novalidate>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="expenseDescription">Description</label>
+                                    <input class="form-control" id="expenseDescription" maxlength="140" required>
+                                    <div class="invalid-feedback">Enter a description.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="expenseAmount">Amount</label>
+                                    <input class="form-control" id="expenseAmount" type="number" step="0.01" min="0.01" required>
+                                    <div class="invalid-feedback">Enter a valid amount.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="expenseCurrency">Currency</label>
+                                    <select class="form-select" id="expenseCurrency" required>
+                                        <option value="USD">USD</option>
+                                        <option value="CAD">CAD</option>
+                                        <option value="BRL">BRL</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a currency.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="expenseDate">Date</label>
+                                    <input class="form-control" id="expenseDate" type="date" required>
+                                    <div class="invalid-feedback">Select a date.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="expenseCategory">Category</label>
+                                    <input class="form-control" id="expenseCategory" placeholder="Lodging">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="expensePayer">Paid by</label>
+                                    <select class="form-select" id="expensePayer" required></select>
+                                    <div class="invalid-feedback">Select a payer.</div>
+                                </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Split type</label>
                                     <div class="d-flex gap-3">
@@ -423,6 +432,12 @@
                                     <button class="btn btn-primary" type="submit">Add expense</button>
                                 </div>
                             </form>
+                            <div class="alert alert-warning d-none mt-3" id="expenseReadOnly">
+                                You have read-only access in this group.
+                            </div>
+                            <div class="alert alert-info d-none mt-3" id="expenseHint">
+                                Add at least one participant to log expenses.
+                            </div>
                             <div class="alert alert-danger d-none mt-3" id="expenseError"></div>
 
                             <div class="table-responsive mt-4">
