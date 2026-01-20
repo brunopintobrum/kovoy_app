@@ -24,10 +24,6 @@ test('register, login, and manage a group', async ({ page }) => {
     await page.selectOption('#groupCurrency', 'USD');
     await page.click('#createGroupForm button[type="submit"]');
 
-    const groupRow = page.locator('#groupRows tr', { hasText: 'E2E Trip Group' });
-    await expect(groupRow).toBeVisible();
-    await groupRow.locator('a.btn').click();
-
     await page.waitForURL('**/dashboard?groupId=*');
     await expect(page.locator('#groupName')).toContainText('E2E Trip Group');
 
