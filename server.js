@@ -217,6 +217,7 @@ db.exec(`
     CREATE TABLE IF NOT EXISTS group_flights (
         id TEXT PRIMARY KEY,
         group_id INTEGER NOT NULL,
+        expense_id INTEGER,
         airline TEXT,
         pnr TEXT,
         cost REAL,
@@ -226,11 +227,13 @@ db.exec(`
         depart_at TEXT,
         arrive_at TEXT,
         notes TEXT,
-        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE SET NULL
     );
     CREATE TABLE IF NOT EXISTS group_lodgings (
         id TEXT PRIMARY KEY,
         group_id INTEGER NOT NULL,
+        expense_id INTEGER,
         name TEXT,
         address TEXT,
         check_in TEXT,
@@ -240,28 +243,33 @@ db.exec(`
         host TEXT,
         contact TEXT,
         notes TEXT,
-        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE SET NULL
     );
     CREATE TABLE IF NOT EXISTS group_transports (
         id TEXT PRIMARY KEY,
         group_id INTEGER NOT NULL,
+        expense_id INTEGER,
         type TEXT,
         date TEXT,
         amount REAL,
         currency TEXT,
         notes TEXT,
-        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE SET NULL
     );
     CREATE TABLE IF NOT EXISTS group_tickets (
         id TEXT PRIMARY KEY,
         group_id INTEGER NOT NULL,
+        expense_id INTEGER,
         name TEXT,
         date TEXT,
         amount REAL,
         currency TEXT,
         holder TEXT,
         notes TEXT,
-        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE SET NULL
     );
     CREATE TABLE IF NOT EXISTS trips (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -391,6 +399,26 @@ if (!hasLastName) {
 }
 if (!hasAvatarUrl) {
     db.exec('ALTER TABLE users ADD COLUMN avatar_url TEXT');
+}
+const groupFlightColumns = db.prepare('PRAGMA table_info(group_flights)').all();
+const hasGroupFlightExpense = groupFlightColumns.some((column) => column.name === 'expense_id');
+if (!hasGroupFlightExpense) {
+    db.exec('ALTER TABLE group_flights ADD COLUMN expense_id INTEGER');
+}
+const groupLodgingColumns = db.prepare('PRAGMA table_info(group_lodgings)').all();
+const hasGroupLodgingExpense = groupLodgingColumns.some((column) => column.name === 'expense_id');
+if (!hasGroupLodgingExpense) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN expense_id INTEGER');
+}
+const groupTransportColumns = db.prepare('PRAGMA table_info(group_transports)').all();
+const hasGroupTransportExpense = groupTransportColumns.some((column) => column.name === 'expense_id');
+if (!hasGroupTransportExpense) {
+    db.exec('ALTER TABLE group_transports ADD COLUMN expense_id INTEGER');
+}
+const groupTicketColumns = db.prepare('PRAGMA table_info(group_tickets)').all();
+const hasGroupTicketExpense = groupTicketColumns.some((column) => column.name === 'expense_id');
+if (!hasGroupTicketExpense) {
+    db.exec('ALTER TABLE group_tickets ADD COLUMN expense_id INTEGER');
 }
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL');
 db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user ON email_verification_tokens(user_id)');
@@ -1404,70 +1432,70 @@ const deleteExpenseSplits = db.prepare('DELETE FROM expense_splits WHERE expense
 const listParticipantIds = db.prepare('SELECT id FROM participants WHERE group_id = ?');
 const listFamilyIds = db.prepare('SELECT id FROM families WHERE group_id = ?');
 const listGroupFlights = db.prepare(`
-    SELECT id, airline, pnr, cost, currency, from_city, to_city, depart_at, arrive_at, notes
+    SELECT id, expense_id, airline, pnr, cost, currency, from_city, to_city, depart_at, arrive_at, notes
     FROM group_flights
     WHERE group_id = ?
     ORDER BY depart_at DESC, id DESC
 `);
-const getGroupFlight = db.prepare('SELECT id FROM group_flights WHERE id = ? AND group_id = ?');
+const getGroupFlight = db.prepare('SELECT id, expense_id FROM group_flights WHERE id = ? AND group_id = ?');
 const insertGroupFlight = db.prepare(`
-    INSERT INTO group_flights (id, group_id, airline, pnr, cost, currency, from_city, to_city, depart_at, arrive_at, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO group_flights (id, group_id, expense_id, airline, pnr, cost, currency, from_city, to_city, depart_at, arrive_at, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const updateGroupFlight = db.prepare(`
     UPDATE group_flights
-    SET airline = ?, pnr = ?, cost = ?, currency = ?, from_city = ?, to_city = ?, depart_at = ?, arrive_at = ?, notes = ?
+    SET expense_id = ?, airline = ?, pnr = ?, cost = ?, currency = ?, from_city = ?, to_city = ?, depart_at = ?, arrive_at = ?, notes = ?
     WHERE id = ? AND group_id = ?
 `);
 const deleteGroupFlight = db.prepare('DELETE FROM group_flights WHERE id = ? AND group_id = ?');
 const listGroupLodgings = db.prepare(`
-    SELECT id, name, address, check_in, check_out, cost, currency, host, contact, notes
+    SELECT id, expense_id, name, address, check_in, check_out, cost, currency, host, contact, notes
     FROM group_lodgings
     WHERE group_id = ?
     ORDER BY check_in DESC, id DESC
 `);
-const getGroupLodging = db.prepare('SELECT id FROM group_lodgings WHERE id = ? AND group_id = ?');
+const getGroupLodging = db.prepare('SELECT id, expense_id FROM group_lodgings WHERE id = ? AND group_id = ?');
 const insertGroupLodging = db.prepare(`
-    INSERT INTO group_lodgings (id, group_id, name, address, check_in, check_out, cost, currency, host, contact, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO group_lodgings (id, group_id, expense_id, name, address, check_in, check_out, cost, currency, host, contact, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const updateGroupLodging = db.prepare(`
     UPDATE group_lodgings
-    SET name = ?, address = ?, check_in = ?, check_out = ?, cost = ?, currency = ?, host = ?, contact = ?, notes = ?
+    SET expense_id = ?, name = ?, address = ?, check_in = ?, check_out = ?, cost = ?, currency = ?, host = ?, contact = ?, notes = ?
     WHERE id = ? AND group_id = ?
 `);
 const deleteGroupLodging = db.prepare('DELETE FROM group_lodgings WHERE id = ? AND group_id = ?');
 const listGroupTransports = db.prepare(`
-    SELECT id, type, date, amount, currency, notes
+    SELECT id, expense_id, type, date, amount, currency, notes
     FROM group_transports
     WHERE group_id = ?
     ORDER BY date DESC, id DESC
 `);
-const getGroupTransport = db.prepare('SELECT id FROM group_transports WHERE id = ? AND group_id = ?');
+const getGroupTransport = db.prepare('SELECT id, expense_id FROM group_transports WHERE id = ? AND group_id = ?');
 const insertGroupTransport = db.prepare(`
-    INSERT INTO group_transports (id, group_id, type, date, amount, currency, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO group_transports (id, group_id, expense_id, type, date, amount, currency, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const updateGroupTransport = db.prepare(`
     UPDATE group_transports
-    SET type = ?, date = ?, amount = ?, currency = ?, notes = ?
+    SET expense_id = ?, type = ?, date = ?, amount = ?, currency = ?, notes = ?
     WHERE id = ? AND group_id = ?
 `);
 const deleteGroupTransport = db.prepare('DELETE FROM group_transports WHERE id = ? AND group_id = ?');
 const listGroupTickets = db.prepare(`
-    SELECT id, name, date, amount, currency, holder, notes
+    SELECT id, expense_id, name, date, amount, currency, holder, notes
     FROM group_tickets
     WHERE group_id = ?
     ORDER BY date DESC, id DESC
 `);
-const getGroupTicket = db.prepare('SELECT id FROM group_tickets WHERE id = ? AND group_id = ?');
+const getGroupTicket = db.prepare('SELECT id, expense_id FROM group_tickets WHERE id = ? AND group_id = ?');
 const insertGroupTicket = db.prepare(`
-    INSERT INTO group_tickets (id, group_id, name, date, amount, currency, holder, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO group_tickets (id, group_id, expense_id, name, date, amount, currency, holder, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const updateGroupTicket = db.prepare(`
     UPDATE group_tickets
-    SET name = ?, date = ?, amount = ?, currency = ?, holder = ?, notes = ?
+    SET expense_id = ?, name = ?, date = ?, amount = ?, currency = ?, holder = ?, notes = ?
     WHERE id = ? AND group_id = ?
 `);
 const deleteGroupTicket = db.prepare('DELETE FROM group_tickets WHERE id = ? AND group_id = ?');
@@ -1742,6 +1770,94 @@ const validateSplitTargets = (groupId, splitType, targetIds) => {
         : listFamilyIds.all(groupId).map((row) => row.id);
     const availableSet = new Set(available);
     return targetIds.every((id) => availableSet.has(id));
+};
+
+const buildModuleExpenseDefaults = (type, payload) => {
+    if (type === 'flight') {
+        return {
+            description: `Flight: ${payload.from} -> ${payload.to}`,
+            amount: payload.cost,
+            currency: payload.currency,
+            date: payload.departAt,
+            category: 'Flight'
+        };
+    }
+    if (type === 'lodging') {
+        return {
+            description: `Lodging: ${payload.name}`,
+            amount: payload.cost,
+            currency: payload.currency,
+            date: payload.checkIn,
+            category: 'Lodging'
+        };
+    }
+    if (type === 'transport') {
+        return {
+            description: `Transport: ${payload.type}`,
+            amount: payload.amount,
+            currency: payload.currency,
+            date: payload.date,
+            category: 'Transport'
+        };
+    }
+    return {
+        description: `Ticket: ${payload.name}`,
+        amount: payload.amount,
+        currency: payload.currency,
+        date: payload.date,
+        category: 'Ticket'
+    };
+};
+
+const normalizeModuleExpensePayload = (payload, defaults) => {
+    if (!payload || typeof payload !== 'object') {
+        return { value: null };
+    }
+    const merged = { ...defaults, ...payload };
+    return validateExpenseSplitPayload(merged);
+};
+
+const upsertModuleExpense = (groupId, expenseId, normalized) => {
+    if (!getParticipant.get(normalized.payerParticipantId, groupId)) {
+        return { error: 'Payer participant not found.' };
+    }
+    if (!validateSplitTargets(groupId, normalized.splitType, normalized.targetIds)) {
+        return { error: 'Split targets are invalid.' };
+    }
+    const splitRows = normalized.splitMode === 'manual'
+        ? normalized.splits
+        : buildEqualSplits(normalized.amount, normalized.targetIds);
+    const splitCheck = validateSplitSum(normalized.amount, splitRows);
+    if (splitCheck.error) {
+        return { error: splitCheck.error };
+    }
+    const now = new Date().toISOString();
+    if (expenseId) {
+        updateExpense.run(
+            normalized.description,
+            normalized.amount,
+            normalized.currency,
+            normalized.date,
+            normalized.category,
+            normalized.payerParticipantId,
+            expenseId,
+            groupId
+        );
+    } else {
+        const result = insertExpense.run(
+            groupId,
+            normalized.description,
+            normalized.amount,
+            normalized.currency,
+            normalized.date,
+            normalized.category,
+            normalized.payerParticipantId,
+            now
+        );
+        expenseId = result.lastInsertRowid;
+    }
+    saveExpenseWithSplits(expenseId, normalized.splitType, splitRows);
+    return { expenseId };
 };
 
 const normalizeStoredSplitType = (value) => {
@@ -2031,21 +2147,44 @@ app.post(
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
-        const id = req.body?.id || generateTripItemId();
-        insertGroupFlight.run(
-            id,
-            req.groupId,
-            normalized.value.airline,
-            normalized.value.pnr,
-            normalized.value.cost,
-            normalized.value.currency,
-            normalized.value.from,
-            normalized.value.to,
-            normalized.value.departAt,
-            normalized.value.arriveAt,
-            normalized.value.notes
+        const expenseNormalized = normalizeModuleExpensePayload(
+            req.body?.expense,
+            buildModuleExpenseDefaults('flight', normalized.value)
         );
-        return res.json({ ok: true, id });
+        if (expenseNormalized.error) {
+            return res.status(400).json({ error: expenseNormalized.error });
+        }
+        const id = req.body?.id || generateTripItemId();
+        try {
+            const expenseId = db.transaction(() => {
+                let linkedExpenseId = null;
+                if (expenseNormalized.value) {
+                    const expenseResult = upsertModuleExpense(req.groupId, null, expenseNormalized.value);
+                    if (expenseResult.error) {
+                        throw new Error(expenseResult.error);
+                    }
+                    linkedExpenseId = expenseResult.expenseId;
+                }
+                insertGroupFlight.run(
+                    id,
+                    req.groupId,
+                    linkedExpenseId,
+                    normalized.value.airline,
+                    normalized.value.pnr,
+                    normalized.value.cost,
+                    normalized.value.currency,
+                    normalized.value.from,
+                    normalized.value.to,
+                    normalized.value.departAt,
+                    normalized.value.arriveAt,
+                    normalized.value.notes
+                );
+                return linkedExpenseId;
+            })();
+            return res.json({ ok: true, id, expenseId });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not save flight.' });
+        }
     }
 );
 
@@ -2060,27 +2199,54 @@ app.put(
         if (!flightId) {
             return res.status(400).json({ error: 'Invalid flight id.' });
         }
-        if (!getGroupFlight.get(flightId, req.groupId)) {
+        const existing = getGroupFlight.get(flightId, req.groupId);
+        if (!existing) {
             return res.status(404).json({ error: 'Flight not found.' });
         }
         const normalized = validateGroupFlightPayload(req.body || {});
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
-        updateGroupFlight.run(
-            normalized.value.airline,
-            normalized.value.pnr,
-            normalized.value.cost,
-            normalized.value.currency,
-            normalized.value.from,
-            normalized.value.to,
-            normalized.value.departAt,
-            normalized.value.arriveAt,
-            normalized.value.notes,
-            flightId,
-            req.groupId
+        const expenseNormalized = normalizeModuleExpensePayload(
+            req.body?.expense,
+            buildModuleExpenseDefaults('flight', normalized.value)
         );
-        return res.json({ ok: true });
+        if (expenseNormalized.error) {
+            return res.status(400).json({ error: expenseNormalized.error });
+        }
+        try {
+            const expenseId = db.transaction(() => {
+                let linkedExpenseId = existing.expense_id || null;
+                if (linkedExpenseId && !getExpense.get(linkedExpenseId, req.groupId)) {
+                    linkedExpenseId = null;
+                }
+                if (expenseNormalized.value) {
+                    const expenseResult = upsertModuleExpense(req.groupId, linkedExpenseId, expenseNormalized.value);
+                    if (expenseResult.error) {
+                        throw new Error(expenseResult.error);
+                    }
+                    linkedExpenseId = expenseResult.expenseId;
+                }
+                updateGroupFlight.run(
+                    linkedExpenseId,
+                    normalized.value.airline,
+                    normalized.value.pnr,
+                    normalized.value.cost,
+                    normalized.value.currency,
+                    normalized.value.from,
+                    normalized.value.to,
+                    normalized.value.departAt,
+                    normalized.value.arriveAt,
+                    normalized.value.notes,
+                    flightId,
+                    req.groupId
+                );
+                return linkedExpenseId;
+            })();
+            return res.json({ ok: true, expenseId });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not update flight.' });
+        }
     }
 );
 
@@ -2095,11 +2261,22 @@ app.delete(
         if (!flightId) {
             return res.status(400).json({ error: 'Invalid flight id.' });
         }
-        const result = deleteGroupFlight.run(flightId, req.groupId);
-        if (result.changes === 0) {
+        const existing = getGroupFlight.get(flightId, req.groupId);
+        if (!existing) {
             return res.status(404).json({ error: 'Flight not found.' });
         }
-        return res.json({ ok: true });
+        try {
+            db.transaction(() => {
+                deleteGroupFlight.run(flightId, req.groupId);
+                if (existing.expense_id) {
+                    deleteExpenseSplits.run(existing.expense_id);
+                    deleteExpense.run(existing.expense_id, req.groupId);
+                }
+            })();
+            return res.json({ ok: true });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not delete flight.' });
+        }
     }
 );
 
@@ -2119,21 +2296,44 @@ app.post(
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
-        const id = req.body?.id || generateTripItemId();
-        insertGroupLodging.run(
-            id,
-            req.groupId,
-            normalized.value.name,
-            normalized.value.address,
-            normalized.value.checkIn,
-            normalized.value.checkOut,
-            normalized.value.cost,
-            normalized.value.currency,
-            normalized.value.host,
-            normalized.value.contact,
-            normalized.value.notes
+        const expenseNormalized = normalizeModuleExpensePayload(
+            req.body?.expense,
+            buildModuleExpenseDefaults('lodging', normalized.value)
         );
-        return res.json({ ok: true, id });
+        if (expenseNormalized.error) {
+            return res.status(400).json({ error: expenseNormalized.error });
+        }
+        const id = req.body?.id || generateTripItemId();
+        try {
+            const expenseId = db.transaction(() => {
+                let linkedExpenseId = null;
+                if (expenseNormalized.value) {
+                    const expenseResult = upsertModuleExpense(req.groupId, null, expenseNormalized.value);
+                    if (expenseResult.error) {
+                        throw new Error(expenseResult.error);
+                    }
+                    linkedExpenseId = expenseResult.expenseId;
+                }
+                insertGroupLodging.run(
+                    id,
+                    req.groupId,
+                    linkedExpenseId,
+                    normalized.value.name,
+                    normalized.value.address,
+                    normalized.value.checkIn,
+                    normalized.value.checkOut,
+                    normalized.value.cost,
+                    normalized.value.currency,
+                    normalized.value.host,
+                    normalized.value.contact,
+                    normalized.value.notes
+                );
+                return linkedExpenseId;
+            })();
+            return res.json({ ok: true, id, expenseId });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not save lodging.' });
+        }
     }
 );
 
@@ -2148,27 +2348,54 @@ app.put(
         if (!lodgingId) {
             return res.status(400).json({ error: 'Invalid lodging id.' });
         }
-        if (!getGroupLodging.get(lodgingId, req.groupId)) {
+        const existing = getGroupLodging.get(lodgingId, req.groupId);
+        if (!existing) {
             return res.status(404).json({ error: 'Lodging not found.' });
         }
         const normalized = validateGroupLodgingPayload(req.body || {});
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
-        updateGroupLodging.run(
-            normalized.value.name,
-            normalized.value.address,
-            normalized.value.checkIn,
-            normalized.value.checkOut,
-            normalized.value.cost,
-            normalized.value.currency,
-            normalized.value.host,
-            normalized.value.contact,
-            normalized.value.notes,
-            lodgingId,
-            req.groupId
+        const expenseNormalized = normalizeModuleExpensePayload(
+            req.body?.expense,
+            buildModuleExpenseDefaults('lodging', normalized.value)
         );
-        return res.json({ ok: true });
+        if (expenseNormalized.error) {
+            return res.status(400).json({ error: expenseNormalized.error });
+        }
+        try {
+            const expenseId = db.transaction(() => {
+                let linkedExpenseId = existing.expense_id || null;
+                if (linkedExpenseId && !getExpense.get(linkedExpenseId, req.groupId)) {
+                    linkedExpenseId = null;
+                }
+                if (expenseNormalized.value) {
+                    const expenseResult = upsertModuleExpense(req.groupId, linkedExpenseId, expenseNormalized.value);
+                    if (expenseResult.error) {
+                        throw new Error(expenseResult.error);
+                    }
+                    linkedExpenseId = expenseResult.expenseId;
+                }
+                updateGroupLodging.run(
+                    linkedExpenseId,
+                    normalized.value.name,
+                    normalized.value.address,
+                    normalized.value.checkIn,
+                    normalized.value.checkOut,
+                    normalized.value.cost,
+                    normalized.value.currency,
+                    normalized.value.host,
+                    normalized.value.contact,
+                    normalized.value.notes,
+                    lodgingId,
+                    req.groupId
+                );
+                return linkedExpenseId;
+            })();
+            return res.json({ ok: true, expenseId });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not update lodging.' });
+        }
     }
 );
 
@@ -2183,11 +2410,22 @@ app.delete(
         if (!lodgingId) {
             return res.status(400).json({ error: 'Invalid lodging id.' });
         }
-        const result = deleteGroupLodging.run(lodgingId, req.groupId);
-        if (result.changes === 0) {
+        const existing = getGroupLodging.get(lodgingId, req.groupId);
+        if (!existing) {
             return res.status(404).json({ error: 'Lodging not found.' });
         }
-        return res.json({ ok: true });
+        try {
+            db.transaction(() => {
+                deleteGroupLodging.run(lodgingId, req.groupId);
+                if (existing.expense_id) {
+                    deleteExpenseSplits.run(existing.expense_id);
+                    deleteExpense.run(existing.expense_id, req.groupId);
+                }
+            })();
+            return res.json({ ok: true });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not delete lodging.' });
+        }
     }
 );
 
@@ -2207,17 +2445,40 @@ app.post(
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
-        const id = req.body?.id || generateTripItemId();
-        insertGroupTransport.run(
-            id,
-            req.groupId,
-            normalized.value.type,
-            normalized.value.date,
-            normalized.value.amount,
-            normalized.value.currency,
-            normalized.value.notes
+        const expenseNormalized = normalizeModuleExpensePayload(
+            req.body?.expense,
+            buildModuleExpenseDefaults('transport', normalized.value)
         );
-        return res.json({ ok: true, id });
+        if (expenseNormalized.error) {
+            return res.status(400).json({ error: expenseNormalized.error });
+        }
+        const id = req.body?.id || generateTripItemId();
+        try {
+            const expenseId = db.transaction(() => {
+                let linkedExpenseId = null;
+                if (expenseNormalized.value) {
+                    const expenseResult = upsertModuleExpense(req.groupId, null, expenseNormalized.value);
+                    if (expenseResult.error) {
+                        throw new Error(expenseResult.error);
+                    }
+                    linkedExpenseId = expenseResult.expenseId;
+                }
+                insertGroupTransport.run(
+                    id,
+                    req.groupId,
+                    linkedExpenseId,
+                    normalized.value.type,
+                    normalized.value.date,
+                    normalized.value.amount,
+                    normalized.value.currency,
+                    normalized.value.notes
+                );
+                return linkedExpenseId;
+            })();
+            return res.json({ ok: true, id, expenseId });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not save transport.' });
+        }
     }
 );
 
@@ -2232,23 +2493,50 @@ app.put(
         if (!transportId) {
             return res.status(400).json({ error: 'Invalid transport id.' });
         }
-        if (!getGroupTransport.get(transportId, req.groupId)) {
+        const existing = getGroupTransport.get(transportId, req.groupId);
+        if (!existing) {
             return res.status(404).json({ error: 'Transport not found.' });
         }
         const normalized = validateGroupTransportPayload(req.body || {});
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
-        updateGroupTransport.run(
-            normalized.value.type,
-            normalized.value.date,
-            normalized.value.amount,
-            normalized.value.currency,
-            normalized.value.notes,
-            transportId,
-            req.groupId
+        const expenseNormalized = normalizeModuleExpensePayload(
+            req.body?.expense,
+            buildModuleExpenseDefaults('transport', normalized.value)
         );
-        return res.json({ ok: true });
+        if (expenseNormalized.error) {
+            return res.status(400).json({ error: expenseNormalized.error });
+        }
+        try {
+            const expenseId = db.transaction(() => {
+                let linkedExpenseId = existing.expense_id || null;
+                if (linkedExpenseId && !getExpense.get(linkedExpenseId, req.groupId)) {
+                    linkedExpenseId = null;
+                }
+                if (expenseNormalized.value) {
+                    const expenseResult = upsertModuleExpense(req.groupId, linkedExpenseId, expenseNormalized.value);
+                    if (expenseResult.error) {
+                        throw new Error(expenseResult.error);
+                    }
+                    linkedExpenseId = expenseResult.expenseId;
+                }
+                updateGroupTransport.run(
+                    linkedExpenseId,
+                    normalized.value.type,
+                    normalized.value.date,
+                    normalized.value.amount,
+                    normalized.value.currency,
+                    normalized.value.notes,
+                    transportId,
+                    req.groupId
+                );
+                return linkedExpenseId;
+            })();
+            return res.json({ ok: true, expenseId });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not update transport.' });
+        }
     }
 );
 
@@ -2263,11 +2551,22 @@ app.delete(
         if (!transportId) {
             return res.status(400).json({ error: 'Invalid transport id.' });
         }
-        const result = deleteGroupTransport.run(transportId, req.groupId);
-        if (result.changes === 0) {
+        const existing = getGroupTransport.get(transportId, req.groupId);
+        if (!existing) {
             return res.status(404).json({ error: 'Transport not found.' });
         }
-        return res.json({ ok: true });
+        try {
+            db.transaction(() => {
+                deleteGroupTransport.run(transportId, req.groupId);
+                if (existing.expense_id) {
+                    deleteExpenseSplits.run(existing.expense_id);
+                    deleteExpense.run(existing.expense_id, req.groupId);
+                }
+            })();
+            return res.json({ ok: true });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not delete transport.' });
+        }
     }
 );
 
@@ -2287,18 +2586,41 @@ app.post(
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
-        const id = req.body?.id || generateTripItemId();
-        insertGroupTicket.run(
-            id,
-            req.groupId,
-            normalized.value.name,
-            normalized.value.date,
-            normalized.value.amount,
-            normalized.value.currency,
-            normalized.value.holder,
-            normalized.value.notes
+        const expenseNormalized = normalizeModuleExpensePayload(
+            req.body?.expense,
+            buildModuleExpenseDefaults('ticket', normalized.value)
         );
-        return res.json({ ok: true, id });
+        if (expenseNormalized.error) {
+            return res.status(400).json({ error: expenseNormalized.error });
+        }
+        const id = req.body?.id || generateTripItemId();
+        try {
+            const expenseId = db.transaction(() => {
+                let linkedExpenseId = null;
+                if (expenseNormalized.value) {
+                    const expenseResult = upsertModuleExpense(req.groupId, null, expenseNormalized.value);
+                    if (expenseResult.error) {
+                        throw new Error(expenseResult.error);
+                    }
+                    linkedExpenseId = expenseResult.expenseId;
+                }
+                insertGroupTicket.run(
+                    id,
+                    req.groupId,
+                    linkedExpenseId,
+                    normalized.value.name,
+                    normalized.value.date,
+                    normalized.value.amount,
+                    normalized.value.currency,
+                    normalized.value.holder,
+                    normalized.value.notes
+                );
+                return linkedExpenseId;
+            })();
+            return res.json({ ok: true, id, expenseId });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not save ticket.' });
+        }
     }
 );
 
@@ -2313,24 +2635,51 @@ app.put(
         if (!ticketId) {
             return res.status(400).json({ error: 'Invalid ticket id.' });
         }
-        if (!getGroupTicket.get(ticketId, req.groupId)) {
+        const existing = getGroupTicket.get(ticketId, req.groupId);
+        if (!existing) {
             return res.status(404).json({ error: 'Ticket not found.' });
         }
         const normalized = validateGroupTicketPayload(req.body || {});
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
-        updateGroupTicket.run(
-            normalized.value.name,
-            normalized.value.date,
-            normalized.value.amount,
-            normalized.value.currency,
-            normalized.value.holder,
-            normalized.value.notes,
-            ticketId,
-            req.groupId
+        const expenseNormalized = normalizeModuleExpensePayload(
+            req.body?.expense,
+            buildModuleExpenseDefaults('ticket', normalized.value)
         );
-        return res.json({ ok: true });
+        if (expenseNormalized.error) {
+            return res.status(400).json({ error: expenseNormalized.error });
+        }
+        try {
+            const expenseId = db.transaction(() => {
+                let linkedExpenseId = existing.expense_id || null;
+                if (linkedExpenseId && !getExpense.get(linkedExpenseId, req.groupId)) {
+                    linkedExpenseId = null;
+                }
+                if (expenseNormalized.value) {
+                    const expenseResult = upsertModuleExpense(req.groupId, linkedExpenseId, expenseNormalized.value);
+                    if (expenseResult.error) {
+                        throw new Error(expenseResult.error);
+                    }
+                    linkedExpenseId = expenseResult.expenseId;
+                }
+                updateGroupTicket.run(
+                    linkedExpenseId,
+                    normalized.value.name,
+                    normalized.value.date,
+                    normalized.value.amount,
+                    normalized.value.currency,
+                    normalized.value.holder,
+                    normalized.value.notes,
+                    ticketId,
+                    req.groupId
+                );
+                return linkedExpenseId;
+            })();
+            return res.json({ ok: true, expenseId });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not update ticket.' });
+        }
     }
 );
 
@@ -2345,11 +2694,22 @@ app.delete(
         if (!ticketId) {
             return res.status(400).json({ error: 'Invalid ticket id.' });
         }
-        const result = deleteGroupTicket.run(ticketId, req.groupId);
-        if (result.changes === 0) {
+        const existing = getGroupTicket.get(ticketId, req.groupId);
+        if (!existing) {
             return res.status(404).json({ error: 'Ticket not found.' });
         }
-        return res.json({ ok: true });
+        try {
+            db.transaction(() => {
+                deleteGroupTicket.run(ticketId, req.groupId);
+                if (existing.expense_id) {
+                    deleteExpenseSplits.run(existing.expense_id);
+                    deleteExpense.run(existing.expense_id, req.groupId);
+                }
+            })();
+            return res.json({ ok: true });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || 'Could not delete ticket.' });
+        }
     }
 );
 
@@ -2788,6 +3148,7 @@ app.post('/api/trip', authRequiredApi, requireCsrfToken, (req, res) => {
 
 const mapGroupFlightRow = (row) => ({
     id: row.id,
+    expenseId: row.expense_id || null,
     airline: row.airline,
     pnr: row.pnr,
     cost: row.cost,
@@ -2801,6 +3162,7 @@ const mapGroupFlightRow = (row) => ({
 
 const mapGroupLodgingRow = (row) => ({
     id: row.id,
+    expenseId: row.expense_id || null,
     name: row.name,
     address: row.address,
     checkIn: row.check_in,
@@ -2814,6 +3176,7 @@ const mapGroupLodgingRow = (row) => ({
 
 const mapGroupTransportRow = (row) => ({
     id: row.id,
+    expenseId: row.expense_id || null,
     type: row.type,
     date: row.date,
     amount: row.amount,
@@ -2823,6 +3186,7 @@ const mapGroupTransportRow = (row) => ({
 
 const mapGroupTicketRow = (row) => ({
     id: row.id,
+    expenseId: row.expense_id || null,
     name: row.name,
     date: row.date,
     amount: row.amount,
