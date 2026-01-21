@@ -18,6 +18,10 @@ const {
     validateExpensePayload,
     validateTripMetaPayload,
     validateExpenseSplitPayload,
+    validateGroupFlightPayload,
+    validateGroupLodgingPayload,
+    validateGroupTransportPayload,
+    validateGroupTicketPayload,
     validateSplitSum
 } = require('../server');
 
@@ -169,5 +173,71 @@ describe('validation helpers', () => {
             ]
         });
         expect(result).toEqual({ error: 'Split totals must match the expense amount.' });
+    });
+
+    test('validateGroupFlightPayload enforces required fields', () => {
+        const result = validateGroupFlightPayload({
+            airline: 'Air Canada',
+            from: 'YUL',
+            to: 'MCO',
+            departAt: '2026-02-22T10:00:00Z',
+            arriveAt: '2026-02-22T14:30:00Z',
+            cost: 1200,
+            currency: 'CAD'
+        });
+        expect(result.value).toMatchObject({
+            airline: 'Air Canada',
+            from: 'YUL',
+            to: 'MCO',
+            cost: 1200,
+            currency: 'CAD'
+        });
+    });
+
+    test('validateGroupLodgingPayload requires address and dates', () => {
+        const result = validateGroupLodgingPayload({
+            name: 'Resort',
+            address: '123 Main St',
+            checkIn: '2026-02-22',
+            checkOut: '2026-02-25',
+            cost: 300,
+            currency: 'USD'
+        });
+        expect(result.value).toMatchObject({
+            name: 'Resort',
+            address: '123 Main St',
+            cost: 300,
+            currency: 'USD'
+        });
+    });
+
+    test('validateGroupTransportPayload validates amount and currency', () => {
+        const result = validateGroupTransportPayload({
+            type: 'Shuttle',
+            date: '2026-02-22',
+            amount: 45,
+            currency: 'USD'
+        });
+        expect(result.value).toMatchObject({
+            type: 'Shuttle',
+            amount: 45,
+            currency: 'USD'
+        });
+    });
+
+    test('validateGroupTicketPayload validates ticket fields', () => {
+        const result = validateGroupTicketPayload({
+            name: 'Theme Park',
+            date: '2026-02-24',
+            amount: 180,
+            currency: 'USD',
+            holder: 'Bruno'
+        });
+        expect(result.value).toMatchObject({
+            name: 'Theme Park',
+            amount: 180,
+            currency: 'USD',
+            holder: 'Bruno'
+        });
     });
 });

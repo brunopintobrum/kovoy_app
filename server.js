@@ -214,6 +214,55 @@ db.exec(`
         amount REAL NOT NULL,
         FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE CASCADE
     );
+    CREATE TABLE IF NOT EXISTS group_flights (
+        id TEXT PRIMARY KEY,
+        group_id INTEGER NOT NULL,
+        airline TEXT,
+        pnr TEXT,
+        cost REAL,
+        currency TEXT,
+        from_city TEXT,
+        to_city TEXT,
+        depart_at TEXT,
+        arrive_at TEXT,
+        notes TEXT,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS group_lodgings (
+        id TEXT PRIMARY KEY,
+        group_id INTEGER NOT NULL,
+        name TEXT,
+        address TEXT,
+        check_in TEXT,
+        check_out TEXT,
+        cost REAL,
+        currency TEXT,
+        host TEXT,
+        contact TEXT,
+        notes TEXT,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS group_transports (
+        id TEXT PRIMARY KEY,
+        group_id INTEGER NOT NULL,
+        type TEXT,
+        date TEXT,
+        amount REAL,
+        currency TEXT,
+        notes TEXT,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS group_tickets (
+        id TEXT PRIMARY KEY,
+        group_id INTEGER NOT NULL,
+        name TEXT,
+        date TEXT,
+        amount REAL,
+        currency TEXT,
+        holder TEXT,
+        notes TEXT,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+    );
     CREATE TABLE IF NOT EXISTS trips (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL UNIQUE,
@@ -361,6 +410,10 @@ db.exec('CREATE INDEX IF NOT EXISTS idx_participants_group ON participants(group
 db.exec('CREATE INDEX IF NOT EXISTS idx_participants_family ON participants(family_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_expenses_group ON expenses(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_expenses_payer ON expenses(payer_participant_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_flights_group ON group_flights(group_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_lodgings_group ON group_lodgings(group_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_transports_group ON group_transports(group_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_tickets_group ON group_tickets(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_expense_splits_expense ON expense_splits(expense_id)');
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_trips_user ON trips(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_trip_flights_trip ON trip_flights(trip_id)');
@@ -1350,6 +1403,74 @@ const insertExpenseSplit = db.prepare(`
 const deleteExpenseSplits = db.prepare('DELETE FROM expense_splits WHERE expense_id = ?');
 const listParticipantIds = db.prepare('SELECT id FROM participants WHERE group_id = ?');
 const listFamilyIds = db.prepare('SELECT id FROM families WHERE group_id = ?');
+const listGroupFlights = db.prepare(`
+    SELECT id, airline, pnr, cost, currency, from_city, to_city, depart_at, arrive_at, notes
+    FROM group_flights
+    WHERE group_id = ?
+    ORDER BY depart_at DESC, id DESC
+`);
+const getGroupFlight = db.prepare('SELECT id FROM group_flights WHERE id = ? AND group_id = ?');
+const insertGroupFlight = db.prepare(`
+    INSERT INTO group_flights (id, group_id, airline, pnr, cost, currency, from_city, to_city, depart_at, arrive_at, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`);
+const updateGroupFlight = db.prepare(`
+    UPDATE group_flights
+    SET airline = ?, pnr = ?, cost = ?, currency = ?, from_city = ?, to_city = ?, depart_at = ?, arrive_at = ?, notes = ?
+    WHERE id = ? AND group_id = ?
+`);
+const deleteGroupFlight = db.prepare('DELETE FROM group_flights WHERE id = ? AND group_id = ?');
+const listGroupLodgings = db.prepare(`
+    SELECT id, name, address, check_in, check_out, cost, currency, host, contact, notes
+    FROM group_lodgings
+    WHERE group_id = ?
+    ORDER BY check_in DESC, id DESC
+`);
+const getGroupLodging = db.prepare('SELECT id FROM group_lodgings WHERE id = ? AND group_id = ?');
+const insertGroupLodging = db.prepare(`
+    INSERT INTO group_lodgings (id, group_id, name, address, check_in, check_out, cost, currency, host, contact, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`);
+const updateGroupLodging = db.prepare(`
+    UPDATE group_lodgings
+    SET name = ?, address = ?, check_in = ?, check_out = ?, cost = ?, currency = ?, host = ?, contact = ?, notes = ?
+    WHERE id = ? AND group_id = ?
+`);
+const deleteGroupLodging = db.prepare('DELETE FROM group_lodgings WHERE id = ? AND group_id = ?');
+const listGroupTransports = db.prepare(`
+    SELECT id, type, date, amount, currency, notes
+    FROM group_transports
+    WHERE group_id = ?
+    ORDER BY date DESC, id DESC
+`);
+const getGroupTransport = db.prepare('SELECT id FROM group_transports WHERE id = ? AND group_id = ?');
+const insertGroupTransport = db.prepare(`
+    INSERT INTO group_transports (id, group_id, type, date, amount, currency, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+`);
+const updateGroupTransport = db.prepare(`
+    UPDATE group_transports
+    SET type = ?, date = ?, amount = ?, currency = ?, notes = ?
+    WHERE id = ? AND group_id = ?
+`);
+const deleteGroupTransport = db.prepare('DELETE FROM group_transports WHERE id = ? AND group_id = ?');
+const listGroupTickets = db.prepare(`
+    SELECT id, name, date, amount, currency, holder, notes
+    FROM group_tickets
+    WHERE group_id = ?
+    ORDER BY date DESC, id DESC
+`);
+const getGroupTicket = db.prepare('SELECT id FROM group_tickets WHERE id = ? AND group_id = ?');
+const insertGroupTicket = db.prepare(`
+    INSERT INTO group_tickets (id, group_id, name, date, amount, currency, holder, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+`);
+const updateGroupTicket = db.prepare(`
+    UPDATE group_tickets
+    SET name = ?, date = ?, amount = ?, currency = ?, holder = ?, notes = ?
+    WHERE id = ? AND group_id = ?
+`);
+const deleteGroupTicket = db.prepare('DELETE FROM group_tickets WHERE id = ? AND group_id = ?');
 const insertInvitation = db.prepare(`
     INSERT INTO invitations
     (group_id, email, role, token, expires_at, status, invited_by_user_id, created_at)
@@ -1894,6 +2015,344 @@ app.delete(
     }
 );
 
+app.get('/api/groups/:groupId/flights', authRequiredApi, requireGroupMember, (req, res) => {
+    const flights = listGroupFlights.all(req.groupId).map(mapGroupFlightRow);
+    return res.json({ ok: true, data: flights });
+});
+
+app.post(
+    '/api/groups/:groupId/flights',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const normalized = validateGroupFlightPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        const id = req.body?.id || generateTripItemId();
+        insertGroupFlight.run(
+            id,
+            req.groupId,
+            normalized.value.airline,
+            normalized.value.pnr,
+            normalized.value.cost,
+            normalized.value.currency,
+            normalized.value.from,
+            normalized.value.to,
+            normalized.value.departAt,
+            normalized.value.arriveAt,
+            normalized.value.notes
+        );
+        return res.json({ ok: true, id });
+    }
+);
+
+app.put(
+    '/api/groups/:groupId/flights/:flightId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const flightId = typeof req.params.flightId === 'string' ? req.params.flightId.trim() : '';
+        if (!flightId) {
+            return res.status(400).json({ error: 'Invalid flight id.' });
+        }
+        if (!getGroupFlight.get(flightId, req.groupId)) {
+            return res.status(404).json({ error: 'Flight not found.' });
+        }
+        const normalized = validateGroupFlightPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        updateGroupFlight.run(
+            normalized.value.airline,
+            normalized.value.pnr,
+            normalized.value.cost,
+            normalized.value.currency,
+            normalized.value.from,
+            normalized.value.to,
+            normalized.value.departAt,
+            normalized.value.arriveAt,
+            normalized.value.notes,
+            flightId,
+            req.groupId
+        );
+        return res.json({ ok: true });
+    }
+);
+
+app.delete(
+    '/api/groups/:groupId/flights/:flightId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const flightId = typeof req.params.flightId === 'string' ? req.params.flightId.trim() : '';
+        if (!flightId) {
+            return res.status(400).json({ error: 'Invalid flight id.' });
+        }
+        const result = deleteGroupFlight.run(flightId, req.groupId);
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Flight not found.' });
+        }
+        return res.json({ ok: true });
+    }
+);
+
+app.get('/api/groups/:groupId/lodgings', authRequiredApi, requireGroupMember, (req, res) => {
+    const lodgings = listGroupLodgings.all(req.groupId).map(mapGroupLodgingRow);
+    return res.json({ ok: true, data: lodgings });
+});
+
+app.post(
+    '/api/groups/:groupId/lodgings',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const normalized = validateGroupLodgingPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        const id = req.body?.id || generateTripItemId();
+        insertGroupLodging.run(
+            id,
+            req.groupId,
+            normalized.value.name,
+            normalized.value.address,
+            normalized.value.checkIn,
+            normalized.value.checkOut,
+            normalized.value.cost,
+            normalized.value.currency,
+            normalized.value.host,
+            normalized.value.contact,
+            normalized.value.notes
+        );
+        return res.json({ ok: true, id });
+    }
+);
+
+app.put(
+    '/api/groups/:groupId/lodgings/:lodgingId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const lodgingId = typeof req.params.lodgingId === 'string' ? req.params.lodgingId.trim() : '';
+        if (!lodgingId) {
+            return res.status(400).json({ error: 'Invalid lodging id.' });
+        }
+        if (!getGroupLodging.get(lodgingId, req.groupId)) {
+            return res.status(404).json({ error: 'Lodging not found.' });
+        }
+        const normalized = validateGroupLodgingPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        updateGroupLodging.run(
+            normalized.value.name,
+            normalized.value.address,
+            normalized.value.checkIn,
+            normalized.value.checkOut,
+            normalized.value.cost,
+            normalized.value.currency,
+            normalized.value.host,
+            normalized.value.contact,
+            normalized.value.notes,
+            lodgingId,
+            req.groupId
+        );
+        return res.json({ ok: true });
+    }
+);
+
+app.delete(
+    '/api/groups/:groupId/lodgings/:lodgingId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const lodgingId = typeof req.params.lodgingId === 'string' ? req.params.lodgingId.trim() : '';
+        if (!lodgingId) {
+            return res.status(400).json({ error: 'Invalid lodging id.' });
+        }
+        const result = deleteGroupLodging.run(lodgingId, req.groupId);
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Lodging not found.' });
+        }
+        return res.json({ ok: true });
+    }
+);
+
+app.get('/api/groups/:groupId/transports', authRequiredApi, requireGroupMember, (req, res) => {
+    const transports = listGroupTransports.all(req.groupId).map(mapGroupTransportRow);
+    return res.json({ ok: true, data: transports });
+});
+
+app.post(
+    '/api/groups/:groupId/transports',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const normalized = validateGroupTransportPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        const id = req.body?.id || generateTripItemId();
+        insertGroupTransport.run(
+            id,
+            req.groupId,
+            normalized.value.type,
+            normalized.value.date,
+            normalized.value.amount,
+            normalized.value.currency,
+            normalized.value.notes
+        );
+        return res.json({ ok: true, id });
+    }
+);
+
+app.put(
+    '/api/groups/:groupId/transports/:transportId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const transportId = typeof req.params.transportId === 'string' ? req.params.transportId.trim() : '';
+        if (!transportId) {
+            return res.status(400).json({ error: 'Invalid transport id.' });
+        }
+        if (!getGroupTransport.get(transportId, req.groupId)) {
+            return res.status(404).json({ error: 'Transport not found.' });
+        }
+        const normalized = validateGroupTransportPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        updateGroupTransport.run(
+            normalized.value.type,
+            normalized.value.date,
+            normalized.value.amount,
+            normalized.value.currency,
+            normalized.value.notes,
+            transportId,
+            req.groupId
+        );
+        return res.json({ ok: true });
+    }
+);
+
+app.delete(
+    '/api/groups/:groupId/transports/:transportId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const transportId = typeof req.params.transportId === 'string' ? req.params.transportId.trim() : '';
+        if (!transportId) {
+            return res.status(400).json({ error: 'Invalid transport id.' });
+        }
+        const result = deleteGroupTransport.run(transportId, req.groupId);
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Transport not found.' });
+        }
+        return res.json({ ok: true });
+    }
+);
+
+app.get('/api/groups/:groupId/tickets', authRequiredApi, requireGroupMember, (req, res) => {
+    const tickets = listGroupTickets.all(req.groupId).map(mapGroupTicketRow);
+    return res.json({ ok: true, data: tickets });
+});
+
+app.post(
+    '/api/groups/:groupId/tickets',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const normalized = validateGroupTicketPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        const id = req.body?.id || generateTripItemId();
+        insertGroupTicket.run(
+            id,
+            req.groupId,
+            normalized.value.name,
+            normalized.value.date,
+            normalized.value.amount,
+            normalized.value.currency,
+            normalized.value.holder,
+            normalized.value.notes
+        );
+        return res.json({ ok: true, id });
+    }
+);
+
+app.put(
+    '/api/groups/:groupId/tickets/:ticketId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const ticketId = typeof req.params.ticketId === 'string' ? req.params.ticketId.trim() : '';
+        if (!ticketId) {
+            return res.status(400).json({ error: 'Invalid ticket id.' });
+        }
+        if (!getGroupTicket.get(ticketId, req.groupId)) {
+            return res.status(404).json({ error: 'Ticket not found.' });
+        }
+        const normalized = validateGroupTicketPayload(req.body || {});
+        if (normalized.error) {
+            return res.status(400).json({ error: normalized.error });
+        }
+        updateGroupTicket.run(
+            normalized.value.name,
+            normalized.value.date,
+            normalized.value.amount,
+            normalized.value.currency,
+            normalized.value.holder,
+            normalized.value.notes,
+            ticketId,
+            req.groupId
+        );
+        return res.json({ ok: true });
+    }
+);
+
+app.delete(
+    '/api/groups/:groupId/tickets/:ticketId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const ticketId = typeof req.params.ticketId === 'string' ? req.params.ticketId.trim() : '';
+        if (!ticketId) {
+            return res.status(400).json({ error: 'Invalid ticket id.' });
+        }
+        const result = deleteGroupTicket.run(ticketId, req.groupId);
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Ticket not found.' });
+        }
+        return res.json({ ok: true });
+    }
+);
+
 app.get('/api/groups/:groupId/summary', authRequiredApi, requireGroupMember, (req, res) => {
     const participants = listParticipants.all(req.groupId).map((row) => ({
         id: row.id,
@@ -2327,6 +2786,51 @@ app.post('/api/trip', authRequiredApi, requireCsrfToken, (req, res) => {
     return res.json({ ok: true, updatedAt: result.updatedAt });
 });
 
+const mapGroupFlightRow = (row) => ({
+    id: row.id,
+    airline: row.airline,
+    pnr: row.pnr,
+    cost: row.cost,
+    currency: row.currency,
+    from: row.from_city,
+    to: row.to_city,
+    departAt: row.depart_at,
+    arriveAt: row.arrive_at,
+    notes: row.notes
+});
+
+const mapGroupLodgingRow = (row) => ({
+    id: row.id,
+    name: row.name,
+    address: row.address,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    cost: row.cost,
+    currency: row.currency,
+    host: row.host,
+    contact: row.contact,
+    notes: row.notes
+});
+
+const mapGroupTransportRow = (row) => ({
+    id: row.id,
+    type: row.type,
+    date: row.date,
+    amount: row.amount,
+    currency: row.currency,
+    notes: row.notes
+});
+
+const mapGroupTicketRow = (row) => ({
+    id: row.id,
+    name: row.name,
+    date: row.date,
+    amount: row.amount,
+    currency: row.currency,
+    holder: row.holder,
+    notes: row.notes
+});
+
 const mapFlightRow = (row) => ({
     id: row.id,
     airline: row.airline,
@@ -2643,6 +3147,105 @@ const requireStatus = (value) => {
         return { error: 'Status is invalid.' };
     }
     return { value };
+};
+
+const validateGroupFlightPayload = (payload) => {
+    const airline = requireString(payload.airline, 'Airline');
+    if (airline.error) return airline;
+    const fromCity = requireString(payload.from, 'From');
+    if (fromCity.error) return fromCity;
+    const toCity = requireString(payload.to, 'To');
+    if (toCity.error) return toCity;
+    const departAt = requireDate(payload.departAt, 'Departure');
+    if (departAt.error) return departAt;
+    const arriveAt = requireDate(payload.arriveAt, 'Arrival');
+    if (arriveAt.error) return arriveAt;
+    const currency = requireCurrency(payload.currency);
+    if (currency.error) return currency;
+    const cost = requireNumber(payload.cost, 'Cost');
+    if (cost.error) return cost;
+    return {
+        value: {
+            airline: airline.value,
+            pnr: optionalString(payload.pnr),
+            cost: cost.value,
+            currency: currency.value,
+            from: fromCity.value,
+            to: toCity.value,
+            departAt: departAt.value,
+            arriveAt: arriveAt.value,
+            notes: optionalString(payload.notes)
+        }
+    };
+};
+
+const validateGroupLodgingPayload = (payload) => {
+    const name = requireString(payload.name, 'Property');
+    if (name.error) return name;
+    const address = requireString(payload.address, 'Address');
+    if (address.error) return address;
+    const checkIn = requireDate(payload.checkIn, 'Check-in');
+    if (checkIn.error) return checkIn;
+    const checkOut = requireDate(payload.checkOut, 'Check-out');
+    if (checkOut.error) return checkOut;
+    const currency = requireCurrency(payload.currency);
+    if (currency.error) return currency;
+    const cost = requireNumber(payload.cost, 'Total cost');
+    if (cost.error) return cost;
+    return {
+        value: {
+            name: name.value,
+            address: address.value,
+            checkIn: checkIn.value,
+            checkOut: checkOut.value,
+            cost: cost.value,
+            currency: currency.value,
+            host: optionalString(payload.host),
+            contact: optionalString(payload.contact),
+            notes: optionalString(payload.notes)
+        }
+    };
+};
+
+const validateGroupTransportPayload = (payload) => {
+    const type = requireString(payload.type, 'Type');
+    if (type.error) return type;
+    const date = requireDate(payload.date, 'Date');
+    if (date.error) return date;
+    const currency = requireCurrency(payload.currency);
+    if (currency.error) return currency;
+    const amount = requireNumber(payload.amount, 'Amount');
+    if (amount.error) return amount;
+    return {
+        value: {
+            type: type.value,
+            date: date.value,
+            amount: amount.value,
+            currency: currency.value,
+            notes: optionalString(payload.notes)
+        }
+    };
+};
+
+const validateGroupTicketPayload = (payload) => {
+    const name = requireString(payload.name, 'Ticket');
+    if (name.error) return name;
+    const date = requireDate(payload.date, 'Date');
+    if (date.error) return date;
+    const currency = requireCurrency(payload.currency);
+    if (currency.error) return currency;
+    const amount = requireNumber(payload.amount, 'Amount');
+    if (amount.error) return amount;
+    return {
+        value: {
+            name: name.value,
+            date: date.value,
+            amount: amount.value,
+            currency: currency.value,
+            holder: optionalString(payload.holder),
+            notes: optionalString(payload.notes)
+        }
+    };
 };
 
 const validateFlightPayload = (payload) => {
@@ -3649,6 +4252,10 @@ module.exports = {
     validateFamilyPayload,
     validateParticipantPayload,
     validateExpenseSplitPayload,
+    validateGroupFlightPayload,
+    validateGroupLodgingPayload,
+    validateGroupTransportPayload,
+    validateGroupTicketPayload,
     validateSplitSum,
     buildBalanceState,
     buildDebtPlan,

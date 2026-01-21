@@ -236,6 +236,22 @@ Principais endpoints:
 - `POST /api/groups/:groupId/expenses`
 - `PUT /api/groups/:groupId/expenses/:expenseId`
 - `DELETE /api/groups/:groupId/expenses/:expenseId`
+- `GET /api/groups/:groupId/flights`
+- `POST /api/groups/:groupId/flights`
+- `PUT /api/groups/:groupId/flights/:flightId`
+- `DELETE /api/groups/:groupId/flights/:flightId`
+- `GET /api/groups/:groupId/lodgings`
+- `POST /api/groups/:groupId/lodgings`
+- `PUT /api/groups/:groupId/lodgings/:lodgingId`
+- `DELETE /api/groups/:groupId/lodgings/:lodgingId`
+- `GET /api/groups/:groupId/transports`
+- `POST /api/groups/:groupId/transports`
+- `PUT /api/groups/:groupId/transports/:transportId`
+- `DELETE /api/groups/:groupId/transports/:transportId`
+- `GET /api/groups/:groupId/tickets`
+- `POST /api/groups/:groupId/tickets`
+- `PUT /api/groups/:groupId/tickets/:ticketId`
+- `DELETE /api/groups/:groupId/tickets/:ticketId`
 - `GET /api/groups/:groupId/summary`
 
 Endpoints legado (viagem) ainda existem, mas nao fazem parte do MVP atual.
