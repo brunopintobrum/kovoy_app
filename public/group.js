@@ -14,7 +14,9 @@
         canEdit: false,
         editing: {
             flightId: null,
-            lodgingId: null
+            lodgingId: null,
+            transportId: null,
+            ticketId: null
         }
     };
 
@@ -429,11 +431,14 @@
                 <td>${formatCurrency(transport.amount, transport.currency)}</td>
                 <td>${transport.notes || '-'}</td>
                 <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-transport" data-id="${transport.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-transport" data-id="${transport.id}">Delete</button>
                 </td>
             `;
             if (!state.canEdit) {
-                tr.querySelector('button').disabled = true;
+                tr.querySelectorAll('button').forEach((button) => {
+                    button.disabled = true;
+                });
             }
             list.appendChild(tr);
         });
@@ -455,11 +460,14 @@
                 <td>${formatCurrency(ticket.amount, ticket.currency)}</td>
                 <td>${ticket.holder || '-'}</td>
                 <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-ticket" data-id="${ticket.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-ticket" data-id="${ticket.id}">Delete</button>
                 </td>
             `;
             if (!state.canEdit) {
-                tr.querySelector('button').disabled = true;
+                tr.querySelectorAll('button').forEach((button) => {
+                    button.disabled = true;
+                });
             }
             list.appendChild(tr);
         });
@@ -679,6 +687,78 @@
         if (notes) notes.value = lodging.notes || '';
     };
 
+    const setTransportFormMode = (mode) => {
+        const submit = document.getElementById('transportSubmit');
+        const cancel = document.getElementById('transportCancel');
+        const isEdit = mode === 'edit';
+        if (submit) {
+            submit.textContent = isEdit ? 'Update transport' : 'Add transport';
+        }
+        if (cancel) {
+            cancel.classList.toggle('d-none', !isEdit);
+        }
+    };
+
+    const resetTransportForm = () => {
+        const form = document.getElementById('transportForm');
+        if (!form) return;
+        form.reset();
+        form.classList.remove('was-validated');
+        state.editing.transportId = null;
+        setTransportFormMode('create');
+    };
+
+    const populateTransportForm = (transport) => {
+        if (!transport) return;
+        const type = document.getElementById('transportType');
+        const date = document.getElementById('transportDate');
+        const amount = document.getElementById('transportAmount');
+        const currency = document.getElementById('transportCurrency');
+        const notes = document.getElementById('transportNotes');
+        if (type) type.value = transport.type || '';
+        if (date) date.value = transport.date || '';
+        if (amount) amount.value = transport.amount ?? '';
+        if (currency) currency.value = transport.currency || state.group?.defaultCurrency || 'USD';
+        if (notes) notes.value = transport.notes || '';
+    };
+
+    const setTicketFormMode = (mode) => {
+        const submit = document.getElementById('ticketSubmit');
+        const cancel = document.getElementById('ticketCancel');
+        const isEdit = mode === 'edit';
+        if (submit) {
+            submit.textContent = isEdit ? 'Update ticket' : 'Add ticket';
+        }
+        if (cancel) {
+            cancel.classList.toggle('d-none', !isEdit);
+        }
+    };
+
+    const resetTicketForm = () => {
+        const form = document.getElementById('ticketForm');
+        if (!form) return;
+        form.reset();
+        form.classList.remove('was-validated');
+        state.editing.ticketId = null;
+        setTicketFormMode('create');
+    };
+
+    const populateTicketForm = (ticket) => {
+        if (!ticket) return;
+        const name = document.getElementById('ticketName');
+        const date = document.getElementById('ticketDate');
+        const amount = document.getElementById('ticketAmount');
+        const currency = document.getElementById('ticketCurrency');
+        const holder = document.getElementById('ticketHolder');
+        const notes = document.getElementById('ticketNotes');
+        if (name) name.value = ticket.name || '';
+        if (date) date.value = ticket.date || '';
+        if (amount) amount.value = ticket.amount ?? '';
+        if (currency) currency.value = ticket.currency || state.group?.defaultCurrency || 'USD';
+        if (holder) holder.value = ticket.holder || '';
+        if (notes) notes.value = ticket.notes || '';
+    };
+
     const bindGroupSelector = () => {
         const selector = document.getElementById('groupSelector');
         if (!selector) return;
@@ -819,12 +899,16 @@
                     notes: document.getElementById('transportNotes')?.value || ''
                 };
                 try {
-                    await apiRequest(`/api/groups/${state.groupId}/transports`, {
-                        method: 'POST',
+                    const transportId = state.editing.transportId;
+                    const endpoint = transportId
+                        ? `/api/groups/${state.groupId}/transports/${transportId}`
+                        : `/api/groups/${state.groupId}/transports`;
+                    const method = transportId ? 'PUT' : 'POST';
+                    await apiRequest(endpoint, {
+                        method,
                         body: JSON.stringify(payload)
                     });
-                    transportForm.reset();
-                    transportForm.classList.remove('was-validated');
+                    resetTransportForm();
                     await refreshData();
                 } catch (err) {
                     if (transportError) {
@@ -832,6 +916,12 @@
                         transportError.classList.remove('d-none');
                     }
                 }
+            });
+        }
+        const transportCancel = document.getElementById('transportCancel');
+        if (transportCancel) {
+            transportCancel.addEventListener('click', () => {
+                resetTransportForm();
             });
         }
 
@@ -851,12 +941,16 @@
                     notes: document.getElementById('ticketNotes')?.value || ''
                 };
                 try {
-                    await apiRequest(`/api/groups/${state.groupId}/tickets`, {
-                        method: 'POST',
+                    const ticketId = state.editing.ticketId;
+                    const endpoint = ticketId
+                        ? `/api/groups/${state.groupId}/tickets/${ticketId}`
+                        : `/api/groups/${state.groupId}/tickets`;
+                    const method = ticketId ? 'PUT' : 'POST';
+                    await apiRequest(endpoint, {
+                        method,
                         body: JSON.stringify(payload)
                     });
-                    ticketForm.reset();
-                    ticketForm.classList.remove('was-validated');
+                    resetTicketForm();
                     await refreshData();
                 } catch (err) {
                     if (ticketError) {
@@ -864,6 +958,12 @@
                         ticketError.classList.remove('d-none');
                     }
                 }
+            });
+        }
+        const ticketCancel = document.getElementById('ticketCancel');
+        if (ticketCancel) {
+            ticketCancel.addEventListener('click', () => {
+                resetTicketForm();
             });
         }
 
@@ -1163,10 +1263,27 @@
             transportList.addEventListener('click', async (event) => {
                 const target = event.target;
                 if (!(target instanceof HTMLButtonElement)) return;
-                if (target.dataset.action !== 'delete-transport') return;
-                const id = target.dataset.id;
+                const action = target.dataset.action;
+                const id = Number(target.dataset.id);
+                if (!id) return;
+                if (action === 'edit-transport') {
+                    if (!state.canEdit) return;
+                    const transport = state.transports.find((item) => item.id === id);
+                    if (!transport) return;
+                    state.editing.transportId = id;
+                    populateTransportForm(transport);
+                    setTransportFormMode('edit');
+                    const transportForm = document.getElementById('transportForm');
+                    transportForm?.classList.remove('was-validated');
+                    transportForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+                if (action !== 'delete-transport') return;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/transports/${id}`, { method: 'DELETE' });
+                    if (state.editing.transportId === id) {
+                        resetTransportForm();
+                    }
                     await refreshData();
                 } catch (err) {
                     const transportError = document.getElementById('transportError');
@@ -1182,10 +1299,27 @@
             ticketList.addEventListener('click', async (event) => {
                 const target = event.target;
                 if (!(target instanceof HTMLButtonElement)) return;
-                if (target.dataset.action !== 'delete-ticket') return;
-                const id = target.dataset.id;
+                const action = target.dataset.action;
+                const id = Number(target.dataset.id);
+                if (!id) return;
+                if (action === 'edit-ticket') {
+                    if (!state.canEdit) return;
+                    const ticket = state.tickets.find((item) => item.id === id);
+                    if (!ticket) return;
+                    state.editing.ticketId = id;
+                    populateTicketForm(ticket);
+                    setTicketFormMode('edit');
+                    const ticketForm = document.getElementById('ticketForm');
+                    ticketForm?.classList.remove('was-validated');
+                    ticketForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+                if (action !== 'delete-ticket') return;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/tickets/${id}`, { method: 'DELETE' });
+                    if (state.editing.ticketId === id) {
+                        resetTicketForm();
+                    }
                     await refreshData();
                 } catch (err) {
                     const ticketError = document.getElementById('ticketError');

@@ -142,6 +142,7 @@ describe('Login page', () => {
     });
 
     test('disables submit while request is pending', async () => {
+        jest.useFakeTimers();
         let resolveLogin;
         const pending = new Promise((resolve) => {
             resolveLogin = resolve;
@@ -155,15 +156,18 @@ describe('Login page', () => {
             }
         });
 
-        await userEvent.type(screen.getByLabelText('Email'), 'user@example.com');
-        await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+        await user.type(screen.getByLabelText('Email'), 'user@example.com');
+        await user.type(screen.getByLabelText('Password'), 'Password123!');
 
         const submit = screen.getByRole('button', { name: /log in/i });
-        await userEvent.click(submit);
+        await user.click(submit);
         expect(submit.disabled).toBe(true);
 
         resolveLogin();
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await Promise.resolve();
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
     });
 
     test('redirects to email verification on 403', async () => {
