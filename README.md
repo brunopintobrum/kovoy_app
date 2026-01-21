@@ -166,6 +166,13 @@ REFRESH_TOKEN_TTL_DAYS_REMEMBER=30
 
 - `npm start`: inicia o servidor (`node server.js`)
 
+## Skill do projeto (Codex)
+
+Skill interna para padronizar o fluxo de trabalho do projeto.
+
+- Arquivo: `docs/skills/orlando-project-workflow.skill`
+- Uso: instalar a skill e reiniciar o Codex para carregar
+
 ## Testes
 
 Suite de testes com Jest + Playwright.
