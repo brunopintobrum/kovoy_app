@@ -13,7 +13,8 @@
         summary: null,
         canEdit: false,
         editing: {
-            flightId: null
+            flightId: null,
+            lodgingId: null
         }
     };
 
@@ -399,11 +400,14 @@
                 <td>${formatCurrency(lodging.cost, lodging.currency)}</td>
                 <td>${lodging.contact || lodging.host || '-'}</td>
                 <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-lodging" data-id="${lodging.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-lodging" data-id="${lodging.id}">Delete</button>
                 </td>
             `;
             if (!state.canEdit) {
-                tr.querySelector('button').disabled = true;
+                tr.querySelectorAll('button').forEach((button) => {
+                    button.disabled = true;
+                });
             }
             list.appendChild(tr);
         });
@@ -632,6 +636,49 @@
         if (notes) notes.value = flight.notes || '';
     };
 
+    const setLodgingFormMode = (mode) => {
+        const submit = document.getElementById('lodgingSubmit');
+        const cancel = document.getElementById('lodgingCancel');
+        const isEdit = mode === 'edit';
+        if (submit) {
+            submit.textContent = isEdit ? 'Update lodging' : 'Add lodging';
+        }
+        if (cancel) {
+            cancel.classList.toggle('d-none', !isEdit);
+        }
+    };
+
+    const resetLodgingForm = () => {
+        const form = document.getElementById('lodgingForm');
+        if (!form) return;
+        form.reset();
+        form.classList.remove('was-validated');
+        state.editing.lodgingId = null;
+        setLodgingFormMode('create');
+    };
+
+    const populateLodgingForm = (lodging) => {
+        if (!lodging) return;
+        const name = document.getElementById('lodgingName');
+        const address = document.getElementById('lodgingAddress');
+        const checkIn = document.getElementById('lodgingCheckIn');
+        const checkOut = document.getElementById('lodgingCheckOut');
+        const cost = document.getElementById('lodgingCost');
+        const currency = document.getElementById('lodgingCurrency');
+        const host = document.getElementById('lodgingHost');
+        const contact = document.getElementById('lodgingContact');
+        const notes = document.getElementById('lodgingNotes');
+        if (name) name.value = lodging.name || '';
+        if (address) address.value = lodging.address || '';
+        if (checkIn) checkIn.value = lodging.checkIn || '';
+        if (checkOut) checkOut.value = lodging.checkOut || '';
+        if (cost) cost.value = lodging.cost ?? '';
+        if (currency) currency.value = lodging.currency || state.group?.defaultCurrency || 'USD';
+        if (host) host.value = lodging.host || '';
+        if (contact) contact.value = lodging.contact || '';
+        if (notes) notes.value = lodging.notes || '';
+    };
+
     const bindGroupSelector = () => {
         const selector = document.getElementById('groupSelector');
         if (!selector) return;
@@ -731,12 +778,16 @@
                     notes: document.getElementById('lodgingNotes')?.value || ''
                 };
                 try {
-                    await apiRequest(`/api/groups/${state.groupId}/lodgings`, {
-                        method: 'POST',
+                    const lodgingId = state.editing.lodgingId;
+                    const endpoint = lodgingId
+                        ? `/api/groups/${state.groupId}/lodgings/${lodgingId}`
+                        : `/api/groups/${state.groupId}/lodgings`;
+                    const method = lodgingId ? 'PUT' : 'POST';
+                    await apiRequest(endpoint, {
+                        method,
                         body: JSON.stringify(payload)
                     });
-                    lodgingForm.reset();
-                    lodgingForm.classList.remove('was-validated');
+                    resetLodgingForm();
                     await refreshData();
                 } catch (err) {
                     if (lodgingError) {
@@ -744,6 +795,12 @@
                         lodgingError.classList.remove('d-none');
                     }
                 }
+            });
+        }
+        const lodgingCancel = document.getElementById('lodgingCancel');
+        if (lodgingCancel) {
+            lodgingCancel.addEventListener('click', () => {
+                resetLodgingForm();
             });
         }
 
@@ -974,6 +1031,7 @@
         const flightList = document.getElementById('flightList');
         const flightForm = document.getElementById('flightForm');
         const lodgingList = document.getElementById('lodgingList');
+        const lodgingForm = document.getElementById('lodgingForm');
         const transportList = document.getElementById('transportList');
         const ticketList = document.getElementById('ticketList');
 
@@ -1039,7 +1097,8 @@
                 const target = event.target;
                 if (!(target instanceof HTMLButtonElement)) return;
                 const action = target.dataset.action;
-                const id = target.dataset.id;
+                const id = Number(target.dataset.id);
+                if (!id) return;
                 if (action === 'edit-flight') {
                     if (!state.canEdit) return;
                     const flight = state.flights.find((item) => item.id === id);
@@ -1069,10 +1128,26 @@
             lodgingList.addEventListener('click', async (event) => {
                 const target = event.target;
                 if (!(target instanceof HTMLButtonElement)) return;
-                if (target.dataset.action !== 'delete-lodging') return;
-                const id = target.dataset.id;
+                const action = target.dataset.action;
+                const id = Number(target.dataset.id);
+                if (!id) return;
+                if (action === 'edit-lodging') {
+                    if (!state.canEdit) return;
+                    const lodging = state.lodgings.find((item) => item.id === id);
+                    if (!lodging) return;
+                    state.editing.lodgingId = id;
+                    populateLodgingForm(lodging);
+                    setLodgingFormMode('edit');
+                    lodgingForm?.classList.remove('was-validated');
+                    lodgingForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+                if (action !== 'delete-lodging') return;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/lodgings/${id}`, { method: 'DELETE' });
+                    if (state.editing.lodgingId === id) {
+                        resetLodgingForm();
+                    }
                     await refreshData();
                 } catch (err) {
                     const lodgingError = document.getElementById('lodgingError');

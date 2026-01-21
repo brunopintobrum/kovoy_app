@@ -616,8 +616,9 @@
                                     <label class="form-label" for="lodgingNotes">Notes</label>
                                     <textarea class="form-control" id="lodgingNotes" rows="2"></textarea>
                                 </div>
-                                <div class="col-md-12 d-flex justify-content-end">
-                                    <button class="btn btn-primary" type="submit">Add lodging</button>
+                                <div class="col-md-12 d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary d-none" type="button" id="lodgingCancel">Cancel</button>
+                                    <button class="btn btn-primary" type="submit" id="lodgingSubmit">Add lodging</button>
                                 </div>
                             </form>
                             <div class="alert alert-warning d-none mt-3" id="lodgingReadOnly">
