@@ -6,6 +6,10 @@
         families: [],
         participants: [],
         expenses: [],
+        flights: [],
+        lodgings: [],
+        transports: [],
+        tickets: [],
         summary: null,
         canEdit: false
     };
@@ -53,6 +57,20 @@
         } catch (err) {
             return `${currency || 'USD'} ${Number(amount || 0).toFixed(2)}`;
         }
+    };
+
+    const formatDate = (value) => {
+        if (!value) return '--';
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return value;
+        return parsed.toLocaleDateString('en-US');
+    };
+
+    const formatDateTime = (value) => {
+        if (!value) return '--';
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return value;
+        return parsed.toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
     };
 
     const parseGroupId = () => {
@@ -105,15 +123,23 @@
     };
 
     const loadGroupData = async () => {
-        const [families, participants, expenses, summary] = await Promise.all([
+        const [families, participants, expenses, flights, lodgings, transports, tickets, summary] = await Promise.all([
             apiRequest(`/api/groups/${state.groupId}/families`),
             apiRequest(`/api/groups/${state.groupId}/participants`),
             apiRequest(`/api/groups/${state.groupId}/expenses`),
+            apiRequest(`/api/groups/${state.groupId}/flights`),
+            apiRequest(`/api/groups/${state.groupId}/lodgings`),
+            apiRequest(`/api/groups/${state.groupId}/transports`),
+            apiRequest(`/api/groups/${state.groupId}/tickets`),
             apiRequest(`/api/groups/${state.groupId}/summary`)
         ]);
         state.families = families.data || [];
         state.participants = participants.data || [];
         state.expenses = expenses.data || [];
+        state.flights = flights.data || [];
+        state.lodgings = lodgings.data || [];
+        state.transports = transports.data || [];
+        state.tickets = tickets.data || [];
         state.summary = summary.data || {};
     };
 
@@ -316,6 +342,111 @@
         });
     };
 
+    const renderFlights = () => {
+        const list = document.getElementById('flightList');
+        if (!list) return;
+        list.innerHTML = '';
+        if (!state.flights.length) {
+            list.innerHTML = '<tr><td colspan="6" class="text-muted text-center">No flights yet.</td></tr>';
+            return;
+        }
+        state.flights.forEach((flight) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${flight.airline || '-'}</td>
+                <td>${flight.from || '-'} -> ${flight.to || '-'}</td>
+                <td>${formatDateTime(flight.departAt)}</td>
+                <td>${formatDateTime(flight.arriveAt)}</td>
+                <td>${formatCurrency(flight.cost, flight.currency)}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-danger" data-action="delete-flight" data-id="${flight.id}">Delete</button>
+                </td>
+            `;
+            if (!state.canEdit) {
+                tr.querySelector('button').disabled = true;
+            }
+            list.appendChild(tr);
+        });
+    };
+
+    const renderLodgings = () => {
+        const list = document.getElementById('lodgingList');
+        if (!list) return;
+        list.innerHTML = '';
+        if (!state.lodgings.length) {
+            list.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No lodgings yet.</td></tr>';
+            return;
+        }
+        state.lodgings.forEach((lodging) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${lodging.name || '-'}</td>
+                <td>${formatDate(lodging.checkIn)} -> ${formatDate(lodging.checkOut)}</td>
+                <td>${formatCurrency(lodging.cost, lodging.currency)}</td>
+                <td>${lodging.contact || lodging.host || '-'}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-danger" data-action="delete-lodging" data-id="${lodging.id}">Delete</button>
+                </td>
+            `;
+            if (!state.canEdit) {
+                tr.querySelector('button').disabled = true;
+            }
+            list.appendChild(tr);
+        });
+    };
+
+    const renderTransports = () => {
+        const list = document.getElementById('transportList');
+        if (!list) return;
+        list.innerHTML = '';
+        if (!state.transports.length) {
+            list.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No transports yet.</td></tr>';
+            return;
+        }
+        state.transports.forEach((transport) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${transport.type || '-'}</td>
+                <td>${formatDate(transport.date)}</td>
+                <td>${formatCurrency(transport.amount, transport.currency)}</td>
+                <td>${transport.notes || '-'}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-danger" data-action="delete-transport" data-id="${transport.id}">Delete</button>
+                </td>
+            `;
+            if (!state.canEdit) {
+                tr.querySelector('button').disabled = true;
+            }
+            list.appendChild(tr);
+        });
+    };
+
+    const renderTickets = () => {
+        const list = document.getElementById('ticketList');
+        if (!list) return;
+        list.innerHTML = '';
+        if (!state.tickets.length) {
+            list.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No tickets yet.</td></tr>';
+            return;
+        }
+        state.tickets.forEach((ticket) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${ticket.name || '-'}</td>
+                <td>${formatDate(ticket.date)}</td>
+                <td>${formatCurrency(ticket.amount, ticket.currency)}</td>
+                <td>${ticket.holder || '-'}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-danger" data-action="delete-ticket" data-id="${ticket.id}">Delete</button>
+                </td>
+            `;
+            if (!state.canEdit) {
+                tr.querySelector('button').disabled = true;
+            }
+            list.appendChild(tr);
+        });
+    };
+
     const renderSplitTargets = () => {
         const wrapper = document.getElementById('splitTargets');
         const errorEl = document.getElementById('splitTargetsError');
@@ -416,7 +547,16 @@
     };
 
     const applyPermissions = () => {
-        const forms = ['familyForm', 'participantForm', 'expenseForm', 'inviteForm'];
+        const forms = [
+            'familyForm',
+            'participantForm',
+            'expenseForm',
+            'inviteForm',
+            'flightForm',
+            'lodgingForm',
+            'transportForm',
+            'ticketForm'
+        ];
         forms.forEach((id) => {
             const form = document.getElementById(id);
             if (!form) return;
@@ -428,6 +568,10 @@
         setReadOnlyBanner('participantReadOnly', !state.canEdit);
         setReadOnlyBanner('expenseReadOnly', !state.canEdit);
         setReadOnlyBanner('inviteReadOnly', !state.canEdit);
+        setReadOnlyBanner('flightReadOnly', !state.canEdit);
+        setReadOnlyBanner('lodgingReadOnly', !state.canEdit);
+        setReadOnlyBanner('transportReadOnly', !state.canEdit);
+        setReadOnlyBanner('ticketReadOnly', !state.canEdit);
         updateExpenseAvailability();
     };
 
@@ -461,6 +605,139 @@
                     if (familyError) {
                         familyError.textContent = err.message;
                         familyError.classList.remove('d-none');
+                    }
+                }
+            });
+        }
+
+        const flightForm = document.getElementById('flightForm');
+        const flightError = document.getElementById('flightError');
+        if (flightForm) {
+            flightForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (flightError) flightError.classList.add('d-none');
+                if (!validateForm(flightForm)) return;
+                const payload = {
+                    airline: document.getElementById('flightAirline')?.value || '',
+                    pnr: document.getElementById('flightPnr')?.value || '',
+                    cost: document.getElementById('flightCost')?.value || '',
+                    currency: document.getElementById('flightCurrency')?.value || '',
+                    from: document.getElementById('flightFrom')?.value || '',
+                    to: document.getElementById('flightTo')?.value || '',
+                    departAt: document.getElementById('flightDepart')?.value || '',
+                    arriveAt: document.getElementById('flightArrive')?.value || '',
+                    notes: document.getElementById('flightNotes')?.value || ''
+                };
+                try {
+                    await apiRequest(`/api/groups/${state.groupId}/flights`, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    flightForm.reset();
+                    flightForm.classList.remove('was-validated');
+                    await refreshData();
+                } catch (err) {
+                    if (flightError) {
+                        flightError.textContent = err.message;
+                        flightError.classList.remove('d-none');
+                    }
+                }
+            });
+        }
+
+        const lodgingForm = document.getElementById('lodgingForm');
+        const lodgingError = document.getElementById('lodgingError');
+        if (lodgingForm) {
+            lodgingForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (lodgingError) lodgingError.classList.add('d-none');
+                if (!validateForm(lodgingForm)) return;
+                const payload = {
+                    name: document.getElementById('lodgingName')?.value || '',
+                    address: document.getElementById('lodgingAddress')?.value || '',
+                    checkIn: document.getElementById('lodgingCheckIn')?.value || '',
+                    checkOut: document.getElementById('lodgingCheckOut')?.value || '',
+                    cost: document.getElementById('lodgingCost')?.value || '',
+                    currency: document.getElementById('lodgingCurrency')?.value || '',
+                    host: document.getElementById('lodgingHost')?.value || '',
+                    contact: document.getElementById('lodgingContact')?.value || '',
+                    notes: document.getElementById('lodgingNotes')?.value || ''
+                };
+                try {
+                    await apiRequest(`/api/groups/${state.groupId}/lodgings`, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    lodgingForm.reset();
+                    lodgingForm.classList.remove('was-validated');
+                    await refreshData();
+                } catch (err) {
+                    if (lodgingError) {
+                        lodgingError.textContent = err.message;
+                        lodgingError.classList.remove('d-none');
+                    }
+                }
+            });
+        }
+
+        const transportForm = document.getElementById('transportForm');
+        const transportError = document.getElementById('transportError');
+        if (transportForm) {
+            transportForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (transportError) transportError.classList.add('d-none');
+                if (!validateForm(transportForm)) return;
+                const payload = {
+                    type: document.getElementById('transportType')?.value || '',
+                    date: document.getElementById('transportDate')?.value || '',
+                    amount: document.getElementById('transportAmount')?.value || '',
+                    currency: document.getElementById('transportCurrency')?.value || '',
+                    notes: document.getElementById('transportNotes')?.value || ''
+                };
+                try {
+                    await apiRequest(`/api/groups/${state.groupId}/transports`, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    transportForm.reset();
+                    transportForm.classList.remove('was-validated');
+                    await refreshData();
+                } catch (err) {
+                    if (transportError) {
+                        transportError.textContent = err.message;
+                        transportError.classList.remove('d-none');
+                    }
+                }
+            });
+        }
+
+        const ticketForm = document.getElementById('ticketForm');
+        const ticketError = document.getElementById('ticketError');
+        if (ticketForm) {
+            ticketForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (ticketError) ticketError.classList.add('d-none');
+                if (!validateForm(ticketForm)) return;
+                const payload = {
+                    name: document.getElementById('ticketName')?.value || '',
+                    date: document.getElementById('ticketDate')?.value || '',
+                    amount: document.getElementById('ticketAmount')?.value || '',
+                    currency: document.getElementById('ticketCurrency')?.value || '',
+                    holder: document.getElementById('ticketHolder')?.value || '',
+                    notes: document.getElementById('ticketNotes')?.value || ''
+                };
+                try {
+                    await apiRequest(`/api/groups/${state.groupId}/tickets`, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    ticketForm.reset();
+                    ticketForm.classList.remove('was-validated');
+                    await refreshData();
+                } catch (err) {
+                    if (ticketError) {
+                        ticketError.textContent = err.message;
+                        ticketError.classList.remove('d-none');
                     }
                 }
             });
@@ -627,6 +904,10 @@
         const familyList = document.getElementById('familyList');
         const participantList = document.getElementById('participantList');
         const expenseList = document.getElementById('expenseList');
+        const flightList = document.getElementById('flightList');
+        const lodgingList = document.getElementById('lodgingList');
+        const transportList = document.getElementById('transportList');
+        const ticketList = document.getElementById('ticketList');
 
         if (familyList) {
             familyList.addEventListener('click', async (event) => {
@@ -684,6 +965,82 @@
                 }
             });
         }
+
+        if (flightList) {
+            flightList.addEventListener('click', async (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLButtonElement)) return;
+                if (target.dataset.action !== 'delete-flight') return;
+                const id = target.dataset.id;
+                try {
+                    await apiRequest(`/api/groups/${state.groupId}/flights/${id}`, { method: 'DELETE' });
+                    await refreshData();
+                } catch (err) {
+                    const flightError = document.getElementById('flightError');
+                    if (flightError) {
+                        flightError.textContent = err.message;
+                        flightError.classList.remove('d-none');
+                    }
+                }
+            });
+        }
+
+        if (lodgingList) {
+            lodgingList.addEventListener('click', async (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLButtonElement)) return;
+                if (target.dataset.action !== 'delete-lodging') return;
+                const id = target.dataset.id;
+                try {
+                    await apiRequest(`/api/groups/${state.groupId}/lodgings/${id}`, { method: 'DELETE' });
+                    await refreshData();
+                } catch (err) {
+                    const lodgingError = document.getElementById('lodgingError');
+                    if (lodgingError) {
+                        lodgingError.textContent = err.message;
+                        lodgingError.classList.remove('d-none');
+                    }
+                }
+            });
+        }
+
+        if (transportList) {
+            transportList.addEventListener('click', async (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLButtonElement)) return;
+                if (target.dataset.action !== 'delete-transport') return;
+                const id = target.dataset.id;
+                try {
+                    await apiRequest(`/api/groups/${state.groupId}/transports/${id}`, { method: 'DELETE' });
+                    await refreshData();
+                } catch (err) {
+                    const transportError = document.getElementById('transportError');
+                    if (transportError) {
+                        transportError.textContent = err.message;
+                        transportError.classList.remove('d-none');
+                    }
+                }
+            });
+        }
+
+        if (ticketList) {
+            ticketList.addEventListener('click', async (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLButtonElement)) return;
+                if (target.dataset.action !== 'delete-ticket') return;
+                const id = target.dataset.id;
+                try {
+                    await apiRequest(`/api/groups/${state.groupId}/tickets/${id}`, { method: 'DELETE' });
+                    await refreshData();
+                } catch (err) {
+                    const ticketError = document.getElementById('ticketError');
+                    if (ticketError) {
+                        ticketError.textContent = err.message;
+                        ticketError.classList.remove('d-none');
+                    }
+                }
+            });
+        }
     };
 
     const bindSplitTypeToggle = () => {
@@ -725,6 +1082,10 @@
         renderFamilies();
         renderParticipants();
         renderExpenses();
+        renderFlights();
+        renderLodgings();
+        renderTransports();
+        renderTickets();
         populateExpenseSelectors();
         renderSplitTargets();
         applyPermissions();

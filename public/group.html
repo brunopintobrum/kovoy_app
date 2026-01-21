@@ -72,6 +72,15 @@
                                                 <li><a href="#expenses">Split preview</a></li>
                                             </ul>
                                         </div>
+                                        <div class="col-md-4 mt-3">
+                                            <h5 class="font-size-14">Logistics</h5>
+                                            <ul class="list-unstyled megamenu-list">
+                                                <li><a href="#flights">Flights</a></li>
+                                                <li><a href="#lodgings">Lodgings</a></li>
+                                                <li><a href="#transports">Transports</a></li>
+                                                <li><a href="#tickets">Tickets</a></li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-sm-4">
@@ -130,6 +139,10 @@
                         <li><a href="#participants" class="waves-effect"><i class="bx bx-user-circle"></i><span>Participants</span></a></li>
                         <li><a href="#invitations" class="waves-effect"><i class="bx bx-mail-send"></i><span>Invites</span></a></li>
                         <li><a href="#expenses" class="waves-effect"><i class="bx bx-wallet"></i><span>Expenses</span></a></li>
+                        <li><a href="#flights" class="waves-effect"><i class="bx bx-plane"></i><span>Flights</span></a></li>
+                        <li><a href="#lodgings" class="waves-effect"><i class="bx bx-home-alt"></i><span>Lodgings</span></a></li>
+                        <li><a href="#transports" class="waves-effect"><i class="bx bx-bus"></i><span>Transports</span></a></li>
+                        <li><a href="#tickets" class="waves-effect"><i class="bx bx-ticket"></i><span>Tickets</span></a></li>
                         <li><a href="#debts" class="waves-effect"><i class="bx bx-transfer"></i><span>Who owes</span></a></li>
                     </ul>
                 </div>
@@ -473,6 +486,284 @@
                         </div>
                     </div>
 
+                    <div class="card mt-4" id="flights">
+                        <div class="card-body">
+                            <h5 class="card-title">Flights</h5>
+                            <form id="flightForm" class="row g-3 needs-validation" novalidate>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="flightAirline">Airline</label>
+                                    <input class="form-control" id="flightAirline" required>
+                                    <div class="invalid-feedback">Enter an airline.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="flightPnr">PNR</label>
+                                    <input class="form-control" id="flightPnr">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="flightCost">Cost</label>
+                                    <input class="form-control" id="flightCost" type="number" step="0.01" min="0.01" required>
+                                    <div class="invalid-feedback">Enter a valid cost.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="flightCurrency">Currency</label>
+                                    <select class="form-select" id="flightCurrency" required>
+                                        <option value="USD">USD</option>
+                                        <option value="CAD">CAD</option>
+                                        <option value="BRL">BRL</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a currency.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="flightFrom">From</label>
+                                    <input class="form-control" id="flightFrom" required>
+                                    <div class="invalid-feedback">Enter a departure city.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="flightTo">To</label>
+                                    <input class="form-control" id="flightTo" required>
+                                    <div class="invalid-feedback">Enter an arrival city.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="flightDepart">Departure</label>
+                                    <input class="form-control" id="flightDepart" type="datetime-local" required>
+                                    <div class="invalid-feedback">Select a departure time.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="flightArrive">Arrival</label>
+                                    <input class="form-control" id="flightArrive" type="datetime-local" required>
+                                    <div class="invalid-feedback">Select an arrival time.</div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label" for="flightNotes">Notes</label>
+                                    <textarea class="form-control" id="flightNotes" rows="2"></textarea>
+                                </div>
+                                <div class="col-md-12 d-flex justify-content-end">
+                                    <button class="btn btn-primary" type="submit">Add flight</button>
+                                </div>
+                            </form>
+                            <div class="alert alert-warning d-none mt-3" id="flightReadOnly">
+                                You have read-only access in this group.
+                            </div>
+                            <div class="alert alert-danger d-none mt-3" id="flightError"></div>
+                            <div class="table-responsive mt-4">
+                                <table class="table align-middle table-nowrap mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Airline</th>
+                                            <th>Route</th>
+                                            <th>Departure</th>
+                                            <th>Arrival</th>
+                                            <th>Cost</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="flightList">
+                                        <tr><td colspan="6" class="text-muted text-center">No flights yet.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4" id="lodgings">
+                        <div class="card-body">
+                            <h5 class="card-title">Lodgings</h5>
+                            <form id="lodgingForm" class="row g-3 needs-validation" novalidate>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="lodgingName">Property</label>
+                                    <input class="form-control" id="lodgingName" required>
+                                    <div class="invalid-feedback">Enter a property name.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="lodgingAddress">Address</label>
+                                    <input class="form-control" id="lodgingAddress" required>
+                                    <div class="invalid-feedback">Enter an address.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="lodgingCheckIn">Check-in</label>
+                                    <input class="form-control" id="lodgingCheckIn" type="date" required>
+                                    <div class="invalid-feedback">Select a check-in date.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="lodgingCheckOut">Check-out</label>
+                                    <input class="form-control" id="lodgingCheckOut" type="date" required>
+                                    <div class="invalid-feedback">Select a check-out date.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="lodgingCost">Total cost</label>
+                                    <input class="form-control" id="lodgingCost" type="number" step="0.01" min="0.01" required>
+                                    <div class="invalid-feedback">Enter a valid cost.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="lodgingCurrency">Currency</label>
+                                    <select class="form-select" id="lodgingCurrency" required>
+                                        <option value="USD">USD</option>
+                                        <option value="CAD">CAD</option>
+                                        <option value="BRL">BRL</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a currency.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="lodgingHost">Host</label>
+                                    <input class="form-control" id="lodgingHost">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="lodgingContact">Contact</label>
+                                    <input class="form-control" id="lodgingContact">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label" for="lodgingNotes">Notes</label>
+                                    <textarea class="form-control" id="lodgingNotes" rows="2"></textarea>
+                                </div>
+                                <div class="col-md-12 d-flex justify-content-end">
+                                    <button class="btn btn-primary" type="submit">Add lodging</button>
+                                </div>
+                            </form>
+                            <div class="alert alert-warning d-none mt-3" id="lodgingReadOnly">
+                                You have read-only access in this group.
+                            </div>
+                            <div class="alert alert-danger d-none mt-3" id="lodgingError"></div>
+                            <div class="table-responsive mt-4">
+                                <table class="table align-middle table-nowrap mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Property</th>
+                                            <th>Dates</th>
+                                            <th>Cost</th>
+                                            <th>Contact</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lodgingList">
+                                        <tr><td colspan="5" class="text-muted text-center">No lodgings yet.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4" id="transports">
+                        <div class="card-body">
+                            <h5 class="card-title">Transports</h5>
+                            <form id="transportForm" class="row g-3 needs-validation" novalidate>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="transportType">Type</label>
+                                    <input class="form-control" id="transportType" required>
+                                    <div class="invalid-feedback">Enter a transport type.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="transportDate">Date</label>
+                                    <input class="form-control" id="transportDate" type="date" required>
+                                    <div class="invalid-feedback">Select a date.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="transportAmount">Amount</label>
+                                    <input class="form-control" id="transportAmount" type="number" step="0.01" min="0.01" required>
+                                    <div class="invalid-feedback">Enter a valid amount.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="transportCurrency">Currency</label>
+                                    <select class="form-select" id="transportCurrency" required>
+                                        <option value="USD">USD</option>
+                                        <option value="CAD">CAD</option>
+                                        <option value="BRL">BRL</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a currency.</div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label" for="transportNotes">Notes</label>
+                                    <textarea class="form-control" id="transportNotes" rows="2"></textarea>
+                                </div>
+                                <div class="col-md-12 d-flex justify-content-end">
+                                    <button class="btn btn-primary" type="submit">Add transport</button>
+                                </div>
+                            </form>
+                            <div class="alert alert-warning d-none mt-3" id="transportReadOnly">
+                                You have read-only access in this group.
+                            </div>
+                            <div class="alert alert-danger d-none mt-3" id="transportError"></div>
+                            <div class="table-responsive mt-4">
+                                <table class="table align-middle table-nowrap mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Notes</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transportList">
+                                        <tr><td colspan="5" class="text-muted text-center">No transports yet.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4" id="tickets">
+                        <div class="card-body">
+                            <h5 class="card-title">Tickets</h5>
+                            <form id="ticketForm" class="row g-3 needs-validation" novalidate>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="ticketName">Ticket</label>
+                                    <input class="form-control" id="ticketName" required>
+                                    <div class="invalid-feedback">Enter a ticket name.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="ticketDate">Date</label>
+                                    <input class="form-control" id="ticketDate" type="date" required>
+                                    <div class="invalid-feedback">Select a date.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="ticketAmount">Amount</label>
+                                    <input class="form-control" id="ticketAmount" type="number" step="0.01" min="0.01" required>
+                                    <div class="invalid-feedback">Enter a valid amount.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="ticketCurrency">Currency</label>
+                                    <select class="form-select" id="ticketCurrency" required>
+                                        <option value="USD">USD</option>
+                                        <option value="CAD">CAD</option>
+                                        <option value="BRL">BRL</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a currency.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="ticketHolder">Holder</label>
+                                    <input class="form-control" id="ticketHolder">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label" for="ticketNotes">Notes</label>
+                                    <textarea class="form-control" id="ticketNotes" rows="2"></textarea>
+                                </div>
+                                <div class="col-md-12 d-flex justify-content-end">
+                                    <button class="btn btn-primary" type="submit">Add ticket</button>
+                                </div>
+                            </form>
+                            <div class="alert alert-warning d-none mt-3" id="ticketReadOnly">
+                                You have read-only access in this group.
+                            </div>
+                            <div class="alert alert-danger d-none mt-3" id="ticketError"></div>
+                            <div class="table-responsive mt-4">
+                                <table class="table align-middle table-nowrap mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Ticket</th>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Holder</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ticketList">
+                                        <tr><td colspan="5" class="text-muted text-center">No tickets yet.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -480,7 +771,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-6">
-                            <script>document.write(new Date().getFullYear())</script> © Orlando 2026
+                            <script>document.write(new Date().getFullYear())</script> (c) Orlando 2026
                         </div>
                         <div class="col-sm-6">
                             <div class="text-sm-end d-none d-sm-block">
