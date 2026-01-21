@@ -95,7 +95,7 @@
 - [x] Convite nao pode ser reutilizado (integration)
 
 ## V2 (fora do MVP)
-- [ ] Voos, hospedagens, transporte e tickets (CRUD simples por grupo)
+- [x] Voos, hospedagens, transporte e tickets (CRUD simples por grupo)
 - [ ] Anexos/recibos
 - [ ] Categorias avancadas e filtros
 - [ ] Multi-moeda e cambio

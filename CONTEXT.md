@@ -64,4 +64,5 @@
 - Validacao da soma do split e testes de convites adicionados.
 - Split manual de despesas implementado (V1.1).
 - API de modulos por grupo (voos, hospedagens, transportes, tickets) adicionada.
+- CRUD no dashboard para voos, hospedagens, transportes e tickets.
 

@@ -31,12 +31,12 @@ Video curto (opcional): (adicione o link aqui)
 - Despesas com split igual por pessoa, familia ou manual
 - Validacao da soma do split
 - Dashboard do grupo com saldos e "quem deve pra quem"
+- Modulos do grupo (CRUD): voos, hospedagens, transportes e tickets
 - Protecao CSRF para operacoes de escrita
 - Rate limiting e headers de seguranca
 
 ### Roadmap
 
-- V2: voos/hospedagens/transporte/tickets como modulos por grupo
 - Anexos/recibos e categorias avancadas
 - Ampliar cobertura E2E e testes de seguranca
 - CI/CD basico com lint/test/build
@@ -339,4 +339,5 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Playwright E2E e pipeline CI adicionados.
 - Fluxo de grupos finalizado (convites, validacoes e UX do painel).
 - Validacao de split e testes de convites adicionados.
+- CRUD completo de voos/hospedagens/transportes/tickets no dashboard.
 

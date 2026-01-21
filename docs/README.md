@@ -15,3 +15,4 @@ Observacao:
 - Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
 - `npm audit fix --force` aplicado para zerar vulnerabilidades.
 - `npm test` executado com sucesso.
+- CRUD completo de voos/hospedagens/transportes/tickets no dashboard.
