@@ -40,6 +40,7 @@ Video curto (opcional): (adicione o link aqui)
 - O controle financeiro (pagador e divisao) acontece somente em Expenses.
 - Os modulos de voos/hospedagens/transportes/tickets sao registros logísticos com custo estimado.
 - Para refletir pagamentos reais, crie uma despesa correspondente em Expenses.
+- Base V2: os endpoints de modulos aceitam um payload `expense` opcional para vincular uma despesa (UI ainda nao exposta).
 
 ### Roadmap
 
@@ -272,6 +273,28 @@ Principais endpoints:
 - `DELETE /api/groups/:groupId/tickets/:ticketId`
 - `GET /api/groups/:groupId/summary`
 
+Payload opcional (V2) para vinculo de despesa nos modulos:
+
+- Nos endpoints `POST`/`PUT` de `flights`, `lodgings`, `transports` e `tickets`, envie `expense` para criar/atualizar a despesa vinculada.
+- Se `expense` vier no `POST`, a API cria a despesa e grava `expense_id` no item do modulo.
+- Se `expense` vier no `PUT`, a API atualiza a despesa vinculada (ou cria se nao existir).
+- No `DELETE`, a despesa vinculada e removida junto com o item.
+
+Exemplo (resumido):
+
+```json
+{
+  "expense": {
+    "total": 1200,
+    "description": "Voo GRU-MCO",
+    "paidAt": "2026-01-10",
+    "payerParticipantId": 10,
+    "splitType": "equal",
+    "splits": [{ "participantId": 10, "amount": 1200 }]
+  }
+}
+```
+
 Endpoints legado (viagem) ainda existem, mas nao fazem parte do MVP atual.
 
 Exemplo rapido:
@@ -351,4 +374,5 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Fluxo de grupos finalizado (convites, validacoes e UX do painel).
 - Validacao de split e testes de convites adicionados.
 - CRUD completo de voos/hospedagens/transportes/tickets no dashboard.
+- Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
 

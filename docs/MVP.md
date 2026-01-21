@@ -109,4 +109,5 @@
 - [ ] Notificacoes (email e in-app) para convites e alteracoes
 - [ ] Importacao/exportacao (CSV e backup JSON)
 - [ ] Auditoria e historico de edicoes
+- [x] Vinculo opcional de despesa nos modulos (backend)
 - [ ] Unificar custos com Expenses (selecionar pagador e split dentro dos modulos)

@@ -16,3 +16,4 @@ Observacao:
 - `npm audit fix --force` aplicado para zerar vulnerabilidades.
 - `npm test` executado com sucesso.
 - CRUD completo de voos/hospedagens/transportes/tickets no dashboard.
+- Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
