@@ -37,7 +37,12 @@ Video curto (opcional): (adicione o link aqui)
 
 ### Roadmap
 
-- Anexos/recibos e categorias avancadas
+- Anexos/recibos por item (upload/preview)
+- Categorias avancadas e filtros no painel
+- Multi-moeda e cambio por data
+- Timeline do grupo e notificacoes
+- Importacao/exportacao (CSV/JSON)
+- Auditoria de alteracoes
 - Ampliar cobertura E2E e testes de seguranca
 - CI/CD basico com lint/test/build
 - Observabilidade (logs estruturados/metrics)

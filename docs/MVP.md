@@ -96,7 +96,15 @@
 
 ## V2 (fora do MVP)
 - [x] Voos, hospedagens, transporte e tickets (CRUD simples por grupo)
-- [ ] Anexos/recibos
-- [ ] Categorias avancadas e filtros
-- [ ] Multi-moeda e cambio
-- [ ] Notificacoes e integracoes
+- [ ] Modulos V2 (detalhes e usabilidade)
+  - [ ] Voos: companhia, PNR, assentos, bagagens e status
+  - [ ] Hospedagens: quartos, enderecos completos, check-in/out com hora
+  - [ ] Transportes: origem/destino, fornecedor, comprovantes
+  - [ ] Tickets: tipo, data/hora, local e vinculo a participantes
+- [ ] Anexos/recibos por item (upload, visualizacao e download)
+- [ ] Categorias avancadas e filtros (por data, status, responsavel)
+- [ ] Multi-moeda e cambio (taxas por data + conversao no dashboard)
+- [ ] Timeline do grupo (eventos e marcos por data)
+- [ ] Notificacoes (email e in-app) para convites e alteracoes
+- [ ] Importacao/exportacao (CSV e backup JSON)
+- [ ] Auditoria e historico de edicoes
