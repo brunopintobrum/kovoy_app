@@ -537,8 +537,9 @@
                                     <label class="form-label" for="flightNotes">Notes</label>
                                     <textarea class="form-control" id="flightNotes" rows="2"></textarea>
                                 </div>
-                                <div class="col-md-12 d-flex justify-content-end">
-                                    <button class="btn btn-primary" type="submit">Add flight</button>
+                                <div class="col-md-12 d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary d-none" type="button" id="flightCancel">Cancel</button>
+                                    <button class="btn btn-primary" type="submit" id="flightSubmit">Add flight</button>
                                 </div>
                             </form>
                             <div class="alert alert-warning d-none mt-3" id="flightReadOnly">

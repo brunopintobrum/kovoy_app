@@ -11,7 +11,10 @@
         transports: [],
         tickets: [],
         summary: null,
-        canEdit: false
+        canEdit: false,
+        editing: {
+            flightId: null
+        }
     };
 
     const getCookie = (name) => {
@@ -71,6 +74,14 @@
         const parsed = new Date(value);
         if (Number.isNaN(parsed.getTime())) return value;
         return parsed.toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
+    };
+
+    const formatDateTimeLocal = (value) => {
+        if (!value) return '';
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return value;
+        const pad = (part) => String(part).padStart(2, '0');
+        return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
     };
 
     const parseGroupId = () => {
@@ -359,11 +370,14 @@
                 <td>${formatDateTime(flight.arriveAt)}</td>
                 <td>${formatCurrency(flight.cost, flight.currency)}</td>
                 <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-flight" data-id="${flight.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-flight" data-id="${flight.id}">Delete</button>
                 </td>
             `;
             if (!state.canEdit) {
-                tr.querySelector('button').disabled = true;
+                tr.querySelectorAll('button').forEach((button) => {
+                    button.disabled = true;
+                });
             }
             list.appendChild(tr);
         });
@@ -575,6 +589,49 @@
         updateExpenseAvailability();
     };
 
+    const setFlightFormMode = (mode) => {
+        const submit = document.getElementById('flightSubmit');
+        const cancel = document.getElementById('flightCancel');
+        const isEdit = mode === 'edit';
+        if (submit) {
+            submit.textContent = isEdit ? 'Update flight' : 'Add flight';
+        }
+        if (cancel) {
+            cancel.classList.toggle('d-none', !isEdit);
+        }
+    };
+
+    const resetFlightForm = () => {
+        const form = document.getElementById('flightForm');
+        if (!form) return;
+        form.reset();
+        form.classList.remove('was-validated');
+        state.editing.flightId = null;
+        setFlightFormMode('create');
+    };
+
+    const populateFlightForm = (flight) => {
+        if (!flight) return;
+        const airline = document.getElementById('flightAirline');
+        const pnr = document.getElementById('flightPnr');
+        const cost = document.getElementById('flightCost');
+        const currency = document.getElementById('flightCurrency');
+        const from = document.getElementById('flightFrom');
+        const to = document.getElementById('flightTo');
+        const depart = document.getElementById('flightDepart');
+        const arrive = document.getElementById('flightArrive');
+        const notes = document.getElementById('flightNotes');
+        if (airline) airline.value = flight.airline || '';
+        if (pnr) pnr.value = flight.pnr || '';
+        if (cost) cost.value = flight.cost ?? '';
+        if (currency) currency.value = flight.currency || state.group?.defaultCurrency || 'USD';
+        if (from) from.value = flight.from || '';
+        if (to) to.value = flight.to || '';
+        if (depart) depart.value = formatDateTimeLocal(flight.departAt);
+        if (arrive) arrive.value = formatDateTimeLocal(flight.arriveAt);
+        if (notes) notes.value = flight.notes || '';
+    };
+
     const bindGroupSelector = () => {
         const selector = document.getElementById('groupSelector');
         if (!selector) return;
@@ -629,12 +686,16 @@
                     notes: document.getElementById('flightNotes')?.value || ''
                 };
                 try {
-                    await apiRequest(`/api/groups/${state.groupId}/flights`, {
-                        method: 'POST',
+                    const flightId = state.editing.flightId;
+                    const endpoint = flightId
+                        ? `/api/groups/${state.groupId}/flights/${flightId}`
+                        : `/api/groups/${state.groupId}/flights`;
+                    const method = flightId ? 'PUT' : 'POST';
+                    await apiRequest(endpoint, {
+                        method,
                         body: JSON.stringify(payload)
                     });
-                    flightForm.reset();
-                    flightForm.classList.remove('was-validated');
+                    resetFlightForm();
                     await refreshData();
                 } catch (err) {
                     if (flightError) {
@@ -642,6 +703,12 @@
                         flightError.classList.remove('d-none');
                     }
                 }
+            });
+        }
+        const flightCancel = document.getElementById('flightCancel');
+        if (flightCancel) {
+            flightCancel.addEventListener('click', () => {
+                resetFlightForm();
             });
         }
 
@@ -905,6 +972,7 @@
         const participantList = document.getElementById('participantList');
         const expenseList = document.getElementById('expenseList');
         const flightList = document.getElementById('flightList');
+        const flightForm = document.getElementById('flightForm');
         const lodgingList = document.getElementById('lodgingList');
         const transportList = document.getElementById('transportList');
         const ticketList = document.getElementById('ticketList');
@@ -970,10 +1038,22 @@
             flightList.addEventListener('click', async (event) => {
                 const target = event.target;
                 if (!(target instanceof HTMLButtonElement)) return;
-                if (target.dataset.action !== 'delete-flight') return;
+                const action = target.dataset.action;
                 const id = target.dataset.id;
+                if (action === 'edit-flight') {
+                    if (!state.canEdit) return;
+                    const flight = state.flights.find((item) => item.id === id);
+                    if (!flight) return;
+                    state.editing.flightId = id;
+                    populateFlightForm(flight);
+                    setFlightFormMode('edit');
+                    flightForm?.classList.remove('was-validated');
+                    return;
+                }
+                if (action !== 'delete-flight') return;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/flights/${id}`, { method: 'DELETE' });
+                    resetFlightForm();
                     await refreshData();
                 } catch (err) {
                     const flightError = document.getElementById('flightError');
