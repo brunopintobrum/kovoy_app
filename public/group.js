@@ -1194,10 +1194,10 @@
 
         if (flightList) {
             flightList.addEventListener('click', async (event) => {
-                const target = event.target;
-                if (!(target instanceof HTMLButtonElement)) return;
-                const action = target.dataset.action;
-                const id = Number(target.dataset.id);
+                const button = event.target.closest('button');
+                if (!(button instanceof HTMLButtonElement)) return;
+                const action = button.dataset.action;
+                const id = button.dataset.id;
                 if (!id) return;
                 if (action === 'edit-flight') {
                     if (!state.canEdit) return;
@@ -1226,10 +1226,10 @@
 
         if (lodgingList) {
             lodgingList.addEventListener('click', async (event) => {
-                const target = event.target;
-                if (!(target instanceof HTMLButtonElement)) return;
-                const action = target.dataset.action;
-                const id = Number(target.dataset.id);
+                const button = event.target.closest('button');
+                if (!(button instanceof HTMLButtonElement)) return;
+                const action = button.dataset.action;
+                const id = button.dataset.id;
                 if (!id) return;
                 if (action === 'edit-lodging') {
                     if (!state.canEdit) return;
@@ -1261,10 +1261,10 @@
 
         if (transportList) {
             transportList.addEventListener('click', async (event) => {
-                const target = event.target;
-                if (!(target instanceof HTMLButtonElement)) return;
-                const action = target.dataset.action;
-                const id = Number(target.dataset.id);
+                const button = event.target.closest('button');
+                if (!(button instanceof HTMLButtonElement)) return;
+                const action = button.dataset.action;
+                const id = button.dataset.id;
                 if (!id) return;
                 if (action === 'edit-transport') {
                     if (!state.canEdit) return;
@@ -1297,10 +1297,10 @@
 
         if (ticketList) {
             ticketList.addEventListener('click', async (event) => {
-                const target = event.target;
-                if (!(target instanceof HTMLButtonElement)) return;
-                const action = target.dataset.action;
-                const id = Number(target.dataset.id);
+                const button = event.target.closest('button');
+                if (!(button instanceof HTMLButtonElement)) return;
+                const action = button.dataset.action;
+                const id = button.dataset.id;
                 if (!id) return;
                 if (action === 'edit-ticket') {
                     if (!state.canEdit) return;
