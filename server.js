@@ -1817,7 +1817,9 @@ app.post(
             normalized.value.payerParticipantId,
             now
         );
-        const splitRows = buildEqualSplits(normalized.value.amount, normalized.value.targetIds);
+        const splitRows = normalized.value.splitMode === 'manual'
+            ? normalized.value.splits
+            : buildEqualSplits(normalized.value.amount, normalized.value.targetIds);
         const splitCheck = validateSplitSum(normalized.value.amount, splitRows);
         if (splitCheck.error) {
             return res.status(400).json({ error: splitCheck.error });
@@ -1861,7 +1863,9 @@ app.put(
             expenseId,
             req.groupId
         );
-        const splitRows = buildEqualSplits(normalized.value.amount, normalized.value.targetIds);
+        const splitRows = normalized.value.splitMode === 'manual'
+            ? normalized.value.splits
+            : buildEqualSplits(normalized.value.amount, normalized.value.targetIds);
         const splitCheck = validateSplitSum(normalized.value.amount, splitRows);
         if (splitCheck.error) {
             return res.status(400).json({ error: splitCheck.error });
@@ -2476,12 +2480,45 @@ const normalizeSplitType = (value) => {
     return trimmed || null;
 };
 
+const normalizeSplitMode = (value) => {
+    if (typeof value !== 'string') return 'equal';
+    const trimmed = value.trim().toLowerCase();
+    return trimmed || 'equal';
+};
+
 const requireCurrencyCode = (value) => {
     const trimmed = typeof value === 'string' ? value.trim().toUpperCase() : '';
     if (!/^[A-Z]{3}$/.test(trimmed)) {
         return { error: 'Currency is invalid.' };
     }
     return { value: trimmed };
+};
+
+const parseManualSplits = (items) => {
+    if (!Array.isArray(items)) {
+        return { error: 'Manual splits are required.' };
+    }
+    const rows = [];
+    const seen = new Set();
+    for (const item of items) {
+        const targetId = parseGroupId(item?.targetId);
+        if (!targetId) {
+            return { error: 'Split target is invalid.' };
+        }
+        if (seen.has(targetId)) {
+            return { error: 'Split target is duplicated.' };
+        }
+        const amount = Number(item?.amount);
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return { error: 'Split amount must be greater than zero.' };
+        }
+        seen.add(targetId);
+        rows.push({ targetId, amount });
+    }
+    if (!rows.length) {
+        return { error: 'Split targets are required.' };
+    }
+    return { rows };
 };
 
 const parseIdArray = (items) => {
@@ -2521,11 +2558,29 @@ const validateExpenseSplitPayload = (payload) => {
     if (!splitType || !['participants', 'families'].includes(splitType)) {
         return { error: 'Split type is invalid.' };
     }
-    const targetIds = splitType === 'participants'
-        ? parseIdArray(payload?.participantIds)
-        : parseIdArray(payload?.familyIds);
-    if (!targetIds.length) {
-        return { error: 'Split targets are required.' };
+    const splitMode = normalizeSplitMode(payload?.splitMode);
+    if (!['equal', 'manual'].includes(splitMode)) {
+        return { error: 'Split mode is invalid.' };
+    }
+
+    let targetIds = [];
+    let manualSplits = null;
+    if (splitMode === 'manual') {
+        const parsed = parseManualSplits(payload?.splits);
+        if (parsed.error) return { error: parsed.error };
+        manualSplits = parsed.rows;
+        targetIds = manualSplits.map((row) => row.targetId);
+        const sumCheck = validateSplitSum(amount, manualSplits);
+        if (sumCheck.error) {
+            return { error: sumCheck.error };
+        }
+    } else {
+        targetIds = splitType === 'participants'
+            ? parseIdArray(payload?.participantIds)
+            : parseIdArray(payload?.familyIds);
+        if (!targetIds.length) {
+            return { error: 'Split targets are required.' };
+        }
     }
     return {
         value: {
@@ -2536,7 +2591,9 @@ const validateExpenseSplitPayload = (payload) => {
             category,
             payerParticipantId,
             splitType,
-            targetIds
+            targetIds,
+            splitMode,
+            splits: manualSplits
         }
     };
 };

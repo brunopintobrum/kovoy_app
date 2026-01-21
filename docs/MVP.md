@@ -37,9 +37,9 @@
   - [x] Listar despesas
   - [x] Remover despesa
   - [x] Selecionar pagador (payerParticipantId)
-  - [x] Split igual por pessoa
-  - [x] Split igual por familia
-  - [ ] Split manual (V1.1)
+- [x] Split igual por pessoa
+- [x] Split igual por familia
+- [x] Split manual (V1.1)
 - [x] Dashboard
   - [x] Total do grupo (UI)
   - [x] Saldo por participant (backend)

@@ -17,6 +17,7 @@ const {
     validateFlightPayload,
     validateExpensePayload,
     validateTripMetaPayload,
+    validateExpenseSplitPayload,
     validateSplitSum
 } = require('../server');
 
@@ -128,5 +129,45 @@ describe('validation helpers', () => {
         expect(validateSplitSum(100, [{ amount: 30 }, { amount: 30 }])).toEqual({
             error: 'Split totals must match the expense amount.'
         });
+    });
+
+    test('validateExpenseSplitPayload supports manual splits', () => {
+        const result = validateExpenseSplitPayload({
+            description: 'Tickets',
+            amount: 100,
+            currency: 'USD',
+            date: '2026-02-22',
+            category: 'Parks',
+            payerParticipantId: 1,
+            splitType: 'participants',
+            splitMode: 'manual',
+            splits: [
+                { targetId: 1, amount: 60 },
+                { targetId: 2, amount: 40 }
+            ]
+        });
+        expect(result.value).toMatchObject({
+            splitMode: 'manual',
+            splitType: 'participants'
+        });
+        expect(result.value.targetIds).toEqual([1, 2]);
+        expect(result.value.splits).toHaveLength(2);
+    });
+
+    test('validateExpenseSplitPayload rejects manual splits with mismatched totals', () => {
+        const result = validateExpenseSplitPayload({
+            description: 'Tickets',
+            amount: 100,
+            currency: 'USD',
+            date: '2026-02-22',
+            payerParticipantId: 1,
+            splitType: 'participants',
+            splitMode: 'manual',
+            splits: [
+                { targetId: 1, amount: 50 },
+                { targetId: 2, amount: 30 }
+            ]
+        });
+        expect(result).toEqual({ error: 'Split totals must match the expense amount.' });
     });
 });

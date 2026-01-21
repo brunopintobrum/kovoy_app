@@ -28,7 +28,7 @@ Video curto (opcional): (adicione o link aqui)
 - Convites: criar e aceitar convite
 - Convites: expiracao e bloqueio de reuso
 - Familias e participantes (pessoas sem login)
-- Despesas com split igual por pessoa ou por familia
+- Despesas com split igual por pessoa, familia ou manual
 - Validacao da soma do split
 - Dashboard do grupo com saldos e "quem deve pra quem"
 - Protecao CSRF para operacoes de escrita

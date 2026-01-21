@@ -321,6 +321,7 @@
         const errorEl = document.getElementById('splitTargetsError');
         if (!wrapper) return;
         const type = document.querySelector('input[name="splitType"]:checked')?.value || 'participants';
+        const mode = document.querySelector('input[name="splitMode"]:checked')?.value || 'equal';
         const targets = type === 'participants' ? state.participants : state.families;
 
         if (!targets.length) {
@@ -330,6 +331,9 @@
         }
         wrapper.innerHTML = '';
         if (errorEl) errorEl.classList.add('d-none');
+        if (errorEl) {
+            errorEl.textContent = 'Select at least one target.';
+        }
         targets.forEach((target) => {
             const label = document.createElement('label');
             label.className = 'form-check d-flex align-items-center gap-2';
@@ -337,6 +341,9 @@
             input.type = 'checkbox';
             input.className = 'form-check-input';
             input.value = target.id;
+            if (mode === 'manual') {
+                input.checked = true;
+            }
             input.addEventListener('change', () => {
                 if (errorEl) errorEl.classList.add('d-none');
             });
@@ -344,6 +351,19 @@
             const span = document.createElement('span');
             span.textContent = target.displayName || target.name;
             label.appendChild(span);
+            if (mode === 'manual') {
+                const amountInput = document.createElement('input');
+                amountInput.type = 'number';
+                amountInput.step = '0.01';
+                amountInput.min = '0';
+                amountInput.placeholder = '0.00';
+                amountInput.className = 'form-control form-control-sm ms-auto';
+                amountInput.dataset.targetId = String(target.id);
+                amountInput.addEventListener('input', () => {
+                    if (errorEl) errorEl.classList.add('d-none');
+                });
+                label.appendChild(amountInput);
+            }
             wrapper.appendChild(label);
         });
         updateExpenseAvailability();
@@ -384,6 +404,7 @@
         const hint = document.getElementById('expenseHint');
         if (!submitBtn) return;
         const type = document.querySelector('input[name="splitType"]:checked')?.value || 'participants';
+        const mode = document.querySelector('input[name="splitMode"]:checked')?.value || 'equal';
         const targets = type === 'participants' ? state.participants : state.families;
         const hasParticipants = state.participants.length > 0;
         const hasTargets = targets.length > 0;
@@ -489,7 +510,9 @@
                 const category = document.getElementById('expenseCategory')?.value || '';
                 const payerParticipantId = Number(document.getElementById('expensePayer')?.value || 0);
                 const splitType = document.querySelector('input[name="splitType"]:checked')?.value || 'participants';
-                const targetIds = Array.from(document.querySelectorAll('#splitTargets input:checked'))
+                const splitMode = document.querySelector('input[name="splitMode"]:checked')?.value || 'equal';
+                const selectedTargets = Array.from(document.querySelectorAll('#splitTargets input[type="checkbox"]:checked'));
+                const targetIds = selectedTargets
                     .map((input) => Number(input.value))
                     .filter((value) => value);
                 if (!targetIds.length) {
@@ -504,9 +527,39 @@
                     date,
                     category,
                     payerParticipantId,
-                    splitType
+                    splitType,
+                    splitMode
                 };
-                if (splitType === 'participants') {
+                if (splitMode === 'manual') {
+                    let total = 0;
+                    const splits = [];
+                    let hasInvalidAmount = false;
+                    selectedTargets.forEach((checkbox) => {
+                        const amountInput = checkbox.closest('label')?.querySelector('input[type="number"]');
+                        const value = Number(amountInput?.value);
+                        if (!Number.isFinite(value) || value <= 0) {
+                            hasInvalidAmount = true;
+                            return;
+                        }
+                        total += value;
+                        splits.push({ targetId: Number(checkbox.value), amount: value });
+                    });
+                    if (hasInvalidAmount || !splits.length) {
+                        if (splitTargetsError) {
+                            splitTargetsError.textContent = 'Enter amounts for the selected targets.';
+                            splitTargetsError.classList.remove('d-none');
+                        }
+                        return;
+                    }
+                    if (Number(amount) !== Number(total.toFixed(2))) {
+                        if (splitTargetsError) {
+                            splitTargetsError.textContent = 'Split totals must match the expense amount.';
+                            splitTargetsError.classList.remove('d-none');
+                        }
+                        return;
+                    }
+                    payload.splits = splits;
+                } else if (splitType === 'participants') {
                     payload.participantIds = targetIds;
                 } else {
                     payload.familyIds = targetIds;
@@ -642,6 +695,15 @@
         });
     };
 
+    const bindSplitModeToggle = () => {
+        const inputs = document.querySelectorAll('input[name="splitMode"]');
+        inputs.forEach((input) => {
+            input.addEventListener('change', () => {
+                renderSplitTargets();
+            });
+        });
+    };
+
     const bindLogout = () => {
         const link = document.getElementById('logoutLink');
         if (!link) return;
@@ -677,6 +739,7 @@
         bindInviteForm();
         bindDeleteActions();
         bindSplitTypeToggle();
+        bindSplitModeToggle();
         bindLogout();
         await refreshData();
     };
