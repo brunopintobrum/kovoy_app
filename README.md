@@ -35,6 +35,12 @@ Video curto (opcional): (adicione o link aqui)
 - Protecao CSRF para operacoes de escrita
 - Rate limiting e headers de seguranca
 
+## Financeiro (MVP)
+
+- O controle financeiro (pagador e divisao) acontece somente em Expenses.
+- Os modulos de voos/hospedagens/transportes/tickets sao registros logísticos com custo estimado.
+- Para refletir pagamentos reais, crie uma despesa correspondente em Expenses.
+
 ### Roadmap
 
 - Anexos/recibos por item (upload/preview)

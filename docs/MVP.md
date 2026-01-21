@@ -54,6 +54,7 @@
 - [x] Family e agrupador de participants
 - [x] Despesa tem pagador + split
 - [x] Split soma exatamente o total (validacao e teste dedicado)
+- [x] Pagamentos e divisao sao registrados apenas em Expenses (modulos V2 sao logísticos)
 
 ## Modelo de dados (MVP)
 - [x] User
@@ -108,3 +109,4 @@
 - [ ] Notificacoes (email e in-app) para convites e alteracoes
 - [ ] Importacao/exportacao (CSV e backup JSON)
 - [ ] Auditoria e historico de edicoes
+- [ ] Unificar custos com Expenses (selecionar pagador e split dentro dos modulos)
