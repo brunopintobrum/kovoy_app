@@ -16,7 +16,9 @@
             flightId: null,
             lodgingId: null,
             transportId: null,
-            ticketId: null
+            ticketId: null,
+            expenseId: null,
+            expenseConfig: null
         }
     };
 
@@ -353,11 +355,14 @@
                 <td>${participantMap.get(expense.payerParticipantId) || '-'}</td>
                 <td class="text-capitalize">${splitType}</td>
                 <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-expense" data-id="${expense.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-expense" data-id="${expense.id}">Delete</button>
                 </td>
             `;
             if (!state.canEdit) {
-                tr.querySelector('button').disabled = true;
+                tr.querySelectorAll('button').forEach((button) => {
+                    button.disabled = true;
+                });
             }
             list.appendChild(tr);
         });
@@ -487,10 +492,17 @@
         const type = document.querySelector('input[name="splitType"]:checked')?.value || 'participants';
         const mode = document.querySelector('input[name="splitMode"]:checked')?.value || 'equal';
         const targets = type === 'participants' ? state.participants : state.families;
+        const editingConfig = state.editing.expenseConfig;
+        const selectedIds = editingConfig?.targetIds || null;
+        const manualMap = editingConfig?.manualAmounts || null;
 
         if (!targets.length) {
             wrapper.innerHTML = '<div class="text-muted">No targets available.</div>';
             if (errorEl) errorEl.classList.add('d-none');
+            const summary = document.getElementById('splitSummary');
+            if (summary) {
+                summary.textContent = 'No targets available yet.';
+            }
             return;
         }
         wrapper.innerHTML = '';
@@ -505,7 +517,9 @@
             input.type = 'checkbox';
             input.className = 'form-check-input';
             input.value = target.id;
-            if (mode === 'manual') {
+            if (selectedIds) {
+                input.checked = selectedIds.includes(target.id);
+            } else if (mode === 'manual') {
                 input.checked = true;
             }
             input.addEventListener('change', () => {
@@ -524,6 +538,9 @@
                 amountInput.placeholder = '0.00';
                 amountInput.className = 'form-control form-control-sm ms-auto';
                 amountInput.dataset.targetId = String(target.id);
+                if (manualMap && manualMap[target.id] != null) {
+                    amountInput.value = manualMap[target.id];
+                }
                 amountInput.addEventListener('input', () => {
                     if (errorEl) errorEl.classList.add('d-none');
                     updateSplitSummary();
@@ -713,6 +730,76 @@
         setReadOnlyBanner('transportReadOnly', !state.canEdit);
         setReadOnlyBanner('ticketReadOnly', !state.canEdit);
         updateExpenseAvailability();
+    };
+
+    const setExpenseFormMode = (mode) => {
+        const submit = document.getElementById('expenseSubmit');
+        const cancel = document.getElementById('expenseCancel');
+        const isEdit = mode === 'edit';
+        if (submit) {
+            submit.textContent = isEdit ? 'Update expense' : 'Add expense';
+        }
+        if (cancel) {
+            cancel.classList.toggle('d-none', !isEdit);
+        }
+    };
+
+    const resetExpenseForm = () => {
+        const form = document.getElementById('expenseForm');
+        if (!form) return;
+        form.reset();
+        form.classList.remove('was-validated');
+        state.editing.expenseId = null;
+        state.editing.expenseConfig = null;
+        const participantsRadio = document.getElementById('splitParticipants');
+        const equalRadio = document.getElementById('splitModeEqual');
+        if (participantsRadio) participantsRadio.checked = true;
+        if (equalRadio) equalRadio.checked = true;
+        setExpenseFormMode('create');
+        renderSplitTargets();
+        updateSplitSummary();
+    };
+
+    const populateExpenseForm = (expense) => {
+        if (!expense) return;
+        const description = document.getElementById('expenseDescription');
+        const amount = document.getElementById('expenseAmount');
+        const currency = document.getElementById('expenseCurrency');
+        const date = document.getElementById('expenseDate');
+        const category = document.getElementById('expenseCategory');
+        const payer = document.getElementById('expensePayer');
+
+        if (description) description.value = expense.description || '';
+        if (amount) amount.value = expense.amount ?? '';
+        if (currency) currency.value = expense.currency || state.group?.defaultCurrency || 'USD';
+        if (date) date.value = expense.date || '';
+        if (category) category.value = expense.category || '';
+        if (payer) payer.value = expense.payerParticipantId ? String(expense.payerParticipantId) : '';
+
+        const rawSplitType = expense.splits && expense.splits.length ? expense.splits[0].targetType : 'participant';
+        const splitType = rawSplitType === 'family' ? 'families' : 'participants';
+        const splitTypeInput = document.getElementById(splitType === 'families' ? 'splitFamilies' : 'splitParticipants');
+        if (splitTypeInput) splitTypeInput.checked = true;
+
+        const targetIds = (expense.splits || []).map((split) => split.targetId);
+        const total = Number(expense.amount || 0);
+        const expected = targetIds.length ? total / targetIds.length : null;
+        const amounts = (expense.splits || []).map((split) => Number(split.amount || 0));
+        const isEqualSplit = expected != null && amounts.every((value) => Math.abs(value - expected) < 0.01);
+        const splitModeInput = document.getElementById(isEqualSplit ? 'splitModeEqual' : 'splitModeManual');
+        if (splitModeInput) splitModeInput.checked = true;
+
+        const manualAmounts = {};
+        amounts.forEach((value, index) => {
+            manualAmounts[targetIds[index]] = value;
+        });
+        state.editing.expenseConfig = {
+            targetIds,
+            manualAmounts
+        };
+        setExpenseFormMode('edit');
+        renderSplitTargets();
+        updateSplitSummary();
     };
 
     const ensureLinkedExpense = (response, errorEl) => {
@@ -1304,12 +1391,16 @@
                 }
 
                 try {
-                    await apiRequest(`/api/groups/${state.groupId}/expenses`, {
-                        method: 'POST',
+                    const expenseId = state.editing.expenseId;
+                    const endpoint = expenseId
+                        ? `/api/groups/${state.groupId}/expenses/${expenseId}`
+                        : `/api/groups/${state.groupId}/expenses`;
+                    const method = expenseId ? 'PUT' : 'POST';
+                    await apiRequest(endpoint, {
+                        method,
                         body: JSON.stringify(payload)
                     });
-                    expenseForm.reset();
-                    expenseForm.classList.remove('was-validated');
+                    resetExpenseForm();
                     await refreshData();
                 } catch (err) {
                     if (expenseError) {
@@ -1329,6 +1420,13 @@
             if (currencyInput) {
                 currencyInput.addEventListener('change', () => {
                     updateSplitSummary();
+                });
+            }
+
+            const expenseCancel = document.getElementById('expenseCancel');
+            if (expenseCancel) {
+                expenseCancel.addEventListener('click', () => {
+                    resetExpenseForm();
                 });
             }
         }
@@ -1425,12 +1523,26 @@
 
         if (expenseList) {
             expenseList.addEventListener('click', async (event) => {
-                const target = event.target;
-                if (!(target instanceof HTMLButtonElement)) return;
-                if (target.dataset.action !== 'delete-expense') return;
-                const id = target.dataset.id;
+                const button = event.target.closest('button');
+                if (!(button instanceof HTMLButtonElement)) return;
+                const action = button.dataset.action;
+                const id = Number(button.dataset.id);
+                if (!id) return;
+                if (action === 'edit-expense') {
+                    if (!state.canEdit) return;
+                    const expense = state.expenses.find((item) => item.id === id);
+                    if (!expense) return;
+                    state.editing.expenseId = id;
+                    populateExpenseForm(expense);
+                    document.getElementById('expenseForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+                if (action !== 'delete-expense') return;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/expenses/${id}`, { method: 'DELETE' });
+                    if (state.editing.expenseId === id) {
+                        resetExpenseForm();
+                    }
                     await refreshData();
                 } catch (err) {
                     const expenseError = document.getElementById('expenseError');
@@ -1586,6 +1698,7 @@
         const inputs = document.querySelectorAll('input[name="splitType"]');
         inputs.forEach((input) => {
             input.addEventListener('change', () => {
+                state.editing.expenseConfig = null;
                 renderSplitTargets();
             });
         });
@@ -1595,6 +1708,7 @@
         const inputs = document.querySelectorAll('input[name="splitMode"]');
         inputs.forEach((input) => {
             input.addEventListener('change', () => {
+                state.editing.expenseConfig = null;
                 renderSplitTargets();
             });
         });
