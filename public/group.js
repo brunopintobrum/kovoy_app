@@ -510,6 +510,7 @@
             }
             input.addEventListener('change', () => {
                 if (errorEl) errorEl.classList.add('d-none');
+                updateSplitSummary();
             });
             label.appendChild(input);
             const span = document.createElement('span');
@@ -525,12 +526,51 @@
                 amountInput.dataset.targetId = String(target.id);
                 amountInput.addEventListener('input', () => {
                     if (errorEl) errorEl.classList.add('d-none');
+                    updateSplitSummary();
                 });
                 label.appendChild(amountInput);
             }
             wrapper.appendChild(label);
         });
+        updateSplitSummary();
         updateExpenseAvailability();
+    };
+
+    const updateSplitSummary = () => {
+        const summary = document.getElementById('splitSummary');
+        if (!summary) return;
+        const amountValue = Number(document.getElementById('expenseAmount')?.value || 0);
+        const currencyValue = document.getElementById('expenseCurrency')?.value || state.group?.defaultCurrency || 'USD';
+        const mode = document.querySelector('input[name="splitMode"]:checked')?.value || 'equal';
+        const checkedTargets = Array.from(document.querySelectorAll('#splitTargets input[type="checkbox"]:checked'));
+        if (!checkedTargets.length) {
+            summary.textContent = 'Select at least one target to preview the split.';
+            return;
+        }
+        if (!Number.isFinite(amountValue) || amountValue <= 0) {
+            summary.textContent = 'Set an amount to preview the split.';
+            return;
+        }
+        if (mode === 'manual') {
+            let total = 0;
+            checkedTargets.forEach((checkbox) => {
+                const amountInput = checkbox.closest('label')?.querySelector('input[type="number"]');
+                const value = Number(amountInput?.value || 0);
+                if (Number.isFinite(value)) {
+                    total += value;
+                }
+            });
+            const formattedTotal = formatCurrency(total, currencyValue);
+            const formattedAmount = formatCurrency(amountValue, currencyValue);
+            if (Number(total.toFixed(2)) === Number(amountValue.toFixed(2))) {
+                summary.textContent = `Manual split total: ${formattedTotal}.`;
+            } else {
+                summary.textContent = `Manual split total: ${formattedTotal} (must match ${formattedAmount}).`;
+            }
+            return;
+        }
+        const perTarget = amountValue / checkedTargets.length;
+        summary.textContent = `Selected ${checkedTargets.length} targets. Estimated per target: ${formatCurrency(perTarget, currencyValue)}.`;
     };
 
     const populateExpenseSelectors = () => {
@@ -1278,6 +1318,19 @@
                     }
                 }
             });
+
+            const amountInput = document.getElementById('expenseAmount');
+            const currencyInput = document.getElementById('expenseCurrency');
+            if (amountInput) {
+                amountInput.addEventListener('input', () => {
+                    updateSplitSummary();
+                });
+            }
+            if (currencyInput) {
+                currencyInput.addEventListener('change', () => {
+                    updateSplitSummary();
+                });
+            }
         }
     };
 
