@@ -373,6 +373,7 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Playwright E2E e pipeline CI adicionados.
 - Fluxo de grupos finalizado (convites, validacoes e UX do painel).
 - Validacao de split e testes de convites adicionados.
+- Despesas: editar pelo painel (UI)
 - CRUD completo de voos/hospedagens/transportes/tickets no dashboard.
 - Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
 - UI: toggle para vincular despesas nos modulos (V2 opcional).

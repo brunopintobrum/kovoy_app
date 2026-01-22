@@ -33,6 +33,7 @@
   - [x] Remover participant
 - [x] Despesas
   - [x] Criar despesa (valor, descricao, data, categoria)
+  - [x] Editar despesa (UI)
   - [x] Editar despesa
   - [x] Listar despesas
   - [x] Remover despesa

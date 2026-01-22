@@ -62,6 +62,7 @@
 - E2E atualizado para fluxo de grupos e webserver dedicado.
 - Fluxo de grupos no painel fechado com validacoes e convites.
 - Validacao da soma do split e testes de convites adicionados.
+- Despesas: edicao no painel (UI).
 - Split manual de despesas implementado (V1.1).
 - API de modulos por grupo (voos, hospedagens, transportes, tickets) adicionada.
 - CRUD no dashboard para voos, hospedagens, transportes e tickets.
