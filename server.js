@@ -1396,6 +1396,19 @@ const updateParticipant = db.prepare(`
     WHERE id = ? AND group_id = ?
 `);
 const deleteParticipant = db.prepare('DELETE FROM participants WHERE id = ? AND group_id = ?');
+const countExpensesWithPayer = db.prepare(`
+    SELECT COUNT(*) as count
+    FROM expenses
+    WHERE payer_participant_id = ? AND group_id = ?
+`);
+const countParticipantExpenseSplits = db.prepare(`
+    SELECT COUNT(*) as count
+    FROM expense_splits es
+    JOIN expenses e ON e.id = es.expense_id
+    WHERE es.target_type = 'participant'
+      AND es.target_id = ?
+      AND e.group_id = ?
+`);
 const countParticipantsByFamily = db.prepare(`
     SELECT COUNT(*) as count
     FROM participants
@@ -1736,6 +1749,14 @@ app.delete(
         }
         if (!getParticipant.get(participantId, req.groupId)) {
             return res.status(404).json({ error: 'Participant not found.' });
+        }
+        const payerCount = countExpensesWithPayer.get(participantId, req.groupId)?.count || 0;
+        if (payerCount > 0) {
+            return res.status(400).json({ error: 'Participant is a payer in expenses. Reassign or remove those expenses first.' });
+        }
+        const splitCount = countParticipantExpenseSplits.get(participantId, req.groupId)?.count || 0;
+        if (splitCount > 0) {
+            return res.status(400).json({ error: 'Participant is included in expense splits. Update those expenses first.' });
         }
         deleteParticipant.run(participantId, req.groupId);
         return res.json({ ok: true });
