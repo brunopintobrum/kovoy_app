@@ -44,6 +44,7 @@ Video curto (opcional): (adicione o link aqui)
 
 ### Roadmap
 
+- Modulos V2 com campos avancados (voos, hospedagens, transportes, tickets)
 - Anexos/recibos por item (upload/preview)
 - Categorias avancadas e filtros no painel
 - Multi-moeda e cambio por data

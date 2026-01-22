@@ -99,11 +99,26 @@
 ## V2 (fora do MVP)
 - [x] Voos, hospedagens, transporte e tickets (CRUD simples por grupo)
 - [ ] Modulos V2 (detalhes e usabilidade)
-  - [ ] Voos: companhia, PNR, assentos, bagagens e status
-  - [ ] Hospedagens: quartos, enderecos completos, check-in/out com hora
-  - [ ] Transportes: origem/destino, fornecedor, comprovantes
-  - [ ] Tickets: tipo, data/hora, local e vinculo a participantes
-- [ ] Anexos/recibos por item (upload, visualizacao e download)
+  - [ ] Voos
+    - [ ] Companhia, numero do voo, PNR
+    - [ ] Assentos, classe, bagagens
+    - [ ] Status (planned/paid/due) e observacoes
+    - [ ] Integração com passageiros (participantes)
+  - [ ] Hospedagens
+    - [ ] Quartos (tipo, quantidade, ocupacao)
+    - [ ] Endereco completo + contato
+    - [ ] Check-in/out com hora
+    - [ ] Status e observacoes
+  - [ ] Transportes
+    - [ ] Origem/destino, datas/horas
+    - [ ] Fornecedor, localizador
+    - [ ] Status e observacoes
+  - [ ] Tickets
+    - [ ] Tipo (parque, evento, etc), data/hora, local
+    - [ ] Vinculo a participantes
+    - [ ] Status e observacoes
+  - [ ] Unificar custos com Expenses (pagador + split dentro do modulo)
+  - [ ] Anexos/recibos por item (upload, visualizacao e download)
 - [ ] Categorias avancadas e filtros (por data, status, responsavel)
 - [ ] Multi-moeda e cambio (taxas por data + conversao no dashboard)
 - [ ] Timeline do grupo (eventos e marcos por data)
@@ -112,4 +127,3 @@
 - [ ] Auditoria e historico de edicoes
 - [x] Vinculo opcional de despesa nos modulos (backend)
 - [x] UI: toggle para vincular despesas nos modulos (V2 opcional)
-- [ ] Unificar custos com Expenses (selecionar pagador e split dentro dos modulos)
