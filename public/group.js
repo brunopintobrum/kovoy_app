@@ -20,6 +20,13 @@
         }
     };
 
+    const moduleExpenseConfigs = [
+        { prefix: 'flight', toggleId: 'flightLinkExpense', fieldsId: 'flightExpenseFields', payerId: 'flightExpensePayer' },
+        { prefix: 'lodging', toggleId: 'lodgingLinkExpense', fieldsId: 'lodgingExpenseFields', payerId: 'lodgingExpensePayer' },
+        { prefix: 'transport', toggleId: 'transportLinkExpense', fieldsId: 'transportExpenseFields', payerId: 'transportExpensePayer' },
+        { prefix: 'ticket', toggleId: 'ticketLinkExpense', fieldsId: 'ticketExpenseFields', payerId: 'ticketExpensePayer' }
+    ];
+
     const getCookie = (name) => {
         return document.cookie
             .split(';')
@@ -547,7 +554,74 @@
         if (currencySelect && state.group) {
             currencySelect.value = state.group.defaultCurrency;
         }
+        populateModuleExpensePayers();
         updateExpenseAvailability();
+    };
+
+    const populateModuleExpensePayers = () => {
+        moduleExpenseConfigs.forEach((config) => {
+            const select = document.getElementById(config.payerId);
+            if (!select) return;
+            select.innerHTML = '';
+            if (!state.participants.length) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Add a participant first';
+                select.appendChild(option);
+                return;
+            }
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Select payer';
+            select.appendChild(placeholder);
+            state.participants.forEach((participant) => {
+                const option = document.createElement('option');
+                option.value = participant.id;
+                option.textContent = participant.displayName;
+                select.appendChild(option);
+            });
+        });
+    };
+
+    const setModuleExpenseVisibility = (prefix, show) => {
+        const config = moduleExpenseConfigs.find((item) => item.prefix === prefix);
+        if (!config) return;
+        const toggle = document.getElementById(config.toggleId);
+        const fields = document.getElementById(config.fieldsId);
+        if (!toggle || !fields) return;
+        toggle.checked = show;
+        fields.classList.toggle('d-none', !show);
+    };
+
+    const setModuleExpensePayer = (prefix, payerId) => {
+        const config = moduleExpenseConfigs.find((item) => item.prefix === prefix);
+        if (!config) return;
+        const select = document.getElementById(config.payerId);
+        if (select) {
+            select.value = payerId ? String(payerId) : '';
+        }
+    };
+
+    const buildLinkedExpensePayload = (prefix, defaults) => {
+        const config = moduleExpenseConfigs.find((item) => item.prefix === prefix);
+        if (!config) return null;
+        const toggle = document.getElementById(config.toggleId);
+        if (!toggle || !toggle.checked) return null;
+        if (!state.participants.length) {
+            throw new Error('Add participants before linking an expense.');
+        }
+        const payerId = Number(document.getElementById(config.payerId)?.value || 0);
+        if (!payerId) {
+            throw new Error('Select a payer to link an expense.');
+        }
+        const base = defaults && typeof defaults === 'object' ? defaults : {};
+        return {
+            ...base,
+            payerParticipantId: payerId,
+            splitType: 'participants',
+            splitMode: 'equal',
+            participantIds: state.participants.map((participant) => participant.id)
+        };
     };
 
     const setReadOnlyBanner = (id, show) => {
@@ -601,6 +675,17 @@
         updateExpenseAvailability();
     };
 
+    const ensureLinkedExpense = (response, errorEl) => {
+        if (response && response.expenseId) {
+            return true;
+        }
+        if (errorEl) {
+            errorEl.textContent = 'Linked expense was not created. Please retry or restart the server.';
+            errorEl.classList.remove('d-none');
+        }
+        return false;
+    };
+
     const setFlightFormMode = (mode) => {
         const submit = document.getElementById('flightSubmit');
         const cancel = document.getElementById('flightCancel');
@@ -620,6 +705,8 @@
         form.classList.remove('was-validated');
         state.editing.flightId = null;
         setFlightFormMode('create');
+        setModuleExpenseVisibility('flight', false);
+        setModuleExpensePayer('flight', null);
     };
 
     const populateFlightForm = (flight) => {
@@ -642,6 +729,9 @@
         if (depart) depart.value = formatDateTimeLocal(flight.departAt);
         if (arrive) arrive.value = formatDateTimeLocal(flight.arriveAt);
         if (notes) notes.value = flight.notes || '';
+        const expense = flight.expenseId ? state.expenses.find((item) => item.id === flight.expenseId) : null;
+        setModuleExpenseVisibility('flight', !!expense);
+        setModuleExpensePayer('flight', expense?.payerParticipantId || null);
     };
 
     const setLodgingFormMode = (mode) => {
@@ -663,6 +753,8 @@
         form.classList.remove('was-validated');
         state.editing.lodgingId = null;
         setLodgingFormMode('create');
+        setModuleExpenseVisibility('lodging', false);
+        setModuleExpensePayer('lodging', null);
     };
 
     const populateLodgingForm = (lodging) => {
@@ -685,6 +777,9 @@
         if (host) host.value = lodging.host || '';
         if (contact) contact.value = lodging.contact || '';
         if (notes) notes.value = lodging.notes || '';
+        const expense = lodging.expenseId ? state.expenses.find((item) => item.id === lodging.expenseId) : null;
+        setModuleExpenseVisibility('lodging', !!expense);
+        setModuleExpensePayer('lodging', expense?.payerParticipantId || null);
     };
 
     const setTransportFormMode = (mode) => {
@@ -706,6 +801,8 @@
         form.classList.remove('was-validated');
         state.editing.transportId = null;
         setTransportFormMode('create');
+        setModuleExpenseVisibility('transport', false);
+        setModuleExpensePayer('transport', null);
     };
 
     const populateTransportForm = (transport) => {
@@ -720,6 +817,9 @@
         if (amount) amount.value = transport.amount ?? '';
         if (currency) currency.value = transport.currency || state.group?.defaultCurrency || 'USD';
         if (notes) notes.value = transport.notes || '';
+        const expense = transport.expenseId ? state.expenses.find((item) => item.id === transport.expenseId) : null;
+        setModuleExpenseVisibility('transport', !!expense);
+        setModuleExpensePayer('transport', expense?.payerParticipantId || null);
     };
 
     const setTicketFormMode = (mode) => {
@@ -741,6 +841,8 @@
         form.classList.remove('was-validated');
         state.editing.ticketId = null;
         setTicketFormMode('create');
+        setModuleExpenseVisibility('ticket', false);
+        setModuleExpensePayer('ticket', null);
     };
 
     const populateTicketForm = (ticket) => {
@@ -757,6 +859,9 @@
         if (currency) currency.value = ticket.currency || state.group?.defaultCurrency || 'USD';
         if (holder) holder.value = ticket.holder || '';
         if (notes) notes.value = ticket.notes || '';
+        const expense = ticket.expenseId ? state.expenses.find((item) => item.id === ticket.expenseId) : null;
+        setModuleExpenseVisibility('ticket', !!expense);
+        setModuleExpensePayer('ticket', expense?.payerParticipantId || null);
     };
 
     const bindGroupSelector = () => {
@@ -812,16 +917,39 @@
                     arriveAt: document.getElementById('flightArrive')?.value || '',
                     notes: document.getElementById('flightNotes')?.value || ''
                 };
+                const expenseDefaults = {
+                    description: `Flight: ${payload.from || '-'} -> ${payload.to || '-'}`,
+                    amount: payload.cost,
+                    currency: payload.currency,
+                    date: payload.departAt,
+                    category: 'Flight'
+                };
+                let expensePayload = null;
+                try {
+                    expensePayload = buildLinkedExpensePayload('flight', expenseDefaults);
+                } catch (err) {
+                    if (flightError) {
+                        flightError.textContent = err.message;
+                        flightError.classList.remove('d-none');
+                    }
+                    return;
+                }
+                if (expensePayload) {
+                    payload.expense = expensePayload;
+                }
                 try {
                     const flightId = state.editing.flightId;
                     const endpoint = flightId
                         ? `/api/groups/${state.groupId}/flights/${flightId}`
                         : `/api/groups/${state.groupId}/flights`;
                     const method = flightId ? 'PUT' : 'POST';
-                    await apiRequest(endpoint, {
+                    const response = await apiRequest(endpoint, {
                         method,
                         body: JSON.stringify(payload)
                     });
+                    if (expensePayload && !ensureLinkedExpense(response, flightError)) {
+                        return;
+                    }
                     resetFlightForm();
                     await refreshData();
                 } catch (err) {
@@ -857,16 +985,39 @@
                     contact: document.getElementById('lodgingContact')?.value || '',
                     notes: document.getElementById('lodgingNotes')?.value || ''
                 };
+                const expenseDefaults = {
+                    description: `Lodging: ${payload.name || '-'}`,
+                    amount: payload.cost,
+                    currency: payload.currency,
+                    date: payload.checkIn,
+                    category: 'Lodging'
+                };
+                let expensePayload = null;
+                try {
+                    expensePayload = buildLinkedExpensePayload('lodging', expenseDefaults);
+                } catch (err) {
+                    if (lodgingError) {
+                        lodgingError.textContent = err.message;
+                        lodgingError.classList.remove('d-none');
+                    }
+                    return;
+                }
+                if (expensePayload) {
+                    payload.expense = expensePayload;
+                }
                 try {
                     const lodgingId = state.editing.lodgingId;
                     const endpoint = lodgingId
                         ? `/api/groups/${state.groupId}/lodgings/${lodgingId}`
                         : `/api/groups/${state.groupId}/lodgings`;
                     const method = lodgingId ? 'PUT' : 'POST';
-                    await apiRequest(endpoint, {
+                    const response = await apiRequest(endpoint, {
                         method,
                         body: JSON.stringify(payload)
                     });
+                    if (expensePayload && !ensureLinkedExpense(response, lodgingError)) {
+                        return;
+                    }
                     resetLodgingForm();
                     await refreshData();
                 } catch (err) {
@@ -898,16 +1049,39 @@
                     currency: document.getElementById('transportCurrency')?.value || '',
                     notes: document.getElementById('transportNotes')?.value || ''
                 };
+                const expenseDefaults = {
+                    description: `Transport: ${payload.type || '-'}`,
+                    amount: payload.amount,
+                    currency: payload.currency,
+                    date: payload.date,
+                    category: 'Transport'
+                };
+                let expensePayload = null;
+                try {
+                    expensePayload = buildLinkedExpensePayload('transport', expenseDefaults);
+                } catch (err) {
+                    if (transportError) {
+                        transportError.textContent = err.message;
+                        transportError.classList.remove('d-none');
+                    }
+                    return;
+                }
+                if (expensePayload) {
+                    payload.expense = expensePayload;
+                }
                 try {
                     const transportId = state.editing.transportId;
                     const endpoint = transportId
                         ? `/api/groups/${state.groupId}/transports/${transportId}`
                         : `/api/groups/${state.groupId}/transports`;
                     const method = transportId ? 'PUT' : 'POST';
-                    await apiRequest(endpoint, {
+                    const response = await apiRequest(endpoint, {
                         method,
                         body: JSON.stringify(payload)
                     });
+                    if (expensePayload && !ensureLinkedExpense(response, transportError)) {
+                        return;
+                    }
                     resetTransportForm();
                     await refreshData();
                 } catch (err) {
@@ -940,16 +1114,39 @@
                     holder: document.getElementById('ticketHolder')?.value || '',
                     notes: document.getElementById('ticketNotes')?.value || ''
                 };
+                const expenseDefaults = {
+                    description: `Ticket: ${payload.name || '-'}`,
+                    amount: payload.amount,
+                    currency: payload.currency,
+                    date: payload.date,
+                    category: 'Ticket'
+                };
+                let expensePayload = null;
+                try {
+                    expensePayload = buildLinkedExpensePayload('ticket', expenseDefaults);
+                } catch (err) {
+                    if (ticketError) {
+                        ticketError.textContent = err.message;
+                        ticketError.classList.remove('d-none');
+                    }
+                    return;
+                }
+                if (expensePayload) {
+                    payload.expense = expensePayload;
+                }
                 try {
                     const ticketId = state.editing.ticketId;
                     const endpoint = ticketId
                         ? `/api/groups/${state.groupId}/tickets/${ticketId}`
                         : `/api/groups/${state.groupId}/tickets`;
                     const method = ticketId ? 'PUT' : 'POST';
-                    await apiRequest(endpoint, {
+                    const response = await apiRequest(endpoint, {
                         method,
                         body: JSON.stringify(payload)
                     });
+                    if (expensePayload && !ensureLinkedExpense(response, ticketError)) {
+                        return;
+                    }
                     resetTicketForm();
                     await refreshData();
                 } catch (err) {
@@ -1350,6 +1547,17 @@
         });
     };
 
+    const bindModuleExpenseToggles = () => {
+        moduleExpenseConfigs.forEach((config) => {
+            const toggle = document.getElementById(config.toggleId);
+            const fields = document.getElementById(config.fieldsId);
+            if (!toggle || !fields) return;
+            toggle.addEventListener('change', () => {
+                fields.classList.toggle('d-none', !toggle.checked);
+            });
+        });
+    };
+
     const bindLogout = () => {
         const link = document.getElementById('logoutLink');
         if (!link) return;
@@ -1390,6 +1598,7 @@
         bindDeleteActions();
         bindSplitTypeToggle();
         bindSplitModeToggle();
+        bindModuleExpenseToggles();
         bindLogout();
         await refreshData();
     };

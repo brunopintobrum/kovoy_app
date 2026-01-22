@@ -387,6 +387,12 @@
                     <div class="card mt-4" id="expenses">
                         <div class="card-body">
                             <h5 class="card-title">Expenses</h5>
+                            <div class="alert alert-info d-flex align-items-start" role="alert">
+                                <i class="mdi mdi-information-outline me-2"></i>
+                                <div>
+                                    This is the MVP financial hub. Track who paid and how the split works here.
+                                </div>
+                            </div>
                             <form id="expenseForm" class="row g-3 needs-validation" novalidate>
                                 <div class="col-md-4">
                                     <label class="form-label" for="expenseDescription">Description</label>
@@ -489,6 +495,13 @@
                     <div class="card mt-4" id="flights">
                         <div class="card-body">
                             <h5 class="card-title">Flights</h5>
+                            <div class="alert alert-info d-flex align-items-start" role="alert">
+                                <i class="mdi mdi-information-outline me-2"></i>
+                                <div>
+                                    MVP note: flights are logistical only. To record payments and splits, add an
+                                    <a class="alert-link" href="#expenses">expense</a>.
+                                </div>
+                            </div>
                             <form id="flightForm" class="row g-3 needs-validation" novalidate>
                                 <div class="col-md-3">
                                     <label class="form-label" for="flightAirline">Airline</label>
@@ -537,6 +550,25 @@
                                     <label class="form-label" for="flightNotes">Notes</label>
                                     <textarea class="form-control" id="flightNotes" rows="2"></textarea>
                                 </div>
+                                <div class="col-12">
+                                    <div class="border rounded p-3 bg-light">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="flightLinkExpense">
+                                            <label class="form-check-label" for="flightLinkExpense">Link an expense (optional)</label>
+                                        </div>
+                                        <div class="row g-3 d-none" id="flightExpenseFields">
+                                            <div class="col-md-4">
+                                                <label class="form-label" for="flightExpensePayer">Payer</label>
+                                                <select class="form-select" id="flightExpensePayer">
+                                                    <option value="">Select payer</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-8 d-flex align-items-end">
+                                                <small class="text-muted">Split is equal across all participants for now.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-md-12 d-flex justify-content-end gap-2">
                                     <button class="btn btn-outline-secondary d-none" type="button" id="flightCancel">Cancel</button>
                                     <button class="btn btn-primary" type="submit" id="flightSubmit">Add flight</button>
@@ -569,6 +601,13 @@
                     <div class="card mt-4" id="lodgings">
                         <div class="card-body">
                             <h5 class="card-title">Lodgings</h5>
+                            <div class="alert alert-info d-flex align-items-start" role="alert">
+                                <i class="mdi mdi-information-outline me-2"></i>
+                                <div>
+                                    MVP note: lodgings are logistical only. To record payments and splits, add an
+                                    <a class="alert-link" href="#expenses">expense</a>.
+                                </div>
+                            </div>
                             <form id="lodgingForm" class="row g-3 needs-validation" novalidate>
                                 <div class="col-md-4">
                                     <label class="form-label" for="lodgingName">Property</label>
@@ -616,6 +655,25 @@
                                     <label class="form-label" for="lodgingNotes">Notes</label>
                                     <textarea class="form-control" id="lodgingNotes" rows="2"></textarea>
                                 </div>
+                                <div class="col-12">
+                                    <div class="border rounded p-3 bg-light">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="lodgingLinkExpense">
+                                            <label class="form-check-label" for="lodgingLinkExpense">Link an expense (optional)</label>
+                                        </div>
+                                        <div class="row g-3 d-none" id="lodgingExpenseFields">
+                                            <div class="col-md-4">
+                                                <label class="form-label" for="lodgingExpensePayer">Payer</label>
+                                                <select class="form-select" id="lodgingExpensePayer">
+                                                    <option value="">Select payer</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-8 d-flex align-items-end">
+                                                <small class="text-muted">Split is equal across all participants for now.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-md-12 d-flex justify-content-end gap-2">
                                     <button class="btn btn-outline-secondary d-none" type="button" id="lodgingCancel">Cancel</button>
                                     <button class="btn btn-primary" type="submit" id="lodgingSubmit">Add lodging</button>
@@ -647,6 +705,13 @@
                     <div class="card mt-4" id="transports">
                         <div class="card-body">
                             <h5 class="card-title">Transports</h5>
+                            <div class="alert alert-info d-flex align-items-start" role="alert">
+                                <i class="mdi mdi-information-outline me-2"></i>
+                                <div>
+                                    MVP note: transports are logistical only. To record payments and splits, add an
+                                    <a class="alert-link" href="#expenses">expense</a>.
+                                </div>
+                            </div>
                             <form id="transportForm" class="row g-3 needs-validation" novalidate>
                                 <div class="col-md-3">
                                     <label class="form-label" for="transportType">Type</label>
@@ -675,6 +740,25 @@
                                 <div class="col-md-12">
                                     <label class="form-label" for="transportNotes">Notes</label>
                                     <textarea class="form-control" id="transportNotes" rows="2"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <div class="border rounded p-3 bg-light">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="transportLinkExpense">
+                                            <label class="form-check-label" for="transportLinkExpense">Link an expense (optional)</label>
+                                        </div>
+                                        <div class="row g-3 d-none" id="transportExpenseFields">
+                                            <div class="col-md-4">
+                                                <label class="form-label" for="transportExpensePayer">Payer</label>
+                                                <select class="form-select" id="transportExpensePayer">
+                                                    <option value="">Select payer</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-8 d-flex align-items-end">
+                                                <small class="text-muted">Split is equal across all participants for now.</small>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-12 d-flex justify-content-end gap-2">
                                     <button class="btn btn-outline-secondary d-none" type="button" id="transportCancel">Cancel</button>
@@ -707,6 +791,13 @@
                     <div class="card mt-4" id="tickets">
                         <div class="card-body">
                             <h5 class="card-title">Tickets</h5>
+                            <div class="alert alert-info d-flex align-items-start" role="alert">
+                                <i class="mdi mdi-information-outline me-2"></i>
+                                <div>
+                                    MVP note: tickets are logistical only. To record payments and splits, add an
+                                    <a class="alert-link" href="#expenses">expense</a>.
+                                </div>
+                            </div>
                             <form id="ticketForm" class="row g-3 needs-validation" novalidate>
                                 <div class="col-md-4">
                                     <label class="form-label" for="ticketName">Ticket</label>
@@ -739,6 +830,25 @@
                                 <div class="col-md-12">
                                     <label class="form-label" for="ticketNotes">Notes</label>
                                     <textarea class="form-control" id="ticketNotes" rows="2"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <div class="border rounded p-3 bg-light">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="ticketLinkExpense">
+                                            <label class="form-check-label" for="ticketLinkExpense">Link an expense (optional)</label>
+                                        </div>
+                                        <div class="row g-3 d-none" id="ticketExpenseFields">
+                                            <div class="col-md-4">
+                                                <label class="form-label" for="ticketExpensePayer">Payer</label>
+                                                <select class="form-select" id="ticketExpensePayer">
+                                                    <option value="">Select payer</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-8 d-flex align-items-end">
+                                                <small class="text-muted">Split is equal across all participants for now.</small>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-12 d-flex justify-content-end gap-2">
                                     <button class="btn btn-outline-secondary d-none" type="button" id="ticketCancel">Cancel</button>
