@@ -110,4 +110,5 @@
 - [ ] Importacao/exportacao (CSV e backup JSON)
 - [ ] Auditoria e historico de edicoes
 - [x] Vinculo opcional de despesa nos modulos (backend)
+- [x] UI: toggle para vincular despesas nos modulos (V2 opcional)
 - [ ] Unificar custos com Expenses (selecionar pagador e split dentro dos modulos)

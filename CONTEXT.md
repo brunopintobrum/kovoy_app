@@ -66,5 +66,6 @@
 - API de modulos por grupo (voos, hospedagens, transportes, tickets) adicionada.
 - CRUD no dashboard para voos, hospedagens, transportes e tickets.
 - Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
+- UI: toggle para vincular despesas nos modulos (V2 opcional).
 - Financeiro do MVP concentrado em Expenses; modulos V2 sao logísticos.
 

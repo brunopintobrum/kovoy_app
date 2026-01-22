@@ -40,7 +40,7 @@ Video curto (opcional): (adicione o link aqui)
 - O controle financeiro (pagador e divisao) acontece somente em Expenses.
 - Os modulos de voos/hospedagens/transportes/tickets sao registros logísticos com custo estimado.
 - Para refletir pagamentos reais, crie uma despesa correspondente em Expenses.
-- Base V2: os endpoints de modulos aceitam um payload `expense` opcional para vincular uma despesa (UI ainda nao exposta).
+- Base V2: os modulos permitem vincular uma despesa (link opcional na UI).
 
 ### Roadmap
 
@@ -285,12 +285,12 @@ Exemplo (resumido):
 ```json
 {
   "expense": {
-    "total": 1200,
+    "amount": 1200,
     "description": "Voo GRU-MCO",
-    "paidAt": "2026-01-10",
+    "date": "2026-01-10",
     "payerParticipantId": 10,
-    "splitType": "equal",
-    "splits": [{ "participantId": 10, "amount": 1200 }]
+    "splitType": "participants",
+    "participantIds": [10]
   }
 }
 ```
@@ -375,4 +375,5 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Validacao de split e testes de convites adicionados.
 - CRUD completo de voos/hospedagens/transportes/tickets no dashboard.
 - Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
+- UI: toggle para vincular despesas nos modulos (V2 opcional).
 
