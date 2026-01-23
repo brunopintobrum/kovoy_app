@@ -24,11 +24,13 @@
 - Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
 - `npm audit fix --force` aplicado para zerar vulnerabilidades.
 - `npm test` executado com sucesso.
-- Voos V2: novos campos e vinculo a participantes no modulo de grupos.
+- Voos V2: novos campos (flight number, class, seat, baggage, status) e vinculo a participantes no modulo de grupos.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
+- Testes: validacoes e integracao para voos V2.
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
 - Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
-- Voos V2: novos campos (flight number, class, seat, baggage, status) e vinculo a participantes no modulo de grupos.
-- Testes: validacoes e integracao para voos V2.
+- Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
+- Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
+- Testes: validacao de transportes V2.
 

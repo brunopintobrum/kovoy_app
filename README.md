@@ -34,6 +34,7 @@ Video curto (opcional): (adicione o link aqui)
 - Modulos do grupo (CRUD): voos, hospedagens, transportes e tickets
 - Voos V2: flight number, class, seat, baggage, status e vinculo a participantes
 - Hospedagens V2: endereco completo, quartos, check-in/out com hora e status
+- Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes
 - Protecao CSRF para operacoes de escrita
 - Rate limiting e headers de seguranca
 
@@ -46,7 +47,7 @@ Video curto (opcional): (adicione o link aqui)
 
 ### Roadmap
 
-- Modulos V2 com campos avancados (voos, hospedagens, transportes, tickets)
+- Tickets V2 (tipo, data/hora, local, participantes, status)
 - Anexos/recibos por item (upload/preview)
 - Categorias avancadas e filtros no painel
 - Multi-moeda e cambio por data
@@ -103,6 +104,12 @@ Campos V2 em `group_lodgings`:
 - `address_line2`, `city`, `state`, `postal_code`, `country`
 - `check_in_time`, `check_out_time`, `room_type`, `room_quantity`, `room_occupancy`, `status`
 - `contact_phone`, `contact_email`
+
+Campos V2 em `group_transports`:
+
+- `origin`, `destination`, `depart_at`, `arrive_at`
+- `provider`, `locator`, `status`
+- `amount`, `currency`, `notes`, `expense_id`
 
 ## Requisitos
 
@@ -401,4 +408,6 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
 - Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
+- Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
+- Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
 

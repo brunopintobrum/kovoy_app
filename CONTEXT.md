@@ -19,6 +19,7 @@
 - tokens: refresh_tokens, email_verification_tokens, reset_tokens, two_factor_codes.
 - grupos: groups, group_members, invitations, families, participants, expenses, expense_splits, group_flights, group_flight_participants, group_lodgings, group_transports, group_tickets.
 - legado: trips, trip_flights, trip_lodgings, trip_cars, trip_expenses, trip_transports, trip_timeline, trip_reminders.
+- campos V2 (grupo): group_transports inclui origin, destination, depart_at, arrive_at, provider, locator, status, expense_id.
 
 ## Auth & Security
 - Register/login via `/api/register` e `/api/login`.
@@ -75,4 +76,7 @@
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
 - Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
+- Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
+- Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
+- Testes: validacao de transportes V2.
 

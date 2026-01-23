@@ -89,6 +89,7 @@
 
 ## Testes
 - [x] Voos V2 (validation/integration)
+- [x] Transportes V2 (validation)
 - [x] Split por pessoa (unit)
 - [x] Split por familia (unit)
 - [x] Validacao de soma do split (unit)
@@ -108,15 +109,15 @@
     - [ ] Validar chegada posterior a partida (backend + UI)
     - [ ] Exibir classe/assento/bagagem na lista
     - [ ] Seletor de passageiros com busca
-  - [ ] Hospedagens
+  - [x] Hospedagens
     - [x] Quartos (tipo, quantidade, ocupacao)
     - [x] Endereco completo + contato
     - [x] Check-in/out com hora
     - [x] Status e observacoes
-  - [ ] Transportes
-    - [ ] Origem/destino, datas/horas
-    - [ ] Fornecedor, localizador
-    - [ ] Status e observacoes
+  - [x] Transportes
+    - [x] Origem/destino, datas/horas
+    - [x] Fornecedor, localizador
+    - [x] Status e observacoes
   - [ ] Tickets
     - [ ] Tipo (parque, evento, etc), data/hora, local
     - [ ] Vinculo a participantes
