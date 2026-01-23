@@ -279,7 +279,13 @@ db.exec(`
         group_id INTEGER NOT NULL,
         expense_id INTEGER,
         type TEXT,
-        date TEXT,
+        origin TEXT,
+        destination TEXT,
+        depart_at TEXT,
+        arrive_at TEXT,
+        provider TEXT,
+        locator TEXT,
+        status TEXT,
         amount REAL,
         currency TEXT,
         notes TEXT,
@@ -512,8 +518,36 @@ if (!hasGroupLodgingContactEmail) {
 }
 const groupTransportColumns = db.prepare('PRAGMA table_info(group_transports)').all();
 const hasGroupTransportExpense = groupTransportColumns.some((column) => column.name === 'expense_id');
+const hasGroupTransportOrigin = groupTransportColumns.some((column) => column.name === 'origin');
+const hasGroupTransportDestination = groupTransportColumns.some((column) => column.name === 'destination');
+const hasGroupTransportDepartAt = groupTransportColumns.some((column) => column.name === 'depart_at');
+const hasGroupTransportArriveAt = groupTransportColumns.some((column) => column.name === 'arrive_at');
+const hasGroupTransportProvider = groupTransportColumns.some((column) => column.name === 'provider');
+const hasGroupTransportLocator = groupTransportColumns.some((column) => column.name === 'locator');
+const hasGroupTransportStatus = groupTransportColumns.some((column) => column.name === 'status');
 if (!hasGroupTransportExpense) {
     db.exec('ALTER TABLE group_transports ADD COLUMN expense_id INTEGER');
+}
+if (!hasGroupTransportOrigin) {
+    db.exec('ALTER TABLE group_transports ADD COLUMN origin TEXT');
+}
+if (!hasGroupTransportDestination) {
+    db.exec('ALTER TABLE group_transports ADD COLUMN destination TEXT');
+}
+if (!hasGroupTransportDepartAt) {
+    db.exec('ALTER TABLE group_transports ADD COLUMN depart_at TEXT');
+}
+if (!hasGroupTransportArriveAt) {
+    db.exec('ALTER TABLE group_transports ADD COLUMN arrive_at TEXT');
+}
+if (!hasGroupTransportProvider) {
+    db.exec('ALTER TABLE group_transports ADD COLUMN provider TEXT');
+}
+if (!hasGroupTransportLocator) {
+    db.exec('ALTER TABLE group_transports ADD COLUMN locator TEXT');
+}
+if (!hasGroupTransportStatus) {
+    db.exec('ALTER TABLE group_transports ADD COLUMN status TEXT');
 }
 const groupTicketColumns = db.prepare('PRAGMA table_info(group_tickets)').all();
 const hasGroupTicketExpense = groupTicketColumns.some((column) => column.name === 'expense_id');
@@ -1611,19 +1645,23 @@ const updateGroupLodging = db.prepare(`
 `);
 const deleteGroupLodging = db.prepare('DELETE FROM group_lodgings WHERE id = ? AND group_id = ?');
 const listGroupTransports = db.prepare(`
-    SELECT id, expense_id, type, date, amount, currency, notes
+    SELECT id, expense_id, type, origin, destination, depart_at, arrive_at, provider, locator, status, amount, currency, notes
     FROM group_transports
     WHERE group_id = ?
-    ORDER BY date DESC, id DESC
+    ORDER BY depart_at DESC, id DESC
 `);
 const getGroupTransport = db.prepare('SELECT id, expense_id FROM group_transports WHERE id = ? AND group_id = ?');
 const insertGroupTransport = db.prepare(`
-    INSERT INTO group_transports (id, group_id, expense_id, type, date, amount, currency, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO group_transports (
+        id, group_id, expense_id, type, origin, destination, depart_at, arrive_at, provider, locator, status,
+        amount, currency, notes
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const updateGroupTransport = db.prepare(`
     UPDATE group_transports
-    SET expense_id = ?, type = ?, date = ?, amount = ?, currency = ?, notes = ?
+    SET expense_id = ?, type = ?, origin = ?, destination = ?, depart_at = ?, arrive_at = ?, provider = ?, locator = ?,
+        status = ?, amount = ?, currency = ?, notes = ?
     WHERE id = ? AND group_id = ?
 `);
 const deleteGroupTransport = db.prepare('DELETE FROM group_transports WHERE id = ? AND group_id = ?');
@@ -1949,7 +1987,7 @@ const buildModuleExpenseDefaults = (type, payload) => {
             description: `Transport: ${payload.type}`,
             amount: payload.amount,
             currency: payload.currency,
-            date: payload.date,
+            date: payload.departAt,
             category: 'Transport'
         };
     }
@@ -2694,7 +2732,13 @@ app.post(
                     req.groupId,
                     linkedExpenseId,
                     normalized.value.type,
-                    normalized.value.date,
+                    normalized.value.origin,
+                    normalized.value.destination,
+                    normalized.value.departAt,
+                    normalized.value.arriveAt,
+                    normalized.value.provider,
+                    normalized.value.locator,
+                    normalized.value.status,
                     normalized.value.amount,
                     normalized.value.currency,
                     normalized.value.notes
@@ -2750,7 +2794,13 @@ app.put(
                 updateGroupTransport.run(
                     linkedExpenseId,
                     normalized.value.type,
-                    normalized.value.date,
+                    normalized.value.origin,
+                    normalized.value.destination,
+                    normalized.value.departAt,
+                    normalized.value.arriveAt,
+                    normalized.value.provider,
+                    normalized.value.locator,
+                    normalized.value.status,
                     normalized.value.amount,
                     normalized.value.currency,
                     normalized.value.notes,
@@ -3423,7 +3473,13 @@ const mapGroupTransportRow = (row) => ({
     id: row.id,
     expenseId: row.expense_id || null,
     type: row.type,
-    date: row.date,
+    origin: row.origin,
+    destination: row.destination,
+    departAt: row.depart_at,
+    arriveAt: row.arrive_at,
+    provider: row.provider,
+    locator: row.locator,
+    status: row.status || 'planned',
     amount: row.amount,
     currency: row.currency,
     notes: row.notes
@@ -3893,8 +3949,16 @@ const validateGroupLodgingPayload = (payload) => {
 const validateGroupTransportPayload = (payload) => {
     const type = requireString(payload.type, 'Type');
     if (type.error) return type;
-    const date = requireDate(payload.date, 'Date');
-    if (date.error) return date;
+    const origin = requireString(payload.origin, 'Origin');
+    if (origin.error) return origin;
+    const destination = requireString(payload.destination, 'Destination');
+    if (destination.error) return destination;
+    const departAt = requireDate(payload.departAt, 'Departure');
+    if (departAt.error) return departAt;
+    const arriveAt = requireDate(payload.arriveAt, 'Arrival');
+    if (arriveAt.error) return arriveAt;
+    const status = payload.status ? requireStatus(payload.status) : { value: 'planned' };
+    if (status.error) return status;
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
     const amount = requireNumber(payload.amount, 'Amount');
@@ -3902,7 +3966,13 @@ const validateGroupTransportPayload = (payload) => {
     return {
         value: {
             type: type.value,
-            date: date.value,
+            origin: origin.value,
+            destination: destination.value,
+            departAt: departAt.value,
+            arriveAt: arriveAt.value,
+            provider: optionalString(payload.provider),
+            locator: optionalString(payload.locator),
+            status: status.value,
             amount: amount.value,
             currency: currency.value,
             notes: optionalString(payload.notes)

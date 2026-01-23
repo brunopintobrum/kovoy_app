@@ -830,9 +830,41 @@
                                     <div class="invalid-feedback">Enter a transport type.</div>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label" for="transportDate">Date</label>
-                                    <input class="form-control" id="transportDate" type="date" required>
-                                    <div class="invalid-feedback">Select a date.</div>
+                                    <label class="form-label" for="transportProvider">Provider</label>
+                                    <input class="form-control" id="transportProvider">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="transportLocator">Locator</label>
+                                    <input class="form-control" id="transportLocator">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="transportStatus">Status</label>
+                                    <select class="form-select" id="transportStatus" required>
+                                        <option value="planned">Planned</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="due">Due</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a status.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="transportOrigin">Origin</label>
+                                    <input class="form-control" id="transportOrigin" required>
+                                    <div class="invalid-feedback">Enter an origin.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="transportDestination">Destination</label>
+                                    <input class="form-control" id="transportDestination" required>
+                                    <div class="invalid-feedback">Enter a destination.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="transportDepart">Departure</label>
+                                    <input class="form-control" id="transportDepart" type="datetime-local" required>
+                                    <div class="invalid-feedback">Select a departure time.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="transportArrive">Arrival</label>
+                                    <input class="form-control" id="transportArrive" type="datetime-local" required>
+                                    <div class="invalid-feedback">Select an arrival time.</div>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label" for="transportAmount">Amount</label>
@@ -848,7 +880,7 @@
                                     </select>
                                     <div class="invalid-feedback">Select a currency.</div>
                                 </div>
-                                <div class="col-md-12">
+                                <div class="col-md-8">
                                     <label class="form-label" for="transportNotes">Notes</label>
                                     <textarea class="form-control" id="transportNotes" rows="2"></textarea>
                                 </div>
@@ -885,14 +917,17 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Type</th>
-                                            <th>Date</th>
+                                            <th>Route</th>
+                                            <th>Departure</th>
+                                            <th>Arrival</th>
+                                            <th>Status</th>
                                             <th>Amount</th>
-                                            <th>Notes</th>
+                                            <th>Provider/Locator</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody id="transportList">
-                                        <tr><td colspan="5" class="text-muted text-center">No transports yet.</td></tr>
+                                        <tr><td colspan="8" class="text-muted text-center">No transports yet.</td></tr>
                                     </tbody>
                                 </table>
                             </div>

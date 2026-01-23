@@ -452,16 +452,23 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.transports.length) {
-            list.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No transports yet.</td></tr>';
+            list.innerHTML = '<tr><td colspan="8" class="text-muted text-center">No transports yet.</td></tr>';
             return;
         }
         state.transports.forEach((transport) => {
+            const route = `${transport.origin || '-'} -> ${transport.destination || '-'}`;
+            const provider = transport.provider || '-';
+            const locator = transport.locator || '-';
+            const providerLine = [provider, locator].filter((value) => value && value !== '-').join(' · ') || '-';
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${transport.type || '-'}</td>
-                <td>${formatDate(transport.date)}</td>
+                <td>${route}</td>
+                <td>${formatDateTime(transport.departAt)}</td>
+                <td>${formatDateTime(transport.arriveAt)}</td>
+                <td class="text-capitalize">${transport.status || 'planned'}</td>
                 <td>${formatCurrency(transport.amount, transport.currency)}</td>
-                <td>${transport.notes || '-'}</td>
+                <td>${providerLine}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-transport" data-id="${transport.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-transport" data-id="${transport.id}">Delete</button>
@@ -1023,17 +1030,31 @@
         setTransportFormMode('create');
         setModuleExpenseVisibility('transport', false);
         setModuleExpensePayer('transport', null);
+        const status = document.getElementById('transportStatus');
+        if (status) status.value = 'planned';
     };
 
     const populateTransportForm = (transport) => {
         if (!transport) return;
         const type = document.getElementById('transportType');
-        const date = document.getElementById('transportDate');
+        const origin = document.getElementById('transportOrigin');
+        const destination = document.getElementById('transportDestination');
+        const depart = document.getElementById('transportDepart');
+        const arrive = document.getElementById('transportArrive');
+        const provider = document.getElementById('transportProvider');
+        const locator = document.getElementById('transportLocator');
+        const status = document.getElementById('transportStatus');
         const amount = document.getElementById('transportAmount');
         const currency = document.getElementById('transportCurrency');
         const notes = document.getElementById('transportNotes');
         if (type) type.value = transport.type || '';
-        if (date) date.value = transport.date || '';
+        if (origin) origin.value = transport.origin || '';
+        if (destination) destination.value = transport.destination || '';
+        if (depart) depart.value = formatDateTimeLocal(transport.departAt);
+        if (arrive) arrive.value = formatDateTimeLocal(transport.arriveAt);
+        if (provider) provider.value = transport.provider || '';
+        if (locator) locator.value = transport.locator || '';
+        if (status) status.value = transport.status || 'planned';
         if (amount) amount.value = transport.amount ?? '';
         if (currency) currency.value = transport.currency || state.group?.defaultCurrency || 'USD';
         if (notes) notes.value = transport.notes || '';
@@ -1288,7 +1309,13 @@
                 if (!validateForm(transportForm)) return;
                 const payload = {
                     type: document.getElementById('transportType')?.value || '',
-                    date: document.getElementById('transportDate')?.value || '',
+                    origin: document.getElementById('transportOrigin')?.value || '',
+                    destination: document.getElementById('transportDestination')?.value || '',
+                    departAt: document.getElementById('transportDepart')?.value || '',
+                    arriveAt: document.getElementById('transportArrive')?.value || '',
+                    provider: document.getElementById('transportProvider')?.value || '',
+                    locator: document.getElementById('transportLocator')?.value || '',
+                    status: document.getElementById('transportStatus')?.value || 'planned',
                     amount: document.getElementById('transportAmount')?.value || '',
                     currency: document.getElementById('transportCurrency')?.value || '',
                     notes: document.getElementById('transportNotes')?.value || ''
@@ -1297,7 +1324,7 @@
                     description: `Transport: ${payload.type || '-'}`,
                     amount: payload.amount,
                     currency: payload.currency,
-                    date: payload.date,
+                    date: payload.departAt,
                     category: 'Transport'
                 };
                 let expensePayload = null;

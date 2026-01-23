@@ -248,12 +248,19 @@ describe('validation helpers', () => {
     test('validateGroupTransportPayload validates amount and currency', () => {
         const result = validateGroupTransportPayload({
             type: 'Shuttle',
-            date: '2026-02-22',
+            origin: 'MCO',
+            destination: 'Hotel',
+            departAt: '2026-02-22T10:00:00Z',
+            arriveAt: '2026-02-22T11:00:00Z',
+            status: 'planned',
             amount: 45,
             currency: 'USD'
         });
         expect(result.value).toMatchObject({
             type: 'Shuttle',
+            origin: 'MCO',
+            destination: 'Hotel',
+            status: 'planned',
             amount: 45,
             currency: 'USD'
         });
