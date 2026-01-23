@@ -216,16 +216,32 @@ describe('validation helpers', () => {
         const result = validateGroupLodgingPayload({
             name: 'Resort',
             address: '123 Main St',
+            city: 'Orlando',
+            country: 'USA',
             checkIn: '2026-02-22',
+            checkInTime: '15:00',
             checkOut: '2026-02-25',
+            checkOutTime: '11:00',
+            roomType: 'Suite',
+            roomQuantity: 2,
+            roomOccupancy: 4,
+            status: 'planned',
             cost: 300,
-            currency: 'USD'
+            currency: 'USD',
+            contact: 'Front Desk'
         });
         expect(result.value).toMatchObject({
             name: 'Resort',
             address: '123 Main St',
+            city: 'Orlando',
+            country: 'USA',
+            roomType: 'Suite',
+            roomQuantity: 2,
+            roomOccupancy: 4,
+            status: 'planned',
             cost: 300,
-            currency: 'USD'
+            currency: 'USD',
+            contact: 'Front Desk'
         });
     });
 

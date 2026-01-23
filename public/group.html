@@ -658,21 +658,62 @@
                                     <div class="invalid-feedback">Enter a property name.</div>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label" for="lodgingAddress">Address</label>
+                                    <label class="form-label" for="lodgingAddress">Address line 1</label>
                                     <input class="form-control" id="lodgingAddress" required>
                                     <div class="invalid-feedback">Enter an address.</div>
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="lodgingCheckIn">Check-in</label>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="lodgingAddressLine2">Address line 2</label>
+                                    <input class="form-control" id="lodgingAddressLine2">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingCity">City</label>
+                                    <input class="form-control" id="lodgingCity" required>
+                                    <div class="invalid-feedback">Enter a city.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingState">State/Province</label>
+                                    <input class="form-control" id="lodgingState">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingPostalCode">Postal code</label>
+                                    <input class="form-control" id="lodgingPostalCode">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingCountry">Country</label>
+                                    <input class="form-control" id="lodgingCountry" required>
+                                    <div class="invalid-feedback">Enter a country.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingCheckIn">Check-in date</label>
                                     <input class="form-control" id="lodgingCheckIn" type="date" required>
                                     <div class="invalid-feedback">Select a check-in date.</div>
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="lodgingCheckOut">Check-out</label>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingCheckInTime">Check-in time</label>
+                                    <input class="form-control" id="lodgingCheckInTime" type="time" required>
+                                    <div class="invalid-feedback">Select a check-in time.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingCheckOut">Check-out date</label>
                                     <input class="form-control" id="lodgingCheckOut" type="date" required>
                                     <div class="invalid-feedback">Select a check-out date.</div>
                                 </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingCheckOutTime">Check-out time</label>
+                                    <input class="form-control" id="lodgingCheckOutTime" type="time" required>
+                                    <div class="invalid-feedback">Select a check-out time.</div>
+                                </div>
                                 <div class="col-md-2">
+                                    <label class="form-label" for="lodgingStatus">Status</label>
+                                    <select class="form-select" id="lodgingStatus" required>
+                                        <option value="planned">Planned</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="due">Due</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a status.</div>
+                                </div>
+                                <div class="col-md-3">
                                     <label class="form-label" for="lodgingCost">Total cost</label>
                                     <input class="form-control" id="lodgingCost" type="number" step="0.01" min="0.01" required>
                                     <div class="invalid-feedback">Enter a valid cost.</div>
@@ -686,13 +727,37 @@
                                     </select>
                                     <div class="invalid-feedback">Select a currency.</div>
                                 </div>
+                                <div class="col-md-5">
+                                    <label class="form-label" for="lodgingRoomType">Room type</label>
+                                    <input class="form-control" id="lodgingRoomType" required>
+                                    <div class="invalid-feedback">Enter a room type.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="lodgingRoomQuantity">Room quantity</label>
+                                    <input class="form-control" id="lodgingRoomQuantity" type="number" min="1" step="1" required>
+                                    <div class="invalid-feedback">Enter a quantity.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="lodgingRoomOccupancy">Room occupancy</label>
+                                    <input class="form-control" id="lodgingRoomOccupancy" type="number" min="1" step="1" required>
+                                    <div class="invalid-feedback">Enter an occupancy.</div>
+                                </div>
                                 <div class="col-md-4">
                                     <label class="form-label" for="lodgingHost">Host</label>
                                     <input class="form-control" id="lodgingHost">
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label" for="lodgingContact">Contact</label>
-                                    <input class="form-control" id="lodgingContact">
+                                    <label class="form-label" for="lodgingContact">Contact name</label>
+                                    <input class="form-control" id="lodgingContact" required>
+                                    <div class="invalid-feedback">Enter a contact name.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="lodgingContactPhone">Contact phone</label>
+                                    <input class="form-control" id="lodgingContactPhone">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="lodgingContactEmail">Contact email</label>
+                                    <input class="form-control" id="lodgingContactEmail" type="email">
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label" for="lodgingNotes">Notes</label>
@@ -731,14 +796,17 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Property</th>
+                                            <th>Location</th>
                                             <th>Dates</th>
+                                            <th>Rooms</th>
+                                            <th>Status</th>
                                             <th>Cost</th>
                                             <th>Contact</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody id="lodgingList">
-                                        <tr><td colspan="5" class="text-muted text-center">No lodgings yet.</td></tr>
+                                        <tr><td colspan="8" class="text-muted text-center">No lodgings yet.</td></tr>
                                     </tbody>
                                 </table>
                             </div>

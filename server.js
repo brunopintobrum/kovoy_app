@@ -251,12 +251,25 @@ db.exec(`
         expense_id INTEGER,
         name TEXT,
         address TEXT,
+        address_line2 TEXT,
+        city TEXT,
+        state TEXT,
+        postal_code TEXT,
+        country TEXT,
         check_in TEXT,
+        check_in_time TEXT,
         check_out TEXT,
+        check_out_time TEXT,
+        room_type TEXT,
+        room_quantity INTEGER,
+        room_occupancy INTEGER,
+        status TEXT,
         cost REAL,
         currency TEXT,
         host TEXT,
         contact TEXT,
+        contact_phone TEXT,
+        contact_email TEXT,
         notes TEXT,
         FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
         FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE SET NULL
@@ -442,8 +455,60 @@ if (!hasGroupFlightStatus) {
 }
 const groupLodgingColumns = db.prepare('PRAGMA table_info(group_lodgings)').all();
 const hasGroupLodgingExpense = groupLodgingColumns.some((column) => column.name === 'expense_id');
+const hasGroupLodgingAddressLine2 = groupLodgingColumns.some((column) => column.name === 'address_line2');
+const hasGroupLodgingCity = groupLodgingColumns.some((column) => column.name === 'city');
+const hasGroupLodgingState = groupLodgingColumns.some((column) => column.name === 'state');
+const hasGroupLodgingPostalCode = groupLodgingColumns.some((column) => column.name === 'postal_code');
+const hasGroupLodgingCountry = groupLodgingColumns.some((column) => column.name === 'country');
+const hasGroupLodgingCheckInTime = groupLodgingColumns.some((column) => column.name === 'check_in_time');
+const hasGroupLodgingCheckOutTime = groupLodgingColumns.some((column) => column.name === 'check_out_time');
+const hasGroupLodgingRoomType = groupLodgingColumns.some((column) => column.name === 'room_type');
+const hasGroupLodgingRoomQuantity = groupLodgingColumns.some((column) => column.name === 'room_quantity');
+const hasGroupLodgingRoomOccupancy = groupLodgingColumns.some((column) => column.name === 'room_occupancy');
+const hasGroupLodgingStatus = groupLodgingColumns.some((column) => column.name === 'status');
+const hasGroupLodgingContactPhone = groupLodgingColumns.some((column) => column.name === 'contact_phone');
+const hasGroupLodgingContactEmail = groupLodgingColumns.some((column) => column.name === 'contact_email');
 if (!hasGroupLodgingExpense) {
     db.exec('ALTER TABLE group_lodgings ADD COLUMN expense_id INTEGER');
+}
+if (!hasGroupLodgingAddressLine2) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN address_line2 TEXT');
+}
+if (!hasGroupLodgingCity) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN city TEXT');
+}
+if (!hasGroupLodgingState) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN state TEXT');
+}
+if (!hasGroupLodgingPostalCode) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN postal_code TEXT');
+}
+if (!hasGroupLodgingCountry) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN country TEXT');
+}
+if (!hasGroupLodgingCheckInTime) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN check_in_time TEXT');
+}
+if (!hasGroupLodgingCheckOutTime) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN check_out_time TEXT');
+}
+if (!hasGroupLodgingRoomType) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN room_type TEXT');
+}
+if (!hasGroupLodgingRoomQuantity) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN room_quantity INTEGER');
+}
+if (!hasGroupLodgingRoomOccupancy) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN room_occupancy INTEGER');
+}
+if (!hasGroupLodgingStatus) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN status TEXT');
+}
+if (!hasGroupLodgingContactPhone) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN contact_phone TEXT');
+}
+if (!hasGroupLodgingContactEmail) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN contact_email TEXT');
 }
 const groupTransportColumns = db.prepare('PRAGMA table_info(group_transports)').all();
 const hasGroupTransportExpense = groupTransportColumns.some((column) => column.name === 'expense_id');
@@ -1520,19 +1585,28 @@ const deleteGroupFlightParticipants = db.prepare(`
     WHERE flight_id = ? AND group_id = ?
 `);
 const listGroupLodgings = db.prepare(`
-    SELECT id, expense_id, name, address, check_in, check_out, cost, currency, host, contact, notes
+    SELECT id, expense_id, name, address, address_line2, city, state, postal_code, country,
+           check_in, check_in_time, check_out, check_out_time, room_type, room_quantity, room_occupancy,
+           status, cost, currency, host, contact, contact_phone, contact_email, notes
     FROM group_lodgings
     WHERE group_id = ?
     ORDER BY check_in DESC, id DESC
 `);
 const getGroupLodging = db.prepare('SELECT id, expense_id FROM group_lodgings WHERE id = ? AND group_id = ?');
 const insertGroupLodging = db.prepare(`
-    INSERT INTO group_lodgings (id, group_id, expense_id, name, address, check_in, check_out, cost, currency, host, contact, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO group_lodgings (
+        id, group_id, expense_id, name, address, address_line2, city, state, postal_code, country,
+        check_in, check_in_time, check_out, check_out_time, room_type, room_quantity, room_occupancy,
+        status, cost, currency, host, contact, contact_phone, contact_email, notes
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const updateGroupLodging = db.prepare(`
     UPDATE group_lodgings
-    SET expense_id = ?, name = ?, address = ?, check_in = ?, check_out = ?, cost = ?, currency = ?, host = ?, contact = ?, notes = ?
+    SET expense_id = ?, name = ?, address = ?, address_line2 = ?, city = ?, state = ?, postal_code = ?, country = ?,
+        check_in = ?, check_in_time = ?, check_out = ?, check_out_time = ?, room_type = ?, room_quantity = ?,
+        room_occupancy = ?, status = ?, cost = ?, currency = ?, host = ?, contact = ?, contact_phone = ?, contact_email = ?,
+        notes = ?
     WHERE id = ? AND group_id = ?
 `);
 const deleteGroupLodging = db.prepare('DELETE FROM group_lodgings WHERE id = ? AND group_id = ?');
@@ -2446,12 +2520,25 @@ app.post(
                     linkedExpenseId,
                     normalized.value.name,
                     normalized.value.address,
+                    normalized.value.addressLine2,
+                    normalized.value.city,
+                    normalized.value.state,
+                    normalized.value.postalCode,
+                    normalized.value.country,
                     normalized.value.checkIn,
+                    normalized.value.checkInTime,
                     normalized.value.checkOut,
+                    normalized.value.checkOutTime,
+                    normalized.value.roomType,
+                    normalized.value.roomQuantity,
+                    normalized.value.roomOccupancy,
+                    normalized.value.status,
                     normalized.value.cost,
                     normalized.value.currency,
                     normalized.value.host,
                     normalized.value.contact,
+                    normalized.value.contactPhone,
+                    normalized.value.contactEmail,
                     normalized.value.notes
                 );
                 return linkedExpenseId;
@@ -2506,12 +2593,25 @@ app.put(
                     linkedExpenseId,
                     normalized.value.name,
                     normalized.value.address,
+                    normalized.value.addressLine2,
+                    normalized.value.city,
+                    normalized.value.state,
+                    normalized.value.postalCode,
+                    normalized.value.country,
                     normalized.value.checkIn,
+                    normalized.value.checkInTime,
                     normalized.value.checkOut,
+                    normalized.value.checkOutTime,
+                    normalized.value.roomType,
+                    normalized.value.roomQuantity,
+                    normalized.value.roomOccupancy,
+                    normalized.value.status,
                     normalized.value.cost,
                     normalized.value.currency,
                     normalized.value.host,
                     normalized.value.contact,
+                    normalized.value.contactPhone,
+                    normalized.value.contactEmail,
                     normalized.value.notes,
                     lodgingId,
                     req.groupId
@@ -3297,12 +3397,25 @@ const mapGroupLodgingRow = (row) => ({
     expenseId: row.expense_id || null,
     name: row.name,
     address: row.address,
+    addressLine2: row.address_line2,
+    city: row.city,
+    state: row.state,
+    postalCode: row.postal_code,
+    country: row.country,
     checkIn: row.check_in,
+    checkInTime: row.check_in_time,
     checkOut: row.check_out,
+    checkOutTime: row.check_out_time,
+    roomType: row.room_type,
+    roomQuantity: row.room_quantity,
+    roomOccupancy: row.room_occupancy,
+    status: row.status || 'planned',
     cost: row.cost,
     currency: row.currency,
     host: row.host,
     contact: row.contact,
+    contactPhone: row.contact_phone,
+    contactEmail: row.contact_email,
     notes: row.notes
 });
 
@@ -3606,6 +3719,14 @@ const requireNumber = (value, field) => {
     return { value: number };
 };
 
+const requirePositiveInt = (value, field) => {
+    const number = Number(value);
+    if (!Number.isFinite(number) || !Number.isInteger(number) || number <= 0) {
+        return { error: `${field} must be a positive integer.` };
+    }
+    return { value: number };
+};
+
 const requireDate = (value, field) => {
     if (!value || Number.isNaN(Date.parse(value))) {
         return { error: `${field} is invalid.` };
@@ -3624,6 +3745,13 @@ const optionalDate = (value, field) => {
 const optionalTime = (value, field) => {
     if (!value) return { value: null };
     if (!/^\d{2}:\d{2}/.test(value)) {
+        return { error: `${field} is invalid.` };
+    }
+    return { value };
+};
+
+const requireTime = (value, field) => {
+    if (!value || !/^\d{2}:\d{2}$/.test(value)) {
         return { error: `${field} is invalid.` };
     }
     return { value };
@@ -3708,24 +3836,55 @@ const validateGroupLodgingPayload = (payload) => {
     if (name.error) return name;
     const address = requireString(payload.address, 'Address');
     if (address.error) return address;
+    const city = requireString(payload.city, 'City');
+    if (city.error) return city;
+    const country = requireString(payload.country, 'Country');
+    if (country.error) return country;
     const checkIn = requireDate(payload.checkIn, 'Check-in');
     if (checkIn.error) return checkIn;
+    const checkInTime = requireTime(payload.checkInTime, 'Check-in time');
+    if (checkInTime.error) return checkInTime;
     const checkOut = requireDate(payload.checkOut, 'Check-out');
     if (checkOut.error) return checkOut;
+    const checkOutTime = requireTime(payload.checkOutTime, 'Check-out time');
+    if (checkOutTime.error) return checkOutTime;
+    const roomType = requireString(payload.roomType, 'Room type');
+    if (roomType.error) return roomType;
+    const roomQuantity = requirePositiveInt(payload.roomQuantity, 'Room quantity');
+    if (roomQuantity.error) return roomQuantity;
+    const roomOccupancy = requirePositiveInt(payload.roomOccupancy, 'Room occupancy');
+    if (roomOccupancy.error) return roomOccupancy;
+    const status = payload.status ? requireStatus(payload.status) : { value: 'planned' };
+    if (status.error) return status;
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
     const cost = requireNumber(payload.cost, 'Total cost');
     if (cost.error) return cost;
+    const contact = requireString(payload.contact, 'Contact name');
+    if (contact.error) return contact;
     return {
         value: {
             name: name.value,
             address: address.value,
+            addressLine2: optionalString(payload.addressLine2),
+            city: city.value,
+            state: optionalString(payload.state),
+            postalCode: optionalString(payload.postalCode),
+            country: country.value,
             checkIn: checkIn.value,
+            checkInTime: checkInTime.value,
             checkOut: checkOut.value,
+            checkOutTime: checkOutTime.value,
+            roomType: roomType.value,
+            roomQuantity: roomQuantity.value,
+            roomOccupancy: roomOccupancy.value,
+            status: status.value,
             cost: cost.value,
             currency: currency.value,
             host: optionalString(payload.host),
-            contact: optionalString(payload.contact),
+            contact: contact.value,
+            contactPhone: optionalString(payload.contactPhone),
+            contactEmail: optionalString(payload.contactEmail),
             notes: optionalString(payload.notes)
         }
     };

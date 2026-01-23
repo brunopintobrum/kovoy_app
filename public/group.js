@@ -412,16 +412,27 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.lodgings.length) {
-            list.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No lodgings yet.</td></tr>';
+            list.innerHTML = '<tr><td colspan="8" class="text-muted text-center">No lodgings yet.</td></tr>';
             return;
         }
         state.lodgings.forEach((lodging) => {
+            const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).join(', ');
+            const checkIn = `${formatDate(lodging.checkIn)} ${lodging.checkInTime || ''}`.trim();
+            const checkOut = `${formatDate(lodging.checkOut)} ${lodging.checkOutTime || ''}`.trim();
+            const rooms = lodging.roomType
+                ? `${lodging.roomQuantity || 0} x ${lodging.roomType} (occ ${lodging.roomOccupancy || 0})`
+                : '-';
+            const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean);
+            const contact = contactParts.length ? contactParts.join(' · ') : '-';
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${lodging.name || '-'}</td>
-                <td>${formatDate(lodging.checkIn)} -> ${formatDate(lodging.checkOut)}</td>
+                <td>${location || '-'}</td>
+                <td>${checkIn} -> ${checkOut}</td>
+                <td>${rooms}</td>
+                <td class="text-capitalize">${lodging.status || 'planned'}</td>
                 <td>${formatCurrency(lodging.cost, lodging.currency)}</td>
-                <td>${lodging.contact || lodging.host || '-'}</td>
+                <td>${contact}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-lodging" data-id="${lodging.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-lodging" data-id="${lodging.id}">Delete</button>
@@ -936,27 +947,55 @@
         setLodgingFormMode('create');
         setModuleExpenseVisibility('lodging', false);
         setModuleExpensePayer('lodging', null);
+        const status = document.getElementById('lodgingStatus');
+        if (status) status.value = 'planned';
     };
 
     const populateLodgingForm = (lodging) => {
         if (!lodging) return;
         const name = document.getElementById('lodgingName');
         const address = document.getElementById('lodgingAddress');
+        const addressLine2 = document.getElementById('lodgingAddressLine2');
+        const city = document.getElementById('lodgingCity');
+        const state = document.getElementById('lodgingState');
+        const postalCode = document.getElementById('lodgingPostalCode');
+        const country = document.getElementById('lodgingCountry');
         const checkIn = document.getElementById('lodgingCheckIn');
+        const checkInTime = document.getElementById('lodgingCheckInTime');
         const checkOut = document.getElementById('lodgingCheckOut');
+        const checkOutTime = document.getElementById('lodgingCheckOutTime');
+        const status = document.getElementById('lodgingStatus');
         const cost = document.getElementById('lodgingCost');
         const currency = document.getElementById('lodgingCurrency');
+        const roomType = document.getElementById('lodgingRoomType');
+        const roomQuantity = document.getElementById('lodgingRoomQuantity');
+        const roomOccupancy = document.getElementById('lodgingRoomOccupancy');
         const host = document.getElementById('lodgingHost');
         const contact = document.getElementById('lodgingContact');
+        const contactPhone = document.getElementById('lodgingContactPhone');
+        const contactEmail = document.getElementById('lodgingContactEmail');
         const notes = document.getElementById('lodgingNotes');
         if (name) name.value = lodging.name || '';
         if (address) address.value = lodging.address || '';
+        if (addressLine2) addressLine2.value = lodging.addressLine2 || '';
+        if (city) city.value = lodging.city || '';
+        if (state) state.value = lodging.state || '';
+        if (postalCode) postalCode.value = lodging.postalCode || '';
+        if (country) country.value = lodging.country || '';
         if (checkIn) checkIn.value = lodging.checkIn || '';
+        if (checkInTime) checkInTime.value = lodging.checkInTime || '';
         if (checkOut) checkOut.value = lodging.checkOut || '';
+        if (checkOutTime) checkOutTime.value = lodging.checkOutTime || '';
+        if (status) status.value = lodging.status || 'planned';
         if (cost) cost.value = lodging.cost ?? '';
         if (currency) currency.value = lodging.currency || state.group?.defaultCurrency || 'USD';
+        if (roomType) roomType.value = lodging.roomType || '';
+        if (roomQuantity) roomQuantity.value = lodging.roomQuantity ?? '';
+        if (roomOccupancy) roomOccupancy.value = lodging.roomOccupancy ?? '';
         if (host) host.value = lodging.host || '';
         if (contact) contact.value = lodging.contact || '';
+        if (contactPhone) contactPhone.value = lodging.contactPhone || '';
+        if (contactEmail) contactEmail.value = lodging.contactEmail || '';
         if (notes) notes.value = lodging.notes || '';
         const expense = lodging.expenseId ? state.expenses.find((item) => item.id === lodging.expenseId) : null;
         setModuleExpenseVisibility('lodging', !!expense);
@@ -1169,12 +1208,25 @@
                 const payload = {
                     name: document.getElementById('lodgingName')?.value || '',
                     address: document.getElementById('lodgingAddress')?.value || '',
+                    addressLine2: document.getElementById('lodgingAddressLine2')?.value || '',
+                    city: document.getElementById('lodgingCity')?.value || '',
+                    state: document.getElementById('lodgingState')?.value || '',
+                    postalCode: document.getElementById('lodgingPostalCode')?.value || '',
+                    country: document.getElementById('lodgingCountry')?.value || '',
                     checkIn: document.getElementById('lodgingCheckIn')?.value || '',
+                    checkInTime: document.getElementById('lodgingCheckInTime')?.value || '',
                     checkOut: document.getElementById('lodgingCheckOut')?.value || '',
+                    checkOutTime: document.getElementById('lodgingCheckOutTime')?.value || '',
+                    status: document.getElementById('lodgingStatus')?.value || 'planned',
                     cost: document.getElementById('lodgingCost')?.value || '',
                     currency: document.getElementById('lodgingCurrency')?.value || '',
+                    roomType: document.getElementById('lodgingRoomType')?.value || '',
+                    roomQuantity: document.getElementById('lodgingRoomQuantity')?.value || '',
+                    roomOccupancy: document.getElementById('lodgingRoomOccupancy')?.value || '',
                     host: document.getElementById('lodgingHost')?.value || '',
                     contact: document.getElementById('lodgingContact')?.value || '',
+                    contactPhone: document.getElementById('lodgingContactPhone')?.value || '',
+                    contactEmail: document.getElementById('lodgingContactEmail')?.value || '',
                     notes: document.getElementById('lodgingNotes')?.value || ''
                 };
                 const expenseDefaults = {
