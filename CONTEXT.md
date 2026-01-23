@@ -20,6 +20,7 @@
 - grupos: groups, group_members, invitations, families, participants, expenses, expense_splits, group_flights, group_flight_participants, group_lodgings, group_transports, group_tickets.
 - legado: trips, trip_flights, trip_lodgings, trip_cars, trip_expenses, trip_transports, trip_timeline, trip_reminders.
 - campos V2 (grupo): group_transports inclui origin, destination, depart_at, arrive_at, provider, locator, status, expense_id.
+- campos V2 (grupo): group_tickets inclui type, event_at, location, status, expense_id e tabela group_ticket_participants.
 
 ## Auth & Security
 - Register/login via `/api/register` e `/api/login`.
@@ -79,4 +80,7 @@
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
 - Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
 - Testes: validacao de transportes V2.
+- Tickets V2: tipo, data/hora, local, status e vinculo a participantes.
+- Schema: novos campos em group_tickets e tabela group_ticket_participants.
+- Testes: validacao de tickets V2.
 

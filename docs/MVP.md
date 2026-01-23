@@ -90,6 +90,7 @@
 ## Testes
 - [x] Voos V2 (validation/integration)
 - [x] Transportes V2 (validation)
+- [x] Tickets V2 (validation)
 - [x] Split por pessoa (unit)
 - [x] Split por familia (unit)
 - [x] Validacao de soma do split (unit)
@@ -118,10 +119,10 @@
     - [x] Origem/destino, datas/horas
     - [x] Fornecedor, localizador
     - [x] Status e observacoes
-  - [ ] Tickets
-    - [ ] Tipo (parque, evento, etc), data/hora, local
-    - [ ] Vinculo a participantes
-    - [ ] Status e observacoes
+  - [x] Tickets
+    - [x] Tipo (parque, evento, etc), data/hora, local
+    - [x] Vinculo a participantes
+    - [x] Status e observacoes
   - [ ] Unificar custos com Expenses (pagador + split dentro do modulo)
   - [ ] Anexos/recibos por item (upload, visualizacao e download)
 - [ ] Categorias avancadas e filtros (por data, status, responsavel)

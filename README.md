@@ -35,6 +35,7 @@ Video curto (opcional): (adicione o link aqui)
 - Voos V2: flight number, class, seat, baggage, status e vinculo a participantes
 - Hospedagens V2: endereco completo, quartos, check-in/out com hora e status
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes
+- Tickets V2: tipo, data/hora, local, status e vinculo a participantes
 - Protecao CSRF para operacoes de escrita
 - Rate limiting e headers de seguranca
 
@@ -47,7 +48,6 @@ Video curto (opcional): (adicione o link aqui)
 
 ### Roadmap
 
-- Tickets V2 (tipo, data/hora, local, participantes, status)
 - Anexos/recibos por item (upload/preview)
 - Categorias avancadas e filtros no painel
 - Multi-moeda e cambio por data
@@ -110,6 +110,15 @@ Campos V2 em `group_transports`:
 - `origin`, `destination`, `depart_at`, `arrive_at`
 - `provider`, `locator`, `status`
 - `amount`, `currency`, `notes`, `expense_id`
+
+Campos V2 em `group_tickets`:
+
+- `type`, `event_at`, `location`, `status`
+- `amount`, `currency`, `notes`, `expense_id`
+
+Tabela de vinculo `group_ticket_participants`:
+
+- `group_id`, `ticket_id`, `participant_id`, `created_at`
 
 ## Requisitos
 
@@ -410,4 +419,6 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
 - Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
+- Tickets V2: tipo, data/hora, local, status e vinculo a participantes.
+- Schema: novos campos em group_tickets e tabela group_ticket_participants.
 
