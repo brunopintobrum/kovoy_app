@@ -507,7 +507,9 @@
                             <form id="flightForm" class="row g-3 needs-validation" novalidate>
                                 <div class="col-md-4">
                                     <label class="form-label" for="flightAirline">Airline</label>
-                                    <input class="form-control" id="flightAirline" required>
+                                    <input class="form-control" id="flightAirline" required list="flightAirlineList">
+                                    <datalist id="flightAirlineList"></datalist>
+                                    <input type="hidden" id="flightAirlineId">
                                     <div class="invalid-feedback">Enter an airline.</div>
                                 </div>
                                 <div class="col-md-3">

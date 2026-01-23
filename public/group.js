@@ -5,6 +5,7 @@
         groupId: null,
         families: [],
         participants: [],
+        airlines: [],
         expenses: [],
         flights: [],
         lodgings: [],
@@ -94,6 +95,50 @@
         if (Number.isNaN(parsed.getTime())) return value;
         const pad = (part) => String(part).padStart(2, '0');
         return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+    };
+
+    const renderAirlineOptions = () => {
+        const list = document.getElementById('flightAirlineList');
+        if (!list) return;
+        list.innerHTML = '';
+        state.airlines.forEach((airline) => {
+            const option = document.createElement('option');
+            option.value = airline.name;
+            list.appendChild(option);
+        });
+        syncFlightAirlineIdFromInput();
+    };
+
+    const syncFlightAirlineIdFromInput = () => {
+        const input = document.getElementById('flightAirline');
+        const hidden = document.getElementById('flightAirlineId');
+        if (!input || !hidden) return;
+        const value = input.value.trim().toLowerCase();
+        if (!value) {
+            hidden.value = '';
+            return;
+        }
+        const match = state.airlines.find((item) => item.name.toLowerCase() === value);
+        hidden.value = match ? match.id : '';
+    };
+
+    const loadAirlines = async () => {
+        try {
+            const response = await apiRequest('/api/airlines');
+            state.airlines = response.data || [];
+        } catch (err) {
+            console.warn('Failed to load airlines:', err.message);
+        } finally {
+            renderAirlineOptions();
+        }
+    };
+
+    const setupFlightAirlineAutocomplete = () => {
+        const input = document.getElementById('flightAirline');
+        if (!input) return;
+        const handler = () => syncFlightAirlineIdFromInput();
+        input.addEventListener('input', handler);
+        input.addEventListener('change', handler);
     };
 
     const formatFlightClassLabel = (value) => {
@@ -1003,6 +1048,9 @@
             participantSearch.value = '';
             applyFlightParticipantSearchFilter();
         }
+        const airlineIdInput = document.getElementById('flightAirlineId');
+        if (airlineIdInput) airlineIdInput.value = '';
+        syncFlightAirlineIdFromInput();
     };
 
     const populateFlightForm = (flight) => {
@@ -1037,6 +1085,9 @@
         if (arrive) arrive.value = formatDateTimeLocal(flight.arriveAt);
         if (passengers) setMultiSelectValues(passengers, flight.participantIds || []);
         if (notes) notes.value = flight.notes || '';
+        const airlineIdInput = document.getElementById('flightAirlineId');
+        if (airlineIdInput) airlineIdInput.value = flight.airlineId || '';
+        syncFlightAirlineIdFromInput();
         const expense = flight.expenseId ? state.expenses.find((item) => item.id === flight.expenseId) : null;
         setModuleExpenseVisibility('flight', !!expense);
         setModuleExpensePayer('flight', expense?.payerParticipantId || null);
@@ -1271,6 +1322,7 @@
                     .filter((value) => Number.isFinite(value) && value > 0);
                 const payload = {
                     airline: document.getElementById('flightAirline')?.value || '',
+                    airlineId: document.getElementById('flightAirlineId')?.value || '',
                     flightNumber: document.getElementById('flightNumber')?.value || '',
                     pnr: document.getElementById('flightPnr')?.value || '',
                     status: document.getElementById('flightStatus')?.value || 'planned',
@@ -2006,6 +2058,7 @@
     };
 
     const refreshData = async () => {
+        await loadAirlines();
         await loadGroupData();
         renderGroupHeader();
         renderSummary();
@@ -2029,10 +2082,11 @@
         await setUserProfile();
         const ok = await loadGroups();
         if (!ok) return;
-      bindGroupSelector();
-      bindForms();
-      setupFlightParticipantSearch();
-      bindInviteForm();
+        bindGroupSelector();
+        bindForms();
+        setupFlightAirlineAutocomplete();
+        setupFlightParticipantSearch();
+        bindInviteForm();
         bindDeleteActions();
         bindSplitTypeToggle();
         bindSplitModeToggle();
