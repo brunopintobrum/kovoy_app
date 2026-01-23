@@ -373,7 +373,7 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.flights.length) {
-            list.innerHTML = '<tr><td colspan="7" class="text-muted text-center">No flights yet.</td></tr>';
+            list.innerHTML = '<tr><td colspan="9" class="text-muted text-center">No flights yet.</td></tr>';
             return;
         }
         const participantMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
@@ -381,14 +381,16 @@
             const participantNames = (flight.participantIds || [])
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
-            const passengersLabel = participantNames.length ? `Passengers: ${participantNames.join(', ')}` : '';
+            const passengersLabel = participantNames.join(', ');
             const flightLabel = [flight.airline, flight.flightNumber].filter(Boolean).join(' ');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td title="${passengersLabel}">${flightLabel || '-'}</td>
+                <td>${flightLabel || '-'}</td>
+                <td>${flight.pnr || '-'}</td>
                 <td>${flight.from || '-'} -> ${flight.to || '-'}</td>
                 <td>${formatDateTime(flight.departAt)}</td>
                 <td>${formatDateTime(flight.arriveAt)}</td>
+                <td>${passengersLabel || '-'}</td>
                 <td class="text-capitalize">${flight.status || 'planned'}</td>
                 <td>${formatCurrency(flight.cost, flight.currency)}</td>
                 <td class="text-end">
