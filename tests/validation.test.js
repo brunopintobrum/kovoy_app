@@ -268,17 +268,19 @@ describe('validation helpers', () => {
 
     test('validateGroupTicketPayload validates ticket fields', () => {
         const result = validateGroupTicketPayload({
-            name: 'Theme Park',
-            date: '2026-02-24',
+            type: 'Theme Park',
+            eventAt: '2026-02-24T10:00:00Z',
+            location: 'Orlando',
+            status: 'planned',
             amount: 180,
-            currency: 'USD',
-            holder: 'Bruno'
+            currency: 'USD'
         });
         expect(result.value).toMatchObject({
-            name: 'Theme Park',
+            type: 'Theme Park',
+            location: 'Orlando',
+            status: 'planned',
             amount: 180,
-            currency: 'USD',
-            holder: 'Bruno'
+            currency: 'USD'
         });
     });
 });

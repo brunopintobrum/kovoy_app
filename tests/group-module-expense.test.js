@@ -147,17 +147,19 @@ describe('group modules with linked expense', () => {
                 Cookie: jarToHeader(jar)
             },
             body: JSON.stringify({
-                name: 'Magic Ticket',
-                date: '2026-03-01',
+                type: 'Magic Ticket',
+                eventAt: '2026-03-01T09:00:00Z',
+                location: 'Orlando',
+                status: 'planned',
                 amount: 120,
                 currency: 'USD',
-                holder: 'Bruno',
                 notes: 'Test ticket',
+                participantIds: [participantId],
                 expense: {
                     description: 'Ticket: Magic Ticket',
                     amount: 120,
                     currency: 'USD',
-                    date: '2026-03-01',
+                    date: '2026-03-01T09:00:00Z',
                     category: 'Ticket',
                     payerParticipantId: participantId,
                     splitType: 'participants',

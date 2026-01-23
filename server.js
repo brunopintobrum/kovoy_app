@@ -296,6 +296,10 @@ db.exec(`
         id TEXT PRIMARY KEY,
         group_id INTEGER NOT NULL,
         expense_id INTEGER,
+        type TEXT,
+        event_at TEXT,
+        location TEXT,
+        status TEXT,
         name TEXT,
         date TEXT,
         amount REAL,
@@ -304,6 +308,16 @@ db.exec(`
         notes TEXT,
         FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
         FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE SET NULL
+    );
+    CREATE TABLE IF NOT EXISTS group_ticket_participants (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        ticket_id TEXT NOT NULL,
+        participant_id INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (ticket_id) REFERENCES group_tickets(id) ON DELETE CASCADE,
+        FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE
     );
     CREATE TABLE IF NOT EXISTS trips (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -554,6 +568,22 @@ const hasGroupTicketExpense = groupTicketColumns.some((column) => column.name ==
 if (!hasGroupTicketExpense) {
     db.exec('ALTER TABLE group_tickets ADD COLUMN expense_id INTEGER');
 }
+const hasGroupTicketType = groupTicketColumns.some((column) => column.name === 'type');
+if (!hasGroupTicketType) {
+    db.exec('ALTER TABLE group_tickets ADD COLUMN type TEXT');
+}
+const hasGroupTicketEventAt = groupTicketColumns.some((column) => column.name === 'event_at');
+if (!hasGroupTicketEventAt) {
+    db.exec('ALTER TABLE group_tickets ADD COLUMN event_at TEXT');
+}
+const hasGroupTicketLocation = groupTicketColumns.some((column) => column.name === 'location');
+if (!hasGroupTicketLocation) {
+    db.exec('ALTER TABLE group_tickets ADD COLUMN location TEXT');
+}
+const hasGroupTicketStatus = groupTicketColumns.some((column) => column.name === 'status');
+if (!hasGroupTicketStatus) {
+    db.exec('ALTER TABLE group_tickets ADD COLUMN status TEXT');
+}
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL');
 db.exec('CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user ON email_verification_tokens(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_two_factor_codes_user ON two_factor_codes(user_id)');
@@ -577,6 +607,10 @@ db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_group_flight_participants_unique 
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_flight_participants_group ON group_flight_participants(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_flight_participants_flight ON group_flight_participants(flight_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_flight_participants_participant ON group_flight_participants(participant_id)');
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_group_ticket_participants_unique ON group_ticket_participants(ticket_id, participant_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_ticket_participants_group ON group_ticket_participants(group_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_ticket_participants_ticket ON group_ticket_participants(ticket_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_ticket_participants_participant ON group_ticket_participants(participant_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_lodgings_group ON group_lodgings(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_transports_group ON group_transports(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_tickets_group ON group_tickets(group_id)');
@@ -1618,6 +1652,20 @@ const deleteGroupFlightParticipants = db.prepare(`
     DELETE FROM group_flight_participants
     WHERE flight_id = ? AND group_id = ?
 `);
+const listGroupTicketParticipants = db.prepare(`
+    SELECT ticket_id, participant_id
+    FROM group_ticket_participants
+    WHERE group_id = ?
+    ORDER BY id
+`);
+const insertGroupTicketParticipant = db.prepare(`
+    INSERT INTO group_ticket_participants (group_id, ticket_id, participant_id, created_at)
+    VALUES (?, ?, ?, ?)
+`);
+const deleteGroupTicketParticipants = db.prepare(`
+    DELETE FROM group_ticket_participants
+    WHERE ticket_id = ? AND group_id = ?
+`);
 const listGroupLodgings = db.prepare(`
     SELECT id, expense_id, name, address, address_line2, city, state, postal_code, country,
            check_in, check_in_time, check_out, check_out_time, room_type, room_quantity, room_occupancy,
@@ -1666,19 +1714,23 @@ const updateGroupTransport = db.prepare(`
 `);
 const deleteGroupTransport = db.prepare('DELETE FROM group_transports WHERE id = ? AND group_id = ?');
 const listGroupTickets = db.prepare(`
-    SELECT id, expense_id, name, date, amount, currency, holder, notes
+    SELECT id, expense_id, type, event_at, location, status, name, date, amount, currency, holder, notes
     FROM group_tickets
     WHERE group_id = ?
-    ORDER BY date DESC, id DESC
+    ORDER BY COALESCE(event_at, date) DESC, id DESC
 `);
 const getGroupTicket = db.prepare('SELECT id, expense_id FROM group_tickets WHERE id = ? AND group_id = ?');
 const insertGroupTicket = db.prepare(`
-    INSERT INTO group_tickets (id, group_id, expense_id, name, date, amount, currency, holder, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO group_tickets (
+        id, group_id, expense_id, type, event_at, location, status, name, date,
+        amount, currency, holder, notes
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const updateGroupTicket = db.prepare(`
     UPDATE group_tickets
-    SET expense_id = ?, name = ?, date = ?, amount = ?, currency = ?, holder = ?, notes = ?
+    SET expense_id = ?, type = ?, event_at = ?, location = ?, status = ?, name = ?, date = ?,
+        amount = ?, currency = ?, holder = ?, notes = ?
     WHERE id = ? AND group_id = ?
 `);
 const deleteGroupTicket = db.prepare('DELETE FROM group_tickets WHERE id = ? AND group_id = ?');
@@ -1992,10 +2044,10 @@ const buildModuleExpenseDefaults = (type, payload) => {
         };
     }
     return {
-        description: `Ticket: ${payload.name}`,
+        description: `Ticket: ${payload.type}`,
         amount: payload.amount,
         currency: payload.currency,
-        date: payload.date,
+        date: payload.eventAt,
         category: 'Ticket'
     };
 };
@@ -2847,7 +2899,14 @@ app.delete(
 );
 
 app.get('/api/groups/:groupId/tickets', authRequiredApi, requireGroupMember, (req, res) => {
-    const tickets = listGroupTickets.all(req.groupId).map(mapGroupTicketRow);
+    const participants = listGroupTicketParticipants.all(req.groupId);
+    const participantMap = new Map();
+    participants.forEach((row) => {
+        const list = participantMap.get(row.ticket_id) || [];
+        list.push(row.participant_id);
+        participantMap.set(row.ticket_id, list);
+    });
+    const tickets = listGroupTickets.all(req.groupId).map((row) => mapGroupTicketRow(row, participantMap));
     return res.json({ ok: true, data: tickets });
 });
 
@@ -2861,6 +2920,14 @@ app.post(
         const normalized = validateGroupTicketPayload(req.body || {});
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
+        }
+        const normalizedParticipants = normalizeParticipantIds(req.body?.participantIds);
+        const participantIds = normalizedParticipants.value;
+        if (participantIds.length) {
+            const allowedIds = new Set(listParticipantIds.all(req.groupId).map((row) => row.id));
+            if (participantIds.some((id) => !allowedIds.has(id))) {
+                return res.status(400).json({ error: 'Invalid participants.' });
+            }
         }
         const expenseNormalized = normalizeModuleExpensePayload(
             req.body?.expense,
@@ -2884,13 +2951,23 @@ app.post(
                     id,
                     req.groupId,
                     linkedExpenseId,
-                    normalized.value.name,
-                    normalized.value.date,
+                    normalized.value.type,
+                    normalized.value.eventAt,
+                    normalized.value.location,
+                    normalized.value.status,
+                    normalized.value.type,
+                    normalized.value.eventAt,
                     normalized.value.amount,
                     normalized.value.currency,
-                    normalized.value.holder,
+                    null,
                     normalized.value.notes
                 );
+                if (participantIds.length) {
+                    const now = new Date().toISOString();
+                    participantIds.forEach((participantId) => {
+                        insertGroupTicketParticipant.run(req.groupId, id, participantId, now);
+                    });
+                }
                 return linkedExpenseId;
             })();
             return res.json({ ok: true, id, expenseId });
@@ -2919,6 +2996,14 @@ app.put(
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
+        const normalizedParticipants = normalizeParticipantIds(req.body?.participantIds);
+        const participantIds = normalizedParticipants.value;
+        if (participantIds.length) {
+            const allowedIds = new Set(listParticipantIds.all(req.groupId).map((row) => row.id));
+            if (participantIds.some((id) => !allowedIds.has(id))) {
+                return res.status(400).json({ error: 'Invalid participants.' });
+            }
+        }
         const expenseNormalized = normalizeModuleExpensePayload(
             req.body?.expense,
             buildModuleExpenseDefaults('ticket', normalized.value)
@@ -2941,15 +3026,26 @@ app.put(
                 }
                 updateGroupTicket.run(
                     linkedExpenseId,
-                    normalized.value.name,
-                    normalized.value.date,
+                    normalized.value.type,
+                    normalized.value.eventAt,
+                    normalized.value.location,
+                    normalized.value.status,
+                    normalized.value.type,
+                    normalized.value.eventAt,
                     normalized.value.amount,
                     normalized.value.currency,
-                    normalized.value.holder,
+                    null,
                     normalized.value.notes,
                     ticketId,
                     req.groupId
                 );
+                deleteGroupTicketParticipants.run(ticketId, req.groupId);
+                if (participantIds.length) {
+                    const now = new Date().toISOString();
+                    participantIds.forEach((participantId) => {
+                        insertGroupTicketParticipant.run(req.groupId, ticketId, participantId, now);
+                    });
+                }
                 return linkedExpenseId;
             })();
             return res.json({ ok: true, expenseId });
@@ -2976,6 +3072,7 @@ app.delete(
         }
         try {
             db.transaction(() => {
+                deleteGroupTicketParticipants.run(ticketId, req.groupId);
                 deleteGroupTicket.run(ticketId, req.groupId);
                 if (existing.expense_id) {
                     deleteExpenseSplits.run(existing.expense_id);
@@ -3485,15 +3582,17 @@ const mapGroupTransportRow = (row) => ({
     notes: row.notes
 });
 
-const mapGroupTicketRow = (row) => ({
+const mapGroupTicketRow = (row, participantMap) => ({
     id: row.id,
     expenseId: row.expense_id || null,
-    name: row.name,
-    date: row.date,
+    type: row.type || row.name,
+    eventAt: row.event_at || row.date,
+    location: row.location,
+    status: row.status || 'planned',
     amount: row.amount,
     currency: row.currency,
-    holder: row.holder,
-    notes: row.notes
+    notes: row.notes,
+    participantIds: participantMap?.get(row.id) || []
 });
 
 const mapFlightRow = (row) => ({
@@ -3981,21 +4080,26 @@ const validateGroupTransportPayload = (payload) => {
 };
 
 const validateGroupTicketPayload = (payload) => {
-    const name = requireString(payload.name, 'Ticket');
-    if (name.error) return name;
-    const date = requireDate(payload.date, 'Date');
-    if (date.error) return date;
+    const type = requireString(payload.type, 'Ticket type');
+    if (type.error) return type;
+    const eventAt = requireDate(payload.eventAt, 'Date/time');
+    if (eventAt.error) return eventAt;
+    const location = requireString(payload.location, 'Location');
+    if (location.error) return location;
+    const status = payload.status ? requireStatus(payload.status) : { value: 'planned' };
+    if (status.error) return status;
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
     const amount = requireNumber(payload.amount, 'Amount');
     if (amount.error) return amount;
     return {
         value: {
-            name: name.value,
-            date: date.value,
+            type: type.value,
+            eventAt: eventAt.value,
+            location: location.value,
+            status: status.value,
             amount: amount.value,
             currency: currency.value,
-            holder: optionalString(payload.holder),
             notes: optionalString(payload.notes)
         }
     };

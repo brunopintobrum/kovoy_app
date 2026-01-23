@@ -945,22 +945,36 @@
                                 </div>
                             </div>
                             <form id="ticketForm" class="row g-3 needs-validation" novalidate>
-                                <div class="col-md-4">
-                                    <label class="form-label" for="ticketName">Ticket</label>
-                                    <input class="form-control" id="ticketName" required>
-                                    <div class="invalid-feedback">Enter a ticket name.</div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="ticketType">Ticket type</label>
+                                    <input class="form-control" id="ticketType" required>
+                                    <div class="invalid-feedback">Enter a ticket type.</div>
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="ticketDate">Date</label>
-                                    <input class="form-control" id="ticketDate" type="date" required>
-                                    <div class="invalid-feedback">Select a date.</div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="ticketEventAt">Date/time</label>
+                                    <input class="form-control" id="ticketEventAt" type="datetime-local" required>
+                                    <div class="invalid-feedback">Select a date/time.</div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
+                                    <label class="form-label" for="ticketLocation">Location</label>
+                                    <input class="form-control" id="ticketLocation" required>
+                                    <div class="invalid-feedback">Enter a location.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="ticketStatus">Status</label>
+                                    <select class="form-select" id="ticketStatus" required>
+                                        <option value="planned">Planned</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="due">Due</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a status.</div>
+                                </div>
+                                <div class="col-md-3">
                                     <label class="form-label" for="ticketAmount">Amount</label>
                                     <input class="form-control" id="ticketAmount" type="number" step="0.01" min="0.01" required>
                                     <div class="invalid-feedback">Enter a valid amount.</div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <label class="form-label" for="ticketCurrency">Currency</label>
                                     <select class="form-select" id="ticketCurrency" required>
                                         <option value="USD">USD</option>
@@ -969,9 +983,10 @@
                                     </select>
                                     <div class="invalid-feedback">Select a currency.</div>
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="ticketHolder">Holder</label>
-                                    <input class="form-control" id="ticketHolder">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="ticketParticipants">Participants</label>
+                                    <select class="form-select" id="ticketParticipants" multiple required></select>
+                                    <small class="text-muted">Select participants (Ctrl/Cmd for multiple).</small>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label" for="ticketNotes">Notes</label>
@@ -1006,20 +1021,22 @@
                             </div>
                             <div class="alert alert-danger d-none mt-3" id="ticketError"></div>
                             <div class="table-responsive mt-4">
-                                <table class="table align-middle table-nowrap mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Ticket</th>
-                                            <th>Date</th>
-                                            <th>Amount</th>
-                                            <th>Holder</th>
-                                            <th class="text-end">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="ticketList">
-                                        <tr><td colspan="5" class="text-muted text-center">No tickets yet.</td></tr>
-                                    </tbody>
-                                </table>
+                                    <table class="table align-middle table-nowrap mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>When</th>
+                                                <th>Location</th>
+                                                <th>Status</th>
+                                                <th>Amount</th>
+                                                <th>Participants</th>
+                                                <th class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ticketList">
+                                            <tr><td colspan="7" class="text-muted text-center">No tickets yet.</td></tr>
+                                        </tbody>
+                                    </table>
                             </div>
                         </div>
                     </div>

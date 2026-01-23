@@ -488,16 +488,23 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.tickets.length) {
-            list.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No tickets yet.</td></tr>';
+            list.innerHTML = '<tr><td colspan="7" class="text-muted text-center">No tickets yet.</td></tr>';
             return;
         }
+        const participantMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
         state.tickets.forEach((ticket) => {
+            const participantNames = (ticket.participantIds || [])
+                .map((id) => participantMap.get(id))
+                .filter(Boolean);
+            const participantsLabel = participantNames.join(', ') || '-';
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${ticket.name || '-'}</td>
-                <td>${formatDate(ticket.date)}</td>
+                <td>${ticket.type || '-'}</td>
+                <td>${formatDateTime(ticket.eventAt)}</td>
+                <td>${ticket.location || '-'}</td>
+                <td class="text-capitalize">${ticket.status || 'planned'}</td>
                 <td>${formatCurrency(ticket.amount, ticket.currency)}</td>
-                <td>${ticket.holder || '-'}</td>
+                <td>${participantsLabel}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-ticket" data-id="${ticket.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-ticket" data-id="${ticket.id}">Delete</button>
@@ -677,6 +684,27 @@
 
     const populateFlightParticipants = () => {
         const select = document.getElementById('flightParticipants');
+        if (!select) return;
+        select.innerHTML = '';
+        if (!state.participants.length) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Add a participant first';
+            select.appendChild(option);
+            select.disabled = true;
+            return;
+        }
+        select.disabled = false;
+        state.participants.forEach((participant) => {
+            const option = document.createElement('option');
+            option.value = participant.id;
+            option.textContent = participant.displayName;
+            select.appendChild(option);
+        });
+    };
+
+    const populateTicketParticipants = () => {
+        const select = document.getElementById('ticketParticipants');
         if (!select) return;
         select.innerHTML = '';
         if (!state.participants.length) {
@@ -1084,21 +1112,29 @@
         setTicketFormMode('create');
         setModuleExpenseVisibility('ticket', false);
         setModuleExpensePayer('ticket', null);
+        const status = document.getElementById('ticketStatus');
+        if (status) status.value = 'planned';
+        const participants = document.getElementById('ticketParticipants');
+        if (participants) setMultiSelectValues(participants, []);
     };
 
     const populateTicketForm = (ticket) => {
         if (!ticket) return;
-        const name = document.getElementById('ticketName');
-        const date = document.getElementById('ticketDate');
+        const type = document.getElementById('ticketType');
+        const eventAt = document.getElementById('ticketEventAt');
+        const location = document.getElementById('ticketLocation');
+        const status = document.getElementById('ticketStatus');
         const amount = document.getElementById('ticketAmount');
         const currency = document.getElementById('ticketCurrency');
-        const holder = document.getElementById('ticketHolder');
+        const participants = document.getElementById('ticketParticipants');
         const notes = document.getElementById('ticketNotes');
-        if (name) name.value = ticket.name || '';
-        if (date) date.value = ticket.date || '';
+        if (type) type.value = ticket.type || '';
+        if (eventAt) eventAt.value = formatDateTimeLocal(ticket.eventAt);
+        if (location) location.value = ticket.location || '';
+        if (status) status.value = ticket.status || 'planned';
         if (amount) amount.value = ticket.amount ?? '';
         if (currency) currency.value = ticket.currency || state.group?.defaultCurrency || 'USD';
-        if (holder) holder.value = ticket.holder || '';
+        if (participants) setMultiSelectValues(participants, ticket.participantIds || []);
         if (notes) notes.value = ticket.notes || '';
         const expense = ticket.expenseId ? state.expenses.find((item) => item.id === ticket.expenseId) : null;
         setModuleExpenseVisibility('ticket', !!expense);
@@ -1377,19 +1413,26 @@
                 event.preventDefault();
                 if (ticketError) ticketError.classList.add('d-none');
                 if (!validateForm(ticketForm)) return;
+                const ticketParticipantValues = Array.from(
+                    document.getElementById('ticketParticipants')?.selectedOptions || []
+                )
+                    .map((option) => Number(option.value))
+                    .filter((value) => Number.isFinite(value) && value > 0);
                 const payload = {
-                    name: document.getElementById('ticketName')?.value || '',
-                    date: document.getElementById('ticketDate')?.value || '',
+                    type: document.getElementById('ticketType')?.value || '',
+                    eventAt: document.getElementById('ticketEventAt')?.value || '',
+                    location: document.getElementById('ticketLocation')?.value || '',
+                    status: document.getElementById('ticketStatus')?.value || 'planned',
                     amount: document.getElementById('ticketAmount')?.value || '',
                     currency: document.getElementById('ticketCurrency')?.value || '',
-                    holder: document.getElementById('ticketHolder')?.value || '',
-                    notes: document.getElementById('ticketNotes')?.value || ''
+                    notes: document.getElementById('ticketNotes')?.value || '',
+                    participantIds: ticketParticipantValues
                 };
                 const expenseDefaults = {
-                    description: `Ticket: ${payload.name || '-'}`,
+                    description: `Ticket: ${payload.type || '-'}`,
                     amount: payload.amount,
                     currency: payload.currency,
-                    date: payload.date,
+                    date: payload.eventAt,
                     category: 'Ticket'
                 };
                 let expensePayload = null;
@@ -1896,6 +1939,7 @@
         renderTickets();
         populateExpenseSelectors();
         populateFlightParticipants();
+        populateTicketParticipants();
         renderSplitTargets();
         applyPermissions();
     };
