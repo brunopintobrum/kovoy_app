@@ -149,6 +149,12 @@ URLs locais:
 - http://localhost:3000/groups (protegida)
 - http://localhost:3000/dashboard?groupId=1 (protegida)
 
+## Importar companhias aéreas
+
+1. Baixe um CSV com as companhias (ex: [`openflights.org/data.html`](https://openflights.org/data.html) ou o `airlines.csv` que você mencionou em `C:\Users\bruno\Downloads\airlines.csv`).
+2. Rode o script `node scripts/import-airlines.js <caminho>` (o caminho padrão já aponta para `C:\Users\bruno\Downloads\airlines.csv` no Windows).
+3. O script insere somente nomes únicos na tabela `airlines`, garantindo o autocomplete do datalist do formulário de voos.
+
 ## Configuracao de ambiente (.env)
 
 Crie um arquivo `.env` na raiz do projeto. Para producao, use o modelo `/.env.production.example` e preencha os valores reais em um `.env.production`.
