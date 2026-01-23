@@ -32,6 +32,7 @@ Video curto (opcional): (adicione o link aqui)
 - Validacao da soma do split
 - Dashboard do grupo com saldos e "quem deve pra quem"
 - Modulos do grupo (CRUD): voos, hospedagens, transportes e tickets
+- Voos V2: flight number, class, seat, baggage, status e vinculo a participantes
 - Protecao CSRF para operacoes de escrita
 - Rate limiting e headers de seguranca
 
@@ -378,4 +379,5 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - CRUD completo de voos/hospedagens/transportes/tickets no dashboard.
 - Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
 - UI: toggle para vincular despesas nos modulos (V2 opcional).
+- Voos V2: campos avancados + participantes vinculados no modulo de grupos.
 

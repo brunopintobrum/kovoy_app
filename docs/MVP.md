@@ -100,10 +100,10 @@
 - [x] Voos, hospedagens, transporte e tickets (CRUD simples por grupo)
 - [ ] Modulos V2 (detalhes e usabilidade)
   - [ ] Voos
-    - [ ] Companhia, numero do voo, PNR
-    - [ ] Assentos, classe, bagagens
-    - [ ] Status (planned/paid/due) e observacoes
-    - [ ] Integração com passageiros (participantes)
+    - [x] Companhia, numero do voo, PNR
+    - [x] Assentos, classe, bagagens
+    - [x] Status (planned/paid/due) e observacoes
+    - [x] Integracao com passageiros (participantes)
   - [ ] Hospedagens
     - [ ] Quartos (tipo, quantidade, ocupacao)
     - [ ] Endereco completo + contato
@@ -127,3 +127,4 @@
 - [ ] Auditoria e historico de edicoes
 - [x] Vinculo opcional de despesa nos modulos (backend)
 - [x] UI: toggle para vincular despesas nos modulos (V2 opcional)
+

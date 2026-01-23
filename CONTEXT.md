@@ -70,3 +70,5 @@
 - UI: toggle para vincular despesas nos modulos (V2 opcional).
 - Financeiro do MVP concentrado em Expenses; modulos V2 sao logísticos.
 
+- Voos V2: novos campos (flight number, class, seat, baggage, status) e vinculo a participantes no modulo de grupos.
+- Testes: validacoes e integracao para voos V2.
