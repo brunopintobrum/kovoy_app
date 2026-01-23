@@ -105,6 +105,9 @@
     - [x] Assentos, classe, bagagens
     - [x] Status (planned/paid/due) e observacoes
     - [x] Integracao com passageiros (participantes)
+    - [ ] Validar chegada posterior a partida (backend + UI)
+    - [ ] Exibir classe/assento/bagagem na lista
+    - [ ] Seletor de passageiros com busca
   - [ ] Hospedagens
     - [ ] Quartos (tipo, quantidade, ocupacao)
     - [ ] Endereco completo + contato

@@ -391,4 +391,5 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - UI: toggle para vincular despesas nos modulos (V2 opcional).
 - Voos V2: campos avancados + participantes vinculados no modulo de grupos.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
+- Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
 

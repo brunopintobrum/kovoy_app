@@ -72,4 +72,5 @@
 - Voos V2: novos campos (flight number, class, seat, baggage, status) e vinculo a participantes no modulo de grupos.
 - Testes: validacoes e integracao para voos V2.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
+- Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
 
