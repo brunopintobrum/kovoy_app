@@ -75,6 +75,7 @@
 - Testes: validacoes e integracao para voos V2.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
+- Voos V2: campo Airline agora usa autocomplete/datalist alimentado pela tabela `airlines`, registra o `airline_id` e cria novas companhias automaticamente para manter consistência.
 - Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.

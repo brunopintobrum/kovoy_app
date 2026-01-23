@@ -33,6 +33,7 @@ Video curto (opcional): (adicione o link aqui)
 - Dashboard do grupo com saldos e "quem deve pra quem"
 - Modulos do grupo (CRUD): voos, hospedagens, transportes e tickets
 - Voos V2: flight number, class, seat, baggage, status e vinculo a participantes
+- Voos V2: o campo Airline utiliza autocomplete/datalist via `/api/airlines`, registra `airline_id` e permite adicionar novas companhias.
 - Hospedagens V2: endereco completo, quartos, check-in/out com hora e status
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes
@@ -85,6 +86,7 @@ Schema criado automaticamente no boot. Tabelas principais:
 - `expenses`, `expense_splits`
 - `expenses` + `expense_splits` mantem o registro do pagador e dos alvos (participants/families) usados pelos módulos logísticos
 - `group_flights`, `group_flight_participants`, `group_lodgings`, `group_transports`, `group_tickets`
+- `airlines` (lista única usada nos autocompletes de módulos logísticos)
 - (legado) `trips`, `trip_flights`, `trip_lodgings`, `trip_cars`, `trip_expenses`, `trip_transports`, `trip_timeline`, `trip_reminders`
 
 Campos relevantes em `users`:
@@ -96,6 +98,7 @@ Campos relevantes em `users`:
 Campos V2 em `group_flights`:
 
 - `airline`, `flight_number`, `pnr`, `cabin_class`, `seat`, `baggage`, `status`
+- `airline_id` referencia a tabela `airlines` para padronizar entradas e alimentar o autocomplete.
 - `cost`, `currency`, `from_city`, `to_city`, `depart_at`, `arrive_at`, `notes`, `expense_id`
 
 Tabela de vinculo `group_flight_participants`:
@@ -297,6 +300,7 @@ Principais endpoints:
 - `POST /api/groups/:groupId/flights`
 - `PUT /api/groups/:groupId/flights/:flightId`
 - `DELETE /api/groups/:groupId/flights/:flightId`
+- `GET /api/airlines`
 - `GET /api/groups/:groupId/lodgings`
 - `POST /api/groups/:groupId/lodgings`
 - `PUT /api/groups/:groupId/lodgings/:lodgingId`

@@ -107,6 +107,7 @@
     - [x] Assentos, classe, bagagens
     - [x] Status (planned/paid/due) e observacoes
     - [x] Integracao com passageiros (participantes)
+    - [x] Autocomplete (datalist) para airline com fallback para adicionar novas cias e `airlines`.
     - [ ] Validar chegada posterior a partida (backend + UI)
     - [ ] Exibir classe/assento/bagagem na lista
     - [ ] Seletor de passageiros com busca
@@ -126,6 +127,7 @@
   - [ ] Unificar custos com Expenses (pagador + split dentro do modulo)
   - [x] Unificar custos com Expenses (pagador + split dentro do modulo) *(panel split agora reaproveitado automaticamente nos módulos logísticos)*
   - [ ] Anexos/recibos por item (upload, visualizacao e download)
+  - [ ] Expandir autocomplete/validação semelhante para hospedagens, transportes e tickets.
 - [ ] Categorias avancadas e filtros (por data, status, responsavel)
 - [ ] Multi-moeda e cambio (taxas por data + conversao no dashboard)
 - [ ] Timeline do grupo (eventos e marcos por data)

@@ -37,4 +37,5 @@
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes.
 - Schema: novos campos em group_tickets e tabela group_ticket_participants.
 - Testes: validacao de tickets V2.
+- Voos V2: input Airline agora usa datalist/api e grava `airline_id`, criando novas companhias se necessário para evitar digitação incorreta e garantir consistência.
 
