@@ -251,6 +251,24 @@ db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE
     );
+    CREATE TABLE IF NOT EXISTS airports (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT NOT NULL UNIQUE,
+        name TEXT,
+        city TEXT,
+        country TEXT
+    );
+    CREATE TABLE IF NOT EXISTS route_airlines (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        airline_name TEXT NOT NULL,
+        airline_id INTEGER,
+        from_code TEXT NOT NULL,
+        to_code TEXT NOT NULL,
+        FOREIGN KEY (airline_id) REFERENCES airlines(id) ON DELETE SET NULL,
+        UNIQUE (airline_name, from_code, to_code)
+    );
+    CREATE INDEX IF NOT EXISTS idx_route_airlines_from ON route_airlines(from_code);
+    CREATE INDEX IF NOT EXISTS idx_route_airlines_to ON route_airlines(to_code);
     CREATE TABLE IF NOT EXISTS group_lodgings (
         id TEXT PRIMARY KEY,
         group_id INTEGER NOT NULL,
@@ -1515,6 +1533,45 @@ const parseGroupId = (value) => {
     const id = Number(value);
     return Number.isInteger(id) && id > 0 ? id : null;
 };
+
+const queryAirportCodes = (input) => {
+    if (!input) return [];
+    const trimmed = input.trim();
+    if (!trimmed) return [];
+    const upper = trimmed.toUpperCase();
+    const like = `%${upper}%`;
+    const rows = findAirportCodesStmt.all(upper, like, like);
+    const codes = rows.map((row) => row.code).filter(Boolean);
+    if (!codes.length && upper.length === 3) {
+        codes.push(upper);
+    }
+    return Array.from(new Set(codes));
+};
+
+const fetchRouteAirlines = (fromCodes, toCodes) => {
+    if (!fromCodes.length || !toCodes.length) return [];
+    const clauses = [];
+    const params = [];
+    const placeholders = (arr) => arr.map(() => '?').join(', ');
+    const upperArray = (arr) => arr.map((value) => value.toUpperCase());
+    if (fromCodes.length) {
+        clauses.push(`UPPER(from_code) IN (${placeholders(fromCodes)})`);
+        params.push(...upperArray(fromCodes));
+    }
+    if (toCodes.length) {
+        clauses.push(`UPPER(to_code) IN (${placeholders(toCodes)})`);
+        params.push(...upperArray(toCodes));
+    }
+    const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    const stmt = db.prepare(`
+        SELECT DISTINCT COALESCE(airlines.name, route_airlines.airline_name) AS name
+        FROM route_airlines
+        LEFT JOIN airlines ON airlines.id = route_airlines.airline_id
+        ${where}
+        ORDER BY name
+    `);
+    return stmt.all(...params).map((row) => row.name);
+};
 const ensureAirlineId = (name, candidateId) => {
     const trimmed = trimString(name);
     if (!trimmed) return null;
@@ -1695,6 +1752,20 @@ const insertGroupTicketParticipant = db.prepare(`
 const deleteGroupTicketParticipants = db.prepare(`
     DELETE FROM group_ticket_participants
     WHERE ticket_id = ? AND group_id = ?
+`);
+const insertRouteAirline = db.prepare(`
+    INSERT OR IGNORE INTO route_airlines (airline_name, airline_id, from_code, to_code)
+    VALUES (?, ?, ?, ?)
+`);
+const insertAirport = db.prepare(`
+    INSERT OR REPLACE INTO airports (code, name, city, country)
+    VALUES (?, ?, ?, ?)
+`);
+const findAirportCodesStmt = db.prepare(`
+    SELECT DISTINCT code FROM airports
+    WHERE UPPER(code) = ?
+       OR UPPER(city) LIKE ?
+       OR UPPER(name) LIKE ?
 `);
 const listAirlines = db.prepare('SELECT id, name FROM airlines ORDER BY name');
 const getAirlineById = db.prepare('SELECT id, name FROM airlines WHERE id = ?');
@@ -2410,6 +2481,21 @@ app.delete(
 
 app.get('/api/airlines', authRequiredApi, (req, res) => {
     const airlines = listAirlines.all();
+    return res.json({ ok: true, data: airlines });
+});
+
+app.get('/api/routes/airlines', authRequiredApi, (req, res) => {
+    const from = (typeof req.query.from === 'string' ? req.query.from : '').trim();
+    const to = (typeof req.query.to === 'string' ? req.query.to : '').trim();
+    if (!from || !to) {
+        return res.json({ ok: true, data: [] });
+    }
+    const fromCodes = queryAirportCodes(from);
+    const toCodes = queryAirportCodes(to);
+    if (!fromCodes.length || !toCodes.length) {
+        return res.json({ ok: true, data: [] });
+    }
+    const airlines = fetchRouteAirlines(fromCodes, toCodes);
     return res.json({ ok: true, data: airlines });
 });
 

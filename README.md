@@ -155,6 +155,12 @@ URLs locais:
 2. Rode o script `node scripts/import-airlines.js <caminho>` (o caminho padrão já aponta para `C:\Users\bruno\Downloads\airlines.csv` no Windows).
 3. O script insere somente nomes únicos na tabela `airlines`, garantindo o autocomplete do datalist do formulário de voos.
 
+## Importar rotas e aeroportos
+
+1. Baixe os arquivos `routes.csv` e `airports.csv` (por exemplo, os datastes do [OpenFlights](https://openflights.org/data.html) e do [dataset airport-codes](https://github.com/datasets/airport-codes/blob/master/data/airport-codes.csv)).
+2. Rode `node scripts/import-routes.js <routes-csv> <airports-csv>`; os caminhos padrão da versão Windows estão em `C:\Users\bruno\Downloads\routes.csv` e `C:\Users\bruno\Downloads\airports.csv`.
+3. O backend passa a oferecer `/api/routes/airlines?from=GRU&to=MCO`, o datalist do campo Airline é filtrado pelas cias que voam na rota (com fallback para a lista completa caso não existam rotas registradas).
+
 ## Configuracao de ambiente (.env)
 
 Crie um arquivo `.env` na raiz do projeto. Para producao, use o modelo `/.env.production.example` e preencha os valores reais em um `.env.production`.

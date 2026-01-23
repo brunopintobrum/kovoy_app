@@ -108,6 +108,7 @@
     - [x] Status (planned/paid/due) e observacoes
     - [x] Integracao com passageiros (participantes)
     - [x] Autocomplete (datalist) para airline com fallback para adicionar novas cias e `airlines`.
+    - [x] Filter por rota (From/To) usando tabela de rotas/aeroportos.
     - [ ] Validar chegada posterior a partida (backend + UI)
     - [ ] Exibir classe/assento/bagagem na lista
     - [ ] Seletor de passageiros com busca

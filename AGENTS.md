@@ -38,4 +38,5 @@
 - Schema: novos campos em group_tickets e tabela group_ticket_participants.
 - Testes: validacao de tickets V2.
 - Voos V2: input Airline agora usa datalist/api e grava `airline_id`, criando novas companhias se necessário para evitar digitação incorreta e garantir consistência.
+- Route filtering: backend consegue filtrar os nomes por From/To usando os scripts `import-routes.js` (routes + airports) e o endpoint `/api/routes/airlines`.
 
