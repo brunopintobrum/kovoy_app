@@ -33,6 +33,7 @@
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
 - Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
 - Testes: validacao de transportes V2.
+- Modulos V2 sincronizam pagador, tipo/mode e alvos do split (Participants/Families/manual) diretamente na despesa vinculada; o detail permanece no `expense_splits`.
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes.
 - Schema: novos campos em group_tickets e tabela group_ticket_participants.
 - Testes: validacao de tickets V2.

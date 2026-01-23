@@ -36,6 +36,7 @@ Video curto (opcional): (adicione o link aqui)
 - Hospedagens V2: endereco completo, quartos, check-in/out com hora e status
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes
+- Modulos V2: quando vinculados a uma despesa, replicam o pagador, tipo/mode e alvos do split configurados no painel
 - Protecao CSRF para operacoes de escrita
 - Rate limiting e headers de seguranca
 
@@ -45,6 +46,7 @@ Video curto (opcional): (adicione o link aqui)
 - Os modulos de voos/hospedagens/transportes/tickets sao registros logísticos com custo estimado.
 - Para refletir pagamentos reais, crie uma despesa correspondente em Expenses.
 - Base V2: os modulos permitem vincular uma despesa (link opcional na UI).
+- A despesa vinculada herda automaticamente o pagador, o tipo/mode (participants/families/manual) e os alvos definidos no painel, garantindo que a mesma configuração do split seja usada em um único fluxo.
 
 ### Roadmap
 
@@ -81,6 +83,7 @@ Schema criado automaticamente no boot. Tabelas principais:
 - `groups`, `group_members`, `invitations`
 - `families`, `participants`
 - `expenses`, `expense_splits`
+- `expenses` + `expense_splits` mantem o registro do pagador e dos alvos (participants/families) usados pelos módulos logísticos
 - `group_flights`, `group_flight_participants`, `group_lodgings`, `group_transports`, `group_tickets`
 - (legado) `trips`, `trip_flights`, `trip_lodgings`, `trip_cars`, `trip_expenses`, `trip_transports`, `trip_timeline`, `trip_reminders`
 
@@ -421,4 +424,5 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes.
 - Schema: novos campos em group_tickets e tabela group_ticket_participants.
+- Modulos V2 agora usam o mesmo pagador/split configurado no painel para preencher as despesas vinculadas.
 

@@ -124,6 +124,7 @@
     - [x] Vinculo a participantes
     - [x] Status e observacoes
   - [ ] Unificar custos com Expenses (pagador + split dentro do modulo)
+  - [x] Unificar custos com Expenses (pagador + split dentro do modulo) *(panel split agora reaproveitado automaticamente nos módulos logísticos)*
   - [ ] Anexos/recibos por item (upload, visualizacao e download)
 - [ ] Categorias avancadas e filtros (por data, status, responsavel)
 - [ ] Multi-moeda e cambio (taxas por data + conversao no dashboard)
