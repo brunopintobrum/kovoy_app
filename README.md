@@ -79,6 +79,7 @@ Schema criado automaticamente no boot. Tabelas principais:
 - `groups`, `group_members`, `invitations`
 - `families`, `participants`
 - `expenses`, `expense_splits`
+- `group_flights`, `group_flight_participants`, `group_lodgings`, `group_transports`, `group_tickets`
 - (legado) `trips`, `trip_flights`, `trip_lodgings`, `trip_cars`, `trip_expenses`, `trip_transports`, `trip_timeline`, `trip_reminders`
 
 Campos relevantes em `users`:
@@ -86,6 +87,15 @@ Campos relevantes em `users`:
 - `email`, `password_hash`, `google_sub`
 - `first_name`, `last_name`, `display_name`, `avatar_url`
 - `email_verified_at`, `two_factor_enabled`, `created_at`
+
+Campos V2 em `group_flights`:
+
+- `airline`, `flight_number`, `pnr`, `cabin_class`, `seat`, `baggage`, `status`
+- `cost`, `currency`, `from_city`, `to_city`, `depart_at`, `arrive_at`, `notes`, `expense_id`
+
+Tabela de vinculo `group_flight_participants`:
+
+- `group_id`, `flight_id`, `participant_id`, `created_at`
 
 ## Requisitos
 
@@ -380,4 +390,5 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
 - UI: toggle para vincular despesas nos modulos (V2 opcional).
 - Voos V2: campos avancados + participantes vinculados no modulo de grupos.
+- Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
 

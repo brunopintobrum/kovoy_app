@@ -88,6 +88,7 @@
   - [x] Lista de dividas (quem deve pra quem)
 
 ## Testes
+- [x] Voos V2 (validation/integration)
 - [x] Split por pessoa (unit)
 - [x] Split por familia (unit)
 - [x] Validacao de soma do split (unit)
@@ -99,7 +100,7 @@
 ## V2 (fora do MVP)
 - [x] Voos, hospedagens, transporte e tickets (CRUD simples por grupo)
 - [ ] Modulos V2 (detalhes e usabilidade)
-  - [ ] Voos
+  - [x] Voos
     - [x] Companhia, numero do voo, PNR
     - [x] Assentos, classe, bagagens
     - [x] Status (planned/paid/due) e observacoes
@@ -127,4 +128,6 @@
 - [ ] Auditoria e historico de edicoes
 - [x] Vinculo opcional de despesa nos modulos (backend)
 - [x] UI: toggle para vincular despesas nos modulos (V2 opcional)
+
+
 

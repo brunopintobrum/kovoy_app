@@ -17,7 +17,7 @@
 ## Data Model
 - users: id, email, password_hash, google_sub, first_name, last_name, display_name, avatar_url, email_verified_at, two_factor_enabled, created_at.
 - tokens: refresh_tokens, email_verification_tokens, reset_tokens, two_factor_codes.
-- grupos: groups, group_members, invitations, families, participants, expenses, expense_splits.
+- grupos: groups, group_members, invitations, families, participants, expenses, expense_splits, group_flights, group_flight_participants, group_lodgings, group_transports, group_tickets.
 - legado: trips, trip_flights, trip_lodgings, trip_cars, trip_expenses, trip_transports, trip_timeline, trip_reminders.
 
 ## Auth & Security
@@ -69,6 +69,7 @@
 - Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
 - UI: toggle para vincular despesas nos modulos (V2 opcional).
 - Financeiro do MVP concentrado em Expenses; modulos V2 sao logísticos.
-
 - Voos V2: novos campos (flight number, class, seat, baggage, status) e vinculo a participantes no modulo de grupos.
 - Testes: validacoes e integracao para voos V2.
+- Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
+
