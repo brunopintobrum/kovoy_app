@@ -17,6 +17,13 @@
         number: document.getElementById('rule-number'),
         special: document.getElementById('rule-special')
     };
+    const ruleLabels = {
+        length: rules.length ? rules.length.textContent.trim() : '',
+        upper: rules.upper ? rules.upper.textContent.trim() : '',
+        lower: rules.lower ? rules.lower.textContent.trim() : '',
+        number: rules.number ? rules.number.textContent.trim() : '',
+        special: rules.special ? rules.special.textContent.trim() : ''
+    };
     let alertBox = document.getElementById('registerAlert');
     const googleButton = document.querySelector('.social-list-item.bg-danger');
 
@@ -73,23 +80,28 @@
 
     const evaluatePassword = () => {
         const password = passwordInput ? passwordInput.value : '';
+        const hasInput = password.length > 0;
         const hasLength = password.length >= 9;
         const hasUpper = /[A-Z]/.test(password);
         const hasLower = /[a-z]/.test(password);
         const hasNumber = /[0-9]/.test(password);
         const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':",.<>/?\\|]/.test(password);
 
-        const applyRule = (node, ok) => {
+        const applyRule = (node, key, ok) => {
             if (!node) return;
-            const label = node.textContent.replace(/^OK |^NO /, '');
+            if (!hasInput) {
+                node.textContent = ruleLabels[key] || node.textContent.replace(/^OK |^NO /, '');
+                return;
+            }
+            const label = ruleLabels[key] || node.textContent.replace(/^OK |^NO /, '');
             node.textContent = `${ok ? 'OK' : 'NO'} ${label}`;
         };
 
-        applyRule(rules.length, hasLength);
-        applyRule(rules.upper, hasUpper);
-        applyRule(rules.lower, hasLower);
-        applyRule(rules.number, hasNumber);
-        applyRule(rules.special, hasSpecial);
+        applyRule(rules.length, 'length', hasLength);
+        applyRule(rules.upper, 'upper', hasUpper);
+        applyRule(rules.lower, 'lower', hasLower);
+        applyRule(rules.number, 'number', hasNumber);
+        applyRule(rules.special, 'special', hasSpecial);
         let score = 0;
         if (hasUpper) score += 1;
         if (hasLower) score += 1;
