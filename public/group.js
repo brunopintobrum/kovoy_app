@@ -772,25 +772,72 @@
         }
     };
 
+    const collectLinkedExpenseSplitData = (amountValue) => {
+        if (!state.participants.length && !state.families.length) {
+            throw new Error('Add participants or families before linking an expense.');
+        }
+        const payerEl = document.getElementById('expensePayer');
+        const payerId = Number(payerEl?.value || 0);
+        if (!payerId) {
+            throw new Error('Select a payer to link an expense.');
+        }
+        const splitType = document.querySelector('input[name="splitType"]:checked')?.value || 'participants';
+        const splitMode = document.querySelector('input[name="splitMode"]:checked')?.value || 'equal';
+        const targetInputs = Array.from(document.querySelectorAll('#splitTargets input[type="checkbox"]:checked'));
+        if (!targetInputs.length) {
+            throw new Error('Select split targets before linking an expense.');
+        }
+        const targetIds = targetInputs
+            .map((input) => Number(input.value))
+            .filter((value) => Number.isFinite(value) && value > 0);
+        if (!targetIds.length) {
+            throw new Error('Select split targets before linking an expense.');
+        }
+        const payload = {
+            payerParticipantId: payerId,
+            splitType,
+            splitMode
+        };
+        if (splitMode === 'manual') {
+            const totalAmount = Number(amountValue);
+            if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
+                throw new Error('Set a valid amount before linking an expense.');
+            }
+            let sum = 0;
+            const splits = [];
+            targetInputs.forEach((checkbox) => {
+                const label = checkbox.closest('label');
+                const amountInput = label?.querySelector('input[type="number"]');
+                const value = Number(amountInput?.value || 0);
+                if (!Number.isFinite(value) || value <= 0) {
+                    throw new Error('Enter manual amounts for each split target.');
+                }
+                sum += value;
+                splits.push({ targetId: Number(checkbox.value), amount: value });
+            });
+            if (Math.abs(sum - totalAmount) > 0.005) {
+                throw new Error('Split totals must match the module amount.');
+            }
+            payload.splits = splits;
+        } else if (splitType === 'participants') {
+            payload.participantIds = targetIds;
+        } else {
+            payload.familyIds = targetIds;
+        }
+        return payload;
+    };
+
     const buildLinkedExpensePayload = (prefix, defaults) => {
         const config = moduleExpenseConfigs.find((item) => item.prefix === prefix);
         if (!config) return null;
         const toggle = document.getElementById(config.toggleId);
         if (!toggle || !toggle.checked) return null;
-        if (!state.participants.length) {
-            throw new Error('Add participants before linking an expense.');
-        }
-        const payerId = Number(document.getElementById(config.payerId)?.value || 0);
-        if (!payerId) {
-            throw new Error('Select a payer to link an expense.');
-        }
         const base = defaults && typeof defaults === 'object' ? defaults : {};
+        const amountValue = typeof base.amount === 'number' ? base.amount : Number(base.amount);
+        const splitData = collectLinkedExpenseSplitData(amountValue);
         return {
             ...base,
-            payerParticipantId: payerId,
-            splitType: 'participants',
-            splitMode: 'equal',
-            participantIds: state.participants.map((participant) => participant.id)
+            ...splitData
         };
     };
 
