@@ -505,14 +505,28 @@
                                 </div>
                             </div>
                             <form id="flightForm" class="row g-3 needs-validation" novalidate>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label class="form-label" for="flightAirline">Airline</label>
                                     <input class="form-control" id="flightAirline" required>
                                     <div class="invalid-feedback">Enter an airline.</div>
                                 </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="flightNumber">Flight number</label>
+                                    <input class="form-control" id="flightNumber" required>
+                                    <div class="invalid-feedback">Enter a flight number.</div>
+                                </div>
                                 <div class="col-md-2">
                                     <label class="form-label" for="flightPnr">PNR</label>
                                     <input class="form-control" id="flightPnr">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="flightStatus">Status</label>
+                                    <select class="form-select" id="flightStatus" required>
+                                        <option value="planned">Planned</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="due">Due</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a status.</div>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label" for="flightCost">Cost</label>
@@ -527,6 +541,24 @@
                                         <option value="BRL">BRL</option>
                                     </select>
                                     <div class="invalid-feedback">Select a currency.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="flightClass">Class</label>
+                                    <select class="form-select" id="flightClass">
+                                        <option value="">Select class</option>
+                                        <option value="economy">Economy</option>
+                                        <option value="premium_economy">Premium economy</option>
+                                        <option value="business">Business</option>
+                                        <option value="first">First</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="flightSeat">Seat</label>
+                                    <input class="form-control" id="flightSeat" placeholder="12A">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="flightBaggage">Baggage</label>
+                                    <input class="form-control" id="flightBaggage" placeholder="1 checked">
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label" for="flightFrom">From</label>
@@ -548,7 +580,13 @@
                                     <input class="form-control" id="flightArrive" type="datetime-local" required>
                                     <div class="invalid-feedback">Select an arrival time.</div>
                                 </div>
-                                <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="flightParticipants">Passengers</label>
+                                    <select class="form-select" id="flightParticipants" multiple>
+                                    </select>
+                                    <small class="text-muted">Hold Ctrl or Cmd to select multiple participants.</small>
+                                </div>
+                                <div class="col-md-6">
                                     <label class="form-label" for="flightNotes">Notes</label>
                                     <textarea class="form-control" id="flightNotes" rows="2"></textarea>
                                 </div>
@@ -584,16 +622,17 @@
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Airline</th>
+                                            <th>Flight</th>
                                             <th>Route</th>
                                             <th>Departure</th>
                                             <th>Arrival</th>
+                                            <th>Status</th>
                                             <th>Cost</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody id="flightList">
-                                        <tr><td colspan="6" class="text-muted text-center">No flights yet.</td></tr>
+                                        <tr><td colspan="7" class="text-muted text-center">No flights yet.</td></tr>
                                     </tbody>
                                 </table>
                             </div>

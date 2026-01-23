@@ -178,6 +178,7 @@ describe('validation helpers', () => {
     test('validateGroupFlightPayload enforces required fields', () => {
         const result = validateGroupFlightPayload({
             airline: 'Air Canada',
+            flightNumber: 'AC123',
             from: 'YUL',
             to: 'MCO',
             departAt: '2026-02-22T10:00:00Z',
@@ -187,11 +188,28 @@ describe('validation helpers', () => {
         });
         expect(result.value).toMatchObject({
             airline: 'Air Canada',
+            flightNumber: 'AC123',
             from: 'YUL',
             to: 'MCO',
+            status: 'planned',
             cost: 1200,
             currency: 'CAD'
         });
+    });
+
+    test('validateGroupFlightPayload rejects invalid cabin class', () => {
+        const result = validateGroupFlightPayload({
+            airline: 'JetBlue',
+            flightNumber: 'B612',
+            from: 'JFK',
+            to: 'MCO',
+            departAt: '2026-02-22T10:00:00Z',
+            arriveAt: '2026-02-22T14:30:00Z',
+            cost: 400,
+            currency: 'USD',
+            cabinClass: 'ultra'
+        });
+        expect(result).toEqual({ error: 'Cabin class is invalid.' });
     });
 
     test('validateGroupLodgingPayload requires address and dates', () => {

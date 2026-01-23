@@ -373,16 +373,23 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.flights.length) {
-            list.innerHTML = '<tr><td colspan="6" class="text-muted text-center">No flights yet.</td></tr>';
+            list.innerHTML = '<tr><td colspan="7" class="text-muted text-center">No flights yet.</td></tr>';
             return;
         }
+        const participantMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
         state.flights.forEach((flight) => {
+            const participantNames = (flight.participantIds || [])
+                .map((id) => participantMap.get(id))
+                .filter(Boolean);
+            const passengersLabel = participantNames.length ? `Passengers: ${participantNames.join(', ')}` : '';
+            const flightLabel = [flight.airline, flight.flightNumber].filter(Boolean).join(' ');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${flight.airline || '-'}</td>
+                <td title="${passengersLabel}">${flightLabel || '-'}</td>
                 <td>${flight.from || '-'} -> ${flight.to || '-'}</td>
                 <td>${formatDateTime(flight.departAt)}</td>
                 <td>${formatDateTime(flight.arriveAt)}</td>
+                <td class="text-capitalize">${flight.status || 'planned'}</td>
                 <td>${formatCurrency(flight.cost, flight.currency)}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-flight" data-id="${flight.id}">Edit</button>
@@ -640,6 +647,35 @@
         });
     };
 
+    const setMultiSelectValues = (select, values) => {
+        if (!select) return;
+        const selected = new Set((values || []).map((value) => String(value)));
+        Array.from(select.options).forEach((option) => {
+            option.selected = selected.has(option.value);
+        });
+    };
+
+    const populateFlightParticipants = () => {
+        const select = document.getElementById('flightParticipants');
+        if (!select) return;
+        select.innerHTML = '';
+        if (!state.participants.length) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Add a participant first';
+            select.appendChild(option);
+            select.disabled = true;
+            return;
+        }
+        select.disabled = false;
+        state.participants.forEach((participant) => {
+            const option = document.createElement('option');
+            option.value = participant.id;
+            option.textContent = participant.displayName;
+            select.appendChild(option);
+        });
+    };
+
     const setModuleExpenseVisibility = (prefix, show) => {
         const config = moduleExpenseConfigs.find((item) => item.prefix === prefix);
         if (!config) return;
@@ -834,27 +870,43 @@
         setFlightFormMode('create');
         setModuleExpenseVisibility('flight', false);
         setModuleExpensePayer('flight', null);
+        const status = document.getElementById('flightStatus');
+        if (status) status.value = 'planned';
+        const passengers = document.getElementById('flightParticipants');
+        if (passengers) setMultiSelectValues(passengers, []);
     };
 
     const populateFlightForm = (flight) => {
         if (!flight) return;
         const airline = document.getElementById('flightAirline');
+        const flightNumber = document.getElementById('flightNumber');
         const pnr = document.getElementById('flightPnr');
+        const status = document.getElementById('flightStatus');
         const cost = document.getElementById('flightCost');
         const currency = document.getElementById('flightCurrency');
+        const cabinClass = document.getElementById('flightClass');
+        const seat = document.getElementById('flightSeat');
+        const baggage = document.getElementById('flightBaggage');
         const from = document.getElementById('flightFrom');
         const to = document.getElementById('flightTo');
         const depart = document.getElementById('flightDepart');
         const arrive = document.getElementById('flightArrive');
+        const passengers = document.getElementById('flightParticipants');
         const notes = document.getElementById('flightNotes');
         if (airline) airline.value = flight.airline || '';
+        if (flightNumber) flightNumber.value = flight.flightNumber || '';
         if (pnr) pnr.value = flight.pnr || '';
+        if (status) status.value = flight.status || 'planned';
         if (cost) cost.value = flight.cost ?? '';
         if (currency) currency.value = flight.currency || state.group?.defaultCurrency || 'USD';
+        if (cabinClass) cabinClass.value = flight.cabinClass || '';
+        if (seat) seat.value = flight.seat || '';
+        if (baggage) baggage.value = flight.baggage || '';
         if (from) from.value = flight.from || '';
         if (to) to.value = flight.to || '';
         if (depart) depart.value = formatDateTimeLocal(flight.departAt);
         if (arrive) arrive.value = formatDateTimeLocal(flight.arriveAt);
+        if (passengers) setMultiSelectValues(passengers, flight.participantIds || []);
         if (notes) notes.value = flight.notes || '';
         const expense = flight.expenseId ? state.expenses.find((item) => item.id === flight.expenseId) : null;
         setModuleExpenseVisibility('flight', !!expense);
@@ -1033,16 +1085,27 @@
                 event.preventDefault();
                 if (flightError) flightError.classList.add('d-none');
                 if (!validateForm(flightForm)) return;
+                const passengerValues = Array.from(
+                    document.getElementById('flightParticipants')?.selectedOptions || []
+                )
+                    .map((option) => Number(option.value))
+                    .filter((value) => Number.isFinite(value) && value > 0);
                 const payload = {
                     airline: document.getElementById('flightAirline')?.value || '',
+                    flightNumber: document.getElementById('flightNumber')?.value || '',
                     pnr: document.getElementById('flightPnr')?.value || '',
+                    status: document.getElementById('flightStatus')?.value || 'planned',
                     cost: document.getElementById('flightCost')?.value || '',
                     currency: document.getElementById('flightCurrency')?.value || '',
+                    cabinClass: document.getElementById('flightClass')?.value || '',
+                    seat: document.getElementById('flightSeat')?.value || '',
+                    baggage: document.getElementById('flightBaggage')?.value || '',
                     from: document.getElementById('flightFrom')?.value || '',
                     to: document.getElementById('flightTo')?.value || '',
                     departAt: document.getElementById('flightDepart')?.value || '',
                     arriveAt: document.getElementById('flightArrive')?.value || '',
-                    notes: document.getElementById('flightNotes')?.value || ''
+                    notes: document.getElementById('flightNotes')?.value || '',
+                    participantIds: passengerValues
                 };
                 const expenseDefaults = {
                     description: `Flight: ${payload.from || '-'} -> ${payload.to || '-'}`,
@@ -1751,6 +1814,7 @@
         renderTransports();
         renderTickets();
         populateExpenseSelectors();
+        populateFlightParticipants();
         renderSplitTargets();
         applyPermissions();
     };
