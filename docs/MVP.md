@@ -109,10 +109,10 @@
     - [ ] Exibir classe/assento/bagagem na lista
     - [ ] Seletor de passageiros com busca
   - [ ] Hospedagens
-    - [ ] Quartos (tipo, quantidade, ocupacao)
-    - [ ] Endereco completo + contato
-    - [ ] Check-in/out com hora
-    - [ ] Status e observacoes
+    - [x] Quartos (tipo, quantidade, ocupacao)
+    - [x] Endereco completo + contato
+    - [x] Check-in/out com hora
+    - [x] Status e observacoes
   - [ ] Transportes
     - [ ] Origem/destino, datas/horas
     - [ ] Fornecedor, localizador
