@@ -96,6 +96,14 @@
         return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
     };
 
+    const formatFlightClassLabel = (value) => {
+        if (!value) return '-';
+        return value
+            .split('_')
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(' ');
+    };
+
     const parseGroupId = () => {
         const params = new URLSearchParams(window.location.search);
         const id = Number(params.get('groupId'));
@@ -373,7 +381,7 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.flights.length) {
-            list.innerHTML = '<tr><td colspan="9" class="text-muted text-center">No flights yet.</td></tr>';
+            list.innerHTML = '<tr><td colspan="12" class="text-muted text-center">No flights yet.</td></tr>';
             return;
         }
         const participantMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
@@ -381,16 +389,19 @@
             const participantNames = (flight.participantIds || [])
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
-            const passengersLabel = participantNames.join(', ');
+            const passengersLabel = participantNames.length ? participantNames.join(', ') : '-';
             const flightLabel = [flight.airline, flight.flightNumber].filter(Boolean).join(' ');
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${flightLabel || '-'}</td>
                 <td>${flight.pnr || '-'}</td>
+                <td>${formatFlightClassLabel(flight.cabinClass)}</td>
+                <td>${flight.seat || '-'}</td>
+                <td>${flight.baggage || '-'}</td>
                 <td>${flight.from || '-'} -> ${flight.to || '-'}</td>
                 <td>${formatDateTime(flight.departAt)}</td>
                 <td>${formatDateTime(flight.arriveAt)}</td>
-                <td>${passengersLabel || '-'}</td>
+                <td>${passengersLabel}</td>
                 <td class="text-capitalize">${flight.status || 'planned'}</td>
                 <td>${formatCurrency(flight.cost, flight.currency)}</td>
                 <td class="text-end">
@@ -682,6 +693,23 @@
         });
     };
 
+    const applyFlightParticipantSearchFilter = () => {
+        const search = document.getElementById('flightParticipantSearch');
+        const select = document.getElementById('flightParticipants');
+        if (!search || !select) return;
+        const query = search.value.trim().toLowerCase();
+        Array.from(select.options).forEach((option) => {
+            option.hidden = query ? !option.textContent.toLowerCase().includes(query) : false;
+        });
+    };
+
+    const setupFlightParticipantSearch = () => {
+        const search = document.getElementById('flightParticipantSearch');
+        const select = document.getElementById('flightParticipants');
+        if (!search || !select) return;
+        search.addEventListener('input', applyFlightParticipantSearchFilter);
+    };
+
     const populateFlightParticipants = () => {
         const select = document.getElementById('flightParticipants');
         if (!select) return;
@@ -701,6 +729,7 @@
             option.textContent = participant.displayName;
             select.appendChild(option);
         });
+        applyFlightParticipantSearchFilter();
     };
 
     const populateTicketParticipants = () => {
@@ -922,6 +951,11 @@
         if (status) status.value = 'planned';
         const passengers = document.getElementById('flightParticipants');
         if (passengers) setMultiSelectValues(passengers, []);
+        const participantSearch = document.getElementById('flightParticipantSearch');
+        if (participantSearch) {
+            participantSearch.value = '';
+            applyFlightParticipantSearchFilter();
+        }
     };
 
     const populateFlightForm = (flight) => {
@@ -1948,9 +1982,10 @@
         await setUserProfile();
         const ok = await loadGroups();
         if (!ok) return;
-        bindGroupSelector();
-        bindForms();
-        bindInviteForm();
+      bindGroupSelector();
+      bindForms();
+      setupFlightParticipantSearch();
+      bindInviteForm();
         bindDeleteActions();
         bindSplitTypeToggle();
         bindSplitModeToggle();

@@ -3958,6 +3958,9 @@ const validateGroupFlightPayload = (payload) => {
     if (departAt.error) return departAt;
     const arriveAt = requireDate(payload.arriveAt, 'Arrival');
     if (arriveAt.error) return arriveAt;
+    if (new Date(arriveAt.value).getTime() <= new Date(departAt.value).getTime()) {
+        return { error: 'Arrival must be after departure.' };
+    }
     const cabinClass = optionalCabinClass(payload.cabinClass);
     if (cabinClass.error) return cabinClass;
     const status = payload.status ? requireStatus(payload.status) : { value: 'planned' };

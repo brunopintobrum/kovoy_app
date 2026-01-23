@@ -175,27 +175,41 @@ describe('validation helpers', () => {
         expect(result).toEqual({ error: 'Split totals must match the expense amount.' });
     });
 
-    test('validateGroupFlightPayload enforces required fields', () => {
-        const result = validateGroupFlightPayload({
-            airline: 'Air Canada',
-            flightNumber: 'AC123',
-            from: 'YUL',
-            to: 'MCO',
-            departAt: '2026-02-22T10:00:00Z',
-            arriveAt: '2026-02-22T14:30:00Z',
-            cost: 1200,
-            currency: 'CAD'
-        });
-        expect(result.value).toMatchObject({
-            airline: 'Air Canada',
-            flightNumber: 'AC123',
-            from: 'YUL',
-            to: 'MCO',
-            status: 'planned',
-            cost: 1200,
-            currency: 'CAD'
-        });
-    });
+      test('validateGroupFlightPayload enforces required fields', () => {
+          const result = validateGroupFlightPayload({
+              airline: 'Air Canada',
+              flightNumber: 'AC123',
+              from: 'YUL',
+              to: 'MCO',
+              departAt: '2026-02-22T10:00:00Z',
+              arriveAt: '2026-02-22T14:30:00Z',
+              cost: 1200,
+              currency: 'CAD'
+          });
+          expect(result.value).toMatchObject({
+              airline: 'Air Canada',
+              flightNumber: 'AC123',
+              from: 'YUL',
+              to: 'MCO',
+              status: 'planned',
+              cost: 1200,
+              currency: 'CAD'
+          });
+      });
+
+      test('validateGroupFlightPayload rejects arrival before departure', () => {
+          const result = validateGroupFlightPayload({
+              airline: 'Air Canada',
+              flightNumber: 'AC124',
+              from: 'YUL',
+              to: 'MCO',
+              departAt: '2026-02-22T14:30:00Z',
+              arriveAt: '2026-02-22T10:00:00Z',
+              cost: 900,
+              currency: 'CAD'
+          });
+          expect(result).toEqual({ error: 'Arrival must be after departure.' });
+      });
 
     test('validateGroupFlightPayload rejects invalid cabin class', () => {
         const result = validateGroupFlightPayload({

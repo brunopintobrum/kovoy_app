@@ -580,12 +580,13 @@
                                     <input class="form-control" id="flightArrive" type="datetime-local" required>
                                     <div class="invalid-feedback">Select an arrival time.</div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label" for="flightParticipants">Passengers</label>
-                                    <select class="form-select" id="flightParticipants" multiple>
-                                    </select>
-                                    <small class="text-muted">Select passengers (Ctrl/Cmd for multiple).</small>
-                                </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label" for="flightParticipants">Passengers</label>
+                                      <input class="form-control mb-2" id="flightParticipantSearch" type="search" placeholder="Search participants">
+                                      <select class="form-select" id="flightParticipants" multiple>
+                                      </select>
+                                      <small class="text-muted">Select passengers (Ctrl/Cmd for multiple).</small>
+                                  </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="flightNotes">Notes</label>
                                     <textarea class="form-control" id="flightNotes" rows="2"></textarea>
@@ -621,21 +622,24 @@
                             <div class="table-responsive mt-4">
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th>Flight</th>
-                                            <th>PNR</th>
-                                            <th>Route</th>
-                                            <th>Departure</th>
-                                            <th>Arrival</th>
-                                            <th>Passengers</th>
-                                            <th>Status</th>
-                                            <th>Cost</th>
-                                            <th class="text-end">Action</th>
-                                        </tr>
+                                          <tr>
+                                              <th>Flight</th>
+                                              <th>PNR</th>
+                                              <th>Class</th>
+                                              <th>Seat</th>
+                                              <th>Baggage</th>
+                                              <th>Route</th>
+                                              <th>Departure</th>
+                                              <th>Arrival</th>
+                                              <th>Passengers</th>
+                                              <th>Status</th>
+                                              <th>Cost</th>
+                                              <th class="text-end">Action</th>
+                                          </tr>
                                     </thead>
-                                    <tbody id="flightList">
-                                        <tr><td colspan="9" class="text-muted text-center">No flights yet.</td></tr>
-                                    </tbody>
+                                      <tbody id="flightList">
+                                         <tr><td colspan="12" class="text-muted text-center">No flights yet.</td></tr>
+                                     </tbody>
                                 </table>
                             </div>
                         </div>
