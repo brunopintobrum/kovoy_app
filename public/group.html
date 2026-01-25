@@ -554,10 +554,6 @@
                                         <option value="first">First</option>
                                     </select>
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="flightSeat">Seat</label>
-                                    <input class="form-control" id="flightSeat" placeholder="12A">
-                                </div>
                                 <div class="col-md-3">
                                     <label class="form-label" for="flightBaggage">Baggage</label>
                                     <input class="form-control" id="flightBaggage" placeholder="1 checked">
@@ -589,6 +585,13 @@
                                       </select>
                                       <small class="text-muted">Select passengers (Ctrl/Cmd for multiple).</small>
                                   </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Passenger seats</label>
+                                    <div class="border rounded p-2 bg-light" id="flightPassengerSeats">
+                                        <div class="text-muted">Select passengers to assign seats.</div>
+                                    </div>
+                                    <small class="text-muted">Optional: assign seats per passenger.</small>
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="flightNotes">Notes</label>
                                     <textarea class="form-control" id="flightNotes" rows="2"></textarea>
@@ -628,7 +631,7 @@
                                               <th>Flight</th>
                                               <th>PNR</th>
                                               <th>Class</th>
-                                              <th>Seat</th>
+                                              <th>Seats</th>
                                               <th>Baggage</th>
                                               <th>Route</th>
                                               <th>Departure</th>

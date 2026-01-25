@@ -169,7 +169,6 @@ describe('group flights V2', () => {
                 flightNumber: 'DL123',
                 pnr: 'ABC123',
                 cabinClass: 'economy',
-                seat: '12A',
                 baggage: '1 checked',
                 status: 'planned',
                 cost: 500,
@@ -179,7 +178,8 @@ describe('group flights V2', () => {
                 departAt: '2026-02-22T10:00:00Z',
                 arriveAt: '2026-02-22T14:30:00Z',
                 notes: 'Test flight',
-                participantIds: [participantId]
+                participantIds: [participantId],
+                participantSeats: { [participantId]: '12A' }
             })
         });
         expect(flightRes.status).toBe(200);
@@ -195,6 +195,7 @@ describe('group flights V2', () => {
         const created = listBody.data.find((item) => item.id === flightBody.id);
         expect(created).toBeTruthy();
         expect(created.participantIds).toEqual([participantId]);
+        expect(created.participantSeats[String(participantId)]).toBe('12A');
 
         const updateRes = await fetch(`${baseUrl}/api/groups/${groupId}/flights/${flightBody.id}`, {
             method: 'PUT',
@@ -208,7 +209,6 @@ describe('group flights V2', () => {
                 flightNumber: 'DL123',
                 pnr: 'ABC123',
                 cabinClass: 'business',
-                seat: '2A',
                 baggage: '2 checked',
                 status: 'paid',
                 cost: 600,
@@ -218,7 +218,8 @@ describe('group flights V2', () => {
                 departAt: '2026-02-22T10:00:00Z',
                 arriveAt: '2026-02-22T14:30:00Z',
                 notes: 'Updated flight',
-                participantIds: [participantIdTwo]
+                participantIds: [participantIdTwo],
+                participantSeats: { [participantIdTwo]: '2A' }
             })
         });
         expect(updateRes.status).toBe(200);
@@ -232,5 +233,6 @@ describe('group flights V2', () => {
         expect(updated).toBeTruthy();
         expect(updated.status).toBe('paid');
         expect(updated.participantIds).toEqual([participantIdTwo]);
+        expect(updated.participantSeats[String(participantIdTwo)]).toBe('2A');
     });
 });

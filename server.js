@@ -223,7 +223,6 @@ db.exec(`
         flight_number TEXT,
         pnr TEXT,
         cabin_class TEXT,
-        seat TEXT,
         baggage TEXT,
         status TEXT,
         cost REAL,
@@ -242,6 +241,7 @@ db.exec(`
         group_id INTEGER NOT NULL,
         flight_id TEXT NOT NULL,
         participant_id INTEGER NOT NULL,
+        seat TEXT,
         created_at TEXT NOT NULL,
         FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
         FOREIGN KEY (flight_id) REFERENCES group_flights(id) ON DELETE CASCADE,
@@ -476,7 +476,6 @@ const groupFlightColumns = db.prepare('PRAGMA table_info(group_flights)').all();
 const hasGroupFlightExpense = groupFlightColumns.some((column) => column.name === 'expense_id');
 const hasGroupFlightNumber = groupFlightColumns.some((column) => column.name === 'flight_number');
 const hasGroupFlightCabinClass = groupFlightColumns.some((column) => column.name === 'cabin_class');
-const hasGroupFlightSeat = groupFlightColumns.some((column) => column.name === 'seat');
 const hasGroupFlightBaggage = groupFlightColumns.some((column) => column.name === 'baggage');
 const hasGroupFlightStatus = groupFlightColumns.some((column) => column.name === 'status');
 const hasGroupFlightAirlineId = groupFlightColumns.some((column) => column.name === 'airline_id');
@@ -489,9 +488,6 @@ if (!hasGroupFlightNumber) {
 if (!hasGroupFlightCabinClass) {
     db.exec('ALTER TABLE group_flights ADD COLUMN cabin_class TEXT');
 }
-if (!hasGroupFlightSeat) {
-    db.exec('ALTER TABLE group_flights ADD COLUMN seat TEXT');
-}
 if (!hasGroupFlightBaggage) {
     db.exec('ALTER TABLE group_flights ADD COLUMN baggage TEXT');
 }
@@ -500,6 +496,11 @@ if (!hasGroupFlightStatus) {
 }
 if (!hasGroupFlightAirlineId) {
     db.exec('ALTER TABLE group_flights ADD COLUMN airline_id INTEGER');
+}
+const groupFlightParticipantColumns = db.prepare('PRAGMA table_info(group_flight_participants)').all();
+const hasGroupFlightParticipantSeat = groupFlightParticipantColumns.some((column) => column.name === 'seat');
+if (!hasGroupFlightParticipantSeat) {
+    db.exec('ALTER TABLE group_flight_participants ADD COLUMN seat TEXT');
 }
 const groupLodgingColumns = db.prepare('PRAGMA table_info(group_lodgings)').all();
 const hasGroupLodgingExpense = groupLodgingColumns.some((column) => column.name === 'expense_id');
@@ -1704,7 +1705,7 @@ const deleteExpenseSplits = db.prepare('DELETE FROM expense_splits WHERE expense
 const listParticipantIds = db.prepare('SELECT id FROM participants WHERE group_id = ?');
 const listFamilyIds = db.prepare('SELECT id FROM families WHERE group_id = ?');
 const listGroupFlights = db.prepare(`
-    SELECT id, expense_id, airline, airline_id, flight_number, pnr, cabin_class, seat, baggage, status,
+    SELECT id, expense_id, airline, airline_id, flight_number, pnr, cabin_class, baggage, status,
            cost, currency, from_city, to_city, depart_at, arrive_at, notes
     FROM group_flights
     WHERE group_id = ?
@@ -1713,27 +1714,27 @@ const listGroupFlights = db.prepare(`
 const getGroupFlight = db.prepare('SELECT id, expense_id FROM group_flights WHERE id = ? AND group_id = ?');
 const insertGroupFlight = db.prepare(`
     INSERT INTO group_flights (
-        id, group_id, expense_id, airline, airline_id, flight_number, pnr, cabin_class, seat, baggage, status,
+        id, group_id, expense_id, airline, airline_id, flight_number, pnr, cabin_class, baggage, status,
         cost, currency, from_city, to_city, depart_at, arrive_at, notes
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const updateGroupFlight = db.prepare(`
     UPDATE group_flights
-    SET expense_id = ?, airline = ?, airline_id = ?, flight_number = ?, pnr = ?, cabin_class = ?, seat = ?, baggage = ?, status = ?,
+    SET expense_id = ?, airline = ?, airline_id = ?, flight_number = ?, pnr = ?, cabin_class = ?, baggage = ?, status = ?,
         cost = ?, currency = ?, from_city = ?, to_city = ?, depart_at = ?, arrive_at = ?, notes = ?
     WHERE id = ? AND group_id = ?
 `);
 const deleteGroupFlight = db.prepare('DELETE FROM group_flights WHERE id = ? AND group_id = ?');
 const listGroupFlightParticipants = db.prepare(`
-    SELECT flight_id, participant_id
+    SELECT flight_id, participant_id, seat
     FROM group_flight_participants
     WHERE group_id = ?
     ORDER BY id
 `);
 const insertGroupFlightParticipant = db.prepare(`
-    INSERT INTO group_flight_participants (group_id, flight_id, participant_id, created_at)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO group_flight_participants (group_id, flight_id, participant_id, seat, created_at)
+    VALUES (?, ?, ?, ?, ?)
 `);
 const deleteGroupFlightParticipants = db.prepare(`
     DELETE FROM group_flight_participants
@@ -2502,12 +2503,18 @@ app.get('/api/routes/airlines', authRequiredApi, (req, res) => {
 app.get('/api/groups/:groupId/flights', authRequiredApi, requireGroupMember, (req, res) => {
     const participants = listGroupFlightParticipants.all(req.groupId);
     const participantMap = new Map();
+    const seatMap = new Map();
     participants.forEach((row) => {
         const list = participantMap.get(row.flight_id) || [];
         list.push(row.participant_id);
         participantMap.set(row.flight_id, list);
+        const seats = seatMap.get(row.flight_id) || {};
+        if (row.seat) {
+            seats[row.participant_id] = row.seat;
+        }
+        seatMap.set(row.flight_id, seats);
     });
-    const flights = listGroupFlights.all(req.groupId).map((row) => mapGroupFlightRow(row, participantMap));
+    const flights = listGroupFlights.all(req.groupId).map((row) => mapGroupFlightRow(row, participantMap, seatMap));
     return res.json({ ok: true, data: flights });
 });
 
@@ -2524,11 +2531,15 @@ app.post(
         }
         const normalizedParticipants = normalizeParticipantIds(req.body?.participantIds);
         const participantIds = normalizedParticipants.value;
+        const seatMap = normalizeParticipantSeats(req.body?.participantSeats).value;
         if (participantIds.length) {
             const allowedIds = new Set(listParticipantIds.all(req.groupId).map((row) => row.id));
             if (participantIds.some((id) => !allowedIds.has(id))) {
                 return res.status(400).json({ error: 'Invalid participants.' });
             }
+        }
+        if ([...seatMap.keys()].some((id) => !participantIds.includes(id))) {
+            return res.status(400).json({ error: 'Invalid participant seats.' });
         }
         const expenseNormalized = normalizeModuleExpensePayload(
             req.body?.expense,
@@ -2558,7 +2569,6 @@ app.post(
                     normalized.value.flightNumber,
                     normalized.value.pnr,
                     normalized.value.cabinClass,
-                    normalized.value.seat,
                     normalized.value.baggage,
                     normalized.value.status,
                     normalized.value.cost,
@@ -2572,7 +2582,8 @@ app.post(
                 if (participantIds.length) {
                     const now = new Date().toISOString();
                     participantIds.forEach((participantId) => {
-                        insertGroupFlightParticipant.run(req.groupId, id, participantId, now);
+                        const seat = seatMap.get(participantId) || null;
+                        insertGroupFlightParticipant.run(req.groupId, id, participantId, seat, now);
                     });
                 }
                 return linkedExpenseId;
@@ -2605,11 +2616,15 @@ app.put(
         }
         const normalizedParticipants = normalizeParticipantIds(req.body?.participantIds);
         const participantIds = normalizedParticipants.value;
+        const seatMap = normalizeParticipantSeats(req.body?.participantSeats).value;
         if (participantIds.length) {
             const allowedIds = new Set(listParticipantIds.all(req.groupId).map((row) => row.id));
             if (participantIds.some((id) => !allowedIds.has(id))) {
                 return res.status(400).json({ error: 'Invalid participants.' });
             }
+        }
+        if ([...seatMap.keys()].some((id) => !participantIds.includes(id))) {
+            return res.status(400).json({ error: 'Invalid participant seats.' });
         }
         const expenseNormalized = normalizeModuleExpensePayload(
             req.body?.expense,
@@ -2639,7 +2654,6 @@ app.put(
                     normalized.value.flightNumber,
                     normalized.value.pnr,
                     normalized.value.cabinClass,
-                    normalized.value.seat,
                     normalized.value.baggage,
                     normalized.value.status,
                     normalized.value.cost,
@@ -2656,7 +2670,8 @@ app.put(
                 if (participantIds.length) {
                     const now = new Date().toISOString();
                     participantIds.forEach((participantId) => {
-                        insertGroupFlightParticipant.run(req.groupId, flightId, participantId, now);
+                        const seat = seatMap.get(participantId) || null;
+                        insertGroupFlightParticipant.run(req.groupId, flightId, participantId, seat, now);
                     });
                 }
                 return linkedExpenseId;
@@ -3648,7 +3663,7 @@ app.post('/api/trip', authRequiredApi, requireCsrfToken, (req, res) => {
     return res.json({ ok: true, updatedAt: result.updatedAt });
 });
 
-const mapGroupFlightRow = (row, participantMap) => ({
+const mapGroupFlightRow = (row, participantMap, seatMap) => ({
     id: row.id,
     expenseId: row.expense_id || null,
     airline: row.airline,
@@ -3656,7 +3671,6 @@ const mapGroupFlightRow = (row, participantMap) => ({
     flightNumber: row.flight_number,
     pnr: row.pnr,
     cabinClass: row.cabin_class,
-    seat: row.seat,
     baggage: row.baggage,
     status: row.status || 'planned',
     cost: row.cost,
@@ -3666,7 +3680,8 @@ const mapGroupFlightRow = (row, participantMap) => ({
     departAt: row.depart_at,
     arriveAt: row.arrive_at,
     notes: row.notes,
-    participantIds: participantMap?.get(row.id) || []
+    participantIds: participantMap?.get(row.id) || [],
+    participantSeats: seatMap?.get(row.id) || {}
 });
 
 const mapGroupLodgingRow = (row) => ({
@@ -4066,6 +4081,19 @@ const normalizeParticipantIds = (value) => {
     return { value: Array.from(new Set(ids)) };
 };
 
+const normalizeParticipantSeats = (value) => {
+    if (!value || typeof value !== 'object') {
+        return { value: new Map() };
+    }
+    const seatMap = new Map();
+    Object.entries(value).forEach(([id, seat]) => {
+        const parsedId = parseGroupId(id);
+        if (parsedId === null) return;
+        seatMap.set(parsedId, optionalString(seat));
+    });
+    return { value: seatMap };
+};
+
 const optionalCabinClass = (value) => {
     if (!value) return { value: null };
     const valid = ['economy', 'premium_economy', 'business', 'first'];
@@ -4106,7 +4134,6 @@ const validateGroupFlightPayload = (payload) => {
             flightNumber: flightNumber.value,
             pnr: optionalString(payload.pnr),
             cabinClass: cabinClass.value,
-            seat: optionalString(payload.seat),
             baggage: optionalString(payload.baggage),
             status: status.value,
             cost: cost.value,
