@@ -71,7 +71,7 @@
 - Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
 - UI: toggle para vincular despesas nos modulos (V2 opcional).
 - Financeiro do MVP concentrado em Expenses; modulos V2 sao logísticos.
-- Voos V2: novos campos (flight number, class, baggage, status) e assentos por passageiro via vinculo a participantes.
+- Voos V2: novos campos (flight number, class, status) e assentos/bagagens por passageiro via vinculo a participantes.
 - Testes: validacoes e integracao para voos V2.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.

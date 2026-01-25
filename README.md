@@ -32,7 +32,7 @@ Video curto (opcional): (adicione o link aqui)
 - Validacao da soma do split
 - Dashboard do grupo com saldos e "quem deve pra quem"
 - Modulos do grupo (CRUD): voos, hospedagens, transportes e tickets
-- Voos V2: flight number, class, baggage, status e assentos por passageiro (vinculo a participantes)
+- Voos V2: flight number, class, status e assentos/bagagens por passageiro (vinculo a participantes)
 - Voos V2: o campo Airline utiliza autocomplete/datalist via `/api/airlines`, registra `airline_id` e permite adicionar novas companhias.
 - Hospedagens V2: endereco completo, quartos, check-in/out com hora e status
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes
@@ -97,13 +97,13 @@ Campos relevantes em `users`:
 
 Campos V2 em `group_flights`:
 
-- `airline`, `flight_number`, `pnr`, `cabin_class`, `baggage`, `status`
+- `airline`, `flight_number`, `pnr`, `cabin_class`, `status`
 - `airline_id` referencia a tabela `airlines` para padronizar entradas e alimentar o autocomplete.
 - `cost`, `currency`, `from_city`, `to_city`, `depart_at`, `arrive_at`, `notes`, `expense_id`
 
 Tabela de vinculo `group_flight_participants`:
 
-- `group_id`, `flight_id`, `participant_id`, `seat`, `created_at`
+- `group_id`, `flight_id`, `participant_id`, `seat`, `baggage`, `created_at`
 
 Campos V2 em `group_lodgings`:
 

@@ -16,6 +16,7 @@
         editing: {
             flightId: null,
             flightSeatMap: {},
+            flightBaggageMap: {},
             lodgingId: null,
             transportId: null,
             ticketId: null,
@@ -445,6 +446,15 @@
                 })
                 .filter(Boolean);
             const seatsLabel = seatLabels.length ? seatLabels.join(', ') : '-';
+            const baggageLabels = (flight.participantIds || [])
+                .map((id) => {
+                    const name = participantMap.get(id);
+                    if (!name) return null;
+                    const baggage = flight.participantBaggage?.[id];
+                    return baggage ? `${name} (${baggage})` : name;
+                })
+                .filter(Boolean);
+            const baggageLabel = baggageLabels.length ? baggageLabels.join(', ') : '-';
             const flightLabel = [flight.airline, flight.flightNumber].filter(Boolean).join(' ');
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -452,7 +462,7 @@
                 <td>${flight.pnr || '-'}</td>
                 <td>${formatFlightClassLabel(flight.cabinClass)}</td>
                 <td>${seatsLabel}</td>
-                <td>${flight.baggage || '-'}</td>
+                <td>${baggageLabel}</td>
                 <td>${flight.from || '-'} -> ${flight.to || '-'}</td>
                 <td>${formatDateTime(flight.departAt)}</td>
                 <td>${formatDateTime(flight.arriveAt)}</td>
@@ -766,6 +776,8 @@
         select.addEventListener('change', () => {
             syncFlightSeatMapWithSelection();
             renderFlightPassengerSeats();
+            syncFlightBaggageMapWithSelection();
+            renderFlightPassengerBaggage();
         });
     };
 
@@ -790,6 +802,7 @@
         });
         applyFlightParticipantSearchFilter();
         renderFlightPassengerSeats();
+        renderFlightPassengerBaggage();
     };
 
     const getSelectedFlightParticipantIds = () => {
@@ -801,6 +814,10 @@
 
     const syncFlightSeatMapWithSelection = () => {
         state.editing.flightSeatMap = state.editing.flightSeatMap || {};
+    };
+
+    const syncFlightBaggageMapWithSelection = () => {
+        state.editing.flightBaggageMap = state.editing.flightBaggageMap || {};
     };
 
     const renderFlightPassengerSeats = () => {
@@ -827,6 +844,37 @@
             input.dataset.participantId = String(participantId);
             input.addEventListener('input', () => {
                 state.editing.flightSeatMap[String(participantId)] = input.value.trim();
+            });
+            row.appendChild(label);
+            row.appendChild(input);
+            container.appendChild(row);
+        });
+    };
+
+    const renderFlightPassengerBaggage = () => {
+        const container = document.getElementById('flightPassengerBaggage');
+        if (!container) return;
+        const selectedIds = getSelectedFlightParticipantIds();
+        const nameMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
+        if (!selectedIds.length) {
+            container.innerHTML = '<div class="text-muted">Select passengers to assign baggage.</div>';
+            return;
+        }
+        const baggageMap = state.editing.flightBaggageMap || {};
+        container.innerHTML = '';
+        selectedIds.forEach((participantId) => {
+            const row = document.createElement('div');
+            row.className = 'd-flex align-items-center gap-2 mb-2';
+            const label = document.createElement('span');
+            label.className = 'flex-grow-1';
+            label.textContent = nameMap.get(participantId) || `Participant ${participantId}`;
+            const input = document.createElement('input');
+            input.className = 'form-control form-control-sm';
+            input.placeholder = 'Baggage';
+            input.value = baggageMap[String(participantId)] || '';
+            input.dataset.participantId = String(participantId);
+            input.addEventListener('input', () => {
+                state.editing.flightBaggageMap[String(participantId)] = input.value.trim();
             });
             row.appendChild(label);
             row.appendChild(input);
@@ -1094,6 +1142,7 @@
         form.classList.remove('was-validated');
         state.editing.flightId = null;
         state.editing.flightSeatMap = {};
+        state.editing.flightBaggageMap = {};
         setFlightFormMode('create');
         setModuleExpenseVisibility('flight', false);
         setModuleExpensePayer('flight', null);
@@ -1107,6 +1156,7 @@
             applyFlightParticipantSearchFilter();
         }
         renderFlightPassengerSeats();
+        renderFlightPassengerBaggage();
         const airlineIdInput = document.getElementById('flightAirlineId');
         if (airlineIdInput) airlineIdInput.value = '';
         syncFlightAirlineIdFromInput();
@@ -1121,7 +1171,6 @@
         const cost = document.getElementById('flightCost');
         const currency = document.getElementById('flightCurrency');
         const cabinClass = document.getElementById('flightClass');
-        const baggage = document.getElementById('flightBaggage');
         const from = document.getElementById('flightFrom');
         const to = document.getElementById('flightTo');
         const depart = document.getElementById('flightDepart');
@@ -1135,7 +1184,6 @@
         if (cost) cost.value = flight.cost ?? '';
         if (currency) currency.value = flight.currency || state.group?.defaultCurrency || 'USD';
         if (cabinClass) cabinClass.value = flight.cabinClass || '';
-        if (baggage) baggage.value = flight.baggage || '';
         if (from) from.value = flight.from || '';
         if (to) to.value = flight.to || '';
         if (depart) depart.value = formatDateTimeLocal(flight.departAt);
@@ -1144,6 +1192,8 @@
         if (notes) notes.value = flight.notes || '';
         state.editing.flightSeatMap = { ...(flight.participantSeats || {}) };
         renderFlightPassengerSeats();
+        state.editing.flightBaggageMap = { ...(flight.participantBaggage || {}) };
+        renderFlightPassengerBaggage();
         const airlineIdInput = document.getElementById('flightAirlineId');
         if (airlineIdInput) airlineIdInput.value = flight.airlineId || '';
         syncFlightAirlineIdFromInput();
@@ -1386,6 +1436,13 @@
                     );
                     seatMap[participantId] = input ? input.value.trim() : '';
                 });
+                const baggageMap = {};
+                passengerValues.forEach((participantId) => {
+                    const input = document.querySelector(
+                        `#flightPassengerBaggage [data-participant-id="${participantId}"]`
+                    );
+                    baggageMap[participantId] = input ? input.value.trim() : '';
+                });
                 const payload = {
                     airline: document.getElementById('flightAirline')?.value || '',
                     airlineId: document.getElementById('flightAirlineId')?.value || '',
@@ -1395,14 +1452,14 @@
                     cost: document.getElementById('flightCost')?.value || '',
                     currency: document.getElementById('flightCurrency')?.value || '',
                     cabinClass: document.getElementById('flightClass')?.value || '',
-                    baggage: document.getElementById('flightBaggage')?.value || '',
                     from: document.getElementById('flightFrom')?.value || '',
                     to: document.getElementById('flightTo')?.value || '',
                     departAt: document.getElementById('flightDepart')?.value || '',
                     arriveAt: document.getElementById('flightArrive')?.value || '',
                     notes: document.getElementById('flightNotes')?.value || '',
                     participantIds: passengerValues,
-                    participantSeats: seatMap
+                    participantSeats: seatMap,
+                    participantBaggage: baggageMap
                 };
                 const expenseDefaults = {
                     description: `Flight: ${payload.from || '-'} -> ${payload.to || '-'}`,

@@ -169,7 +169,6 @@ describe('group flights V2', () => {
                 flightNumber: 'DL123',
                 pnr: 'ABC123',
                 cabinClass: 'economy',
-                baggage: '1 checked',
                 status: 'planned',
                 cost: 500,
                 currency: 'USD',
@@ -179,7 +178,8 @@ describe('group flights V2', () => {
                 arriveAt: '2026-02-22T14:30:00Z',
                 notes: 'Test flight',
                 participantIds: [participantId],
-                participantSeats: { [participantId]: '12A' }
+                participantSeats: { [participantId]: '12A' },
+                participantBaggage: { [participantId]: '1 checked' }
             })
         });
         expect(flightRes.status).toBe(200);
@@ -196,6 +196,7 @@ describe('group flights V2', () => {
         expect(created).toBeTruthy();
         expect(created.participantIds).toEqual([participantId]);
         expect(created.participantSeats[String(participantId)]).toBe('12A');
+        expect(created.participantBaggage[String(participantId)]).toBe('1 checked');
 
         const updateRes = await fetch(`${baseUrl}/api/groups/${groupId}/flights/${flightBody.id}`, {
             method: 'PUT',
@@ -209,7 +210,6 @@ describe('group flights V2', () => {
                 flightNumber: 'DL123',
                 pnr: 'ABC123',
                 cabinClass: 'business',
-                baggage: '2 checked',
                 status: 'paid',
                 cost: 600,
                 currency: 'USD',
@@ -219,7 +219,8 @@ describe('group flights V2', () => {
                 arriveAt: '2026-02-22T14:30:00Z',
                 notes: 'Updated flight',
                 participantIds: [participantIdTwo],
-                participantSeats: { [participantIdTwo]: '2A' }
+                participantSeats: { [participantIdTwo]: '2A' },
+                participantBaggage: { [participantIdTwo]: '2 checked' }
             })
         });
         expect(updateRes.status).toBe(200);
@@ -234,5 +235,6 @@ describe('group flights V2', () => {
         expect(updated.status).toBe('paid');
         expect(updated.participantIds).toEqual([participantIdTwo]);
         expect(updated.participantSeats[String(participantIdTwo)]).toBe('2A');
+        expect(updated.participantBaggage[String(participantIdTwo)]).toBe('2 checked');
     });
 });
