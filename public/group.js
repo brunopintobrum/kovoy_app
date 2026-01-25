@@ -100,6 +100,13 @@
         return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
     };
 
+    const parseDateValue = (value) => {
+        if (!value) return null;
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return null;
+        return parsed;
+    };
+
     const renderAirlineOptions = () => {
         const list = document.getElementById('flightAirlineList');
         if (!list) return;
@@ -876,6 +883,44 @@
         sync();
     };
 
+    const setupTransportDateConstraints = () => {
+        const depart = document.getElementById('transportDepart');
+        const arrive = document.getElementById('transportArrive');
+        if (!depart || !arrive) return;
+        const sync = () => {
+            if (depart.value) {
+                arrive.min = depart.value;
+                if (arrive.value && arrive.value < depart.value) {
+                    arrive.value = depart.value;
+                }
+            } else {
+                arrive.removeAttribute('min');
+            }
+        };
+        depart.addEventListener('change', sync);
+        depart.addEventListener('input', sync);
+        sync();
+    };
+
+    const setupLodgingDateConstraints = () => {
+        const checkIn = document.getElementById('lodgingCheckIn');
+        const checkOut = document.getElementById('lodgingCheckOut');
+        if (!checkIn || !checkOut) return;
+        const sync = () => {
+            if (checkIn.value) {
+                checkOut.min = checkIn.value;
+                if (checkOut.value && checkOut.value < checkIn.value) {
+                    checkOut.value = checkIn.value;
+                }
+            } else {
+                checkOut.removeAttribute('min');
+            }
+        };
+        checkIn.addEventListener('change', sync);
+        checkIn.addEventListener('input', sync);
+        sync();
+    };
+
     const populateFlightParticipants = () => {
         const select = document.getElementById('flightParticipants');
         if (!select) return;
@@ -1325,6 +1370,10 @@
         setModuleExpensePayer('lodging', null);
         const status = document.getElementById('lodgingStatus');
         if (status) status.value = 'planned';
+        const checkOut = document.getElementById('lodgingCheckOut');
+        if (checkOut) {
+            checkOut.removeAttribute('min');
+        }
     };
 
     const populateLodgingForm = (lodging) => {
@@ -1362,6 +1411,13 @@
         if (checkInTime) checkInTime.value = lodging.checkInTime || '';
         if (checkOut) checkOut.value = lodging.checkOut || '';
         if (checkOutTime) checkOutTime.value = lodging.checkOutTime || '';
+        if (checkOut) {
+            if (checkIn?.value) {
+                checkOut.min = checkIn.value;
+            } else {
+                checkOut.removeAttribute('min');
+            }
+        }
         if (status) status.value = lodging.status || 'planned';
         if (cost) cost.value = lodging.cost ?? '';
         if (currency) currency.value = lodging.currency || state.group?.defaultCurrency || 'USD';
@@ -1401,6 +1457,10 @@
         setModuleExpensePayer('transport', null);
         const status = document.getElementById('transportStatus');
         if (status) status.value = 'planned';
+        const arrive = document.getElementById('transportArrive');
+        if (arrive) {
+            arrive.removeAttribute('min');
+        }
     };
 
     const populateTransportForm = (transport) => {
@@ -1421,6 +1481,13 @@
         if (destination) destination.value = transport.destination || '';
         if (depart) depart.value = formatDateTimeLocal(transport.departAt);
         if (arrive) arrive.value = formatDateTimeLocal(transport.arriveAt);
+        if (arrive) {
+            if (depart?.value) {
+                arrive.min = depart.value;
+            } else {
+                arrive.removeAttribute('min');
+            }
+        }
         if (provider) provider.value = transport.provider || '';
         if (locator) locator.value = transport.locator || '';
         if (status) status.value = transport.status || 'planned';
@@ -1642,6 +1709,15 @@
                     contactEmail: document.getElementById('lodgingContactEmail')?.value || '',
                     notes: document.getElementById('lodgingNotes')?.value || ''
                 };
+                const checkInDate = parseDateValue(payload.checkIn);
+                const checkOutDate = parseDateValue(payload.checkOut);
+                if (checkInDate && checkOutDate && checkOutDate.getTime() <= checkInDate.getTime()) {
+                    if (lodgingError) {
+                        lodgingError.textContent = 'Check-out must be after check-in.';
+                        lodgingError.classList.remove('d-none');
+                    }
+                    return;
+                }
                 const expenseDefaults = {
                     description: `Lodging: ${payload.name || '-'}`,
                     amount: payload.cost,
@@ -1712,6 +1788,15 @@
                     currency: document.getElementById('transportCurrency')?.value || '',
                     notes: document.getElementById('transportNotes')?.value || ''
                 };
+                const departDate = parseDateValue(payload.departAt);
+                const arriveDate = parseDateValue(payload.arriveAt);
+                if (departDate && arriveDate && arriveDate.getTime() <= departDate.getTime()) {
+                    if (transportError) {
+                        transportError.textContent = 'Arrival must be after departure.';
+                        transportError.classList.remove('d-none');
+                    }
+                    return;
+                }
                 const expenseDefaults = {
                     description: `Transport: ${payload.type || '-'}`,
                     amount: payload.amount,
@@ -1784,6 +1869,17 @@
                     notes: document.getElementById('ticketNotes')?.value || '',
                     participantIds: ticketParticipantValues
                 };
+                const eventDate = parseDateValue(payload.eventAt);
+                if (payload.status === 'planned' && eventDate) {
+                    const now = new Date();
+                    if (eventDate.getTime() <= now.getTime()) {
+                        if (ticketError) {
+                            ticketError.textContent = 'Planned tickets must be scheduled in the future.';
+                            ticketError.classList.remove('d-none');
+                        }
+                        return;
+                    }
+                }
                 const expenseDefaults = {
                     description: `Ticket: ${payload.type || '-'}`,
                     amount: payload.amount,
@@ -2310,6 +2406,8 @@
         setupFlightAirlineAutocomplete();
         setupFlightAirportAutocomplete();
         setupFlightDateConstraints();
+        setupTransportDateConstraints();
+        setupLodgingDateConstraints();
         setupFlightParticipantSearch();
         bindInviteForm();
         bindDeleteActions();
