@@ -31,6 +31,7 @@
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
 - Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
+- Hospedagens V2: backend valida check-out posterior ao check-in.
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
 - Transportes V2: validacao de chegada posterior a partida no backend.
 - Transportes V2: UI valida chegada posterior a partida.
@@ -40,6 +41,7 @@
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes.
 - Schema: novos campos em group_tickets e tabela group_ticket_participants.
 - Testes: validacao de tickets V2.
+- Tickets V2: backend valida data/hora futura quando status=planned.
 - Hospedagens V2: UI valida check-out posterior ao check-in.
 - Tickets V2: UI valida data/hora futura quando status=planned.
 - Voos V2: input Airline agora usa datalist/api e grava `airline_id`, criando novas companhias se necessário para evitar digitação incorreta e garantir consistência.
