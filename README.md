@@ -32,8 +32,9 @@ Video curto (opcional): (adicione o link aqui)
 - Validacao da soma do split
 - Dashboard do grupo com saldos e "quem deve pra quem"
 - Modulos do grupo (CRUD): voos, hospedagens, transportes e tickets
-- Voos V2: flight number, class, status e assentos/bagagens por passageiro (vinculo a participantes)
+- Voos V2: flight number, class, status, assentos/bagagens por passageiro e autocomplete de aeroportos (From/To)
 - Voos V2: o campo Airline utiliza autocomplete/datalist via `/api/airlines`, registra `airline_id` e permite adicionar novas companhias.
+- Voos V2: From/To utiliza autocomplete via `/api/airports` e grava `from_airport_id`/`to_airport_id` quando ha match.
 - Hospedagens V2: endereco completo, quartos, check-in/out com hora e status
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes
@@ -99,11 +100,21 @@ Campos V2 em `group_flights`:
 
 - `airline`, `flight_number`, `pnr`, `cabin_class`, `status`
 - `airline_id` referencia a tabela `airlines` para padronizar entradas e alimentar o autocomplete.
+- `from_airport_id`, `to_airport_id` referenciam `airports` para padronizar From/To.
 - `cost`, `currency`, `from_city`, `to_city`, `depart_at`, `arrive_at`, `notes`, `expense_id`
 
 Tabela de vinculo `group_flight_participants`:
 
 - `group_id`, `flight_id`, `participant_id`, `seat`, `baggage`, `created_at`
+
+Tabela `airports`:
+
+- `code`, `name`, `city`, `country`, `name_normalized`, `city_normalized`
+
+Importacao de aeroportos:
+
+- `node scripts/import-routes.js "C:\Users\bruno\Downloads\airports.csv"` (importa aeroportos apenas)
+- `node scripts/import-routes.js "C:\Users\bruno\Downloads\routes.csv" "C:\Users\bruno\Downloads\airports.csv"` (importa rotas + aeroportos)
 
 Campos V2 em `group_lodgings`:
 

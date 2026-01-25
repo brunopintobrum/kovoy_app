@@ -105,13 +105,17 @@
   - [x] Voos
     - [x] Companhia, numero do voo, PNR
     - [x] Assentos, classe, bagagens
+    - [x] Assentos por passageiro
+    - [x] Bagagens por passageiro
     - [x] Status (planned/paid/due) e observacoes
     - [x] Integracao com passageiros (participantes)
     - [x] Autocomplete (datalist) para airline com fallback para adicionar novas cias e `airlines`.
+    - [x] Autocomplete de aeroportos (From/To) com `/api/airports`.
     - [x] Filter por rota (From/To) usando tabela de rotas/aeroportos.
-    - [ ] Validar chegada posterior a partida (backend + UI)
-    - [ ] Exibir classe/assento/bagagem na lista
-    - [ ] Seletor de passageiros com busca
+    - [x] Validar chegada posterior a partida (backend + UI)
+    - [x] Exibir classe/assento/bagagem na lista
+    - [x] Seletor de passageiros com busca
+    - [x] Layout de voos reorganizado (secoes e tabela de detalhes por passageiro)
     - [ ] UX: filtros por cia/rota/status
     - [ ] Dados: prefilling por airline + flight number
   - [x] Hospedagens
@@ -153,12 +157,12 @@
 - [x] UI: toggle para vincular despesas nos modulos (V2 opcional)
 
 ## V2 - Prioridade sugerida
-1. Voos V2: Validar chegada posterior a partida (backend + UI)
+1. Voos V2: Validar chegada posterior a partida (backend + UI) [feito]
 2. Transportes V2: Validar chegada > partida (backend + UI)
 3. Hospedagens V2: Validar check-out > check-in (backend + UI)
 4. Tickets V2: Validar data/hora coerente (futuro quando aplicavel)
-5. Voos V2: Exibir classe/assento/bagagem na lista
-6. Voos V2: Seletor de passageiros com busca
+5. Voos V2: Exibir classe/assento/bagagem na lista [feito]
+6. Voos V2: Seletor de passageiros com busca [feito]
 7. Hospedagens V2: Listagem com resumo de quartos e status
 8. Transportes V2: Listagem com origem/destino + horario em destaque
 9. Tickets V2: Listagem com participantes destacados
@@ -170,20 +174,23 @@
 15. Transportes V2: Provider + locator obrigatorios quando status=paid
 16. Hospedagens V2: Contato obrigatorio quando necessario
 17. Tickets V2: Local obrigatorio quando type exige
+18. Voos V2: Autocomplete de aeroportos (From/To) e IDs persistidos [feito]
+19. Voos V2: Assentos/bagagens por passageiro [feito]
+20. Voos V2: Layout de formulario organizado [feito]
 
 ## V2 - Roadmap por fases
 - V2.1 (Qualidade de dados)
-  - Voos: chegada > partida
+  - Voos: chegada > partida (feito)
   - Transportes: chegada > partida
   - Hospedagens: check-out > check-in
   - Tickets: data/hora coerente
 - V2.2 (Listagens mais uteis)
-  - Voos: classe/assento/bagagem na lista
+  - Voos: classe/assento/bagagem na lista (feito)
   - Hospedagens: resumo de quartos e status
   - Transportes: origem/destino + horario em destaque
   - Tickets: participantes destacados
 - V2.3 (Usabilidade de selecao e filtros)
-  - Voos: seletor de passageiros com busca
+  - Voos: seletor de passageiros com busca (feito)
   - Voos: filtros por cia/rota/status
   - Hospedagens: filtros por cidade/status
   - Transportes: filtros por status/fornecedor
