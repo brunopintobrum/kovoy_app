@@ -125,7 +125,7 @@
     - [x] Check-in/out com hora
     - [x] Status e observacoes
     - [ ] Validar check-out > check-in (backend)
-    - [ ] Validar check-out > check-in (UI)
+    - [x] Validar check-out > check-in (UI)
     - [ ] Listagem: resumo de quartos e status
     - [ ] Filtros por cidade/status
     - [ ] Dados: contato obrigatorio quando necessario
@@ -134,7 +134,7 @@
     - [x] Fornecedor, localizador
     - [x] Status e observacoes
     - [x] Validar chegada > partida (backend)
-    - [ ] Validar chegada > partida (UI)
+    - [x] Validar chegada > partida (UI)
     - [ ] Listagem: origem/destino + horario em destaque
     - [ ] Filtros por status/fornecedor
     - [ ] Dados: provider + locator obrigatorios quando status=paid
@@ -143,7 +143,7 @@
     - [x] Vinculo a participantes
     - [x] Status e observacoes
     - [ ] Validar data/hora coerente (backend)
-    - [ ] Validar data/hora coerente (UI)
+    - [x] Validar data/hora coerente (UI)
     - [ ] Listagem: participantes destacados
     - [ ] Filtros por tipo/status/data
     - [ ] Dados: local obrigatorio quando type exige
@@ -161,9 +161,9 @@
 
 ## V2 - Prioridade sugerida
 1. Voos V2: Validar chegada posterior a partida (backend + UI) [feito]
-2. Transportes V2: Validar chegada > partida (backend feito, UI pendente)
-3. Hospedagens V2: Validar check-out > check-in (backend pendente, UI pendente)
-4. Tickets V2: Validar data/hora coerente (backend pendente, UI pendente)
+2. Transportes V2: Validar chegada > partida (backend feito, UI feito)
+3. Hospedagens V2: Validar check-out > check-in (backend pendente, UI feito)
+4. Tickets V2: Validar data/hora coerente (backend pendente, UI feito)
 5. Voos V2: Exibir classe/assento/bagagem na lista [feito]
 6. Voos V2: Seletor de passageiros com busca [feito]
 7. Hospedagens V2: Listagem com resumo de quartos e status
@@ -184,9 +184,9 @@
 ## V2 - Roadmap por fases
 - V2.1 (Qualidade de dados)
   - Voos: chegada > partida (feito)
-  - Transportes: chegada > partida (backend feito, UI pendente)
-  - Hospedagens: check-out > check-in (backend pendente, UI pendente)
-  - Tickets: data/hora coerente (backend pendente, UI pendente)
+  - Transportes: chegada > partida (backend feito, UI feito)
+  - Hospedagens: check-out > check-in (backend pendente, UI feito)
+  - Tickets: data/hora coerente (backend pendente, UI feito)
 - V2.2 (Listagens mais uteis)
   - Voos: classe/assento/bagagem na lista (feito)
   - Hospedagens: resumo de quartos e status

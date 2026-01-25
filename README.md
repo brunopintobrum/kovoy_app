@@ -447,6 +447,9 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Voos V2: chegada agora sincroniza com a partida no formulario.
 - Transportes V2: validacao de chegada posterior a partida no backend.
 - Voos V2: campos avancados + participantes vinculados no modulo de grupos.
+- Transportes V2: UI valida chegada posterior a partida.
+- Hospedagens V2: UI valida check-out posterior ao check-in.
+- Tickets V2: UI valida data/hora futura quando status=planned.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
 - Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.

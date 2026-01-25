@@ -82,10 +82,13 @@
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
 - Transportes V2: validacao de chegada posterior a partida no backend.
+- Transportes V2: UI valida chegada posterior a partida.
 - Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
 - Testes: validacao de transportes V2.
 - Modulos V2 sincronizam o pagador e o split (participants/families/manual) do painel diretamente na despesa vinculada, usando `expense_splits` para registrar cada alvo.
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes.
 - Schema: novos campos em group_tickets e tabela group_ticket_participants.
 - Testes: validacao de tickets V2.
+- Hospedagens V2: UI valida check-out posterior ao check-in.
+- Tickets V2: UI valida data/hora futura quando status=planned.
 
