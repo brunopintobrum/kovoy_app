@@ -259,6 +259,27 @@ describe('validation helpers', () => {
         });
     });
 
+    test('validateGroupLodgingPayload rejects check-out before check-in', () => {
+        const result = validateGroupLodgingPayload({
+            name: 'Resort',
+            address: '123 Main St',
+            city: 'Orlando',
+            country: 'USA',
+            checkIn: '2026-02-25',
+            checkInTime: '15:00',
+            checkOut: '2026-02-22',
+            checkOutTime: '11:00',
+            roomType: 'Suite',
+            roomQuantity: 2,
+            roomOccupancy: 4,
+            status: 'planned',
+            cost: 300,
+            currency: 'USD',
+            contact: 'Front Desk'
+        });
+        expect(result).toEqual({ error: 'Check-out must be after check-in.' });
+    });
+
     test('validateGroupTransportPayload validates amount and currency', () => {
         const result = validateGroupTransportPayload({
             type: 'Shuttle',
@@ -310,5 +331,18 @@ describe('validation helpers', () => {
             amount: 180,
             currency: 'USD'
         });
+    });
+
+    test('validateGroupTicketPayload rejects past planned tickets', () => {
+        const pastDate = new Date(Date.now() - 60_000).toISOString();
+        const result = validateGroupTicketPayload({
+            type: 'Theme Park',
+            eventAt: pastDate,
+            location: 'Orlando',
+            status: 'planned',
+            amount: 180,
+            currency: 'USD'
+        });
+        expect(result).toEqual({ error: 'Planned tickets must be scheduled in the future.' });
     });
 });

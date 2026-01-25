@@ -4280,6 +4280,9 @@ const validateGroupLodgingPayload = (payload) => {
     if (checkInTime.error) return checkInTime;
     const checkOut = requireDate(payload.checkOut, 'Check-out');
     if (checkOut.error) return checkOut;
+    if (new Date(checkOut.value).getTime() <= new Date(checkIn.value).getTime()) {
+        return { error: 'Check-out must be after check-in.' };
+    }
     const checkOutTime = requireTime(payload.checkOutTime, 'Check-out time');
     if (checkOutTime.error) return checkOutTime;
     const roomType = requireString(payload.roomType, 'Room type');
@@ -4370,6 +4373,9 @@ const validateGroupTicketPayload = (payload) => {
     if (location.error) return location;
     const status = payload.status ? requireStatus(payload.status) : { value: 'planned' };
     if (status.error) return status;
+    if (status.value === 'planned' && new Date(eventAt.value).getTime() <= Date.now()) {
+        return { error: 'Planned tickets must be scheduled in the future.' };
+    }
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
     const amount = requireNumber(payload.amount, 'Amount');
