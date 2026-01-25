@@ -36,6 +36,7 @@
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
 - Transportes V2: validacao de chegada posterior a partida no backend.
 - Transportes V2: UI valida chegada posterior a partida.
+- Transportes V2: UI sincroniza chegada com partida no formulario.
 - Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
 - Testes: validacao de transportes V2.
 - Modulos V2 sincronizam pagador, tipo/mode e alvos do split (Participants/Families/manual) diretamente na despesa vinculada; o detail permanece no `expense_splits`.

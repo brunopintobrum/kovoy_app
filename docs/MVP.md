@@ -136,6 +136,7 @@
     - [x] Status e observacoes
     - [x] Validar chegada > partida (backend)
     - [x] Validar chegada > partida (UI)
+    - [x] UI: chegada sincroniza com partida
     - [ ] Listagem: origem/destino + horario em destaque
     - [ ] Filtros por status/fornecedor
     - [ ] Dados: provider + locator obrigatorios quando status=paid
