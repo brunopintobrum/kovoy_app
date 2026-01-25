@@ -124,7 +124,7 @@
     - [x] Endereco completo + contato
     - [x] Check-in/out com hora
     - [x] Status e observacoes
-    - [ ] Validar check-out > check-in (backend)
+    - [x] Validar check-out > check-in (backend)
     - [x] Validar check-out > check-in (UI)
     - [ ] Listagem: resumo de quartos e status
     - [ ] Filtros por cidade/status
@@ -142,7 +142,7 @@
     - [x] Tipo (parque, evento, etc), data/hora, local
     - [x] Vinculo a participantes
     - [x] Status e observacoes
-    - [ ] Validar data/hora coerente (backend)
+    - [x] Validar data/hora coerente (backend)
     - [x] Validar data/hora coerente (UI)
     - [ ] Listagem: participantes destacados
     - [ ] Filtros por tipo/status/data
@@ -162,8 +162,8 @@
 ## V2 - Prioridade sugerida
 1. Voos V2: Validar chegada posterior a partida (backend + UI) [feito]
 2. Transportes V2: Validar chegada > partida (backend feito, UI feito)
-3. Hospedagens V2: Validar check-out > check-in (backend pendente, UI feito)
-4. Tickets V2: Validar data/hora coerente (backend pendente, UI feito)
+3. Hospedagens V2: Validar check-out > check-in (backend feito, UI feito)
+4. Tickets V2: Validar data/hora coerente (backend feito, UI feito)
 5. Voos V2: Exibir classe/assento/bagagem na lista [feito]
 6. Voos V2: Seletor de passageiros com busca [feito]
 7. Hospedagens V2: Listagem com resumo de quartos e status
@@ -185,8 +185,8 @@
 - V2.1 (Qualidade de dados)
   - Voos: chegada > partida (feito)
   - Transportes: chegada > partida (backend feito, UI feito)
-  - Hospedagens: check-out > check-in (backend pendente, UI feito)
-  - Tickets: data/hora coerente (backend pendente, UI feito)
+  - Hospedagens: check-out > check-in (backend feito, UI feito)
+  - Tickets: data/hora coerente (backend feito, UI feito)
 - V2.2 (Listagens mais uteis)
   - Voos: classe/assento/bagagem na lista (feito)
   - Hospedagens: resumo de quartos e status
