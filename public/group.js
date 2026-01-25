@@ -6,6 +6,7 @@
         families: [],
         participants: [],
         airlines: [],
+        airports: { from: [], to: [] },
         expenses: [],
         flights: [],
         lodgings: [],
@@ -141,6 +142,78 @@
         const handler = () => syncFlightAirlineIdFromInput();
         input.addEventListener('input', handler);
         input.addEventListener('change', handler);
+    };
+
+    const buildAirportDisplayValue = (airport) => {
+        const label = airport.city || airport.name || airport.code;
+        if (airport.code && label && label !== airport.code) {
+            return `${label} (${airport.code})`;
+        }
+        return airport.code || label || '';
+    };
+
+    const renderAirportOptions = (listId, airports) => {
+        const list = document.getElementById(listId);
+        if (!list) return;
+        list.innerHTML = '';
+        airports.forEach((airport) => {
+            const option = document.createElement('option');
+            option.value = buildAirportDisplayValue(airport);
+            option.dataset.id = String(airport.id);
+            list.appendChild(option);
+        });
+    };
+
+    const syncAirportIdFromInput = (inputId, hiddenId, airports) => {
+        const input = document.getElementById(inputId);
+        const hidden = document.getElementById(hiddenId);
+        if (!input || !hidden) return;
+        const valueRaw = input.value.trim();
+        const value = valueRaw.toUpperCase();
+        if (!value) {
+            hidden.value = '';
+            return;
+        }
+        const match = (airports || []).find((airport) => {
+            const code = airport.code.toUpperCase();
+            const display = buildAirportDisplayValue(airport).toUpperCase();
+            return code === value || display === value;
+        });
+        hidden.value = match ? match.id : '';
+    };
+
+    const loadAirportSuggestions = async (query, targetKey, inputId, listId, hiddenId) => {
+        try {
+            const response = await apiRequest(`/api/airports?query=${encodeURIComponent(query)}`);
+            state.airports[targetKey] = response.data || [];
+            renderAirportOptions(listId, state.airports[targetKey]);
+            syncAirportIdFromInput(inputId, hiddenId, state.airports[targetKey]);
+        } catch (err) {
+            console.warn('Failed to load airports:', err.message);
+        }
+    };
+
+    const setupFlightAirportAutocomplete = () => {
+        const configs = [
+            { inputId: 'flightFrom', listId: 'flightFromList', hiddenId: 'flightFromAirportId', key: 'from' },
+            { inputId: 'flightTo', listId: 'flightToList', hiddenId: 'flightToAirportId', key: 'to' }
+        ];
+        configs.forEach((config) => {
+            const input = document.getElementById(config.inputId);
+            if (!input) return;
+            let timer = null;
+            const handler = () => {
+                syncAirportIdFromInput(config.inputId, config.hiddenId, state.airports[config.key]);
+                const query = input.value.trim();
+                if (query.length < 2) return;
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(() => {
+                    loadAirportSuggestions(query, config.key, config.inputId, config.listId, config.hiddenId);
+                }, 200);
+            };
+            input.addEventListener('input', handler);
+            input.addEventListener('change', handler);
+        });
     };
 
     const formatFlightClassLabel = (value) => {
@@ -463,7 +536,7 @@
                 <td>${formatFlightClassLabel(flight.cabinClass)}</td>
                 <td>${seatsLabel}</td>
                 <td>${baggageLabel}</td>
-                <td>${flight.from || '-'} -> ${flight.to || '-'}</td>
+                <td>${flight.fromLabel || flight.from || '-'} -> ${flight.toLabel || flight.to || '-'}</td>
                 <td>${formatDateTime(flight.departAt)}</td>
                 <td>${formatDateTime(flight.arriveAt)}</td>
                 <td>${passengersLabel}</td>
@@ -1141,6 +1214,10 @@
             applyFlightParticipantSearchFilter();
         }
         renderFlightPassengerDetails();
+        const fromAirportId = document.getElementById('flightFromAirportId');
+        const toAirportId = document.getElementById('flightToAirportId');
+        if (fromAirportId) fromAirportId.value = '';
+        if (toAirportId) toAirportId.value = '';
         const airlineIdInput = document.getElementById('flightAirlineId');
         if (airlineIdInput) airlineIdInput.value = '';
         syncFlightAirlineIdFromInput();
@@ -1168,12 +1245,16 @@
         if (cost) cost.value = flight.cost ?? '';
         if (currency) currency.value = flight.currency || state.group?.defaultCurrency || 'USD';
         if (cabinClass) cabinClass.value = flight.cabinClass || '';
-        if (from) from.value = flight.from || '';
-        if (to) to.value = flight.to || '';
+        if (from) from.value = flight.fromLabel || flight.from || '';
+        if (to) to.value = flight.toLabel || flight.to || '';
         if (depart) depart.value = formatDateTimeLocal(flight.departAt);
         if (arrive) arrive.value = formatDateTimeLocal(flight.arriveAt);
         if (passengers) setMultiSelectValues(passengers, flight.participantIds || []);
         if (notes) notes.value = flight.notes || '';
+        const fromAirportId = document.getElementById('flightFromAirportId');
+        const toAirportId = document.getElementById('flightToAirportId');
+        if (fromAirportId) fromAirportId.value = flight.fromAirportId || '';
+        if (toAirportId) toAirportId.value = flight.toAirportId || '';
         state.editing.flightSeatMap = { ...(flight.participantSeats || {}) };
         state.editing.flightBaggageMap = { ...(flight.participantBaggage || {}) };
         renderFlightPassengerDetails();
@@ -1435,6 +1516,8 @@
                     cabinClass: document.getElementById('flightClass')?.value || '',
                     from: document.getElementById('flightFrom')?.value || '',
                     to: document.getElementById('flightTo')?.value || '',
+                    fromAirportId: document.getElementById('flightFromAirportId')?.value || '',
+                    toAirportId: document.getElementById('flightToAirportId')?.value || '',
                     departAt: document.getElementById('flightDepart')?.value || '',
                     arriveAt: document.getElementById('flightArrive')?.value || '',
                     notes: document.getElementById('flightNotes')?.value || '',
@@ -2189,6 +2272,7 @@
         bindGroupSelector();
         bindForms();
         setupFlightAirlineAutocomplete();
+        setupFlightAirportAutocomplete();
         setupFlightParticipantSearch();
         bindInviteForm();
         bindDeleteActions();

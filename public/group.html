@@ -562,12 +562,16 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label" for="flightFrom">From</label>
-                                    <input class="form-control" id="flightFrom" required>
+                                    <input class="form-control" id="flightFrom" required list="flightFromList" placeholder="City or airport code">
+                                    <datalist id="flightFromList"></datalist>
+                                    <input type="hidden" id="flightFromAirportId">
                                     <div class="invalid-feedback">Enter a departure city.</div>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label" for="flightTo">To</label>
-                                    <input class="form-control" id="flightTo" required>
+                                    <input class="form-control" id="flightTo" required list="flightToList" placeholder="City or airport code">
+                                    <datalist id="flightToList"></datalist>
+                                    <input type="hidden" id="flightToAirportId">
                                     <div class="invalid-feedback">Enter an arrival city.</div>
                                 </div>
                                 <div class="col-md-3">

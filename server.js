@@ -228,12 +228,16 @@ db.exec(`
         currency TEXT,
         from_city TEXT,
         to_city TEXT,
+        from_airport_id INTEGER,
+        to_airport_id INTEGER,
         depart_at TEXT,
         arrive_at TEXT,
         notes TEXT,
         FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
         FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE SET NULL,
-        FOREIGN KEY (airline_id) REFERENCES airlines(id) ON DELETE SET NULL
+        FOREIGN KEY (airline_id) REFERENCES airlines(id) ON DELETE SET NULL,
+        FOREIGN KEY (from_airport_id) REFERENCES airports(id) ON DELETE SET NULL,
+        FOREIGN KEY (to_airport_id) REFERENCES airports(id) ON DELETE SET NULL
     );
     CREATE TABLE IF NOT EXISTS group_flight_participants (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -256,7 +260,9 @@ db.exec(`
         code TEXT NOT NULL UNIQUE,
         name TEXT,
         city TEXT,
-        country TEXT
+        country TEXT,
+        name_normalized TEXT,
+        city_normalized TEXT
     );
     CREATE TABLE IF NOT EXISTS route_airlines (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -478,6 +484,8 @@ const hasGroupFlightNumber = groupFlightColumns.some((column) => column.name ===
 const hasGroupFlightCabinClass = groupFlightColumns.some((column) => column.name === 'cabin_class');
 const hasGroupFlightStatus = groupFlightColumns.some((column) => column.name === 'status');
 const hasGroupFlightAirlineId = groupFlightColumns.some((column) => column.name === 'airline_id');
+const hasGroupFlightFromAirportId = groupFlightColumns.some((column) => column.name === 'from_airport_id');
+const hasGroupFlightToAirportId = groupFlightColumns.some((column) => column.name === 'to_airport_id');
 if (!hasGroupFlightExpense) {
     db.exec('ALTER TABLE group_flights ADD COLUMN expense_id INTEGER');
 }
@@ -493,6 +501,12 @@ if (!hasGroupFlightStatus) {
 if (!hasGroupFlightAirlineId) {
     db.exec('ALTER TABLE group_flights ADD COLUMN airline_id INTEGER');
 }
+if (!hasGroupFlightFromAirportId) {
+    db.exec('ALTER TABLE group_flights ADD COLUMN from_airport_id INTEGER');
+}
+if (!hasGroupFlightToAirportId) {
+    db.exec('ALTER TABLE group_flights ADD COLUMN to_airport_id INTEGER');
+}
 const groupFlightParticipantColumns = db.prepare('PRAGMA table_info(group_flight_participants)').all();
 const hasGroupFlightParticipantSeat = groupFlightParticipantColumns.some((column) => column.name === 'seat');
 const hasGroupFlightParticipantBaggage = groupFlightParticipantColumns.some((column) => column.name === 'baggage');
@@ -501,6 +515,15 @@ if (!hasGroupFlightParticipantSeat) {
 }
 if (!hasGroupFlightParticipantBaggage) {
     db.exec('ALTER TABLE group_flight_participants ADD COLUMN baggage TEXT');
+}
+const airportColumns = db.prepare('PRAGMA table_info(airports)').all();
+const hasAirportNameNormalized = airportColumns.some((column) => column.name === 'name_normalized');
+const hasAirportCityNormalized = airportColumns.some((column) => column.name === 'city_normalized');
+if (!hasAirportNameNormalized) {
+    db.exec('ALTER TABLE airports ADD COLUMN name_normalized TEXT');
+}
+if (!hasAirportCityNormalized) {
+    db.exec('ALTER TABLE airports ADD COLUMN city_normalized TEXT');
 }
 const groupLodgingColumns = db.prepare('PRAGMA table_info(group_lodgings)').all();
 const hasGroupLodgingExpense = groupLodgingColumns.some((column) => column.name === 'expense_id');
@@ -1706,7 +1729,7 @@ const listParticipantIds = db.prepare('SELECT id FROM participants WHERE group_i
 const listFamilyIds = db.prepare('SELECT id FROM families WHERE group_id = ?');
 const listGroupFlights = db.prepare(`
     SELECT id, expense_id, airline, airline_id, flight_number, pnr, cabin_class, status,
-           cost, currency, from_city, to_city, depart_at, arrive_at, notes
+           cost, currency, from_city, to_city, from_airport_id, to_airport_id, depart_at, arrive_at, notes
     FROM group_flights
     WHERE group_id = ?
     ORDER BY depart_at DESC, id DESC
@@ -1715,14 +1738,15 @@ const getGroupFlight = db.prepare('SELECT id, expense_id FROM group_flights WHER
 const insertGroupFlight = db.prepare(`
     INSERT INTO group_flights (
         id, group_id, expense_id, airline, airline_id, flight_number, pnr, cabin_class, status,
-        cost, currency, from_city, to_city, depart_at, arrive_at, notes
+        cost, currency, from_city, to_city, from_airport_id, to_airport_id, depart_at, arrive_at, notes
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const updateGroupFlight = db.prepare(`
     UPDATE group_flights
     SET expense_id = ?, airline = ?, airline_id = ?, flight_number = ?, pnr = ?, cabin_class = ?, status = ?,
-        cost = ?, currency = ?, from_city = ?, to_city = ?, depart_at = ?, arrive_at = ?, notes = ?
+        cost = ?, currency = ?, from_city = ?, to_city = ?, from_airport_id = ?, to_airport_id = ?,
+        depart_at = ?, arrive_at = ?, notes = ?
     WHERE id = ? AND group_id = ?
 `);
 const deleteGroupFlight = db.prepare('DELETE FROM group_flights WHERE id = ? AND group_id = ?');
@@ -1768,10 +1792,22 @@ const findAirportCodesStmt = db.prepare(`
        OR UPPER(city) LIKE ?
        OR UPPER(name) LIKE ?
 `);
+const listAirportsByQuery = db.prepare(`
+    SELECT id, code, name, city, country
+    FROM airports
+    WHERE UPPER(code) LIKE ?
+       OR city_normalized LIKE ?
+       OR name_normalized LIKE ?
+       OR UPPER(city) LIKE ?
+       OR UPPER(name) LIKE ?
+    ORDER BY code
+    LIMIT 20
+`);
 const listAirlines = db.prepare('SELECT id, name FROM airlines ORDER BY name');
 const getAirlineById = db.prepare('SELECT id, name FROM airlines WHERE id = ?');
 const findAirlineByName = db.prepare('SELECT id FROM airlines WHERE LOWER(name) = ?');
 const insertAirline = db.prepare('INSERT INTO airlines (name) VALUES (?)');
+const getAirportById = db.prepare('SELECT id, code, name, city, country FROM airports WHERE id = ?');
 const listGroupLodgings = db.prepare(`
     SELECT id, expense_id, name, address, address_line2, city, state, postal_code, country,
            check_in, check_in_time, check_out, check_out_time, room_type, room_quantity, room_occupancy,
@@ -2485,6 +2521,22 @@ app.get('/api/airlines', authRequiredApi, (req, res) => {
     return res.json({ ok: true, data: airlines });
 });
 
+app.get('/api/airports', authRequiredApi, (req, res) => {
+    const queryRaw = typeof req.query.query === 'string' ? req.query.query.trim() : '';
+    if (!queryRaw) {
+        return res.json({ ok: true, data: [] });
+    }
+    const query = queryRaw.toUpperCase();
+    const normalized = queryRaw
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase();
+    const like = `%${query}%`;
+    const likeNormalized = `%${normalized}%`;
+    const airports = listAirportsByQuery.all(like, likeNormalized, likeNormalized, like, like);
+    return res.json({ ok: true, data: airports });
+});
+
 app.get('/api/routes/airlines', authRequiredApi, (req, res) => {
     const from = (typeof req.query.from === 'string' ? req.query.from : '').trim();
     const to = (typeof req.query.to === 'string' ? req.query.to : '').trim();
@@ -2572,6 +2624,8 @@ app.post(
                     linkedExpenseId = expenseResult.expenseId;
                 }
                 const airlineId = ensureAirlineId(normalized.value.airline, normalized.value.airlineId);
+                const fromValue = resolveAirportCode(normalized.value.fromAirportId, normalized.value.from);
+                const toValue = resolveAirportCode(normalized.value.toAirportId, normalized.value.to);
                 insertGroupFlight.run(
                     id,
                     req.groupId,
@@ -2584,8 +2638,10 @@ app.post(
                     normalized.value.status,
                     normalized.value.cost,
                     normalized.value.currency,
-                    normalized.value.from,
-                    normalized.value.to,
+                    fromValue,
+                    toValue,
+                    normalized.value.fromAirportId,
+                    normalized.value.toAirportId,
                     normalized.value.departAt,
                     normalized.value.arriveAt,
                     normalized.value.notes
@@ -2663,6 +2719,8 @@ app.put(
                     linkedExpenseId = expenseResult.expenseId;
                 }
                 const airlineId = ensureAirlineId(normalized.value.airline, normalized.value.airlineId);
+                const fromValue = resolveAirportCode(normalized.value.fromAirportId, normalized.value.from);
+                const toValue = resolveAirportCode(normalized.value.toAirportId, normalized.value.to);
                 updateGroupFlight.run(
                     linkedExpenseId,
                     normalized.value.airline,
@@ -2673,8 +2731,10 @@ app.put(
                     normalized.value.status,
                     normalized.value.cost,
                     normalized.value.currency,
-                    normalized.value.from,
-                    normalized.value.to,
+                    fromValue,
+                    toValue,
+                    normalized.value.fromAirportId,
+                    normalized.value.toAirportId,
                     normalized.value.departAt,
                     normalized.value.arriveAt,
                     normalized.value.notes,
@@ -3692,6 +3752,10 @@ const mapGroupFlightRow = (row, participantMap, seatMap, baggageMap) => ({
     currency: row.currency,
     from: row.from_city,
     to: row.to_city,
+    fromLabel: resolveAirportLabel(row.from_airport_id, row.from_city),
+    toLabel: resolveAirportLabel(row.to_airport_id, row.to_city),
+    fromAirportId: row.from_airport_id || null,
+    toAirportId: row.to_airport_id || null,
     departAt: row.depart_at,
     arriveAt: row.arrive_at,
     notes: row.notes,
@@ -4123,6 +4187,27 @@ const normalizeParticipantBaggage = (value) => {
     return { value: baggageMap };
 };
 
+const formatAirportLabel = (airport) => {
+    if (!airport) return null;
+    const label = airport.city || airport.name || airport.code;
+    if (airport.code && label && label !== airport.code) {
+        return `${label} (${airport.code})`;
+    }
+    return airport.code || label || null;
+};
+
+const resolveAirportCode = (airportId, fallback) => {
+    if (!airportId) return fallback;
+    const airport = getAirportById.get(airportId);
+    return airport ? airport.code : fallback;
+};
+
+const resolveAirportLabel = (airportId, fallback) => {
+    if (!airportId) return fallback;
+    const airport = getAirportById.get(airportId);
+    return formatAirportLabel(airport) || fallback;
+};
+
 const optionalCabinClass = (value) => {
     if (!value) return { value: null };
     const valid = ['economy', 'premium_economy', 'business', 'first'];
@@ -4142,6 +4227,8 @@ const validateGroupFlightPayload = (payload) => {
     if (fromCity.error) return fromCity;
     const toCity = requireString(payload.to, 'To');
     if (toCity.error) return toCity;
+    const fromAirportId = parseGroupId(payload.fromAirportId);
+    const toAirportId = parseGroupId(payload.toAirportId);
     const departAt = requireDate(payload.departAt, 'Departure');
     if (departAt.error) return departAt;
     const arriveAt = requireDate(payload.arriveAt, 'Arrival');
@@ -4168,6 +4255,8 @@ const validateGroupFlightPayload = (payload) => {
             currency: currency.value,
             from: fromCity.value,
             to: toCity.value,
+            fromAirportId,
+            toAirportId,
             departAt: departAt.value,
             arriveAt: arriveAt.value,
             notes: optionalString(payload.notes),
