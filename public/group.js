@@ -890,9 +890,7 @@
         const sync = () => {
             if (depart.value) {
                 arrive.min = depart.value;
-                if (arrive.value && arrive.value < depart.value) {
-                    arrive.value = depart.value;
-                }
+                arrive.value = depart.value;
             } else {
                 arrive.removeAttribute('min');
             }
