@@ -505,6 +505,9 @@
                                 </div>
                             </div>
                             <form id="flightForm" class="row g-3 needs-validation" novalidate>
+                                <div class="col-12">
+                                    <h6 class="text-uppercase text-muted mb-0">Flight details</h6>
+                                </div>
                                 <div class="col-md-4">
                                     <label class="form-label" for="flightAirline">Airline</label>
                                     <input class="form-control" id="flightAirline" required list="flightAirlineList">
@@ -530,21 +533,7 @@
                                     </select>
                                     <div class="invalid-feedback">Select a status.</div>
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="flightCost">Cost</label>
-                                    <input class="form-control" id="flightCost" type="number" step="0.01" min="0.01" required>
-                                    <div class="invalid-feedback">Enter a valid cost.</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="flightCurrency">Currency</label>
-                                    <select class="form-select" id="flightCurrency" required>
-                                        <option value="USD">USD</option>
-                                        <option value="CAD">CAD</option>
-                                        <option value="BRL">BRL</option>
-                                    </select>
-                                    <div class="invalid-feedback">Select a currency.</div>
-                                </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label class="form-label" for="flightClass">Class</label>
                                     <select class="form-select" id="flightClass">
                                         <option value="">Select class</option>
@@ -554,9 +543,22 @@
                                         <option value="first">First</option>
                                     </select>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Baggage</label>
-                                    <div class="text-muted small">Set per passenger below.</div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="flightCost">Cost</label>
+                                    <input class="form-control" id="flightCost" type="number" step="0.01" min="0.01" required>
+                                    <div class="invalid-feedback">Enter a valid cost.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="flightCurrency">Currency</label>
+                                    <select class="form-select" id="flightCurrency" required>
+                                        <option value="USD">USD</option>
+                                        <option value="CAD">CAD</option>
+                                        <option value="BRL">BRL</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a currency.</div>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <h6 class="text-uppercase text-muted mb-0">Route & timing</h6>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label" for="flightFrom">From</label>
@@ -578,28 +580,39 @@
                                     <input class="form-control" id="flightArrive" type="datetime-local" required>
                                     <div class="invalid-feedback">Select an arrival time.</div>
                                 </div>
-                                  <div class="col-md-6">
-                                      <label class="form-label" for="flightParticipants">Passengers</label>
-                                      <input class="form-control mb-2" id="flightParticipantSearch" type="search" placeholder="Search participants">
-                                      <select class="form-select" id="flightParticipants" multiple>
-                                      </select>
-                                      <small class="text-muted">Select passengers (Ctrl/Cmd for multiple).</small>
-                                  </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Passenger seats</label>
-                                    <div class="border rounded p-2 bg-light" id="flightPassengerSeats">
-                                        <div class="text-muted">Select passengers to assign seats.</div>
-                                    </div>
-                                    <small class="text-muted">Optional: assign seats per passenger.</small>
+                                <div class="col-12 mt-2">
+                                    <h6 class="text-uppercase text-muted mb-0">Passengers</h6>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Passenger baggage</label>
-                                    <div class="border rounded p-2 bg-light" id="flightPassengerBaggage">
-                                        <div class="text-muted">Select passengers to assign baggage.</div>
-                                    </div>
-                                    <small class="text-muted">Optional: assign baggage per passenger.</small>
+                                    <label class="form-label" for="flightParticipants">Passengers</label>
+                                    <input class="form-control mb-2" id="flightParticipantSearch" type="search" placeholder="Search participants">
+                                    <select class="form-select" id="flightParticipants" multiple>
+                                    </select>
+                                    <small class="text-muted">Select passengers (Ctrl/Cmd for multiple).</small>
                                 </div>
                                 <div class="col-md-6">
+                                    <label class="form-label">Passenger details</label>
+                                    <div class="table-responsive border rounded bg-light">
+                                        <table class="table table-sm align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Passenger</th>
+                                                    <th>Seat</th>
+                                                    <th>Baggage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="flightPassengerDetails">
+                                                <tr>
+                                                    <td colspan="3" class="text-muted">
+                                                        Select passengers to assign seats and baggage.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <small class="text-muted">Optional: assign seats and baggage per passenger.</small>
+                                </div>
+                                <div class="col-12">
                                     <label class="form-label" for="flightNotes">Notes</label>
                                     <textarea class="form-control" id="flightNotes" rows="2"></textarea>
                                 </div>

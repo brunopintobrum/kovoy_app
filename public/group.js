@@ -775,9 +775,8 @@
         search.addEventListener('input', applyFlightParticipantSearchFilter);
         select.addEventListener('change', () => {
             syncFlightSeatMapWithSelection();
-            renderFlightPassengerSeats();
             syncFlightBaggageMapWithSelection();
-            renderFlightPassengerBaggage();
+            renderFlightPassengerDetails();
         });
     };
 
@@ -801,8 +800,7 @@
             select.appendChild(option);
         });
         applyFlightParticipantSearchFilter();
-        renderFlightPassengerSeats();
-        renderFlightPassengerBaggage();
+        renderFlightPassengerDetails();
     };
 
     const getSelectedFlightParticipantIds = () => {
@@ -820,65 +818,52 @@
         state.editing.flightBaggageMap = state.editing.flightBaggageMap || {};
     };
 
-    const renderFlightPassengerSeats = () => {
-        const container = document.getElementById('flightPassengerSeats');
-        if (!container) return;
+    const renderFlightPassengerDetails = () => {
+        const tbody = document.getElementById('flightPassengerDetails');
+        if (!tbody) return;
         const selectedIds = getSelectedFlightParticipantIds();
         const nameMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
         if (!selectedIds.length) {
-            container.innerHTML = '<div class="text-muted">Select passengers to assign seats.</div>';
+            tbody.innerHTML =
+                '<tr><td colspan="3" class="text-muted">Select passengers to assign seats and baggage.</td></tr>';
             return;
         }
         const seatMap = state.editing.flightSeatMap || {};
-        container.innerHTML = '';
-        selectedIds.forEach((participantId) => {
-            const row = document.createElement('div');
-            row.className = 'd-flex align-items-center gap-2 mb-2';
-            const label = document.createElement('span');
-            label.className = 'flex-grow-1';
-            label.textContent = nameMap.get(participantId) || `Participant ${participantId}`;
-            const input = document.createElement('input');
-            input.className = 'form-control form-control-sm';
-            input.placeholder = 'Seat';
-            input.value = seatMap[String(participantId)] || '';
-            input.dataset.participantId = String(participantId);
-            input.addEventListener('input', () => {
-                state.editing.flightSeatMap[String(participantId)] = input.value.trim();
-            });
-            row.appendChild(label);
-            row.appendChild(input);
-            container.appendChild(row);
-        });
-    };
-
-    const renderFlightPassengerBaggage = () => {
-        const container = document.getElementById('flightPassengerBaggage');
-        if (!container) return;
-        const selectedIds = getSelectedFlightParticipantIds();
-        const nameMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
-        if (!selectedIds.length) {
-            container.innerHTML = '<div class="text-muted">Select passengers to assign baggage.</div>';
-            return;
-        }
         const baggageMap = state.editing.flightBaggageMap || {};
-        container.innerHTML = '';
+        tbody.innerHTML = '';
         selectedIds.forEach((participantId) => {
-            const row = document.createElement('div');
-            row.className = 'd-flex align-items-center gap-2 mb-2';
-            const label = document.createElement('span');
-            label.className = 'flex-grow-1';
-            label.textContent = nameMap.get(participantId) || `Participant ${participantId}`;
-            const input = document.createElement('input');
-            input.className = 'form-control form-control-sm';
-            input.placeholder = 'Baggage';
-            input.value = baggageMap[String(participantId)] || '';
-            input.dataset.participantId = String(participantId);
-            input.addEventListener('input', () => {
-                state.editing.flightBaggageMap[String(participantId)] = input.value.trim();
+            const row = document.createElement('tr');
+            const nameCell = document.createElement('td');
+            nameCell.textContent = nameMap.get(participantId) || `Participant ${participantId}`;
+
+            const seatCell = document.createElement('td');
+            const seatInput = document.createElement('input');
+            seatInput.className = 'form-control form-control-sm';
+            seatInput.placeholder = 'Seat';
+            seatInput.value = seatMap[String(participantId)] || '';
+            seatInput.dataset.participantId = String(participantId);
+            seatInput.dataset.field = 'seat';
+            seatInput.addEventListener('input', () => {
+                state.editing.flightSeatMap[String(participantId)] = seatInput.value.trim();
             });
-            row.appendChild(label);
-            row.appendChild(input);
-            container.appendChild(row);
+            seatCell.appendChild(seatInput);
+
+            const baggageCell = document.createElement('td');
+            const baggageInput = document.createElement('input');
+            baggageInput.className = 'form-control form-control-sm';
+            baggageInput.placeholder = 'Baggage';
+            baggageInput.value = baggageMap[String(participantId)] || '';
+            baggageInput.dataset.participantId = String(participantId);
+            baggageInput.dataset.field = 'baggage';
+            baggageInput.addEventListener('input', () => {
+                state.editing.flightBaggageMap[String(participantId)] = baggageInput.value.trim();
+            });
+            baggageCell.appendChild(baggageInput);
+
+            row.appendChild(nameCell);
+            row.appendChild(seatCell);
+            row.appendChild(baggageCell);
+            tbody.appendChild(row);
         });
     };
 
@@ -1155,8 +1140,7 @@
             participantSearch.value = '';
             applyFlightParticipantSearchFilter();
         }
-        renderFlightPassengerSeats();
-        renderFlightPassengerBaggage();
+        renderFlightPassengerDetails();
         const airlineIdInput = document.getElementById('flightAirlineId');
         if (airlineIdInput) airlineIdInput.value = '';
         syncFlightAirlineIdFromInput();
@@ -1191,9 +1175,8 @@
         if (passengers) setMultiSelectValues(passengers, flight.participantIds || []);
         if (notes) notes.value = flight.notes || '';
         state.editing.flightSeatMap = { ...(flight.participantSeats || {}) };
-        renderFlightPassengerSeats();
         state.editing.flightBaggageMap = { ...(flight.participantBaggage || {}) };
-        renderFlightPassengerBaggage();
+        renderFlightPassengerDetails();
         const airlineIdInput = document.getElementById('flightAirlineId');
         if (airlineIdInput) airlineIdInput.value = flight.airlineId || '';
         syncFlightAirlineIdFromInput();
@@ -1430,18 +1413,16 @@
                     .map((option) => Number(option.value))
                     .filter((value) => Number.isFinite(value) && value > 0);
                 const seatMap = {};
-                passengerValues.forEach((participantId) => {
-                    const input = document.querySelector(
-                        `#flightPassengerSeats [data-participant-id="${participantId}"]`
-                    );
-                    seatMap[participantId] = input ? input.value.trim() : '';
-                });
                 const baggageMap = {};
                 passengerValues.forEach((participantId) => {
-                    const input = document.querySelector(
-                        `#flightPassengerBaggage [data-participant-id="${participantId}"]`
+                    const seatInput = document.querySelector(
+                        `#flightPassengerDetails [data-field="seat"][data-participant-id="${participantId}"]`
                     );
-                    baggageMap[participantId] = input ? input.value.trim() : '';
+                    seatMap[participantId] = seatInput ? seatInput.value.trim() : '';
+                    const baggageInput = document.querySelector(
+                        `#flightPassengerDetails [data-field="baggage"][data-participant-id="${participantId}"]`
+                    );
+                    baggageMap[participantId] = baggageInput ? baggageInput.value.trim() : '';
                 });
                 const payload = {
                     airline: document.getElementById('flightAirline')?.value || '',
