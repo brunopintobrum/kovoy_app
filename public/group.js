@@ -909,9 +909,7 @@
         const sync = () => {
             if (checkIn.value) {
                 checkOut.min = checkIn.value;
-                if (checkOut.value && checkOut.value < checkIn.value) {
-                    checkOut.value = checkIn.value;
-                }
+                checkOut.value = checkIn.value;
             } else {
                 checkOut.removeAttribute('min');
             }
