@@ -853,6 +853,29 @@
         });
     };
 
+    const setupFlightDateConstraints = () => {
+        const depart = document.getElementById('flightDepart');
+        const arrive = document.getElementById('flightArrive');
+        if (!depart || !arrive) return;
+        const clearAutofill = () => {
+            delete arrive.dataset.autofilled;
+        };
+        const sync = () => {
+            if (depart.value) {
+                arrive.min = depart.value;
+                arrive.value = depart.value;
+                arrive.dataset.autofilled = '1';
+            } else {
+                arrive.removeAttribute('min');
+            }
+        };
+        depart.addEventListener('change', sync);
+        depart.addEventListener('input', sync);
+        arrive.addEventListener('change', clearAutofill);
+        arrive.addEventListener('input', clearAutofill);
+        sync();
+    };
+
     const populateFlightParticipants = () => {
         const select = document.getElementById('flightParticipants');
         if (!select) return;
@@ -1221,6 +1244,11 @@
         const airlineIdInput = document.getElementById('flightAirlineId');
         if (airlineIdInput) airlineIdInput.value = '';
         syncFlightAirlineIdFromInput();
+        const arrive = document.getElementById('flightArrive');
+        if (arrive) {
+            arrive.removeAttribute('min');
+            delete arrive.dataset.autofilled;
+        }
     };
 
     const populateFlightForm = (flight) => {
@@ -1248,7 +1276,15 @@
         if (from) from.value = flight.fromLabel || flight.from || '';
         if (to) to.value = flight.toLabel || flight.to || '';
         if (depart) depart.value = formatDateTimeLocal(flight.departAt);
-        if (arrive) arrive.value = formatDateTimeLocal(flight.arriveAt);
+        if (arrive) {
+            arrive.value = formatDateTimeLocal(flight.arriveAt);
+            if (depart?.value) {
+                arrive.min = depart.value;
+            } else {
+                arrive.removeAttribute('min');
+            }
+            delete arrive.dataset.autofilled;
+        }
         if (passengers) setMultiSelectValues(passengers, flight.participantIds || []);
         if (notes) notes.value = flight.notes || '';
         const fromAirportId = document.getElementById('flightFromAirportId');
@@ -2273,6 +2309,7 @@
         bindForms();
         setupFlightAirlineAutocomplete();
         setupFlightAirportAutocomplete();
+        setupFlightDateConstraints();
         setupFlightParticipantSearch();
         bindInviteForm();
         bindDeleteActions();
