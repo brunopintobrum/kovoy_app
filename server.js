@@ -4335,6 +4335,9 @@ const validateGroupTransportPayload = (payload) => {
     if (departAt.error) return departAt;
     const arriveAt = requireDate(payload.arriveAt, 'Arrival');
     if (arriveAt.error) return arriveAt;
+    if (new Date(arriveAt.value).getTime() <= new Date(departAt.value).getTime()) {
+        return { error: 'Arrival must be after departure.' };
+    }
     const status = payload.status ? requireStatus(payload.status) : { value: 'planned' };
     if (status.error) return status;
     const currency = requireCurrency(payload.currency);
@@ -4395,6 +4398,9 @@ const validateFlightPayload = (payload) => {
     if (departAt.error) return departAt;
     const arriveAt = requireDate(payload.arriveAt, 'Arrival');
     if (arriveAt.error) return arriveAt;
+    if (new Date(arriveAt.value).getTime() <= new Date(departAt.value).getTime()) {
+        return { error: 'Arrival must be after departure.' };
+    }
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
     const cost = requireNumber(payload.cost, 'Cost');

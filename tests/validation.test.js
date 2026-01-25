@@ -280,6 +280,20 @@ describe('validation helpers', () => {
         });
     });
 
+    test('validateGroupTransportPayload rejects arrival before departure', () => {
+        const result = validateGroupTransportPayload({
+            type: 'Shuttle',
+            origin: 'MCO',
+            destination: 'Hotel',
+            departAt: '2026-02-22T11:00:00Z',
+            arriveAt: '2026-02-22T10:00:00Z',
+            status: 'planned',
+            amount: 45,
+            currency: 'USD'
+        });
+        expect(result).toEqual({ error: 'Arrival must be after departure.' });
+    });
+
     test('validateGroupTicketPayload validates ticket fields', () => {
         const result = validateGroupTicketPayload({
             type: 'Theme Park',
