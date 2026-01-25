@@ -25,12 +25,14 @@
 - `npm audit fix --force` aplicado para zerar vulnerabilidades.
 - `npm test` executado com sucesso.
 - Voos V2: novos campos (flight number, class, status), assentos/bagagens por passageiro via vinculo a participantes, e autocomplete de aeroportos (From/To).
+- Voos V2: chegada sincroniza com a partida no formulario.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
 - Testes: validacoes e integracao para voos V2.
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
 - Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
+- Transportes V2: validacao de chegada posterior a partida no backend.
 - Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
 - Testes: validacao de transportes V2.
 - Modulos V2 sincronizam pagador, tipo/mode e alvos do split (Participants/Families/manual) diretamente na despesa vinculada; o detail permanece no `expense_splits`.

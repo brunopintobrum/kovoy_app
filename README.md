@@ -90,6 +90,8 @@ Schema criado automaticamente no boot. Tabelas principais:
 - `airlines` (lista única usada nos autocompletes de módulos logísticos)
 - (legado) `trips`, `trip_flights`, `trip_lodgings`, `trip_cars`, `trip_expenses`, `trip_transports`, `trip_timeline`, `trip_reminders`
 
+Resumo do schema: `docs/SCHEMA.md`.
+
 Campos relevantes em `users`:
 
 - `email`, `password_hash`, `google_sub`
@@ -442,6 +444,8 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - CRUD completo de voos/hospedagens/transportes/tickets no dashboard.
 - Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
 - UI: toggle para vincular despesas nos modulos (V2 opcional).
+- Voos V2: chegada agora sincroniza com a partida no formulario.
+- Transportes V2: validacao de chegada posterior a partida no backend.
 - Voos V2: campos avancados + participantes vinculados no modulo de grupos.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.

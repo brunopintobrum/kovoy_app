@@ -113,6 +113,7 @@
     - [x] Autocomplete de aeroportos (From/To) com `/api/airports`.
     - [x] Filter por rota (From/To) usando tabela de rotas/aeroportos.
     - [x] Validar chegada posterior a partida (backend + UI)
+    - [x] UI: chegada sincroniza com a partida no formulario
     - [x] Exibir classe/assento/bagagem na lista
     - [x] Seletor de passageiros com busca
     - [x] Layout de voos reorganizado (secoes e tabela de detalhes por passageiro)
@@ -123,7 +124,8 @@
     - [x] Endereco completo + contato
     - [x] Check-in/out com hora
     - [x] Status e observacoes
-    - [ ] Validar check-out > check-in (backend + UI)
+    - [ ] Validar check-out > check-in (backend)
+    - [ ] Validar check-out > check-in (UI)
     - [ ] Listagem: resumo de quartos e status
     - [ ] Filtros por cidade/status
     - [ ] Dados: contato obrigatorio quando necessario
@@ -131,7 +133,8 @@
     - [x] Origem/destino, datas/horas
     - [x] Fornecedor, localizador
     - [x] Status e observacoes
-    - [ ] Validar chegada > partida (backend + UI)
+    - [x] Validar chegada > partida (backend)
+    - [ ] Validar chegada > partida (UI)
     - [ ] Listagem: origem/destino + horario em destaque
     - [ ] Filtros por status/fornecedor
     - [ ] Dados: provider + locator obrigatorios quando status=paid
@@ -139,11 +142,11 @@
     - [x] Tipo (parque, evento, etc), data/hora, local
     - [x] Vinculo a participantes
     - [x] Status e observacoes
-    - [ ] Validar data/hora coerente (futuro quando aplicavel)
+    - [ ] Validar data/hora coerente (backend)
+    - [ ] Validar data/hora coerente (UI)
     - [ ] Listagem: participantes destacados
     - [ ] Filtros por tipo/status/data
     - [ ] Dados: local obrigatorio quando type exige
-  - [ ] Unificar custos com Expenses (pagador + split dentro do modulo)
   - [x] Unificar custos com Expenses (pagador + split dentro do modulo) *(panel split agora reaproveitado automaticamente nos módulos logísticos)*
   - [ ] Anexos/recibos por item (upload, visualizacao e download)
   - [ ] Expandir autocomplete/validação semelhante para hospedagens, transportes e tickets.
@@ -158,9 +161,9 @@
 
 ## V2 - Prioridade sugerida
 1. Voos V2: Validar chegada posterior a partida (backend + UI) [feito]
-2. Transportes V2: Validar chegada > partida (backend + UI)
-3. Hospedagens V2: Validar check-out > check-in (backend + UI)
-4. Tickets V2: Validar data/hora coerente (futuro quando aplicavel)
+2. Transportes V2: Validar chegada > partida (backend feito, UI pendente)
+3. Hospedagens V2: Validar check-out > check-in (backend pendente, UI pendente)
+4. Tickets V2: Validar data/hora coerente (backend pendente, UI pendente)
 5. Voos V2: Exibir classe/assento/bagagem na lista [feito]
 6. Voos V2: Seletor de passageiros com busca [feito]
 7. Hospedagens V2: Listagem com resumo de quartos e status
@@ -181,9 +184,9 @@
 ## V2 - Roadmap por fases
 - V2.1 (Qualidade de dados)
   - Voos: chegada > partida (feito)
-  - Transportes: chegada > partida
-  - Hospedagens: check-out > check-in
-  - Tickets: data/hora coerente
+  - Transportes: chegada > partida (backend feito, UI pendente)
+  - Hospedagens: check-out > check-in (backend pendente, UI pendente)
+  - Tickets: data/hora coerente (backend pendente, UI pendente)
 - V2.2 (Listagens mais uteis)
   - Voos: classe/assento/bagagem na lista (feito)
   - Hospedagens: resumo de quartos e status

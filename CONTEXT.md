@@ -18,6 +18,7 @@
 - users: id, email, password_hash, google_sub, first_name, last_name, display_name, avatar_url, email_verified_at, two_factor_enabled, created_at.
 - tokens: refresh_tokens, email_verification_tokens, reset_tokens, two_factor_codes.
 - grupos: groups, group_members, invitations, families, participants, expenses, expense_splits, group_flights, group_flight_participants, group_lodgings, group_transports, group_tickets.
+- lookup: airlines, airports.
 - legado: trips, trip_flights, trip_lodgings, trip_cars, trip_expenses, trip_transports, trip_timeline, trip_reminders.
 - campos V2 (grupo): group_transports inclui origin, destination, depart_at, arrive_at, provider, locator, status, expense_id.
 - campos V2 (grupo): group_tickets inclui type, event_at, location, status, expense_id e tabela group_ticket_participants.
@@ -72,6 +73,7 @@
 - UI: toggle para vincular despesas nos modulos (V2 opcional).
 - Financeiro do MVP concentrado em Expenses; modulos V2 sao logísticos.
 - Voos V2: novos campos (flight number, class, status), assentos/bagagens por passageiro via vinculo a participantes, e autocomplete de aeroportos (From/To).
+- Voos V2: chegada sincroniza com a partida no formulario.
 - Testes: validacoes e integracao para voos V2.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
@@ -79,6 +81,7 @@
 - Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
+- Transportes V2: validacao de chegada posterior a partida no backend.
 - Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
 - Testes: validacao de transportes V2.
 - Modulos V2 sincronizam o pagador e o split (participants/families/manual) do painel diretamente na despesa vinculada, usando `expense_splits` para registrar cada alvo.
