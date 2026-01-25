@@ -31,6 +31,7 @@
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
 - Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
+- Hospedagens V2: UI sincroniza check-out com check-in no formulario.
 - Hospedagens V2: backend valida check-out posterior ao check-in.
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
 - Transportes V2: validacao de chegada posterior a partida no backend.

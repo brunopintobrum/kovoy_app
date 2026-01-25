@@ -124,6 +124,7 @@
     - [x] Endereco completo + contato
     - [x] Check-in/out com hora
     - [x] Status e observacoes
+    - [x] UI: check-out sincroniza com check-in
     - [x] Validar check-out > check-in (backend)
     - [x] Validar check-out > check-in (UI)
     - [ ] Listagem: resumo de quartos e status
