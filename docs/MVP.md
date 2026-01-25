@@ -112,19 +112,33 @@
     - [ ] Validar chegada posterior a partida (backend + UI)
     - [ ] Exibir classe/assento/bagagem na lista
     - [ ] Seletor de passageiros com busca
+    - [ ] UX: filtros por cia/rota/status
+    - [ ] Dados: prefilling por airline + flight number
   - [x] Hospedagens
     - [x] Quartos (tipo, quantidade, ocupacao)
     - [x] Endereco completo + contato
     - [x] Check-in/out com hora
     - [x] Status e observacoes
+    - [ ] Validar check-out > check-in (backend + UI)
+    - [ ] Listagem: resumo de quartos e status
+    - [ ] Filtros por cidade/status
+    - [ ] Dados: contato obrigatorio quando necessario
   - [x] Transportes
     - [x] Origem/destino, datas/horas
     - [x] Fornecedor, localizador
     - [x] Status e observacoes
+    - [ ] Validar chegada > partida (backend + UI)
+    - [ ] Listagem: origem/destino + horario em destaque
+    - [ ] Filtros por status/fornecedor
+    - [ ] Dados: provider + locator obrigatorios quando status=paid
   - [x] Tickets
     - [x] Tipo (parque, evento, etc), data/hora, local
     - [x] Vinculo a participantes
     - [x] Status e observacoes
+    - [ ] Validar data/hora coerente (futuro quando aplicavel)
+    - [ ] Listagem: participantes destacados
+    - [ ] Filtros por tipo/status/data
+    - [ ] Dados: local obrigatorio quando type exige
   - [ ] Unificar custos com Expenses (pagador + split dentro do modulo)
   - [x] Unificar custos com Expenses (pagador + split dentro do modulo) *(panel split agora reaproveitado automaticamente nos módulos logísticos)*
   - [ ] Anexos/recibos por item (upload, visualizacao e download)
@@ -137,6 +151,48 @@
 - [ ] Auditoria e historico de edicoes
 - [x] Vinculo opcional de despesa nos modulos (backend)
 - [x] UI: toggle para vincular despesas nos modulos (V2 opcional)
+
+## V2 - Prioridade sugerida
+1. Voos V2: Validar chegada posterior a partida (backend + UI)
+2. Transportes V2: Validar chegada > partida (backend + UI)
+3. Hospedagens V2: Validar check-out > check-in (backend + UI)
+4. Tickets V2: Validar data/hora coerente (futuro quando aplicavel)
+5. Voos V2: Exibir classe/assento/bagagem na lista
+6. Voos V2: Seletor de passageiros com busca
+7. Hospedagens V2: Listagem com resumo de quartos e status
+8. Transportes V2: Listagem com origem/destino + horario em destaque
+9. Tickets V2: Listagem com participantes destacados
+10. Filtros: Voos por cia/rota/status
+11. Filtros: Hospedagens por cidade/status
+12. Filtros: Transportes por status/fornecedor
+13. Filtros: Tickets por tipo/status/data
+14. Voos V2: Prefilling por airline + flight number
+15. Transportes V2: Provider + locator obrigatorios quando status=paid
+16. Hospedagens V2: Contato obrigatorio quando necessario
+17. Tickets V2: Local obrigatorio quando type exige
+
+## V2 - Roadmap por fases
+- V2.1 (Qualidade de dados)
+  - Voos: chegada > partida
+  - Transportes: chegada > partida
+  - Hospedagens: check-out > check-in
+  - Tickets: data/hora coerente
+- V2.2 (Listagens mais uteis)
+  - Voos: classe/assento/bagagem na lista
+  - Hospedagens: resumo de quartos e status
+  - Transportes: origem/destino + horario em destaque
+  - Tickets: participantes destacados
+- V2.3 (Usabilidade de selecao e filtros)
+  - Voos: seletor de passageiros com busca
+  - Voos: filtros por cia/rota/status
+  - Hospedagens: filtros por cidade/status
+  - Transportes: filtros por status/fornecedor
+  - Tickets: filtros por tipo/status/data
+- V2.4 (Regras condicionais)
+  - Voos: prefilling por airline + flight number
+  - Transportes: provider + locator obrigatorios quando status=paid
+  - Hospedagens: contato obrigatorio quando necessario
+  - Tickets: local obrigatorio quando type exige
 
 
 
