@@ -31,12 +31,12 @@
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
 - Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.
 - Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
-- Hospedagens V2: UI sincroniza check-out com check-in no formulario.
+- Hospedagens V2: UI sincroniza check-out com check-in quando o campo esta vazio.
 - Hospedagens V2: backend valida check-out posterior ao check-in.
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
 - Transportes V2: validacao de chegada posterior a partida no backend.
 - Transportes V2: UI valida chegada posterior a partida.
-- Transportes V2: UI sincroniza chegada com partida no formulario.
+- Transportes V2: UI sincroniza chegada com partida quando o campo esta vazio.
 - Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
 - Testes: validacao de transportes V2.
 - Modulos V2 sincronizam pagador, tipo/mode e alvos do split (Participants/Families/manual) diretamente na despesa vinculada; o detail permanece no `expense_splits`.

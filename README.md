@@ -449,8 +449,8 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Voos V2: campos avancados + participantes vinculados no modulo de grupos.
 - Transportes V2: UI valida chegada posterior a partida.
 - Hospedagens V2: UI valida check-out posterior ao check-in.
-- Hospedagens V2: check-out sincroniza com check-in no formulario.
-- Transportes V2: chegada sincroniza com partida no formulario.
+- Hospedagens V2: check-out sincroniza com check-in quando o campo esta vazio.
+- Transportes V2: chegada sincroniza com partida quando o campo esta vazio.
 - Tickets V2: UI valida data/hora futura quando status=planned.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
 - Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.

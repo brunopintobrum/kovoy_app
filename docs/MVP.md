@@ -124,7 +124,7 @@
     - [x] Endereco completo + contato
     - [x] Check-in/out com hora
     - [x] Status e observacoes
-    - [x] UI: check-out sincroniza com check-in
+    - [x] UI: check-out sincroniza com check-in quando o campo esta vazio
     - [x] Validar check-out > check-in (backend)
     - [x] Validar check-out > check-in (UI)
     - [ ] Listagem: resumo de quartos e status
@@ -136,7 +136,7 @@
     - [x] Status e observacoes
     - [x] Validar chegada > partida (backend)
     - [x] Validar chegada > partida (UI)
-    - [x] UI: chegada sincroniza com partida
+    - [x] UI: chegada sincroniza com partida quando o campo esta vazio
     - [ ] Listagem: origem/destino + horario em destaque
     - [ ] Filtros por status/fornecedor
     - [ ] Dados: provider + locator obrigatorios quando status=paid
