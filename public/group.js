@@ -887,13 +887,20 @@
         const depart = document.getElementById('transportDepart');
         const arrive = document.getElementById('transportArrive');
         if (!depart || !arrive) return;
+        const clearAutofill = () => {
+            delete arrive.dataset.autofilled;
+        };
         const sync = () => {
             if (depart.value) {
                 arrive.min = depart.value;
-                if (!arrive.value) {
+                const arriveValue = arrive.value;
+                const shouldAutofill = !arriveValue || arrive.dataset.autofilled === '1';
+                if (shouldAutofill) {
                     arrive.value = depart.value;
-                } else if (arrive.value < depart.value) {
+                    arrive.dataset.autofilled = '1';
+                } else if (arriveValue < depart.value) {
                     arrive.value = depart.value;
+                    arrive.dataset.autofilled = '1';
                 }
             } else {
                 arrive.removeAttribute('min');
@@ -901,6 +908,8 @@
         };
         depart.addEventListener('change', sync);
         depart.addEventListener('input', sync);
+        arrive.addEventListener('change', clearAutofill);
+        arrive.addEventListener('input', clearAutofill);
         sync();
     };
 
@@ -911,7 +920,11 @@
         const sync = () => {
             if (checkIn.value) {
                 checkOut.min = checkIn.value;
-                checkOut.value = checkIn.value;
+                if (!checkOut.value) {
+                    checkOut.value = checkIn.value;
+                } else if (checkOut.value < checkIn.value) {
+                    checkOut.value = checkIn.value;
+                }
             } else {
                 checkOut.removeAttribute('min');
             }
@@ -1460,6 +1473,7 @@
         const arrive = document.getElementById('transportArrive');
         if (arrive) {
             arrive.removeAttribute('min');
+            delete arrive.dataset.autofilled;
         }
     };
 
@@ -1487,6 +1501,7 @@
             } else {
                 arrive.removeAttribute('min');
             }
+            delete arrive.dataset.autofilled;
         }
         if (provider) provider.value = transport.provider || '';
         if (locator) locator.value = transport.locator || '';
