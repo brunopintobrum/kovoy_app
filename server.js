@@ -255,6 +255,10 @@ db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE
     );
+    CREATE TABLE IF NOT EXISTS lodging_platforms (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE
+    );
     CREATE TABLE IF NOT EXISTS airports (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         code TEXT NOT NULL UNIQUE,
@@ -280,6 +284,8 @@ db.exec(`
         group_id INTEGER NOT NULL,
         expense_id INTEGER,
         name TEXT,
+        platform TEXT,
+        platform_id INTEGER,
         address TEXT,
         address_line2 TEXT,
         city TEXT,
@@ -302,7 +308,8 @@ db.exec(`
         contact_email TEXT,
         notes TEXT,
         FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
-        FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE SET NULL
+        FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE SET NULL,
+        FOREIGN KEY (platform_id) REFERENCES lodging_platforms(id) ON DELETE SET NULL
     );
     CREATE TABLE IF NOT EXISTS group_transports (
         id TEXT PRIMARY KEY,
@@ -527,6 +534,8 @@ if (!hasAirportCityNormalized) {
 }
 const groupLodgingColumns = db.prepare('PRAGMA table_info(group_lodgings)').all();
 const hasGroupLodgingExpense = groupLodgingColumns.some((column) => column.name === 'expense_id');
+const hasGroupLodgingPlatform = groupLodgingColumns.some((column) => column.name === 'platform');
+const hasGroupLodgingPlatformId = groupLodgingColumns.some((column) => column.name === 'platform_id');
 const hasGroupLodgingAddressLine2 = groupLodgingColumns.some((column) => column.name === 'address_line2');
 const hasGroupLodgingCity = groupLodgingColumns.some((column) => column.name === 'city');
 const hasGroupLodgingState = groupLodgingColumns.some((column) => column.name === 'state');
@@ -542,6 +551,12 @@ const hasGroupLodgingContactPhone = groupLodgingColumns.some((column) => column.
 const hasGroupLodgingContactEmail = groupLodgingColumns.some((column) => column.name === 'contact_email');
 if (!hasGroupLodgingExpense) {
     db.exec('ALTER TABLE group_lodgings ADD COLUMN expense_id INTEGER');
+}
+if (!hasGroupLodgingPlatform) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN platform TEXT');
+}
+if (!hasGroupLodgingPlatformId) {
+    db.exec('ALTER TABLE group_lodgings ADD COLUMN platform_id INTEGER');
 }
 if (!hasGroupLodgingAddressLine2) {
     db.exec('ALTER TABLE group_lodgings ADD COLUMN address_line2 TEXT');
@@ -1616,6 +1631,26 @@ const ensureAirlineId = (name, candidateId) => {
         return Number(result.lastInsertRowid);
     })();
 };
+const ensureLodgingPlatformId = (name, candidateId) => {
+    const trimmed = trimString(name);
+    if (!trimmed) return null;
+    const normalized = trimmed.toLowerCase();
+    return db.transaction(() => {
+        const preferred = parseGroupId(candidateId);
+        if (preferred) {
+            const existing = getLodgingPlatformById.get(preferred);
+            if (existing && existing.name.toLowerCase() === normalized) {
+                return existing.id;
+            }
+        }
+        const byName = findLodgingPlatformByName.get(normalized);
+        if (byName) {
+            return byName.id;
+        }
+        const result = insertLodgingPlatform.run(trimmed);
+        return Number(result.lastInsertRowid);
+    })();
+};
 
 const getGroupById = db.prepare('SELECT * FROM groups WHERE id = ?');
 const getGroupMember = db.prepare('SELECT role FROM group_members WHERE group_id = ? AND user_id = ?');
@@ -1807,27 +1842,71 @@ const listAirlines = db.prepare('SELECT id, name FROM airlines ORDER BY name');
 const getAirlineById = db.prepare('SELECT id, name FROM airlines WHERE id = ?');
 const findAirlineByName = db.prepare('SELECT id FROM airlines WHERE LOWER(name) = ?');
 const insertAirline = db.prepare('INSERT INTO airlines (name) VALUES (?)');
+const listLodgingPlatforms = db.prepare('SELECT id, name FROM lodging_platforms ORDER BY name');
+const getLodgingPlatformById = db.prepare('SELECT id, name FROM lodging_platforms WHERE id = ?');
+const findLodgingPlatformByName = db.prepare('SELECT id FROM lodging_platforms WHERE LOWER(name) = ?');
+const insertLodgingPlatform = db.prepare('INSERT OR IGNORE INTO lodging_platforms (name) VALUES (?)');
 const getAirportById = db.prepare('SELECT id, code, name, city, country FROM airports WHERE id = ?');
+const defaultLodgingPlatforms = [
+    'Booking.com',
+    'Airbnb',
+    'Expedia',
+    'Hotels.com',
+    'Agoda',
+    'Vrbo',
+    'Trip.com',
+    'Priceline',
+    'Hostelworld',
+    'Trivago',
+    'Marriott',
+    'Hilton',
+    'IHG',
+    'Accor'
+];
+const defaultLodgingProperties = [
+    'Booking.com',
+    'Airbnb',
+    'Expedia',
+    'Vrbo',
+    'Hotels.com',
+    'Agoda',
+    'Tripadvisor',
+    'Trivago',
+    'Priceline',
+    'Marriott'
+];
+defaultLodgingPlatforms.forEach((platform) => {
+    insertLodgingPlatform.run(platform);
+});
 const listGroupLodgings = db.prepare(`
-    SELECT id, expense_id, name, address, address_line2, city, state, postal_code, country,
+    SELECT id, expense_id, name, platform, platform_id, address, address_line2, city, state, postal_code, country,
            check_in, check_in_time, check_out, check_out_time, room_type, room_quantity, room_occupancy,
            status, cost, currency, host, contact, contact_phone, contact_email, notes
     FROM group_lodgings
     WHERE group_id = ?
     ORDER BY check_in DESC, id DESC
 `);
+const listGroupLodgingProperties = db.prepare(`
+    SELECT name, COUNT(*) as usage_count
+    FROM group_lodgings
+    WHERE group_id = ? AND name IS NOT NULL AND TRIM(name) <> ''
+    GROUP BY name
+    ORDER BY usage_count DESC, name ASC
+    LIMIT ?
+`);
 const getGroupLodging = db.prepare('SELECT id, expense_id FROM group_lodgings WHERE id = ? AND group_id = ?');
 const insertGroupLodging = db.prepare(`
     INSERT INTO group_lodgings (
-        id, group_id, expense_id, name, address, address_line2, city, state, postal_code, country,
+        id, group_id, expense_id, name, platform, platform_id, address, address_line2, city, state, postal_code, country,
         check_in, check_in_time, check_out, check_out_time, room_type, room_quantity, room_occupancy,
         status, cost, currency, host, contact, contact_phone, contact_email, notes
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const updateGroupLodging = db.prepare(`
     UPDATE group_lodgings
-    SET expense_id = ?, name = ?, address = ?, address_line2 = ?, city = ?, state = ?, postal_code = ?, country = ?,
+    SET expense_id = ?, name = ?, platform = ?, platform_id = ?, address = ?, address_line2 = ?, city = ?, state = ?,
+        postal_code = ?, country = ?,
         check_in = ?, check_in_time = ?, check_out = ?, check_out_time = ?, room_type = ?, room_quantity = ?,
         room_occupancy = ?, status = ?, cost = ?, currency = ?, host = ?, contact = ?, contact_phone = ?, contact_email = ?,
         notes = ?
@@ -2521,6 +2600,11 @@ app.get('/api/airlines', authRequiredApi, (req, res) => {
     return res.json({ ok: true, data: airlines });
 });
 
+app.get('/api/lodging-platforms', authRequiredApi, (req, res) => {
+    const platforms = listLodgingPlatforms.all();
+    return res.json({ ok: true, data: platforms });
+});
+
 app.get('/api/airports', authRequiredApi, (req, res) => {
     const queryRaw = typeof req.query.query === 'string' ? req.query.query.trim() : '';
     if (!queryRaw) {
@@ -2616,6 +2700,10 @@ app.post(
         try {
             const expenseId = db.transaction(() => {
                 let linkedExpenseId = null;
+                const platformName = normalized.value.platform || null;
+                const platformId = platformName
+                    ? ensureLodgingPlatformId(platformName, normalized.value.platformId)
+                    : null;
                 if (expenseNormalized.value) {
                     const expenseResult = upsertModuleExpense(req.groupId, null, expenseNormalized.value);
                     if (expenseResult.error) {
@@ -2795,6 +2883,31 @@ app.get('/api/groups/:groupId/lodgings', authRequiredApi, requireGroupMember, (r
     return res.json({ ok: true, data: lodgings });
 });
 
+app.get('/api/groups/:groupId/lodging-properties', authRequiredApi, requireGroupMember, (req, res) => {
+    const rawLimit = typeof req.query.limit === 'string' ? req.query.limit.trim() : '';
+    let limit = Number.parseInt(rawLimit, 10);
+    if (!Number.isFinite(limit)) {
+        limit = 10;
+    }
+    limit = Math.max(1, Math.min(limit, 25));
+    const rows = listGroupLodgingProperties.all(req.groupId, limit);
+    const properties = rows.map((row) => ({
+        name: row.name,
+        usageCount: row.usage_count
+    }));
+    const seen = new Set(properties.map((item) => String(item.name).toLowerCase()));
+    if (properties.length < limit) {
+        for (const fallbackName of defaultLodgingProperties) {
+            const key = fallbackName.toLowerCase();
+            if (seen.has(key)) continue;
+            properties.push({ name: fallbackName, usageCount: 0 });
+            seen.add(key);
+            if (properties.length >= limit) break;
+        }
+    }
+    return res.json({ ok: true, data: properties });
+});
+
 app.post(
     '/api/groups/:groupId/lodgings',
     authRequiredApi,
@@ -2829,6 +2942,8 @@ app.post(
                     req.groupId,
                     linkedExpenseId,
                     normalized.value.name,
+                    platformName,
+                    platformId,
                     normalized.value.address,
                     normalized.value.addressLine2,
                     normalized.value.city,
@@ -2889,6 +3004,10 @@ app.put(
         try {
             const expenseId = db.transaction(() => {
                 let linkedExpenseId = existing.expense_id || null;
+                const platformName = normalized.value.platform || null;
+                const platformId = platformName
+                    ? ensureLodgingPlatformId(platformName, normalized.value.platformId)
+                    : null;
                 if (linkedExpenseId && !getExpense.get(linkedExpenseId, req.groupId)) {
                     linkedExpenseId = null;
                 }
@@ -2902,6 +3021,8 @@ app.put(
                 updateGroupLodging.run(
                     linkedExpenseId,
                     normalized.value.name,
+                    platformName,
+                    platformId,
                     normalized.value.address,
                     normalized.value.addressLine2,
                     normalized.value.city,
@@ -3768,6 +3889,8 @@ const mapGroupLodgingRow = (row) => ({
     id: row.id,
     expenseId: row.expense_id || null,
     name: row.name,
+    platform: row.platform,
+    platformId: row.platform_id || null,
     address: row.address,
     addressLine2: row.address_line2,
     city: row.city,
@@ -4268,6 +4391,8 @@ const validateGroupFlightPayload = (payload) => {
 const validateGroupLodgingPayload = (payload) => {
     const name = requireString(payload.name, 'Property');
     if (name.error) return name;
+    const platform = optionalString(payload.platform);
+    const platformId = parseGroupId(payload.platformId);
     const address = requireString(payload.address, 'Address');
     if (address.error) return address;
     const city = requireString(payload.city, 'City');
@@ -4302,6 +4427,8 @@ const validateGroupLodgingPayload = (payload) => {
     return {
         value: {
             name: name.value,
+            platform,
+            platformId,
             address: address.value,
             addressLine2: optionalString(payload.addressLine2),
             city: city.value,

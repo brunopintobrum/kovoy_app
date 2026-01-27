@@ -6,6 +6,8 @@
         families: [],
         participants: [],
         airlines: [],
+        lodgingPlatforms: [],
+        lodgingProperties: [],
         airports: { from: [], to: [] },
         expenses: [],
         flights: [],
@@ -147,6 +149,75 @@
         const input = document.getElementById('flightAirline');
         if (!input) return;
         const handler = () => syncFlightAirlineIdFromInput();
+        input.addEventListener('input', handler);
+        input.addEventListener('change', handler);
+    };
+
+    const renderLodgingPlatformOptions = () => {
+        const list = document.getElementById('lodgingPlatformList');
+        if (!list) return;
+        list.innerHTML = '';
+        state.lodgingPlatforms.forEach((platform) => {
+            const option = document.createElement('option');
+            option.value = platform.name;
+            list.appendChild(option);
+        });
+        syncLodgingPlatformIdFromInput();
+    };
+
+    const renderLodgingPropertyOptions = () => {
+        const list = document.getElementById('lodgingPropertyList');
+        if (!list) return;
+        list.innerHTML = '';
+        state.lodgingProperties.forEach((property) => {
+            if (!property?.name) return;
+            const option = document.createElement('option');
+            option.value = property.name;
+            list.appendChild(option);
+        });
+    };
+
+    const syncLodgingPlatformIdFromInput = () => {
+        const input = document.getElementById('lodgingPlatform');
+        const hidden = document.getElementById('lodgingPlatformId');
+        if (!input || !hidden) return;
+        const value = input.value.trim().toLowerCase();
+        if (!value) {
+            hidden.value = '';
+            return;
+        }
+        const match = state.lodgingPlatforms.find((item) => item.name.toLowerCase() === value);
+        hidden.value = match ? match.id : '';
+    };
+
+    const loadLodgingPlatforms = async () => {
+        try {
+            const response = await apiRequest('/api/lodging-platforms');
+            state.lodgingPlatforms = response.data || [];
+        } catch (err) {
+            console.warn('Failed to load lodging platforms:', err.message);
+        } finally {
+            renderLodgingPlatformOptions();
+        }
+    };
+
+    const loadLodgingProperties = async () => {
+        if (!state.groupId) return;
+        try {
+            const response = await apiRequest(`/api/groups/${state.groupId}/lodging-properties?limit=10`);
+            state.lodgingProperties = (response.data || []).filter((item) => item?.name);
+        } catch (err) {
+            state.lodgingProperties = [];
+            console.warn('Failed to load lodging properties:', err.message);
+        } finally {
+            renderLodgingPropertyOptions();
+        }
+    };
+
+    const setupLodgingPlatformAutocomplete = () => {
+        const input = document.getElementById('lodgingPlatform');
+        if (!input) return;
+        const handler = () => syncLodgingPlatformIdFromInput();
         input.addEventListener('input', handler);
         input.addEventListener('change', handler);
     };
@@ -2393,7 +2464,9 @@
 
     const refreshData = async () => {
         await loadAirlines();
+        await loadLodgingPlatforms();
         await loadGroupData();
+        await loadLodgingProperties();
         renderGroupHeader();
         renderSummary();
         renderBalances();
@@ -2419,6 +2492,7 @@
         bindGroupSelector();
         bindForms();
         setupFlightAirlineAutocomplete();
+        setupLodgingPlatformAutocomplete();
         setupFlightAirportAutocomplete();
         setupFlightDateConstraints();
         setupTransportDateConstraints();

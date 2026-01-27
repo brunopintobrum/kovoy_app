@@ -2,7 +2,7 @@
 
 This is a concise, human-readable snapshot of the SQLite schema used by the app.
 For full definitions, see `server.js` (schema bootstrapping) and the SQLite DB at `data/app.db`.
-Last updated: 2026-01-25 00:00.
+Last updated: 2026-01-27 00:00.
 
 ## Core Auth
 - users: id, email, password_hash, google_sub, first_name, last_name, display_name, avatar_url, email_verified_at, two_factor_enabled, created_at
@@ -35,11 +35,12 @@ Last updated: 2026-01-25 00:00.
 ## Airports & Airlines
 - airports: id, code, name, city, country, name_normalized, city_normalized, created_at
 - airlines: id, name, created_at
+- lodging_platforms: id, name, created_at
 
 ## Lodgings (V2)
 - group_lodgings:
   - id, group_id, expense_id
-  - name, address, address_line2, city, state, postal_code, country
+  - name, platform, platform_id, address, address_line2, city, state, postal_code, country
   - check_in, check_in_time, check_out, check_out_time
   - room_type, room_quantity, room_occupancy
   - status, cost, currency

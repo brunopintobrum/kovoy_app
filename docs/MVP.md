@@ -124,6 +124,7 @@
     - [x] Endereco completo + contato
     - [x] Check-in/out com hora
     - [x] Status e observacoes
+    - [x] Autocomplete (datalist) para Property com historico + fallback fixo
     - [x] UI: check-out sincroniza com check-in quando o campo esta vazio
     - [x] Validar check-out > check-in (backend)
     - [x] Validar check-out > check-in (UI)

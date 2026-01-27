@@ -36,6 +36,7 @@ Video curto (opcional): (adicione o link aqui)
 - Voos V2: o campo Airline utiliza autocomplete/datalist via `/api/airlines`, registra `airline_id` e permite adicionar novas companhias.
 - Voos V2: From/To utiliza autocomplete via `/api/airports` e grava `from_airport_id`/`to_airport_id` quando ha match.
 - Hospedagens V2: endereco completo, quartos, check-in/out com hora e status
+- Hospedagens V2: Property com datalist de nomes mais usados + fallback fixo por grupo
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes
 - Modulos V2: quando vinculados a uma despesa, replicam o pagador, tipo/mode e alvos do split configurados no painel
@@ -87,7 +88,7 @@ Schema criado automaticamente no boot. Tabelas principais:
 - `expenses`, `expense_splits`
 - `expenses` + `expense_splits` mantem o registro do pagador e dos alvos (participants/families) usados pelos módulos logísticos
 - `group_flights`, `group_flight_participants`, `group_lodgings`, `group_transports`, `group_tickets`
-- `airlines` (lista única usada nos autocompletes de módulos logísticos)
+- irlines, irports, lodging_platforms (listas unicas usadas nos autocompletes dos modulos logisticos)
 - (legado) `trips`, `trip_flights`, `trip_lodgings`, `trip_cars`, `trip_expenses`, `trip_transports`, `trip_timeline`, `trip_reminders`
 
 Resumo do schema: `docs/SCHEMA.md`.
@@ -120,6 +121,7 @@ Importacao de aeroportos:
 
 Campos V2 em `group_lodgings`:
 
+- `platform`, `platform_id`
 - `address_line2`, `city`, `state`, `postal_code`, `country`
 - `check_in_time`, `check_out_time`, `room_type`, `room_quantity`, `room_occupancy`, `status`
 - `contact_phone`, `contact_email`
@@ -330,6 +332,7 @@ Principais endpoints:
 - `POST /api/groups/:groupId/lodgings`
 - `PUT /api/groups/:groupId/lodgings/:lodgingId`
 - `DELETE /api/groups/:groupId/lodgings/:lodgingId`
+- `GET /api/groups/:groupId/lodging-properties`
 - `GET /api/groups/:groupId/transports`
 - `POST /api/groups/:groupId/transports`
 - `PUT /api/groups/:groupId/transports/:transportId`
@@ -450,6 +453,7 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Transportes V2: UI valida chegada posterior a partida.
 - Hospedagens V2: UI valida check-out posterior ao check-in.
 - Hospedagens V2: check-out sincroniza com check-in quando o campo esta vazio.
+- Hospedagens V2: Property com datalist de nomes mais usados + fallback fixo via `/api/groups/:groupId/lodging-properties`.
 - Transportes V2: chegada sincroniza com partida quando o campo esta vazio.
 - Tickets V2: UI valida data/hora futura quando status=planned.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.

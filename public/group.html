@@ -687,7 +687,8 @@
                             <form id="lodgingForm" class="row g-3 needs-validation" novalidate>
                                 <div class="col-md-4">
                                     <label class="form-label" for="lodgingName">Property</label>
-                                    <input class="form-control" id="lodgingName" required>
+                                    <input class="form-control" id="lodgingName" list="lodgingPropertyList" required>
+                                    <datalist id="lodgingPropertyList"></datalist>
                                     <div class="invalid-feedback">Enter a property name.</div>
                                 </div>
                                 <div class="col-md-4">
