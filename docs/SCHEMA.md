@@ -37,6 +37,11 @@ Last updated: 2026-01-28 00:00.
 - airlines: id, name, created_at
 - lodging_platforms: id, name, created_at
 
+## Locations
+- countries: code, name
+- states: id, country_code, code, name
+- cities: id, country_code, state_code, name
+
 ## Lodgings (V2)
 - group_lodgings:
   - id, group_id, expense_id

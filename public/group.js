@@ -9,6 +9,7 @@
         lodgingPlatforms: [],
         lodgingProperties: [],
         lodgingLocations: { cities: [], states: [] },
+        lodgingCountries: [],
         airports: { from: [], to: [] },
         expenses: [],
         flights: [],
@@ -442,15 +443,16 @@
         const select = document.getElementById('lodgingCountry');
         if (!select) return;
         const current = select.value;
+        const options = state.lodgingCountries.length ? state.lodgingCountries : lodgingCountries;
         select.innerHTML = '<option value=\"\">Select a country</option>';
-        lodgingCountries.forEach((country) => {
+        options.forEach((country) => {
             const option = document.createElement('option');
             option.value = country;
             option.textContent = country;
             select.appendChild(option);
         });
         if (current) {
-            const exists = lodgingCountries.some((country) => country === current);
+            const exists = options.some((country) => country === current);
             if (!exists) {
                 const option = document.createElement('option');
                 option.value = current;
@@ -540,6 +542,19 @@
         }
     };
 
+    const loadLodgingCountries = async () => {
+        try {
+            const response = await apiRequest('/api/locations/countries');
+            const countries = (response.data || []).map((item) => item?.name).filter(Boolean);
+            state.lodgingCountries = countries.length ? countries : lodgingCountries;
+        } catch (err) {
+            state.lodgingCountries = lodgingCountries;
+            console.warn('Failed to load lodging countries:', err.message);
+        } finally {
+            renderLodgingCountryOptions();
+        }
+    };
+
     const loadLodgingLocations = async (country) => {
         if (!state.groupId || !country) {
             state.lodgingLocations = { cities: [], states: [] };
@@ -548,14 +563,18 @@
         }
         const fallback = lodgingFallbackLocations[country] || { cities: [], states: [] };
         try {
-            const response = await apiRequest(
-                `/api/groups/${state.groupId}/lodging-locations?country=${encodeURIComponent(country)}&limit=10`
-            );
-            const cities = response.data?.cities || [];
-            const states = response.data?.states || [];
+            const [historyResponse, countriesCitiesResponse, countriesStatesResponse] = await Promise.all([
+                apiRequest(`/api/groups/${state.groupId}/lodging-locations?country=${encodeURIComponent(country)}&limit=10`),
+                apiRequest(`/api/locations/cities?country=${encodeURIComponent(country)}&limit=50`),
+                apiRequest(`/api/locations/states?country=${encodeURIComponent(country)}`)
+            ]);
+            const cities = historyResponse.data?.cities || [];
+            const states = historyResponse.data?.states || [];
+            const officialCities = (countriesCitiesResponse.data || []).map((item) => item?.name).filter(Boolean);
+            const officialStates = (countriesStatesResponse.data || []).map((item) => item?.name).filter(Boolean);
             state.lodgingLocations = {
-                cities: mergeLocationSuggestions(cities, fallback.cities || [], 10),
-                states: mergeLocationSuggestions(states, fallback.states || [], 10)
+                cities: mergeLocationSuggestions(cities, [...officialCities, ...(fallback.cities || [])], 10),
+                states: mergeLocationSuggestions(states, [...officialStates, ...(fallback.states || [])], 10)
             };
         } catch (err) {
             state.lodgingLocations = {
@@ -580,6 +599,10 @@
         const select = document.getElementById('lodgingCountry');
         if (!select) return;
         select.addEventListener('change', () => {
+            const city = document.getElementById('lodgingCity');
+            const state = document.getElementById('lodgingState');
+            if (city) city.value = '';
+            if (state) state.value = '';
             loadLodgingLocations(select.value.trim());
         });
     };
@@ -2856,7 +2879,7 @@
         if (!ok) return;
         bindGroupSelector();
         bindForms();
-        renderLodgingCountryOptions();
+        await loadLodgingCountries();
         setupFlightAirlineAutocomplete();
         setupLodgingPlatformAutocomplete();
         setupLodgingLocationAutocomplete();

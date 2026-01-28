@@ -126,6 +126,7 @@
     - [x] Status e observacoes
     - [x] Autocomplete (datalist) para Property com historico + fallback fixo
     - [x] Country select + sugestoes de City/State por pais (historico + fallback)
+    - [x] Base oficial de localizacoes (countries/states/cities) via `/api/locations/*`
     - [x] UI: check-out sincroniza com check-in quando o campo esta vazio
     - [x] Validar check-out > check-in (backend)
     - [x] Validar check-out > check-in (UI)

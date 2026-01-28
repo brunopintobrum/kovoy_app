@@ -89,7 +89,7 @@ Schema criado automaticamente no boot. Tabelas principais:
 - `expenses`, `expense_splits`
 - `expenses` + `expense_splits` mantem o registro do pagador e dos alvos (participants/families) usados pelos módulos logísticos
 - `group_flights`, `group_flight_participants`, `group_lodgings`, `group_transports`, `group_tickets`
-- irlines, irports, lodging_platforms (listas unicas usadas nos autocompletes dos modulos logisticos)
+- `airlines`, `airports`, `lodging_platforms`, `countries`, `states`, `cities` (listas unicas usadas nos autocompletes dos modulos logisticos)
 - (legado) `trips`, `trip_flights`, `trip_lodgings`, `trip_cars`, `trip_expenses`, `trip_transports`, `trip_timeline`, `trip_reminders`
 
 Resumo do schema: `docs/SCHEMA.md`.
@@ -176,6 +176,12 @@ URLs locais:
 1. Baixe os arquivos `routes.csv` e `airports.csv` (por exemplo, os datastes do [OpenFlights](https://openflights.org/data.html) e do [dataset airport-codes](https://github.com/datasets/airport-codes/blob/master/data/airport-codes.csv)).
 2. Rode `node scripts/import-routes.js <routes-csv> <airports-csv>`; os caminhos padrão da versão Windows estão em `C:\Users\bruno\Downloads\routes.csv` e `C:\Users\bruno\Downloads\airports.csv`.
 3. O backend passa a oferecer `/api/routes/airlines?from=GRU&to=MCO`, o datalist do campo Airline é filtrado pelas cias que voam na rota (com fallback para a lista completa caso não existam rotas registradas).
+
+## Importar localizacoes (countries/states/cities)
+
+1. Prepare um CSV com as colunas: `country_code`, `country_name`, `state_code`, `state_name`, `city_name`.
+2. Rode `node scripts/import-locations.js <caminho-do-csv>` (opcional: `--clear` para limpar antes).
+3. As tabelas `countries`, `states`, `cities` alimentam os endpoints `/api/locations/*`.
 
 ## Configuracao de ambiente (.env)
 
@@ -329,6 +335,9 @@ Principais endpoints:
 - `PUT /api/groups/:groupId/flights/:flightId`
 - `DELETE /api/groups/:groupId/flights/:flightId`
 - `GET /api/airlines`
+- `GET /api/locations/countries`
+- `GET /api/locations/states`
+- `GET /api/locations/cities`
 - `GET /api/groups/:groupId/lodgings`
 - `POST /api/groups/:groupId/lodgings`
 - `PUT /api/groups/:groupId/lodgings/:lodgingId`
@@ -456,6 +465,7 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Hospedagens V2: UI valida check-out posterior ao check-in.
 - Hospedagens V2: check-out sincroniza com check-in quando o campo esta vazio.
 - Hospedagens V2: Property com datalist de nomes mais usados + fallback fixo via `/api/groups/:groupId/lodging-properties`.
+- Hospedagens V2: Country select + sugestoes de City/State por pais com base oficial + historico.
 - Hospedagens V2: Country select com sugestoes de City/State por pais (historico + fallback).
 - Transportes V2: chegada sincroniza com partida quando o campo esta vazio.
 - Tickets V2: UI valida data/hora futura quando status=planned.

@@ -268,6 +268,26 @@ db.exec(`
         name_normalized TEXT,
         city_normalized TEXT
     );
+    CREATE TABLE IF NOT EXISTS countries (
+        code TEXT PRIMARY KEY,
+        name TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS states (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        country_code TEXT NOT NULL,
+        code TEXT,
+        name TEXT NOT NULL,
+        FOREIGN KEY (country_code) REFERENCES countries(code) ON DELETE CASCADE,
+        UNIQUE (country_code, code, name)
+    );
+    CREATE TABLE IF NOT EXISTS cities (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        country_code TEXT NOT NULL,
+        state_code TEXT,
+        name TEXT NOT NULL,
+        FOREIGN KEY (country_code) REFERENCES countries(code) ON DELETE CASCADE,
+        UNIQUE (country_code, state_code, name)
+    );
     CREATE TABLE IF NOT EXISTS route_airlines (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         airline_name TEXT NOT NULL,
@@ -685,6 +705,9 @@ db.exec('CREATE INDEX IF NOT EXISTS idx_expense_splits_expense ON expense_splits
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_trips_user ON trips(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_trip_flights_trip ON trip_flights(trip_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_trip_lodgings_trip ON trip_lodgings(trip_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_states_country ON states(country_code)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_cities_country ON cities(country_code)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_cities_state ON cities(state_code)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_trip_cars_trip ON trip_cars(trip_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_trip_expenses_trip ON trip_expenses(trip_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_trip_transports_trip ON trip_transports(trip_id)');
@@ -1846,6 +1869,12 @@ const listLodgingPlatforms = db.prepare('SELECT id, name FROM lodging_platforms 
 const getLodgingPlatformById = db.prepare('SELECT id, name FROM lodging_platforms WHERE id = ?');
 const findLodgingPlatformByName = db.prepare('SELECT id FROM lodging_platforms WHERE LOWER(name) = ?');
 const insertLodgingPlatform = db.prepare('INSERT OR IGNORE INTO lodging_platforms (name) VALUES (?)');
+const listCountries = db.prepare('SELECT code, name FROM countries ORDER BY name');
+const listStatesByCountry = db.prepare('SELECT code, name FROM states WHERE country_code = ? ORDER BY name');
+const listCitiesByCountry = db.prepare('SELECT name, state_code FROM cities WHERE country_code = ? ORDER BY name LIMIT ?');
+const listCitiesByCountryState = db.prepare(
+    'SELECT name FROM cities WHERE country_code = ? AND state_code = ? ORDER BY name LIMIT ?'
+);
 const getAirportById = db.prepare('SELECT id, code, name, city, country FROM airports WHERE id = ?');
 const defaultLodgingPlatforms = [
     'Booking.com',
@@ -2619,6 +2648,38 @@ app.get('/api/airlines', authRequiredApi, (req, res) => {
 app.get('/api/lodging-platforms', authRequiredApi, (req, res) => {
     const platforms = listLodgingPlatforms.all();
     return res.json({ ok: true, data: platforms });
+});
+
+app.get('/api/locations/countries', authRequiredApi, (req, res) => {
+    const countries = listCountries.all();
+    return res.json({ ok: true, data: countries });
+});
+
+app.get('/api/locations/states', authRequiredApi, (req, res) => {
+    const country = typeof req.query.country === 'string' ? req.query.country.trim() : '';
+    if (!country) {
+        return res.status(400).json({ error: 'Country is required.' });
+    }
+    const states = listStatesByCountry.all(country);
+    return res.json({ ok: true, data: states });
+});
+
+app.get('/api/locations/cities', authRequiredApi, (req, res) => {
+    const country = typeof req.query.country === 'string' ? req.query.country.trim() : '';
+    if (!country) {
+        return res.status(400).json({ error: 'Country is required.' });
+    }
+    const state = typeof req.query.state === 'string' ? req.query.state.trim() : '';
+    const rawLimit = typeof req.query.limit === 'string' ? req.query.limit.trim() : '';
+    let limit = Number.parseInt(rawLimit, 10);
+    if (!Number.isFinite(limit)) {
+        limit = 50;
+    }
+    limit = Math.max(1, Math.min(limit, 200));
+    const cities = state
+        ? listCitiesByCountryState.all(country, state, limit)
+        : listCitiesByCountry.all(country, limit);
+    return res.json({ ok: true, data: cities });
 });
 
 app.get('/api/airports', authRequiredApi, (req, res) => {

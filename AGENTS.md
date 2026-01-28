@@ -50,4 +50,5 @@
 - Route filtering: backend consegue filtrar os nomes por From/To usando os scripts `import-routes.js` (routes + airports) e o endpoint `/api/routes/airlines`.
 - Hospedagens V2: campo Property com datalist das propriedades mais usadas + fallback fixo via `/api/groups/:groupId/lodging-properties`.
 - Hospedagens V2: Country select com sugestoes de City/State por pais (historico + fallback) via `/api/groups/:groupId/lodging-locations`.
+- Localizacoes: endpoints `/api/locations/countries`, `/api/locations/states`, `/api/locations/cities` para Country/City/State.
 
