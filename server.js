@@ -1894,6 +1894,22 @@ const listGroupLodgingProperties = db.prepare(`
     ORDER BY usage_count DESC, name ASC
     LIMIT ?
 `);
+const listGroupLodgingCities = db.prepare(`
+    SELECT city as name, COUNT(*) as usage_count
+    FROM group_lodgings
+    WHERE group_id = ? AND LOWER(country) = LOWER(?) AND city IS NOT NULL AND TRIM(city) <> ''
+    GROUP BY city
+    ORDER BY usage_count DESC, city ASC
+    LIMIT ?
+`);
+const listGroupLodgingStates = db.prepare(`
+    SELECT state as name, COUNT(*) as usage_count
+    FROM group_lodgings
+    WHERE group_id = ? AND LOWER(country) = LOWER(?) AND state IS NOT NULL AND TRIM(state) <> ''
+    GROUP BY state
+    ORDER BY usage_count DESC, state ASC
+    LIMIT ?
+`);
 const getGroupLodging = db.prepare('SELECT id, expense_id FROM group_lodgings WHERE id = ? AND group_id = ?');
 const insertGroupLodging = db.prepare(`
     INSERT INTO group_lodgings (
@@ -2906,6 +2922,28 @@ app.get('/api/groups/:groupId/lodging-properties', authRequiredApi, requireGroup
         }
     }
     return res.json({ ok: true, data: properties });
+});
+
+app.get('/api/groups/:groupId/lodging-locations', authRequiredApi, requireGroupMember, (req, res) => {
+    const country = typeof req.query.country === 'string' ? req.query.country.trim() : '';
+    if (!country) {
+        return res.status(400).json({ error: 'Country is required.' });
+    }
+    const rawLimit = typeof req.query.limit === 'string' ? req.query.limit.trim() : '';
+    let limit = Number.parseInt(rawLimit, 10);
+    if (!Number.isFinite(limit)) {
+        limit = 10;
+    }
+    limit = Math.max(1, Math.min(limit, 25));
+    const cities = listGroupLodgingCities.all(req.groupId, country, limit).map((row) => ({
+        name: row.name,
+        usageCount: row.usage_count
+    }));
+    const states = listGroupLodgingStates.all(req.groupId, country, limit).map((row) => ({
+        name: row.name,
+        usageCount: row.usage_count
+    }));
+    return res.json({ ok: true, data: { cities, states } });
 });
 
 app.post(

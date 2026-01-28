@@ -37,6 +37,7 @@ Video curto (opcional): (adicione o link aqui)
 - Voos V2: From/To utiliza autocomplete via `/api/airports` e grava `from_airport_id`/`to_airport_id` quando ha match.
 - Hospedagens V2: endereco completo, quartos, check-in/out com hora e status
 - Hospedagens V2: Property com datalist de nomes mais usados + fallback fixo por grupo
+- Hospedagens V2: Country select com sugestoes de City/State por pais (historico + fallback)
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes
 - Modulos V2: quando vinculados a uma despesa, replicam o pagador, tipo/mode e alvos do split configurados no painel
@@ -333,6 +334,7 @@ Principais endpoints:
 - `PUT /api/groups/:groupId/lodgings/:lodgingId`
 - `DELETE /api/groups/:groupId/lodgings/:lodgingId`
 - `GET /api/groups/:groupId/lodging-properties`
+- `GET /api/groups/:groupId/lodging-locations`
 - `GET /api/groups/:groupId/transports`
 - `POST /api/groups/:groupId/transports`
 - `PUT /api/groups/:groupId/transports/:transportId`
@@ -454,6 +456,7 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Hospedagens V2: UI valida check-out posterior ao check-in.
 - Hospedagens V2: check-out sincroniza com check-in quando o campo esta vazio.
 - Hospedagens V2: Property com datalist de nomes mais usados + fallback fixo via `/api/groups/:groupId/lodging-properties`.
+- Hospedagens V2: Country select com sugestoes de City/State por pais (historico + fallback).
 - Transportes V2: chegada sincroniza com partida quando o campo esta vazio.
 - Tickets V2: UI valida data/hora futura quando status=planned.
 - Schema: tabela group_flight_participants para vinculo de passageiros nos voos.

@@ -125,6 +125,7 @@
     - [x] Check-in/out com hora
     - [x] Status e observacoes
     - [x] Autocomplete (datalist) para Property com historico + fallback fixo
+    - [x] Country select + sugestoes de City/State por pais (historico + fallback)
     - [x] UI: check-out sincroniza com check-in quando o campo esta vazio
     - [x] Validar check-out > check-in (backend)
     - [x] Validar check-out > check-in (UI)
@@ -152,7 +153,9 @@
     - [ ] Dados: local obrigatorio quando type exige
   - [x] Unificar custos com Expenses (pagador + split dentro do modulo) *(panel split agora reaproveitado automaticamente nos módulos logísticos)*
   - [ ] Anexos/recibos por item (upload, visualizacao e download)
-  - [ ] Expandir autocomplete/validação semelhante para hospedagens, transportes e tickets.
+  - [x] Autocomplete/validacao para hospedagens (Country + City/State + Property)
+  - [ ] Autocomplete/validacao para transportes (origem/destino)
+  - [ ] Autocomplete/validacao para tickets (local)
 - [ ] Categorias avancadas e filtros (por data, status, responsavel)
 - [ ] Multi-moeda e cambio (taxas por data + conversao no dashboard)
 - [ ] Timeline do grupo (eventos e marcos por data)

@@ -2,7 +2,7 @@
 
 This is a concise, human-readable snapshot of the SQLite schema used by the app.
 For full definitions, see `server.js` (schema bootstrapping) and the SQLite DB at `data/app.db`.
-Last updated: 2026-01-27 00:00.
+Last updated: 2026-01-28 00:00.
 
 ## Core Auth
 - users: id, email, password_hash, google_sub, first_name, last_name, display_name, avatar_url, email_verified_at, two_factor_enabled, created_at

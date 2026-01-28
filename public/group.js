@@ -8,6 +8,7 @@
         airlines: [],
         lodgingPlatforms: [],
         lodgingProperties: [],
+        lodgingLocations: { cities: [], states: [] },
         airports: { from: [], to: [] },
         expenses: [],
         flights: [],
@@ -145,6 +146,266 @@
         }
     };
 
+    const lodgingCountries = [
+        'Afghanistan',
+        'Albania',
+        'Algeria',
+        'Andorra',
+        'Angola',
+        'Antigua and Barbuda',
+        'Argentina',
+        'Armenia',
+        'Australia',
+        'Austria',
+        'Azerbaijan',
+        'Bahamas',
+        'Bahrain',
+        'Bangladesh',
+        'Barbados',
+        'Belarus',
+        'Belgium',
+        'Belize',
+        'Benin',
+        'Bhutan',
+        'Bolivia',
+        'Bosnia and Herzegovina',
+        'Botswana',
+        'Brazil',
+        'Brunei',
+        'Bulgaria',
+        'Burkina Faso',
+        'Burundi',
+        'Cambodia',
+        'Cameroon',
+        'Canada',
+        'Cape Verde',
+        'Central African Republic',
+        'Chad',
+        'Chile',
+        'China',
+        'Colombia',
+        'Comoros',
+        'Congo (Brazzaville)',
+        'Congo (DRC)',
+        'Costa Rica',
+        "Cote d'Ivoire",
+        'Croatia',
+        'Cuba',
+        'Cyprus',
+        'Czech Republic',
+        'Denmark',
+        'Djibouti',
+        'Dominica',
+        'Dominican Republic',
+        'Ecuador',
+        'Egypt',
+        'El Salvador',
+        'Equatorial Guinea',
+        'Eritrea',
+        'Estonia',
+        'Eswatini',
+        'Ethiopia',
+        'Fiji',
+        'Finland',
+        'France',
+        'Gabon',
+        'Gambia',
+        'Georgia',
+        'Germany',
+        'Ghana',
+        'Greece',
+        'Grenada',
+        'Guatemala',
+        'Guinea',
+        'Guinea-Bissau',
+        'Guyana',
+        'Haiti',
+        'Honduras',
+        'Hungary',
+        'Iceland',
+        'India',
+        'Indonesia',
+        'Iran',
+        'Iraq',
+        'Ireland',
+        'Israel',
+        'Italy',
+        'Jamaica',
+        'Japan',
+        'Jordan',
+        'Kazakhstan',
+        'Kenya',
+        'Kiribati',
+        'Kuwait',
+        'Kyrgyzstan',
+        'Laos',
+        'Latvia',
+        'Lebanon',
+        'Lesotho',
+        'Liberia',
+        'Libya',
+        'Liechtenstein',
+        'Lithuania',
+        'Luxembourg',
+        'Madagascar',
+        'Malawi',
+        'Malaysia',
+        'Maldives',
+        'Mali',
+        'Malta',
+        'Marshall Islands',
+        'Mauritania',
+        'Mauritius',
+        'Mexico',
+        'Micronesia',
+        'Moldova',
+        'Monaco',
+        'Mongolia',
+        'Montenegro',
+        'Morocco',
+        'Mozambique',
+        'Myanmar',
+        'Namibia',
+        'Nauru',
+        'Nepal',
+        'Netherlands',
+        'New Zealand',
+        'Nicaragua',
+        'Niger',
+        'Nigeria',
+        'North Korea',
+        'North Macedonia',
+        'Norway',
+        'Oman',
+        'Pakistan',
+        'Palau',
+        'Panama',
+        'Papua New Guinea',
+        'Paraguay',
+        'Peru',
+        'Philippines',
+        'Poland',
+        'Portugal',
+        'Qatar',
+        'Romania',
+        'Russia',
+        'Rwanda',
+        'Saint Kitts and Nevis',
+        'Saint Lucia',
+        'Saint Vincent and the Grenadines',
+        'Samoa',
+        'San Marino',
+        'Sao Tome and Principe',
+        'Saudi Arabia',
+        'Senegal',
+        'Serbia',
+        'Seychelles',
+        'Sierra Leone',
+        'Singapore',
+        'Slovakia',
+        'Slovenia',
+        'Solomon Islands',
+        'Somalia',
+        'South Africa',
+        'South Korea',
+        'South Sudan',
+        'Spain',
+        'Sri Lanka',
+        'Sudan',
+        'Suriname',
+        'Sweden',
+        'Switzerland',
+        'Syria',
+        'Taiwan',
+        'Tajikistan',
+        'Tanzania',
+        'Thailand',
+        'Timor-Leste',
+        'Togo',
+        'Tonga',
+        'Trinidad and Tobago',
+        'Tunisia',
+        'Turkey',
+        'Turkmenistan',
+        'Tuvalu',
+        'Uganda',
+        'Ukraine',
+        'United Arab Emirates',
+        'United Kingdom',
+        'United States',
+        'Uruguay',
+        'Uzbekistan',
+        'Vanuatu',
+        'Vatican City',
+        'Venezuela',
+        'Vietnam',
+        'Yemen',
+        'Zambia',
+        'Zimbabwe'
+    ];
+    const lodgingFallbackLocations = {
+        'Brazil': {
+            states: ['SP', 'RJ', 'MG', 'RS', 'SC', 'BA', 'PR', 'PE', 'CE', 'DF'],
+            cities: [
+                'Sao Paulo',
+                'Rio de Janeiro',
+                'Brasilia',
+                'Belo Horizonte',
+                'Curitiba',
+                'Salvador',
+                'Fortaleza',
+                'Recife',
+                'Porto Alegre',
+                'Florianopolis'
+            ]
+        },
+        'Canada': {
+            states: ['ON', 'QC', 'BC', 'AB', 'MB', 'NS', 'SK', 'NB', 'NL', 'PE'],
+            cities: [
+                'Toronto',
+                'Montreal',
+                'Vancouver',
+                'Calgary',
+                'Ottawa',
+                'Edmonton',
+                'Winnipeg',
+                'Quebec City',
+                'Halifax',
+                'Victoria'
+            ]
+        },
+        'United Kingdom': {
+            states: ['England', 'Scotland', 'Wales', 'Northern Ireland'],
+            cities: [
+                'London',
+                'Manchester',
+                'Birmingham',
+                'Edinburgh',
+                'Glasgow',
+                'Liverpool',
+                'Bristol',
+                'Leeds',
+                'Cardiff',
+                'Belfast'
+            ]
+        },
+        'United States': {
+            states: ['FL', 'CA', 'NY', 'TX', 'NV', 'IL', 'GA', 'MA', 'WA', 'AZ'],
+            cities: [
+                'Orlando',
+                'Miami',
+                'New York',
+                'Los Angeles',
+                'San Francisco',
+                'Las Vegas',
+                'Chicago',
+                'Houston',
+                'Seattle',
+                'Boston'
+            ]
+        }
+    };
+
     const setupFlightAirlineAutocomplete = () => {
         const input = document.getElementById('flightAirline');
         if (!input) return;
@@ -175,6 +436,71 @@
             option.value = property.name;
             list.appendChild(option);
         });
+    };
+
+    const renderLodgingCountryOptions = () => {
+        const select = document.getElementById('lodgingCountry');
+        if (!select) return;
+        const current = select.value;
+        select.innerHTML = '<option value=\"\">Select a country</option>';
+        lodgingCountries.forEach((country) => {
+            const option = document.createElement('option');
+            option.value = country;
+            option.textContent = country;
+            select.appendChild(option);
+        });
+        if (current) {
+            const exists = lodgingCountries.some((country) => country === current);
+            if (!exists) {
+                const option = document.createElement('option');
+                option.value = current;
+                option.textContent = current;
+                select.appendChild(option);
+            }
+            select.value = current;
+        }
+    };
+
+    const renderLodgingLocationOptions = () => {
+        const cityList = document.getElementById('lodgingCityList');
+        const stateList = document.getElementById('lodgingStateList');
+        if (cityList) {
+            cityList.innerHTML = '';
+            state.lodgingLocations.cities.forEach((city) => {
+                if (!city?.name) return;
+                const option = document.createElement('option');
+                option.value = city.name;
+                cityList.appendChild(option);
+            });
+        }
+        if (stateList) {
+            stateList.innerHTML = '';
+            state.lodgingLocations.states.forEach((region) => {
+                if (!region?.name) return;
+                const option = document.createElement('option');
+                option.value = region.name;
+                stateList.appendChild(option);
+            });
+        }
+    };
+
+    const mergeLocationSuggestions = (primary, fallback, limit) => {
+        const results = [];
+        const seen = new Set();
+        primary.forEach((item) => {
+            if (!item?.name) return;
+            const key = String(item.name).toLowerCase();
+            if (seen.has(key)) return;
+            results.push({ name: item.name, usageCount: item.usageCount ?? 0 });
+            seen.add(key);
+        });
+        fallback.forEach((name) => {
+            const key = String(name).toLowerCase();
+            if (seen.has(key)) return;
+            results.push({ name, usageCount: 0 });
+            seen.add(key);
+        });
+        return results.slice(0, limit);
     };
 
     const syncLodgingPlatformIdFromInput = () => {
@@ -214,12 +540,48 @@
         }
     };
 
+    const loadLodgingLocations = async (country) => {
+        if (!state.groupId || !country) {
+            state.lodgingLocations = { cities: [], states: [] };
+            renderLodgingLocationOptions();
+            return;
+        }
+        const fallback = lodgingFallbackLocations[country] || { cities: [], states: [] };
+        try {
+            const response = await apiRequest(
+                `/api/groups/${state.groupId}/lodging-locations?country=${encodeURIComponent(country)}&limit=10`
+            );
+            const cities = response.data?.cities || [];
+            const states = response.data?.states || [];
+            state.lodgingLocations = {
+                cities: mergeLocationSuggestions(cities, fallback.cities || [], 10),
+                states: mergeLocationSuggestions(states, fallback.states || [], 10)
+            };
+        } catch (err) {
+            state.lodgingLocations = {
+                cities: mergeLocationSuggestions([], fallback.cities || [], 10),
+                states: mergeLocationSuggestions([], fallback.states || [], 10)
+            };
+            console.warn('Failed to load lodging locations:', err.message);
+        } finally {
+            renderLodgingLocationOptions();
+        }
+    };
+
     const setupLodgingPlatformAutocomplete = () => {
         const input = document.getElementById('lodgingPlatform');
         if (!input) return;
         const handler = () => syncLodgingPlatformIdFromInput();
         input.addEventListener('input', handler);
         input.addEventListener('change', handler);
+    };
+
+    const setupLodgingLocationAutocomplete = () => {
+        const select = document.getElementById('lodgingCountry');
+        if (!select) return;
+        select.addEventListener('change', () => {
+            loadLodgingLocations(select.value.trim());
+        });
     };
 
     const buildAirportDisplayValue = (airport) => {
@@ -1490,7 +1852,10 @@
         if (city) city.value = lodging.city || '';
         if (state) state.value = lodging.state || '';
         if (postalCode) postalCode.value = lodging.postalCode || '';
-        if (country) country.value = lodging.country || '';
+        if (country) {
+            country.value = lodging.country || '';
+            loadLodgingLocations(country.value.trim());
+        }
         if (checkIn) checkIn.value = lodging.checkIn || '';
         if (checkInTime) checkInTime.value = lodging.checkInTime || '';
         if (checkOut) checkOut.value = lodging.checkOut || '';
@@ -2491,8 +2856,10 @@
         if (!ok) return;
         bindGroupSelector();
         bindForms();
+        renderLodgingCountryOptions();
         setupFlightAirlineAutocomplete();
         setupLodgingPlatformAutocomplete();
+        setupLodgingLocationAutocomplete();
         setupFlightAirportAutocomplete();
         setupFlightDateConstraints();
         setupTransportDateConstraints();
