@@ -179,9 +179,13 @@ URLs locais:
 
 ## Importar localizacoes (countries/states/cities)
 
-1. Prepare um CSV com as colunas: `country_code`, `country_name`, `state_code`, `state_name`, `city_name`.
-2. Rode `node scripts/import-locations.js <caminho-do-csv>` (opcional: `--clear` para limpar antes).
-3. As tabelas `countries`, `states`, `cities` alimentam os endpoints `/api/locations/*`.
+1. Baixe a base GeoNames (gera os arquivos em `data/geonames`):
+   - Windows: `powershell -ExecutionPolicy Bypass -File scripts/download-geonames.ps1`
+2. Converta para CSV:
+   - `node scripts/convert-geonames-to-locations.js`
+3. Importe no banco:
+   - `node scripts/import-locations.js data/locations.csv --clear`
+4. As tabelas `countries`, `states`, `cities` alimentam os endpoints `/api/locations/*`.
 
 ## Configuracao de ambiente (.env)
 
