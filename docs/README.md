@@ -19,3 +19,5 @@ Observacao:
 - Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
 - Despesas: editar pelo painel (UI).
 - UI: toggle para vincular despesas nos modulos (V2 opcional).
+- Hospedagens V2: Property com datalist + Country select com sugestoes de City/State.
+- Localizacoes: endpoints `/api/locations/*` e scripts GeoNames (download/conversao/import).

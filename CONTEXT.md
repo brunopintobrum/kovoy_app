@@ -18,7 +18,7 @@
 - users: id, email, password_hash, google_sub, first_name, last_name, display_name, avatar_url, email_verified_at, two_factor_enabled, created_at.
 - tokens: refresh_tokens, email_verification_tokens, reset_tokens, two_factor_codes.
 - grupos: groups, group_members, invitations, families, participants, expenses, expense_splits, group_flights, group_flight_participants, group_lodgings, group_transports, group_tickets.
-- lookup: airlines, airports.
+- lookup: airlines, airports, lodging_platforms, countries, states, cities.
 - legado: trips, trip_flights, trip_lodgings, trip_cars, trip_expenses, trip_transports, trip_timeline, trip_reminders.
 - campos V2 (grupo): group_transports inclui origin, destination, depart_at, arrive_at, provider, locator, status, expense_id.
 - campos V2 (grupo): group_tickets inclui type, event_at, location, status, expense_id e tabela group_ticket_participants.
@@ -98,4 +98,5 @@
 - Hospedagens V2: campo Property com datalist das propriedades mais usadas + fallback fixo via `/api/groups/:groupId/lodging-properties`.
 - Hospedagens V2: Country select com sugestoes de City/State por pais (historico + fallback) via `/api/groups/:groupId/lodging-locations`.
 - Localizacoes: endpoints `/api/locations/countries`, `/api/locations/states`, `/api/locations/cities` para Country/City/State.
+- Localizacoes: base oficial (GeoNames) convertida/importada via `scripts/download-geonames.ps1` e `scripts/convert-geonames-to-locations.js`.
 
