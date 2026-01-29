@@ -21,3 +21,4 @@ Observacao:
 - UI: toggle para vincular despesas nos modulos (V2 opcional).
 - Hospedagens V2: Property com datalist + Country select com sugestoes de City/State.
 - Localizacoes: endpoints `/api/locations/*` e scripts GeoNames (download/conversao/import).
+- Hospedagens V2: formulario reorganizado em blocos (Location, Dates & Status, Rooms, Contact).

@@ -685,6 +685,10 @@
                                 </div>
                             </div>
                             <form id="lodgingForm" class="row g-3 needs-validation" novalidate>
+                                <div class="col-12">
+                                    <h6 class="text-uppercase text-muted mb-0">Location</h6>
+                                    <hr class="mt-2 mb-0">
+                                </div>
                                 <div class="col-md-4">
                                     <label class="form-label" for="lodgingName">Property</label>
                                     <input class="form-control" id="lodgingName" list="lodgingPropertyList" required>
@@ -700,28 +704,32 @@
                                     <label class="form-label" for="lodgingAddressLine2">Address line 2</label>
                                     <input class="form-control" id="lodgingAddressLine2">
                                 </div>
-                                  <div class="col-md-3">
-                                      <label class="form-label" for="lodgingCity">City</label>
-                                      <input class="form-control" id="lodgingCity" list="lodgingCityList" required>
-                                      <datalist id="lodgingCityList"></datalist>
-                                      <div class="invalid-feedback">Enter a city.</div>
-                                  </div>
-                                  <div class="col-md-3">
-                                      <label class="form-label" for="lodgingState">State/Province</label>
-                                      <input class="form-control" id="lodgingState" list="lodgingStateList">
-                                      <datalist id="lodgingStateList"></datalist>
-                                  </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingCountry">Country</label>
+                                    <select class="form-select" id="lodgingCountry" required>
+                                        <option value="">Select a country</option>
+                                    </select>
+                                    <div class="invalid-feedback">Select a country.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingCity">City</label>
+                                    <input class="form-control" id="lodgingCity" list="lodgingCityList" required>
+                                    <datalist id="lodgingCityList"></datalist>
+                                    <div class="invalid-feedback">Enter a city.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="lodgingState">State/Province</label>
+                                    <input class="form-control" id="lodgingState" list="lodgingStateList">
+                                    <datalist id="lodgingStateList"></datalist>
+                                </div>
                                 <div class="col-md-3">
                                     <label class="form-label" for="lodgingPostalCode">Postal code</label>
                                     <input class="form-control" id="lodgingPostalCode">
                                 </div>
-                                  <div class="col-md-3">
-                                      <label class="form-label" for="lodgingCountry">Country</label>
-                                      <select class="form-select" id="lodgingCountry" required>
-                                          <option value="">Select a country</option>
-                                      </select>
-                                      <div class="invalid-feedback">Select a country.</div>
-                                  </div>
+                                <div class="col-12">
+                                    <h6 class="text-uppercase text-muted mb-0">Dates &amp; Status</h6>
+                                    <hr class="mt-2 mb-0">
+                                </div>
                                 <div class="col-md-3">
                                     <label class="form-label" for="lodgingCheckIn">Check-in date</label>
                                     <input class="form-control" id="lodgingCheckIn" type="date" required>
@@ -765,6 +773,10 @@
                                     </select>
                                     <div class="invalid-feedback">Select a currency.</div>
                                 </div>
+                                <div class="col-12">
+                                    <h6 class="text-uppercase text-muted mb-0">Rooms</h6>
+                                    <hr class="mt-2 mb-0">
+                                </div>
                                 <div class="col-md-5">
                                     <label class="form-label" for="lodgingRoomType">Room type</label>
                                     <input class="form-control" id="lodgingRoomType" required>
@@ -779,6 +791,10 @@
                                     <label class="form-label" for="lodgingRoomOccupancy">Room occupancy</label>
                                     <input class="form-control" id="lodgingRoomOccupancy" type="number" min="1" step="1" required>
                                     <div class="invalid-feedback">Enter an occupancy.</div>
+                                </div>
+                                <div class="col-12">
+                                    <h6 class="text-uppercase text-muted mb-0">Contact</h6>
+                                    <hr class="mt-2 mb-0">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label" for="lodgingHost">Host</label>

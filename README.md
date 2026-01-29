@@ -38,6 +38,7 @@ Video curto (opcional): (adicione o link aqui)
 - Hospedagens V2: endereco completo, quartos, check-in/out com hora e status
 - Hospedagens V2: Property com datalist de nomes mais usados + fallback fixo por grupo
 - Hospedagens V2: Country select com sugestoes de City/State por pais (base oficial + historico)
+- Hospedagens V2: formulario reorganizado em blocos (Location, Dates & Status, Rooms, Contact)
 - Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes
 - Modulos V2: quando vinculados a uma despesa, replicam o pagador, tipo/mode e alvos do split configurados no painel

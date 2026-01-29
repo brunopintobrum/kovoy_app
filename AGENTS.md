@@ -52,4 +52,5 @@
 - Hospedagens V2: Country select com sugestoes de City/State por pais (historico + fallback) via `/api/groups/:groupId/lodging-locations`.
 - Localizacoes: endpoints `/api/locations/countries`, `/api/locations/states`, `/api/locations/cities` para Country/City/State.
 - Localizacoes: base oficial (GeoNames) com scripts `scripts/download-geonames.ps1` e `scripts/convert-geonames-to-locations.js`.
+- Hospedagens V2: formulario reorganizado em blocos (Location, Dates & Status, Rooms, Contact).
 
