@@ -918,6 +918,17 @@
         }, true);
     };
 
+    const bindMobileMenuAutoClose = () => {
+        const menu = document.getElementById('side-menu');
+        if (!menu) return;
+        menu.addEventListener('click', (event) => {
+            const target = event.target.closest('a');
+            if (!target) return;
+            if (window.innerWidth >= 992) return;
+            document.body.classList.remove('sidebar-enable');
+        });
+    };
+
     const getCurrentBasePath = () => {
         const path = window.location.pathname || '/dashboard';
         return path === '/' ? '/dashboard' : path;
@@ -3236,6 +3247,7 @@
         bindModuleExpenseToggles();
         bindLogout();
         bindMobileMenuToggleFallback();
+        bindMobileMenuAutoClose();
         renderGroupHeader();
         await refreshData();
     };

@@ -178,6 +178,17 @@
         }, true);
     };
 
+    const bindMobileMenuAutoClose = () => {
+        const menu = document.getElementById('side-menu');
+        if (!menu) return;
+        menu.addEventListener('click', (event) => {
+            const target = event.target.closest('a');
+            if (!target) return;
+            if (window.innerWidth >= 992) return;
+            document.body.classList.remove('sidebar-enable');
+        });
+    };
+
     const init = async () => {
         await setUserProfile();
         await loadGroups();
@@ -185,6 +196,7 @@
         bindAcceptInvite();
         bindLogout();
         bindMobileMenuToggleFallback();
+        bindMobileMenuAutoClose();
     };
 
     init();
