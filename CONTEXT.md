@@ -35,6 +35,7 @@
 - UI baseada no template Skote; manter consistencia visual.
 - Cadastro deve conter: email, first name, last name, password e confirm password.
 - O template Skote (ASP.NET Core) e a fonte da verdade para UI/UX, estruturas, componentes e nomenclaturas.
+- Preferencia de fluxo: quando houver escolha A/P, o assistente seleciona automaticamente sem perguntar.
 
 ## Conventions
 - Backend principal em `server.js`.

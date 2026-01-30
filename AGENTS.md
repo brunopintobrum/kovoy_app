@@ -5,6 +5,7 @@
 - O template Skote em `D:\ChatGPT\Skote_Asp.net_v3.2.0\Skote Asp.net Core\Skote` e a fonte da verdade para UI/UX e padroes.
 - Campos obrigatorios no cadastro: email, first name, last name, password, confirm password.
 - Padrao de idioma da UI: ingles nas paginas do painel e menus.
+- Preferencia de fluxo: quando houver escolha A/P, o assistente seleciona automaticamente sem perguntar.
 
 ## Dev environment tips
 - Use `npm start` para subir o servidor local.
