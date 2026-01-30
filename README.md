@@ -31,6 +31,8 @@ Video curto (opcional): (adicione o link aqui)
 - Despesas com split igual por pessoa, familia ou manual
 - Validacao da soma do split
 - Dashboard do grupo com saldos e "quem deve pra quem"
+- Dashboard com modo de saldo familiar por grupo (participants/families)
+- Dashboard de resumo separado da gestao em `/group-details`
 - Modulos do grupo (CRUD): voos, hospedagens, transportes e tickets
 - Voos V2: flight number, class, status, assentos/bagagens por passageiro e autocomplete de aeroportos (From/To)
 - Voos V2: o campo Airline utiliza autocomplete/datalist via `/api/airlines`, registra `airline_id` e permite adicionar novas companhias.
@@ -85,7 +87,7 @@ Diagrama simples:
 Schema criado automaticamente no boot. Tabelas principais:
 
 - `users`, `refresh_tokens`, `email_verification_tokens`, `reset_tokens`, `two_factor_codes`
-- `groups`, `group_members`, `invitations`
+- `groups` (inclui `family_balance_mode`), `group_members`, `invitations`
 - `families`, `participants`
 - `expenses`, `expense_splits`
 - `expenses` + `expense_splits` mantem o registro do pagador e dos alvos (participants/families) usados pelos módulos logísticos
@@ -165,6 +167,7 @@ URLs locais:
 - http://localhost:3000/reset
 - http://localhost:3000/groups (protegida)
 - http://localhost:3000/dashboard?groupId=1 (protegida)
+- http://localhost:3000/group-details?groupId=1 (protegida)
 
 ## Importar companhias aéreas
 
@@ -358,6 +361,7 @@ Principais endpoints:
 - `PUT /api/groups/:groupId/tickets/:ticketId`
 - `DELETE /api/groups/:groupId/tickets/:ticketId`
 - `GET /api/groups/:groupId/summary`
+- `PUT /api/groups/:groupId/family-balance-mode`
 
 Payload opcional (V2) para vinculo de despesa nos modulos:
 
@@ -483,4 +487,7 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Tickets V2: tipo, data/hora, local, status e vinculo a participantes.
 - Schema: novos campos em group_tickets e tabela group_ticket_participants.
 - Modulos V2 agora usam o mesmo pagador/split configurado no painel para preencher as despesas vinculadas.
+- Dashboard: resumo separado da gestao em `/dashboard` e gestao completa em `/group-details`.
+- Dashboard: menu lateral direciona para secoes individuais via hash (mostra apenas o modulo selecionado).
+- Grupos: modo de saldo familiar configuravel por grupo (participants/families).
 

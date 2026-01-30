@@ -2,14 +2,14 @@
 
 This is a concise, human-readable snapshot of the SQLite schema used by the app.
 For full definitions, see `server.js` (schema bootstrapping) and the SQLite DB at `data/app.db`.
-Last updated: 2026-01-28 12:00.
+Last updated: 2026-01-30 16:20.
 
 ## Core Auth
 - users: id, email, password_hash, google_sub, first_name, last_name, display_name, avatar_url, email_verified_at, two_factor_enabled, created_at
 - refresh_tokens, email_verification_tokens, reset_tokens, two_factor_codes
 
 ## Groups
-- groups: id, name, default_currency, created_at
+- groups: id, name, default_currency, family_balance_mode, created_at
 - group_members: id, group_id, user_id, role, created_at
 - invitations: id, group_id, email, role, token, expires_at, used_at, created_at
 

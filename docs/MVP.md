@@ -46,6 +46,9 @@
   - [x] Saldo por participant (backend)
   - [x] Saldo por familia (backend)
   - [x] Lista "quem deve pra quem" (backend)
+  - [x] Modo de saldo familiar por grupo (participants/families)
+  - [x] Dashboard separado da gestao (resumo apenas)
+  - [x] Navegacao por secao (hash) para focar um modulo por vez
 
 ## Regras de negocio (MVP)
 - [x] Tudo pertence a um groupId
@@ -86,6 +89,8 @@
 - [x] Dashboard do grupo
   - [x] Cards de saldo
   - [x] Lista de dividas (quem deve pra quem)
+  - [x] Resumo separado da pagina de gestao
+  - [x] Menu lateral direciona para secao unica por vez
 
 ## Testes
 - [x] Voos V2 (validation/integration)

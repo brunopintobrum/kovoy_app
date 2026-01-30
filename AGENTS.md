@@ -53,4 +53,7 @@
 - Localizacoes: endpoints `/api/locations/countries`, `/api/locations/states`, `/api/locations/cities` para Country/City/State.
 - Localizacoes: base oficial (GeoNames) com scripts `scripts/download-geonames.ps1` e `scripts/convert-geonames-to-locations.js`.
 - Hospedagens V2: formulario reorganizado em blocos (Location, Dates & Status, Rooms, Contact).
+- Dashboard: resumo separado da gestao em `/dashboard` e gestao completa em `/group-details`.
+- Dashboard: menu lateral direciona para secoes individuais via hash (mostra apenas o modulo selecionado).
+- Grupos: modo de saldo familiar configuravel por grupo (participants/families).
 
