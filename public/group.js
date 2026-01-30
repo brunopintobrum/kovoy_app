@@ -894,6 +894,26 @@
             el.classList.toggle('d-none', !visible.includes(id));
         });
 
+        const titleEl = document.getElementById('pageTitle');
+        const breadcrumbEl = document.getElementById('breadcrumbActive');
+        if (titleEl && breadcrumbEl) {
+            const labels = {
+                dashboard: 'Management',
+                balances: 'Balances',
+                debts: 'Who owes',
+                participants: 'Participants',
+                invitations: 'Invites',
+                expenses: 'Expenses',
+                flights: 'Flights',
+                lodgings: 'Lodgings',
+                transports: 'Transports',
+                tickets: 'Tickets'
+            };
+            const label = labels[key] || 'Management';
+            titleEl.textContent = label;
+            breadcrumbEl.textContent = label;
+        }
+
         // Let the browser handle anchor scrolling to avoid double scroll jumps.
     };
 
