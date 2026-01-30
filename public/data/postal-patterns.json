@@ -1,0 +1,1959 @@
+{
+  "AC": {
+    "pattern": "ASCN 1ZZ",
+    "example": "ASCN 1ZZ"
+  },
+  "AD": {
+    "pattern": "AD[1-7]0\\d",
+    "example": "AD100",
+    "regions": {
+      "ANDORRA LA VELLA": "AD50[01]",
+      "Andorra la Vella": "AD50[01]",
+      "CANILLO": "AD10[01]",
+      "Canillo": "AD10[01]",
+      "ENCAMP": "AD20[01]",
+      "Encamp": "AD20[01]",
+      "ESCALDES ENGORDANY": "AD70[01]",
+      "Escaldes Engordany": "AD70[01]",
+      "LAMASSANA": "AD40[01]",
+      "Lamassana": "AD40[01]",
+      "ORDINO": "AD30[01]",
+      "Ordino": "AD30[01]",
+      "SANT JULIA DE LORIA": "AD60[01]",
+      "Sant Julia de Loria": "AD60[01]"
+    }
+  },
+  "AF": {
+    "pattern": "\\d{4}",
+    "example": "1001"
+  },
+  "AI": {
+    "pattern": "2640",
+    "example": "2640"
+  },
+  "AL": {
+    "pattern": "\\d{4}",
+    "example": "1001"
+  },
+  "AM": {
+    "pattern": "(37)?\\d{4}",
+    "example": "375010",
+    "regions": {
+      "Արագածոտն": "0[2-5]",
+      "Aragatsotn": "0[2-5]",
+      "Արարատ": "0[6-8]",
+      "Ararat": "0[6-8]",
+      "Արմավիր": "09|1[01]",
+      "Armavir": "09|1[01]",
+      "Գեղարքունիք": "1[2-6]",
+      "Gegharkunik": "1[2-6]",
+      "Երևան": "00",
+      "Yerevan": "00",
+      "Լոռի": "1[7-9]|2[01]",
+      "Lori": "1[7-9]|2[01]",
+      "Կոտայք": "2[2-5]",
+      "Kotayk": "2[2-5]",
+      "Շիրակ": "2[6-9]|3[01]",
+      "Shirak": "2[6-9]|3[01]",
+      "Սյունիք": "3[2-5]",
+      "Syunik": "3[2-5]",
+      "Վայոց ձոր": "3[6-8]",
+      "Vayots Dzor": "3[6-8]",
+      "Տավուշ": "39|4[0-2]",
+      "Tavush": "39|4[0-2]"
+    }
+  },
+  "AR": {
+    "pattern": "([A-HJ-NP-Z])?\\d{4}([A-Z]{3})?",
+    "example": "C1070AAM",
+    "regions": {
+      "Buenos Aires": "B?[1-36-8]",
+      "Capital Federal": "C?1",
+      "Catamarca": "K?[45]",
+      "Chaco": "H?3",
+      "Chubut": "U?[89]",
+      "Córdoba": "X?[235-8]",
+      "Corrientes": "W?3",
+      "Entre Ríos": "E?[1-3]",
+      "Formosa": "P?[37]",
+      "Jujuy": "Y?4",
+      "La Pampa": "L?[3568]",
+      "La Rioja": "F?5",
+      "Mendoza": "M?[56]",
+      "Misiones": "N?3",
+      "Neuquén": "Q?[38]",
+      "Río Negro": "R?[89]",
+      "Salta": "A?[34]",
+      "San Juan": "J?5",
+      "San Luis": "D?[4-6]",
+      "Santa Cruz": "Z?[89]",
+      "Santa Fe": "S?[2368]",
+      "Santiago del Estero": "G?[2-5]",
+      "Tierra del Fuego": "V?9",
+      "Tucumán": "T?[45]"
+    }
+  },
+  "AS": {
+    "pattern": "96799",
+    "example": "96799"
+  },
+  "AT": {
+    "pattern": "\\d{4}",
+    "example": "1010"
+  },
+  "AU": {
+    "pattern": "\\d{4}",
+    "example": "2060",
+    "regions": {
+      "ACT": "29|2540|260|261[0-8]|02|2620",
+      "Australian Capital Territory": "29|2540|260|261[0-8]|02|2620",
+      "NSW": "1|2[0-57-8]|26[2-9]|261[189]|3500|3585|3586|3644|3707",
+      "New South Wales": "1|2[0-57-8]|26[2-9]|261[189]|3500|3585|3586|3644|3707",
+      "NT": "0[89]",
+      "Northern Territory": "0[89]",
+      "QLD": "[49]",
+      "Queensland": "[49]",
+      "SA": "5|0872",
+      "South Australia": "5|0872",
+      "TAS": "7",
+      "Tasmania": "7",
+      "VIC": "[38]",
+      "Victoria": "[38]",
+      "WA": "6|0872",
+      "Western Australia": "6|0872"
+    }
+  },
+  "AX": {
+    "pattern": "22\\d{3}",
+    "example": "22150"
+  },
+  "AZ": {
+    "pattern": "\\d{4}",
+    "example": "1000"
+  },
+  "BA": {
+    "pattern": "\\d{5}",
+    "example": "71000"
+  },
+  "BB": {
+    "pattern": "(BB\\d{5})?",
+    "example": "BB23026"
+  },
+  "BD": {
+    "pattern": "\\d{4}",
+    "example": "1340"
+  },
+  "BE": {
+    "pattern": "\\d{4}",
+    "example": "4000"
+  },
+  "BG": {
+    "pattern": "\\d{4}",
+    "example": "1000"
+  },
+  "BH": {
+    "pattern": "((\\d|1[0-2])\\d{2})?",
+    "example": "317"
+  },
+  "BL": {
+    "pattern": "9[78][01]\\d{2}",
+    "example": "97100"
+  },
+  "BM": {
+    "pattern": "[A-Z]{2}[ ]?[A-Z0-9]{2}",
+    "example": "FL 07"
+  },
+  "BN": {
+    "pattern": "[A-Z]{2}[ ]?\\d{4}",
+    "example": "BT2328"
+  },
+  "BR": {
+    "pattern": "\\d{5}[\\-]?\\d{3}",
+    "example": "40301-110",
+    "regions": {
+      "AC": "699",
+      "Acre": "699",
+      "AL": "57",
+      "Alagoas": "57",
+      "AP": "689",
+      "Amapá": "689",
+      "AM": "69[0-24-8]",
+      "Amazonas": "69[0-24-8]",
+      "BA": "4[0-8]",
+      "Bahia": "4[0-8]",
+      "CE": "6[0-3]",
+      "Ceará": "6[0-3]",
+      "DF": "7[0-1]|72[0-7]|73[0-6]",
+      "Distrito Federal": "7[0-1]|72[0-7]|73[0-6]",
+      "ES": "29",
+      "Espírito Santo": "29",
+      "GO": "72[89]|73[7-9]|7[4-6]",
+      "Goiás": "72[89]|73[7-9]|7[4-6]",
+      "MA": "65",
+      "Maranhão": "65",
+      "MT": "78[0-8]",
+      "Mato Grosso": "78[0-8]",
+      "MS": "79",
+      "Mato Grosso do Sul": "79",
+      "MG": "3",
+      "Minas Gerais": "3",
+      "PA": "6[6-7]|68[0-8]",
+      "Pará": "6[6-7]|68[0-8]",
+      "PB": "58",
+      "Paraíba": "58",
+      "PR": "8[0-7]",
+      "Paraná": "8[0-7]",
+      "PE": "5[0-6]",
+      "Pernambuco": "5[0-6]",
+      "PI": "64",
+      "Piauí": "64",
+      "RJ": "2[0-8]",
+      "Rio de Janeiro": "2[0-8]",
+      "RN": "59",
+      "Rio Grande do Norte": "59",
+      "RS": "9",
+      "Rio Grande do Sul": "9",
+      "RO": "76[89]|789",
+      "Rondônia": "76[89]|789",
+      "RR": "693",
+      "Roraima": "693",
+      "SC": "8[89]",
+      "Santa Catarina": "8[89]",
+      "SP": "[01][1-9]",
+      "São Paulo": "[01][1-9]",
+      "SE": "49",
+      "Sergipe": "49",
+      "TO": "77",
+      "Tocantins": "77"
+    }
+  },
+  "BT": {
+    "pattern": "\\d{5}",
+    "example": "11001"
+  },
+  "BY": {
+    "pattern": "\\d{6}",
+    "example": "20050"
+  },
+  "CA": {
+    "pattern": "[ABCEGHJKLMNPRSTVXY]\\d[ABCEGHJ-NPRSTV-Z][ ]?\\d[ABCEGHJ-NPRSTV-Z]\\d",
+    "example": "H3Z 2Y7",
+    "regions": {
+      "AB": "T",
+      "Alberta": "T",
+      "BC": "V",
+      "British Columbia": "V",
+      "MB": "R",
+      "Manitoba": "R",
+      "NB": "E",
+      "New Brunswick": "E",
+      "NL": "A",
+      "Newfoundland and Labrador": "A",
+      "NT": "X0E|X0G|X1A",
+      "Northwest Territories": "X0E|X0G|X1A",
+      "NS": "B",
+      "Nova Scotia": "B",
+      "NU": "X0A|X0B|X0C",
+      "Nunavut": "X0A|X0B|X0C",
+      "ON": "K|L|M|N|P",
+      "Ontario": "K|L|M|N|P",
+      "PE": "C",
+      "Prince Edward Island": "C",
+      "QC": "G|H|J|K1A",
+      "Quebec": "G|H|J|K1A",
+      "SK": "S|R8A",
+      "Saskatchewan": "S|R8A",
+      "YT": "Y",
+      "Yukon": "Y"
+    }
+  },
+  "CC": {
+    "pattern": "6799",
+    "example": ""
+  },
+  "CH": {
+    "pattern": "\\d{4}",
+    "example": "2544"
+  },
+  "CK": {
+    "pattern": "\\d{4}",
+    "example": ""
+  },
+  "CL": {
+    "pattern": "\\d{7}",
+    "example": "8340457"
+  },
+  "CN": {
+    "pattern": "\\d{6}",
+    "example": "266033"
+  },
+  "CO": {
+    "pattern": "\\d{6}",
+    "example": "111221"
+  },
+  "CR": {
+    "pattern": "\\d{4,5}|\\d{3}-\\d{4}",
+    "example": "1000"
+  },
+  "CV": {
+    "pattern": "\\d{4}",
+    "example": "7600"
+  },
+  "CX": {
+    "pattern": "6798",
+    "example": ""
+  },
+  "CY": {
+    "pattern": "\\d{4}",
+    "example": "2008"
+  },
+  "CZ": {
+    "pattern": "\\d{3}[ ]?\\d{2}",
+    "example": "100 00"
+  },
+  "DE": {
+    "pattern": "\\d{5}",
+    "example": "26133"
+  },
+  "DK": {
+    "pattern": "\\d{4}",
+    "example": "8660"
+  },
+  "DO": {
+    "pattern": "\\d{5}",
+    "example": "11903"
+  },
+  "DZ": {
+    "pattern": "\\d{5}",
+    "example": "40304"
+  },
+  "EC": {
+    "pattern": "([A-Z]\\d{4}[A-Z]|(?:[A-Z]{2})?\\d{6})?",
+    "example": "EC090112"
+  },
+  "EE": {
+    "pattern": "\\d{5}",
+    "example": "69501"
+  },
+  "EG": {
+    "pattern": "\\d{5}",
+    "example": "12411",
+    "regions": {
+      "أسوان": "81",
+      "Aswan": "81",
+      "أسيوط": "71",
+      "Asyut": "71",
+      "الأقصر": "85",
+      "Luxor": "85",
+      "الإسكندرية": "2[13]",
+      "Alexandria": "2[13]",
+      "الإسماعيلية": "41",
+      "Ismailia": "41",
+      "البحر الأحمر": "84",
+      "Red Sea": "84",
+      "البحيرة": "22",
+      "Beheira": "22",
+      "الجيزة": "12",
+      "Giza": "12",
+      "الدقهلية": "35",
+      "Dakahlia": "35",
+      "السويس": "43",
+      "Suez": "43",
+      "الشرقية": "44",
+      "Al Sharqia": "44",
+      "الغربية": "31",
+      "Gharbia": "31",
+      "الفيوم": "63",
+      "Faiyum": "63",
+      "القاهرة": "11",
+      "Cairo": "11",
+      "القليوبية": "13",
+      "Qalyubia": "13",
+      "المنوفية": "32",
+      "Monufia": "32",
+      "المنيا": "61",
+      "Minya": "61",
+      "الوادي الجديد": "72",
+      "New Valley": "72",
+      "بني سويف": "62",
+      "Beni Suef": "62",
+      "بورسعيد": "42",
+      "Port Said": "42",
+      "جنوب سيناء": "46",
+      "South Sinai": "46",
+      "دمياط": "34",
+      "Damietta": "34",
+      "سوهاج": "82",
+      "Sohag": "82",
+      "شمال سيناء": "45",
+      "North Sinai": "45",
+      "قنا": "83",
+      "Qena": "83",
+      "كفر الشيخ": "33",
+      "Kafr el-Sheikh": "33",
+      "مطروح": "51",
+      "Matruh": "51"
+    }
+  },
+  "EH": {
+    "pattern": "\\d{5}",
+    "example": "70000"
+  },
+  "ES": {
+    "pattern": "\\d{5}",
+    "example": "28039",
+    "regions": {
+      "A Coruña": "15",
+      "Álava": "01",
+      "Albacete": "02",
+      "Alicante": "03",
+      "Almería": "04",
+      "Asturias": "33",
+      "Ávila": "05",
+      "Badajoz": "06",
+      "Barcelona": "08",
+      "Burgos": "09",
+      "Cáceres": "10",
+      "Cádiz": "11",
+      "Cantabria": "39",
+      "Castellón": "12",
+      "Ceuta": "51",
+      "Ciudad Real": "13",
+      "Córdoba": "14",
+      "Cuenca": "16",
+      "Girona": "17",
+      "Granada": "18",
+      "Guadalajara": "19",
+      "Guipúzcoa": "20",
+      "Huelva": "21",
+      "Huesca": "22",
+      "Islas Baleares": "07",
+      "Jaén": "23",
+      "La Rioja": "26",
+      "Las Palmas": "35",
+      "León": "24",
+      "Lleida": "25",
+      "Lugo": "27",
+      "Madrid": "28",
+      "Málaga": "29",
+      "Melilla": "52",
+      "Murcia": "30",
+      "Navarra": "31",
+      "Ourense": "32",
+      "Palencia": "34",
+      "Pontevedra": "36",
+      "Salamanca": "37",
+      "Santa Cruz de Tenerife": "38",
+      "Segovia": "40",
+      "Sevilla": "41",
+      "Soria": "42",
+      "Tarragona": "43",
+      "Teruel": "44",
+      "Toledo": "45",
+      "Valencia": "46",
+      "Valladolid": "47",
+      "Vizcaya": "48",
+      "Zamora": "49",
+      "Zaragoza": "50"
+    }
+  },
+  "ET": {
+    "pattern": "\\d{4}",
+    "example": "1000"
+  },
+  "FI": {
+    "pattern": "\\d{5}",
+    "example": "00550"
+  },
+  "FK": {
+    "pattern": "FIQQ 1ZZ",
+    "example": "FIQQ 1ZZ"
+  },
+  "FM": {
+    "pattern": "(9694[1-4])([ \\-]\\d{4})?",
+    "example": "96941"
+  },
+  "FO": {
+    "pattern": "\\d{3}",
+    "example": "100"
+  },
+  "FR": {
+    "pattern": "\\d{2}[ ]?\\d{3}",
+    "example": "33380"
+  },
+  "GB": {
+    "pattern": "GIR[ ]?0AA|((AB|AL|B|BA|BB|BD|BH|BL|BN|BR|BS|BT|BX|CA|CB|CF|CH|CM|CO|CR|CT|CV|CW|DA|DD|DE|DG|DH|DL|DN|DT|DY|E|EC|EH|EN|EX|FK|FY|G|GL|GY|GU|HA|HD|HG|HP|HR|HS|HU|HX|IG|IM|IP|IV|JE|KA|KT|KW|KY|L|LA|LD|LE|LL|LN|LS|LU|M|ME|MK|ML|N|NE|NG|NN|NP|NR|NW|OL|OX|PA|PE|PH|PL|PO|PR|RG|RH|RM|S|SA|SE|SG|SK|SL|SM|SN|SO|SP|SR|SS|ST|SW|SY|TA|TD|TF|TN|TQ|TR|TS|TW|UB|W|WA|WC|WD|WF|WN|WR|WS|WV|YO|ZE)(\\d[\\dA-Z]?[ ]?\\d[ABD-HJLN-UW-Z]{2}))|BFPO[ ]?\\d{1,4}",
+    "example": "EC1Y 8SY"
+  },
+  "GE": {
+    "pattern": "\\d{4}",
+    "example": "0101"
+  },
+  "GF": {
+    "pattern": "9[78]3\\d{2}",
+    "example": "97300"
+  },
+  "GG": {
+    "pattern": "GY\\d[\\dA-Z]?[ ]?\\d[ABD-HJLN-UW-Z]{2}",
+    "example": "GY1 1AA"
+  },
+  "GI": {
+    "pattern": "GX11 1AA",
+    "example": "GX11 1AA"
+  },
+  "GL": {
+    "pattern": "39\\d{2}",
+    "example": "3900"
+  },
+  "GN": {
+    "pattern": "\\d{3}",
+    "example": "001"
+  },
+  "GP": {
+    "pattern": "9[78][01]\\d{2}",
+    "example": "97100"
+  },
+  "GR": {
+    "pattern": "\\d{3} ?\\d{2}",
+    "example": "151 24"
+  },
+  "GS": {
+    "pattern": "SIQQ 1ZZ",
+    "example": "SIQQ 1ZZ"
+  },
+  "GT": {
+    "pattern": "\\d{5}",
+    "example": "09001"
+  },
+  "GU": {
+    "pattern": "969([12]\\d|3[12])([ \\-]\\d{4})?",
+    "example": "96910"
+  },
+  "GW": {
+    "pattern": "\\d{4}",
+    "example": "1000"
+  },
+  "HM": {
+    "pattern": "\\d{4}",
+    "example": ""
+  },
+  "HN": {
+    "pattern": "(?:\\d{5})?",
+    "example": ""
+  },
+  "HR": {
+    "pattern": "\\d{5}",
+    "example": "10000"
+  },
+  "HT": {
+    "pattern": "\\d{4}",
+    "example": "6120"
+  },
+  "HU": {
+    "pattern": "\\d{4}",
+    "example": "1037"
+  },
+  "ID": {
+    "pattern": "\\d{5}",
+    "example": "40115"
+  },
+  "IL": {
+    "pattern": "\\d{5}(?:\\d{2})?",
+    "example": "9614303"
+  },
+  "IM": {
+    "pattern": "IM\\d[\\dA-Z]?[ ]?\\d[ABD-HJLN-UW-Z]{2}",
+    "example": "IM2 1AA"
+  },
+  "IN": {
+    "pattern": "\\d{6}",
+    "example": "110034",
+    "regions": {
+      "Andaman and Nicobar Islands": "744",
+      "Andaman & Nicobar": "744",
+      "Andhra Pradesh": "5[0-3]",
+      "Arunachal Pradesh": "79[0-2]",
+      "Assam": "78",
+      "Bihar": "8[0-5]",
+      "Chandigarh": "16|1440[3-9]",
+      "Chhattisgarh": "49",
+      "Dadra and Nagar Haveli": "396",
+      "Dadra & Nagar Haveli": "396",
+      "Daman and Diu": "396",
+      "Daman & Diu": "396",
+      "Delhi": "11",
+      "Goa": "403",
+      "Gujarat": "3[6-9]",
+      "Haryana": "1[23]",
+      "Himachal Pradesh": "17",
+      "Jammu & Kashmir": "1[89]",
+      "Jharkhand": "81[4-9]|82|83[0-5]",
+      "Karnataka": "5[4-9]|53[7-9]",
+      "Kerala": "6[7-9]|6010|607008|777",
+      "Lakshadweep": "673",
+      "Madhya Pradesh": "4[5-8]|490",
+      "Maharashtra": "4[0-4]",
+      "Manipur": "79[56]",
+      "Meghalaya": "79[34]",
+      "Mizoram": "796",
+      "Nagaland": "79[78]",
+      "Odisha": "7[5-7]",
+      "Puducherry": "605",
+      "Punjab": "1[456]",
+      "Rajasthan": "3[0-4]",
+      "Sikkim": "737|750",
+      "Tamil Nadu": "6[0-6]|536",
+      "Tripura": "799",
+      "Uttar Pradesh": "2[0-35-8]|24[0-7]|26[12]",
+      "Uttarakhand": "24[46-9]|254|26[23]",
+      "West Bengal": "7[0-4]"
+    }
+  },
+  "IO": {
+    "pattern": "BBND 1ZZ",
+    "example": "BBND 1ZZ"
+  },
+  "IQ": {
+    "pattern": "\\d{5}",
+    "example": ""
+  },
+  "IR": {
+    "pattern": "\\d{5}-?\\d{5}",
+    "example": "11936-12345"
+  },
+  "IS": {
+    "pattern": "\\d{3}",
+    "example": "320"
+  },
+  "IT": {
+    "pattern": "\\d{5}",
+    "example": "00144",
+    "regions": {
+      "AG": "92",
+      "Agrigento": "92",
+      "AL": "15",
+      "Alessandria": "15",
+      "AN": "60",
+      "Ancona": "60",
+      "AR": "52",
+      "Arezzo": "52",
+      "AP": "63",
+      "Ascoli Piceno": "63",
+      "AT": "14",
+      "Asti": "14",
+      "AV": "83",
+      "Avellino": "83",
+      "BA": "70",
+      "Bari": "70",
+      "BT": "76[01]",
+      "Barletta-Andria-Trani": "76[01]",
+      "BL": "32",
+      "Belluno": "32",
+      "BN": "82",
+      "Benevento": "82",
+      "BG": "24",
+      "Bergamo": "24",
+      "BI": "13[89]",
+      "Biella": "13[89]",
+      "BO": "40",
+      "Bologna": "40",
+      "BZ": "39",
+      "Bolzano": "39",
+      "BS": "25",
+      "Brescia": "25",
+      "BR": "72",
+      "Brindisi": "72",
+      "CA": "0912[1-9]|0913[0-4]|0901[0289]|0902[03468]|0903[0234]|0904|0803[035]|08043",
+      "Cagliari": "0912[1-9]|0913[0-4]|0901[0289]|0902[03468]|0903[0234]|0904|0803[035]|08043",
+      "CL": "93",
+      "Caltanissetta": "93",
+      "CB": "860[1-4]|86100",
+      "Campobasso": "860[1-4]|86100",
+      "CI": "0901[013-7]",
+      "Carbonia-Iglesias": "0901[013-7]",
+      "CE": "81",
+      "Caserta": "81",
+      "CT": "95",
+      "Catania": "95",
+      "CZ": "88[01]",
+      "Catanzaro": "88[01]",
+      "CH": "66",
+      "Chieti": "66",
+      "CO": "22",
+      "Como": "22",
+      "CS": "87",
+      "Cosenza": "87",
+      "CR": "26[01]",
+      "Cremona": "26[01]",
+      "KR": "88[89]",
+      "Crotone": "88[89]",
+      "CN": "12|18025",
+      "Cuneo": "12|18025",
+      "EN": "94",
+      "Enna": "94",
+      "FM": "638|63900",
+      "Fermo": "638|63900",
+      "FE": "44",
+      "Ferrara": "44",
+      "FI": "50",
+      "Firenze": "50",
+      "FG": "71",
+      "Foggia": "71",
+      "FC": "47[015]",
+      "Forlì-Cesena": "47[015]",
+      "FR": "03",
+      "Frosinone": "03",
+      "GE": "16",
+      "Genova": "16",
+      "GO": "34[01]7",
+      "Gorizia": "34[01]7",
+      "GR": "58",
+      "Grosseto": "58",
+      "IM": "18",
+      "Imperia": "18",
+      "IS": "860[7-9]|86170",
+      "Isernia": "860[7-9]|86170",
+      "AQ": "67",
+      "L'Aquila": "67",
+      "SP": "19",
+      "La Spezia": "19",
+      "LT": "04",
+      "Latina": "04",
+      "LE": "73",
+      "Lecce": "73",
+      "LC": "23[89]",
+      "Lecco": "23[89]",
+      "LI": "57",
+      "Livorno": "57",
+      "LO": "26[89]",
+      "Lodi": "26[89]",
+      "LU": "55",
+      "Lucca": "55",
+      "MC": "62",
+      "Macerata": "62",
+      "MN": "46",
+      "Mantova": "46",
+      "MS": "54",
+      "Massa-Carrara": "54",
+      "MT": "75",
+      "Matera": "75",
+      "VS": "0902[012579]|0903[015-9]|09040",
+      "Medio Campidano": "0902[012579]|0903[015-9]|09040",
+      "ME": "98",
+      "Messina": "98",
+      "MI": "20",
+      "Milano": "20",
+      "MO": "41",
+      "Modena": "41",
+      "MB": "208|20900",
+      "Monza e della Brianza": "208|20900",
+      "NA": "80",
+      "Napoli": "80",
+      "NO": "28[01]",
+      "Novara": "28[01]",
+      "NU": "080[1-3]|08100",
+      "Nuoro": "080[1-3]|08100",
+      "OG": "08037|0804[024-9]",
+      "Ogliastra": "08037|0804[024-9]",
+      "OT": "08020|0702|0703[08]",
+      "Olbia-Tempio": "08020|0702|0703[08]",
+      "OR": "090[7-9]|09170|0801[039]|0803[04]",
+      "Oristano": "090[7-9]|09170|0801[039]|0803[04]",
+      "PD": "35",
+      "Padova": "35",
+      "PA": "90",
+      "Palermo": "90",
+      "PR": "43",
+      "Parma": "43",
+      "PV": "27",
+      "Pavia": "27",
+      "PG": "06",
+      "Perugia": "06",
+      "PU": "61",
+      "Pesaro e Urbino": "61",
+      "PE": "65",
+      "Pescara": "65",
+      "PC": "29",
+      "Piacenza": "29",
+      "PI": "56",
+      "Pisa": "56",
+      "PT": "51",
+      "Pistoia": "51",
+      "PN": "330[7-9]|33170",
+      "Pordenone": "330[7-9]|33170",
+      "PZ": "85",
+      "Potenza": "85",
+      "PO": "59",
+      "Prato": "59",
+      "RG": "97",
+      "Ragusa": "97",
+      "RA": "48",
+      "Ravenna": "48",
+      "RC": "89[01]",
+      "Reggio Calabria": "89[01]",
+      "RE": "42",
+      "Reggio nell'Emilia": "42",
+      "RI": "02",
+      "Rieti": "02",
+      "RN": "47[89]",
+      "Rimini": "47[89]",
+      "RM": "00",
+      "Roma": "00",
+      "RO": "45",
+      "Rovigo": "45",
+      "SA": "84",
+      "Salerno": "84",
+      "SS": "070[14]|0703[0-79]|07100",
+      "Sassari": "070[14]|0703[0-79]|07100",
+      "SV": "17|12071",
+      "Savona": "17|12071",
+      "SI": "53",
+      "Siena": "53",
+      "SR": "96",
+      "Siracusa": "96",
+      "SO": "23[01]",
+      "Sondrio": "23[01]",
+      "TA": "74",
+      "Taranto": "74",
+      "TE": "64",
+      "Teramo": "64",
+      "TR": "05",
+      "Terni": "05",
+      "TO": "10",
+      "Torino": "10",
+      "TP": "91",
+      "Trapani": "91",
+      "TN": "38",
+      "Trento": "38",
+      "TV": "31",
+      "Treviso": "31",
+      "TS": "3401|341[0-689]|34062",
+      "Trieste": "3401|341[0-689]|34062",
+      "UD": "330[1-5]|33100",
+      "Udine": "330[1-5]|33100",
+      "AO": "11",
+      "Valle d'Aosta": "11",
+      "VA": "21",
+      "Varese": "21",
+      "VE": "30",
+      "Venezia": "30",
+      "VB": "28[89]",
+      "Verbano-Cusio-Ossola": "28[89]",
+      "VC": "13[01]",
+      "Vercelli": "13[01]",
+      "VR": "37",
+      "Verona": "37",
+      "VV": "89[89]",
+      "Vibo Valentia": "89[89]",
+      "VI": "36",
+      "Vicenza": "36",
+      "VT": "01",
+      "Viterbo": "01"
+    }
+  },
+  "JE": {
+    "pattern": "JE\\d[\\dA-Z]?[ ]?\\d[ABD-HJLN-UW-Z]{2}",
+    "example": "JE1 1AA"
+  },
+  "JO": {
+    "pattern": "\\d{5}",
+    "example": "11937"
+  },
+  "JP": {
+    "pattern": "\\d{3}-?\\d{4}",
+    "example": "154-0023",
+    "regions": {
+      "北海道": "0[4-9]|00[1-7]",
+      "HOKKAIDO": "0[4-9]|00[1-7]",
+      "青森県": "03|018",
+      "AOMORI": "03|018",
+      "岩手県": "02",
+      "IWATE": "02",
+      "宮城県": "98",
+      "MIYAGI": "98",
+      "秋田県": "01",
+      "AKITA": "01",
+      "山形県": "99",
+      "YAMAGATA": "99",
+      "福島県": "9[67]",
+      "FUKUSHIMA": "9[67]",
+      "茨城県": "3[01]",
+      "IBARAKI": "3[01]",
+      "栃木県": "32|311|349",
+      "TOCHIGI": "32|311|349",
+      "群馬県": "37|38[49]",
+      "GUNMA": "37|38[49]",
+      "埼玉県": "3[3-6]",
+      "SAITAMA": "3[3-6]",
+      "千葉県": "2[6-9]",
+      "CHIBA": "2[6-9]",
+      "東京都": "1[0-8]|19[0-8]|20",
+      "TOKYO": "1[0-8]|19[0-8]|20",
+      "神奈川県": "2[1-5]|199",
+      "KANAGAWA": "2[1-5]|199",
+      "新潟県": "9[45]|389",
+      "NIIGATA": "9[45]|389",
+      "富山県": "93",
+      "TOYAMA": "93",
+      "石川県": "92|939",
+      "ISHIKAWA": "92|939",
+      "福井県": "91|922",
+      "FUKUI": "91|922",
+      "山梨県": "40",
+      "YAMANASHI": "40",
+      "長野県": "3[89]|949",
+      "NAGANO": "3[89]|949",
+      "岐阜県": "50",
+      "GIFU": "50",
+      "静岡県": "4[1-9]",
+      "SHIZUOKA": "4[1-9]",
+      "愛知県": "4[4-9]|431",
+      "AICHI": "4[4-9]|431",
+      "三重県": "51|498|647",
+      "MIE": "51|498|647",
+      "滋賀県": "52",
+      "SHIGA": "52",
+      "京都府": "6[0-2]|520",
+      "KYOTO": "6[0-2]|520",
+      "大阪府": "5[3-9]|618|630",
+      "OSAKA": "5[3-9]|618|630",
+      "兵庫県": "6[5-7]|563",
+      "HYOGO": "6[5-7]|563",
+      "奈良県": "63|64[78]",
+      "NARA": "63|64[78]",
+      "和歌山県": "64|519",
+      "WAKAYAMA": "64|519",
+      "鳥取県": "68",
+      "TOTTORI": "68",
+      "島根県": "69|68[45]",
+      "SHIMANE": "69|68[45]",
+      "岡山県": "7[01]",
+      "OKAYAMA": "7[01]",
+      "広島県": "7[23]",
+      "HIROSHIMA": "7[23]",
+      "山口県": "7[45]",
+      "YAMAGUCHI": "7[45]",
+      "徳島県": "77",
+      "TOKUSHIMA": "77",
+      "香川県": "76",
+      "KAGAWA": "76",
+      "愛媛県": "79",
+      "EHIME": "79",
+      "高知県": "78",
+      "KOCHI": "78",
+      "福岡県": "8[0-3]|871",
+      "FUKUOKA": "8[0-3]|871",
+      "佐賀県": "84",
+      "SAGA": "84",
+      "長崎県": "85|81[17]|848",
+      "NAGASAKI": "85|81[17]|848",
+      "熊本県": "86",
+      "KUMAMOTO": "86",
+      "大分県": "87|839",
+      "OITA": "87|839",
+      "宮崎県": "88",
+      "MIYAZAKI": "88",
+      "鹿児島県": "89",
+      "KAGOSHIMA": "89",
+      "沖縄県": "90",
+      "OKINAWA": "90"
+    }
+  },
+  "KE": {
+    "pattern": "\\d{5}",
+    "example": "20100"
+  },
+  "KG": {
+    "pattern": "\\d{6}",
+    "example": "720001"
+  },
+  "KH": {
+    "pattern": "\\d{5}",
+    "example": "12203"
+  },
+  "KR": {
+    "pattern": "\\d{3}[\\-]\\d{3}",
+    "example": "110-110",
+    "regions": {
+      "강원도": "2[0-6]|487[\\-]839",
+      "강원": "2[0-6]|487[\\-]839",
+      "Gangwon": "2[0-6]|487[\\-]839",
+      "경기도": "4(?:1[0-6]|[2-8])",
+      "경기": "4(?:1[0-6]|[2-8])",
+      "Gyeonggi": "4(?:1[0-6]|[2-8])",
+      "경상남도": "6[2-7]",
+      "경남": "6[2-7]",
+      "Gyeongnam": "6[2-7]",
+      "경상북도": "7(?:1[2-9]|[3-9])",
+      "경북": "7(?:1[2-9]|[3-9])",
+      "Gyeongbuk": "7(?:1[2-9]|[3-9])",
+      "광주광역시": "50[0-36]",
+      "광주": "50[0-36]",
+      "Gwangju": "50[0-36]",
+      "대구광역시": "7(?:0[0-6]|11)",
+      "대구": "7(?:0[0-6]|11)",
+      "Daegu": "7(?:0[0-6]|11)",
+      "대전광역시": "30[0-25-6]",
+      "대전": "30[0-25-6]",
+      "Daejeon": "30[0-25-6]",
+      "부산광역시": "6[0-1]",
+      "부산": "6[0-1]",
+      "Busan": "6[0-1]",
+      "서울특별시": "1[0-5]",
+      "서울": "1[0-5]",
+      "Seoul": "1[0-5]",
+      "세종특별자치시": "339",
+      "세종": "339",
+      "Sejong": "339",
+      "울산광역시": "68[0-39]",
+      "울산": "68[0-39]",
+      "Ulsan": "68[0-39]",
+      "인천광역시": "4(?:0[0-79]|17)",
+      "인천": "4(?:0[0-79]|17)",
+      "Incheon": "4(?:0[0-79]|17)",
+      "전라남도": "5[1-5]",
+      "전남": "5[1-5]",
+      "Jeonnam": "5[1-5]",
+      "전라북도": "5[6-9]",
+      "전북": "5[6-9]",
+      "Jeonbuk": "5[6-9]",
+      "제주특별자치도": "69[0579]",
+      "제주": "69[0579]",
+      "Jeju": "69[0579]",
+      "충청남도": "3(?:[1245]|3[0-8])",
+      "충남": "3(?:[1245]|3[0-8])",
+      "Chungnam": "3(?:[1245]|3[0-8])",
+      "충청북도": "3[6-9]",
+      "충북": "3[6-9]",
+      "Chungbuk": "3[6-9]"
+    }
+  },
+  "KW": {
+    "pattern": "\\d{5}",
+    "example": "54541"
+  },
+  "KY": {
+    "pattern": "KY\\d-\\d{4}",
+    "example": "KY1-1100"
+  },
+  "KZ": {
+    "pattern": "\\d{6}",
+    "example": "040900"
+  },
+  "LA": {
+    "pattern": "\\d{5}",
+    "example": "01160"
+  },
+  "LB": {
+    "pattern": "(\\d{4}([ ]?\\d{4})?)?",
+    "example": "2038 3054"
+  },
+  "LI": {
+    "pattern": "(948[5-9])|(949[0-7])",
+    "example": "9496"
+  },
+  "LK": {
+    "pattern": "\\d{5}",
+    "example": "20000"
+  },
+  "LR": {
+    "pattern": "\\d{4}",
+    "example": "1000"
+  },
+  "LS": {
+    "pattern": "\\d{3}",
+    "example": "100"
+  },
+  "LT": {
+    "pattern": "\\d{5}",
+    "example": "04340"
+  },
+  "LU": {
+    "pattern": "\\d{4}",
+    "example": "4750"
+  },
+  "LV": {
+    "pattern": "LV-\\d{4}",
+    "example": "LV-1073"
+  },
+  "MA": {
+    "pattern": "\\d{5}",
+    "example": "53000"
+  },
+  "MC": {
+    "pattern": "980\\d{2}",
+    "example": "98000"
+  },
+  "MD": {
+    "pattern": "\\d{4}",
+    "example": "2012"
+  },
+  "ME": {
+    "pattern": "8\\d{4}",
+    "example": "81257"
+  },
+  "MF": {
+    "pattern": "9[78][01]\\d{2}",
+    "example": "97100"
+  },
+  "MG": {
+    "pattern": "\\d{3}",
+    "example": "501"
+  },
+  "MH": {
+    "pattern": "969[67]\\d([ \\-]\\d{4})?",
+    "example": "96960"
+  },
+  "MK": {
+    "pattern": "\\d{4}",
+    "example": "1314"
+  },
+  "MM": {
+    "pattern": "\\d{5}",
+    "example": "11181"
+  },
+  "MN": {
+    "pattern": "\\d{5}",
+    "example": "65030"
+  },
+  "MP": {
+    "pattern": "9695[012]([ \\-]\\d{4})?",
+    "example": "96950"
+  },
+  "MQ": {
+    "pattern": "9[78]2\\d{2}",
+    "example": "97220"
+  },
+  "MT": {
+    "pattern": "[A-Z]{3}[ ]?\\d{2,4}",
+    "example": "NXR 01"
+  },
+  "MU": {
+    "pattern": "(\\d{3}[A-Z]{2}\\d{3})?",
+    "example": "742CU001"
+  },
+  "MV": {
+    "pattern": "\\d{5}",
+    "example": "20026"
+  },
+  "MX": {
+    "pattern": "\\d{5}",
+    "example": "02860",
+    "regions": {
+      "AGS": "20",
+      "Aguascalientes": "20",
+      "BC": "2[12]",
+      "Baja California": "2[12]",
+      "BCS": "23",
+      "Baja California Sur": "23",
+      "CAMP": "24",
+      "Campeche": "24",
+      "CHIS": "29|30",
+      "Chiapas": "29|30",
+      "CHIH": "3[1-3]",
+      "Chihuahua": "3[1-3]",
+      "COAH": "2[5-7]",
+      "Coahuila": "2[5-7]",
+      "COL": "28",
+      "Colima": "28",
+      "D.F.": "0|1[0-6]",
+      "Distrito Federal": "0|1[0-6]",
+      "DGO": "3[45]",
+      "Durango": "3[45]",
+      "MEX": "5[0-7]",
+      "Estado de México": "5[0-7]",
+      "GTO": "3[6-8]",
+      "Guanajuato": "3[6-8]",
+      "GRO": "39|4[01]",
+      "Guerrero": "39|4[01]",
+      "HGO": "4[23]",
+      "Hidalgo": "4[23]",
+      "JAL": "4[4-9]",
+      "Jalisco": "4[4-9]",
+      "MICH": "5[89]|6[01]",
+      "Michoacán": "5[89]|6[01]",
+      "MOR": "62",
+      "Morelos": "62",
+      "NAY": "63",
+      "Nayarit": "63",
+      "NL": "6[4-7]",
+      "Nuevo León": "6[4-7]",
+      "OAX": "6[89]|7[01]",
+      "Oaxaca": "6[89]|7[01]",
+      "PUE": "7[2-5]",
+      "Puebla": "7[2-5]",
+      "QRO": "76",
+      "Querétaro": "76",
+      "QROO": "77",
+      "Quintana Roo": "77",
+      "SLP": "7[89]",
+      "San Luís Potosí": "7[89]",
+      "SIN": "8[0-2]",
+      "Sinalóa": "8[0-2]",
+      "SON": "8[3-5]",
+      "Sonora": "8[3-5]",
+      "TAB": "86",
+      "Tabasco": "86",
+      "TAMPS": "8[7-9]",
+      "Tamaulipas": "8[7-9]",
+      "TLAX": "90",
+      "Tlaxcala": "90",
+      "VER": "9[1-6]",
+      "Veracruz": "9[1-6]",
+      "YUC": "97",
+      "Yucatán": "97",
+      "ZAC": "9[89]",
+      "Zacatecas": "9[89]"
+    }
+  },
+  "MY": {
+    "pattern": "\\d{5}",
+    "example": "43000",
+    "regions": {
+      "JOHOR": "79|8[0-6]",
+      "KEDAH": "0[5-9]|34950",
+      "KELANTAN": "1[5-9]",
+      "KUALA LUMPUR": "[56]0",
+      "LABUAN": "87",
+      "MELAKA": "7[5-8]",
+      "NEGERI SEMBILAN": "7[0-4]",
+      "PAHANG": "2[5-8]|[346]9",
+      "PERAK": "3[0-6]|39000",
+      "PERLIS": "0[12]",
+      "PULAU PINANG": "1[0-4]",
+      "PUTRAJAYA": "62",
+      "SABAH": "8[89]|9[01]",
+      "SARAWAK": "9[3-8]",
+      "SELANGOR": "4[0-8]|6[3-8]",
+      "TERENGGANU": "2[0-4]"
+    }
+  },
+  "MZ": {
+    "pattern": "\\d{4}",
+    "example": "1102"
+  },
+  "NC": {
+    "pattern": "988\\d{2}",
+    "example": "98814"
+  },
+  "NE": {
+    "pattern": "\\d{4}",
+    "example": "8001"
+  },
+  "NF": {
+    "pattern": "2899",
+    "example": ""
+  },
+  "NG": {
+    "pattern": "(\\d{6})?",
+    "example": "930283"
+  },
+  "NI": {
+    "pattern": "\\d{5}",
+    "example": "52000",
+    "regions": {
+      "BOACO": "5[23]",
+      "CARAZO": "4[45]",
+      "CHINANDEGA": "2[23]",
+      "CHONTALES": "51",
+      "ESTELI": "3[01]",
+      "GRANADA": "4[01]",
+      "JINOTEGA": "6[23]",
+      "LEON": "2[01]",
+      "MADRIZ": "3[23]",
+      "MANAGUA": "1[02-6]|99",
+      "MASAYA": "4[23]",
+      "MATAGALPA": "6[01]",
+      "NUEVA SEGOVIA": "3[45]",
+      "RAAN": "7[01]",
+      "RAAS": "8[01]",
+      "RIO SAN JUAN": "9[01]",
+      "RIVAS": "4[67]"
+    }
+  },
+  "NL": {
+    "pattern": "\\d{4}[ ]?[A-Z]{2}",
+    "example": "1234 AB"
+  },
+  "NO": {
+    "pattern": "\\d{4}",
+    "example": "0025"
+  },
+  "NP": {
+    "pattern": "\\d{5}",
+    "example": "44601"
+  },
+  "NZ": {
+    "pattern": "\\d{4}",
+    "example": "6001"
+  },
+  "OM": {
+    "pattern": "(PC )?\\d{3}",
+    "example": "133"
+  },
+  "PE": {
+    "pattern": "(?:LIMA \\d|CALLAO 0?)\\d|[0-2]\\d{4}",
+    "example": "LIMA 23"
+  },
+  "PF": {
+    "pattern": "987\\d{2}",
+    "example": ""
+  },
+  "PG": {
+    "pattern": "\\d{3}",
+    "example": "111"
+  },
+  "PH": {
+    "pattern": "\\d{4}",
+    "example": "1008",
+    "regions": {
+      "Abra": "28[0-2]",
+      "Agusan del Norte": "86[01]",
+      "Agusan del Sur": "85[01]",
+      "Aklan": "56[01]",
+      "Albay": "45[01]",
+      "Antique": "57[01]",
+      "Apayao": "380[0-68]",
+      "Aurora": "320",
+      "Basilan": "730",
+      "Bataan": "21[01]",
+      "Batanes": "390",
+      "Batangas": "42[0-3]",
+      "Benguet": "26(0|1[0-5])",
+      "Biliran": "65(4[3-9]|5)",
+      "Bohol": "63[0-3]",
+      "Bukidnon": "87[0-2]",
+      "Bulacan": "30[0-2]",
+      "Cagayan": "35[0-2]",
+      "Camarines Norte": "46[01]",
+      "Camarines Sur": "44[0-3]",
+      "Camiguin": "910",
+      "Capiz": "58[01]",
+      "Catanduanes": "48[01]",
+      "Cavite": "41[0-2]",
+      "Cebu": "60[0-5]",
+      "Compostela Valley": "88[01]",
+      "Cotabato": "94[01]",
+      "Davao del Norte": "81[0-2]",
+      "Davao del Sur": "80[01]",
+      "Davao Oriental": "82[01]",
+      "Eastern Samar": "68[0-2]",
+      "Guimaras": "504[4-6]",
+      "Ifugao": "36[01]",
+      "Ilocos Norte": "29[0-2]",
+      "Ilocos Sur": "27[0-3]",
+      "Iloilo": "50([0-3]|4[0-3])",
+      "Isabela": "33[0-3]",
+      "Kalinga": "38(0[79]|1[0-4])",
+      "La Union": "25[0-2]",
+      "Laguna": "40[0-3]",
+      "Lanao del Norte": "92[0-2]",
+      "Lanao del Sur": "9(3[0-2]|7[01])",
+      "Leyte": "65([0-3]|4[0-2])",
+      "Maguindanao": "96[01]",
+      "Marinduque": "490",
+      "Masbate": "54[0-2]",
+      "Mindoro Occidental": "51[01]",
+      "Mindoro Oriental": "52[01]",
+      "Misamis Occidental": "72[01]",
+      "Misamis Oriental": "90[0-2]",
+      "Mountain Province": "26(1[6-9]|2[0-5])",
+      "Negros Occidental": "61[0-3]",
+      "Negros Oriental": "62[0-2]",
+      "Northern Samar": "64[0-2]",
+      "Nueva Ecija": "31[0-3]",
+      "Nueva Vizcaya": "37[01]",
+      "Palawan": "53[0-2]",
+      "Pampanga": "20[0-2]",
+      "Pangasinan": "24[0-4]",
+      "Quezon Province": "43[0-4]",
+      "Quirino": "340",
+      "Rizal": "1[89]",
+      "Romblon": "55[01]",
+      "Samar": "67[0-2]",
+      "Sarangani": "8015",
+      "Siquijor": "62(2[5-9]|30)",
+      "Sorsogon": "47[01]",
+      "South Cotabato": "95[01]",
+      "Sultan Kudarat": "98[01]",
+      "Sulu": "74[01]",
+      "Surigao del Norte": "84[02]",
+      "Surigao del Sur": "83[01]",
+      "Tarlac": "23[01]",
+      "Tawi-Tawi": "750",
+      "Zambales": "22[01]",
+      "Zamboanga del Norte": "71[0-2]",
+      "Zamboanga del Sur": "70[0-4]",
+      "Zamboanga Sibuguey": "70[0-4]"
+    }
+  },
+  "PK": {
+    "pattern": "\\d{5}",
+    "example": "44000"
+  },
+  "PL": {
+    "pattern": "\\d{2}-\\d{3}",
+    "example": "00-950"
+  },
+  "PM": {
+    "pattern": "9[78]5\\d{2}",
+    "example": "97500"
+  },
+  "PN": {
+    "pattern": "PCRN 1ZZ",
+    "example": "PCRN 1ZZ"
+  },
+  "PR": {
+    "pattern": "00[679]\\d{2}([ \\-]\\d{4})?",
+    "example": "00930"
+  },
+  "PT": {
+    "pattern": "\\d{4}-\\d{3}",
+    "example": "2725-079"
+  },
+  "PW": {
+    "pattern": "969(39|40)",
+    "example": "96940"
+  },
+  "PY": {
+    "pattern": "\\d{4}",
+    "example": "1536"
+  },
+  "RE": {
+    "pattern": "9[78]4\\d{2}",
+    "example": "97400"
+  },
+  "RO": {
+    "pattern": "\\d{6}",
+    "example": "060274"
+  },
+  "RS": {
+    "pattern": "\\d{5,6}",
+    "example": "106314"
+  },
+  "RU": {
+    "pattern": "\\d{6}",
+    "example": "125075"
+  },
+  "SA": {
+    "pattern": "\\d{5}",
+    "example": "11564"
+  },
+  "SE": {
+    "pattern": "\\d{3}[ ]?\\d{2}",
+    "example": "11455"
+  },
+  "SG": {
+    "pattern": "\\d{6}",
+    "example": "546080"
+  },
+  "SH": {
+    "pattern": "(ASCN|STHL) 1ZZ",
+    "example": "STHL 1ZZ"
+  },
+  "SI": {
+    "pattern": "\\d{4}",
+    "example": "4000"
+  },
+  "SJ": {
+    "pattern": "\\d{4}",
+    "example": "9170"
+  },
+  "SK": {
+    "pattern": "\\d{3}[ ]?\\d{2}",
+    "example": "010 01"
+  },
+  "SM": {
+    "pattern": "4789\\d",
+    "example": "47890"
+  },
+  "SN": {
+    "pattern": "\\d{5}",
+    "example": "12500"
+  },
+  "SO": {
+    "pattern": "\\d{5}",
+    "example": "09010"
+  },
+  "SV": {
+    "pattern": "CP [1-3][1-7][0-2]\\d",
+    "example": "CP 1101",
+    "regions": {
+      "AHUACHAPAN": "CP 21",
+      "Ahuachapán": "CP 21",
+      "CABANAS": "CP 12",
+      "Cabañas": "CP 12",
+      "CALATENANGO": "CP 13",
+      "Chalatenango": "CP 13",
+      "CUSCATLAN": "CP 14",
+      "Cuscatlán": "CP 14",
+      "LA LIBERTAD": "CP 15",
+      "La Libertad": "CP 15",
+      "LA PAZ": "CP 16",
+      "La Paz": "CP 16",
+      "LA UNION": "CP 31",
+      "La Unión": "CP 31",
+      "MORAZAN": "CP 32",
+      "Morazán": "CP 32",
+      "SAN MIGUEL": "CP 33",
+      "San Miguel": "CP 33",
+      "SAN SALVADOR": "CP 11",
+      "San Salvador": "CP 11",
+      "SAN VICENTE": "CP 17",
+      "San Vicente": "CP 17",
+      "SANTA ANA": "CP 22",
+      "Santa Ana": "CP 22",
+      "SONSONATE": "CP 23",
+      "Sonsonate": "CP 23",
+      "USULUTAN": "CP 34",
+      "Usulután": "CP 34"
+    }
+  },
+  "SZ": {
+    "pattern": "[HLMS]\\d{3}",
+    "example": "H100"
+  },
+  "TA": {
+    "pattern": "TDCU 1ZZ",
+    "example": "TDCU 1ZZ"
+  },
+  "TC": {
+    "pattern": "TKCA 1ZZ",
+    "example": "TKCA 1ZZ"
+  },
+  "TH": {
+    "pattern": "\\d{5}",
+    "example": "10150",
+    "regions": {
+      "กระบี่": "81",
+      "KRABI": "81",
+      "กรุงเทพมหานคร": "10",
+      "BANGKOK": "10",
+      "กาญจนบุรี": "71",
+      "KANCHANABURI": "71",
+      "กาฬสินธุ์": "46",
+      "KALASIN": "46",
+      "กำแพงเพชร": "62",
+      "KAMPHAENG PHET": "62",
+      "ขอนแก่น": "40",
+      "KHON KAEN": "40",
+      "จันทบุรี": "22",
+      "CHANTHABURI": "22",
+      "ฉะเชิงเทรา": "24",
+      "CHACHOENGSAO": "24",
+      "ชลบุรี": "20",
+      "CHON BURI": "20",
+      "ชัยนาท": "17",
+      "CHAI NAT": "17",
+      "ชัยภูมิ": "36",
+      "CHAIYAPHUM": "36",
+      "ชุมพร": "86",
+      "CHUMPON": "86",
+      "เชียงราย": "57",
+      "CHIANG RAI": "57",
+      "เชียงใหม่": "50",
+      "CHIANG MAI": "50",
+      "ตรัง": "92",
+      "TRANG": "92",
+      "ตราด": "23",
+      "TRAT": "23",
+      "ตาก": "63",
+      "TAK": "63",
+      "นครนายก": "26",
+      "NAKHON NAYOK": "26",
+      "นครปฐม": "73",
+      "NAKHON PATHOM": "73",
+      "นครพนม": "48",
+      "NAKHON PHANOM": "48",
+      "นครราชสีมา": "30",
+      "NAKHON RATCHASIMA": "30",
+      "นครศรีธรรมราช": "80",
+      "NAKHON SI THAMMARAT": "80",
+      "นครสวรรค์": "60",
+      "NAKHON SAWAN": "60",
+      "นนทบุรี": "11",
+      "NONTHABURI": "11",
+      "นราธิวาส": "96",
+      "NARATHIWAT": "96",
+      "น่าน": "55",
+      "NAN": "55",
+      "บุรีรัมย์": "31",
+      "BURI RAM": "31",
+      "ปทุมธานี": "12",
+      "PATHUM THANI": "12",
+      "ประจวบคีรีขันธ์": "77",
+      "PRACHUAP KHIRI KHAN": "77",
+      "ปราจีนบุรี": "25",
+      "PRACHIN BURI": "25",
+      "ปัตตานี": "94",
+      "PATTANI": "94",
+      "พระนครศรีอยุธยา": "13",
+      "PHRA NAKHON SI AYUTTHAYA": "13",
+      "พะเยา": "56",
+      "PHAYAO": "56",
+      "พังงา": "82",
+      "PHANG NGA": "82",
+      "พัทลุง": "93",
+      "PHATTALUNG": "93",
+      "พิจิตร": "66",
+      "PHICHIT": "66",
+      "พิษณุโลก": "65",
+      "PHITSANULOK": "65",
+      "เพชรบุรี": "76",
+      "PHETCHABURI": "76",
+      "เพชรบูรณ์": "67",
+      "PHETCHABUN": "67",
+      "แพร่": "54",
+      "PHRAE": "54",
+      "ภูเก็ต": "83",
+      "PHUKET": "83",
+      "มหาสารคาม": "44",
+      "MAHA SARAKHAM": "44",
+      "มุกดาหาร": "49",
+      "MUKDAHAN": "49",
+      "แม่ฮ่องสอน": "58",
+      "MAE HONG SON": "58",
+      "ยโสธร": "35",
+      "YASOTHON": "35",
+      "ยะลา": "95",
+      "YALA": "95",
+      "ร้อยเอ็ด": "45",
+      "ROI ET": "45",
+      "ระนอง": "85",
+      "RANONG": "85",
+      "ระยอง": "21",
+      "RAYONG": "21",
+      "ราชบุรี": "70",
+      "RATCHABURI": "70",
+      "ลพบุรี": "15",
+      "LOP BURI": "15",
+      "ลำปาง": "52",
+      "LAMPANG": "52",
+      "ลำพูน": "51",
+      "LAMPHUN": "51",
+      "เลย": "42",
+      "LOEI": "42",
+      "ศรีสะเกษ": "33",
+      "SI SA KET": "33",
+      "สกลนคร": "47",
+      "SAKON NAKHON": "47",
+      "สงขลา": "90",
+      "SONGKHLA": "90",
+      "สตูล": "91",
+      "SATUN": "91",
+      "สมุทรปราการ": "10",
+      "SAMUT PRAKAN": "10",
+      "สมุทรสงคราม": "75",
+      "SAMUT SONGKHRAM": "75",
+      "สมุทรสาคร": "74",
+      "SAMUT SAKHON": "74",
+      "สระแก้ว": "27",
+      "SA KAEO": "27",
+      "สระบุรี": "18",
+      "SARABURI": "18",
+      "สิงห์บุรี": "16",
+      "SING BURI": "16",
+      "สุโขทัย": "64",
+      "SUKHOTHAI": "64",
+      "สุพรรณบุรี": "72",
+      "SUPHANBURI": "72",
+      "สุราษฎร์ธานี": "84",
+      "SURAT THANI": "84",
+      "สุรินทร์": "32",
+      "SURIN": "32",
+      "หนองคาย": "43",
+      "NONG KHAI": "43",
+      "หนองบัวลำภู": "39",
+      "NONG BUA LAM PHU": "39",
+      "อ่างทอง": "14",
+      "ANG THONG": "14",
+      "อำนาจเจริญ": "37",
+      "AMNAT CHAROEN": "37",
+      "อุดรธานี": "41",
+      "UDON THANI": "41",
+      "อุตรดิตถ์": "53",
+      "UTTARADIT": "53",
+      "อุทัยธานี": "61",
+      "UTHAI THANI": "61",
+      "อุบลราชธานี": "34",
+      "UBON RATCHATHANI": "34"
+    }
+  },
+  "TJ": {
+    "pattern": "\\d{6}",
+    "example": "735450"
+  },
+  "TM": {
+    "pattern": "\\d{6}",
+    "example": "744000"
+  },
+  "TN": {
+    "pattern": "\\d{4}",
+    "example": "1002"
+  },
+  "TR": {
+    "pattern": "\\d{5}",
+    "example": "01960"
+  },
+  "TW": {
+    "pattern": "\\d{3}(\\d{2})?",
+    "example": "104",
+    "regions": {
+      "台中市": "4[0-3]",
+      "Taichung City": "4[0-3]",
+      "台北市": "1[01]",
+      "Taipei City": "1[01]",
+      "台東縣": "9[56]",
+      "Taitung County": "9[56]",
+      "台南市": "7[0-4]",
+      "Tainan City": "7[0-4]",
+      "宜蘭縣": "2[67]",
+      "Yilan County": "2[67]",
+      "花蓮縣": "9[78]",
+      "Hualien County": "9[78]",
+      "金門縣": "89",
+      "Kinmen County": "89",
+      "南投縣": "5[45]",
+      "Nantou County": "5[45]",
+      "屏東縣": "9[0-4]",
+      "Pingtung County": "9[0-4]",
+      "苗栗縣": "3[56]",
+      "Miaoli County": "3[56]",
+      "桃園縣": "3[23]",
+      "Taoyuan County": "3[23]",
+      "高雄市": "8[02-5]|81[1-579]",
+      "Kaohsiung City": "8[02-5]|81[1-579]",
+      "基隆市": "20[0-6]",
+      "Keelung City": "20[0-6]",
+      "連江縣": "209|21[012]",
+      "Lienchiang County": "209|21[012]",
+      "雲林縣": "6[3-5]",
+      "Yunlin County": "6[3-5]",
+      "新北市": "20[78]|2[2345]",
+      "New Taipei City": "20[78]|2[2345]",
+      "新竹市": "300",
+      "Hsinchu City": "300",
+      "新竹縣": "30[2-8]|31",
+      "Hsinchu County": "30[2-8]|31",
+      "嘉義市": "600",
+      "Chiayi City": "600",
+      "嘉義縣": "60[1-9]|6[12]",
+      "Chiayi County": "60[1-9]|6[12]",
+      "彰化縣": "5[0123]",
+      "Changhua County": "5[0123]",
+      "澎湖縣": "88",
+      "Penghu County": "88"
+    }
+  },
+  "TZ": {
+    "pattern": "\\d{4}",
+    "example": "6090"
+  },
+  "UA": {
+    "pattern": "\\d{5}",
+    "example": "15432"
+  },
+  "US": {
+    "pattern": "\\d{5}([ \\-]\\d{4})?",
+    "example": "95014",
+    "regions": {
+      "AL": "3[56]",
+      "Alabama": "3[56]",
+      "AK": "99[5-9]",
+      "Alaska": "99[5-9]",
+      "AS": "96799",
+      "American Samoa": "96799",
+      "AZ": "8[56]",
+      "Arizona": "8[56]",
+      "AR": "71[6-9]|72",
+      "Arkansas": "71[6-9]|72",
+      "AA": "340",
+      "Armed Forces (AA)": "340",
+      "AE": "09",
+      "Armed Forces (AE)": "09",
+      "AP": "96[2-6]",
+      "Armed Forces (AP)": "96[2-6]",
+      "CA": "9[0-5]|96[01]",
+      "California": "9[0-5]|96[01]",
+      "CO": "8[01]",
+      "Colorado": "8[01]",
+      "CT": "06",
+      "Connecticut": "06",
+      "DE": "19[7-9]",
+      "Delaware": "19[7-9]",
+      "DC": "20[02-5]|569",
+      "District of Columbia": "20[02-5]|569",
+      "FL": "3[23]|34[1-9]",
+      "Florida": "3[23]|34[1-9]",
+      "GA": "3[01]|398|39901",
+      "Georgia": "3[01]|398|39901",
+      "GU": "969([1-2]\\d|3[12])",
+      "Guam": "969([1-2]\\d|3[12])",
+      "HI": "967[0-8]|9679[0-8]|968",
+      "Hawaii": "967[0-8]|9679[0-8]|968",
+      "ID": "83[2-9]",
+      "Idaho": "83[2-9]",
+      "IL": "6[0-2]",
+      "Illinois": "6[0-2]",
+      "IN": "4[67]",
+      "Indiana": "4[67]",
+      "IA": "5[0-2]",
+      "Iowa": "5[0-2]",
+      "KS": "6[67]",
+      "Kansas": "6[67]",
+      "KY": "4[01]|42[0-7]",
+      "Kentucky": "4[01]|42[0-7]",
+      "LA": "70|71[0-5]",
+      "Louisiana": "70|71[0-5]",
+      "ME": "039|04",
+      "Maine": "039|04",
+      "MH": "969[67]",
+      "Marshall Islands": "969[67]",
+      "MD": "20[6-9]|21",
+      "Maryland": "20[6-9]|21",
+      "MA": "01|02[0-7]|05501|05544",
+      "Massachusetts": "01|02[0-7]|05501|05544",
+      "MI": "4[89]",
+      "Michigan": "4[89]",
+      "FM": "9694[1-4]",
+      "Micronesia": "9694[1-4]",
+      "MN": "55|56[0-7]",
+      "Minnesota": "55|56[0-7]",
+      "MS": "38[6-9]|39[0-7]",
+      "Mississippi": "38[6-9]|39[0-7]",
+      "MO": "6[3-5]",
+      "Missouri": "6[3-5]",
+      "MT": "59",
+      "Montana": "59",
+      "NE": "6[89]",
+      "Nebraska": "6[89]",
+      "NV": "889|89",
+      "Nevada": "889|89",
+      "NH": "03[0-8]",
+      "New Hampshire": "03[0-8]",
+      "NJ": "0[78]",
+      "New Jersey": "0[78]",
+      "NM": "87|88[0-4]",
+      "New Mexico": "87|88[0-4]",
+      "NY": "1[0-4]|06390|00501|00544",
+      "New York": "1[0-4]|06390|00501|00544",
+      "NC": "2[78]",
+      "North Carolina": "2[78]",
+      "ND": "58",
+      "North Dakota": "58",
+      "MP": "9695[0-2]",
+      "Northern Mariana Islands": "9695[0-2]",
+      "OH": "4[3-5]",
+      "Ohio": "4[3-5]",
+      "OK": "7[34]",
+      "Oklahoma": "7[34]",
+      "OR": "97",
+      "Oregon": "97",
+      "PW": "969(39|40)",
+      "Palau": "969(39|40)",
+      "PA": "1[5-8]|19[0-6]",
+      "Pennsylvania": "1[5-8]|19[0-6]",
+      "PR": "00[679]",
+      "Puerto Rico": "00[679]",
+      "RI": "02[89]",
+      "Rhode Island": "02[89]",
+      "SC": "29",
+      "South Carolina": "29",
+      "SD": "57",
+      "South Dakota": "57",
+      "TN": "37|38[0-5]",
+      "Tennessee": "37|38[0-5]",
+      "TX": "7[5-9]|885|73301|73344",
+      "Texas": "7[5-9]|885|73301|73344",
+      "UT": "84",
+      "Utah": "84",
+      "VT": "05",
+      "Vermont": "05",
+      "VI": "008",
+      "Virgin Islands": "008",
+      "VA": "201|2[23]|24[0-6]",
+      "Virginia": "201|2[23]|24[0-6]",
+      "WA": "98|99[0-4]",
+      "Washington": "98|99[0-4]",
+      "WV": "24[7-9]|2[56]",
+      "West Virginia": "24[7-9]|2[56]",
+      "WI": "5[34]",
+      "Wisconsin": "5[34]",
+      "WY": "82|83[01]|83414",
+      "Wyoming": "82|83[01]|83414"
+    }
+  },
+  "UY": {
+    "pattern": "\\d{5}",
+    "example": "11600",
+    "regions": {
+      "ARTIGAS": "55",
+      "CANELONES": "9[01]|1[456]",
+      "CERRO LARGO": "37",
+      "COLONIA": "70|75204",
+      "DURAZNO": "97",
+      "FLORES": "85",
+      "FLORIDA": "94|9060|97005",
+      "LAVALLEJA": "30",
+      "MALDONADO": "20",
+      "MONTEVIDEO": "1|91600",
+      "PAYSANDÚ": "60",
+      "RÍO NEGRO": "65|60002",
+      "RIVERA": "40",
+      "ROCHA": "27",
+      "SALTO": "50",
+      "SAN JOSÉ": "80",
+      "SORIANO": "75|70003",
+      "TACUAREMBÓ": "45",
+      "TREINTA Y TRES": "33|30203|30204|30302|37007"
+    }
+  },
+  "UZ": {
+    "pattern": "\\d{6}",
+    "example": "702100"
+  },
+  "VA": {
+    "pattern": "00120",
+    "example": "00120"
+  },
+  "VC": {
+    "pattern": "VC\\d{4}",
+    "example": "VC0100"
+  },
+  "VE": {
+    "pattern": "\\d{4}",
+    "example": "1010"
+  },
+  "VG": {
+    "pattern": "VG\\d{4}",
+    "example": "VG1110"
+  },
+  "VI": {
+    "pattern": "008(([0-4]\\d)|(5[01]))([ \\-]\\d{4})?",
+    "example": "00802-1222"
+  },
+  "VN": {
+    "pattern": "\\d{6}",
+    "example": "119415"
+  },
+  "WF": {
+    "pattern": "986\\d{2}",
+    "example": "98600"
+  },
+  "XK": {
+    "pattern": "[1-7]\\d{4}",
+    "example": "10000"
+  },
+  "YT": {
+    "pattern": "976\\d{2}",
+    "example": "97600"
+  },
+  "ZA": {
+    "pattern": "\\d{4}",
+    "example": "0083"
+  },
+  "ZM": {
+    "pattern": "\\d{5}",
+    "example": "50100"
+  }
+}

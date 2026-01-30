@@ -50,6 +50,7 @@ const DB_PATH = process.env.DB_PATH || path.join(DATA_DIR, 'app.db');
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 const UPLOADS_DIR = path.join(PUBLIC_DIR, 'uploads');
 const AVATAR_UPLOAD_DIR = path.join(UPLOADS_DIR, 'avatars');
+const POSTAL_PATTERN_PATH = path.join(PUBLIC_DIR, 'data', 'postal-patterns.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 const IS_PROD = process.env.NODE_ENV === 'production';
 const EMAIL_VERIFICATION_REQUIRED = process.env.EMAIL_VERIFICATION_REQUIRED !== 'false';
@@ -73,6 +74,66 @@ const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
 const SMTP_FROM = process.env.SMTP_FROM || 'no-reply@example.com';
 const APP_BASE_URL = process.env.APP_BASE_URL;
 const INVITE_TOKEN_TTL_DAYS = Number(process.env.INVITE_TOKEN_TTL_DAYS || 7);
+
+const loadPostalPatterns = () => {
+    try {
+        if (!fs.existsSync(POSTAL_PATTERN_PATH)) return {};
+        return JSON.parse(fs.readFileSync(POSTAL_PATTERN_PATH, 'utf8'));
+    } catch (err) {
+        console.warn('Failed to load postal patterns:', err.message);
+        return {};
+    }
+};
+const postalPatterns = loadPostalPatterns();
+const postalPatternCache = {};
+const normalizePostalValue = (value) => (typeof value === 'string' ? value.trim() : '');
+
+const normalizePostalPattern = (pattern) => {
+    if (!pattern) return { pattern: '', flags: '' };
+    let normalized = pattern;
+    let flags = '';
+    if (normalized.startsWith('(?i)')) {
+        normalized = normalized.slice(4);
+        flags = 'i';
+    }
+    if (normalized.includes('(?i:')) {
+        normalized = normalized.replace(/\(\?i:/g, '(');
+        flags = 'i';
+    }
+    if (!normalized.startsWith('^')) normalized = `^${normalized}`;
+    if (!normalized.endsWith('$')) normalized = `${normalized}$`;
+    return { pattern: normalized, flags };
+};
+
+const findRegionPattern = (regions, regionValue) => {
+    if (!regions || !regionValue) return '';
+    const trimmed = normalizePostalValue(regionValue);
+    if (!trimmed) return '';
+    if (regions[trimmed]) return regions[trimmed];
+    const lower = trimmed.toLowerCase();
+    const match = Object.keys(regions).find((key) => key.toLowerCase() === lower);
+    return match ? regions[match] : '';
+};
+
+const getPostalPatternRule = (countryCode, regionValue = '') => {
+    if (!countryCode) return null;
+    const cacheKey = `${countryCode}:${normalizePostalValue(regionValue).toLowerCase()}`;
+    if (postalPatternCache[cacheKey]) return postalPatternCache[cacheKey];
+    const rule = postalPatterns[countryCode];
+    if (!rule?.pattern) return null;
+    const regionPattern = findRegionPattern(rule.regions, regionValue);
+    const normalized = normalizePostalPattern(regionPattern || rule.pattern);
+    try {
+        postalPatternCache[cacheKey] = {
+            ...normalized,
+            example: rule.example || '',
+            regex: new RegExp(normalized.pattern, normalized.flags)
+        };
+    } catch (err) {
+        return null;
+    }
+    return postalPatternCache[cacheKey];
+};
 
 if (JWT_SECRET === 'change-this-secret') {
     if (IS_PROD) {
@@ -1878,6 +1939,7 @@ const findLodgingPlatformByName = db.prepare('SELECT id FROM lodging_platforms W
 const insertLodgingPlatform = db.prepare('INSERT OR IGNORE INTO lodging_platforms (name) VALUES (?)');
 const listCountries = db.prepare('SELECT code, name FROM countries ORDER BY name');
 const listStatesByCountry = db.prepare('SELECT code, name FROM states WHERE country_code = ? ORDER BY name');
+const getCountryCodeByName = db.prepare('SELECT code FROM countries WHERE LOWER(name) = ?');
 const listCitiesByCountry = db.prepare(
     'SELECT name, state_code FROM cities WHERE country_code = ? ORDER BY population DESC, name LIMIT ?'
 );
@@ -4164,6 +4226,14 @@ const normalizeGroupRole = (value) => {
     return trimmed || null;
 };
 
+const resolveCountryCode = (value) => {
+    const trimmed = trimString(value);
+    if (!trimmed) return '';
+    if (/^[A-Z]{2}$/i.test(trimmed)) return trimmed.toUpperCase();
+    const match = getCountryCodeByName.get(trimmed.toLowerCase());
+    return match?.code || '';
+};
+
 const validateGroupPayload = (payload) => {
     const name = typeof payload?.name === 'string' ? payload.name.trim() : '';
     if (!name) {
@@ -4523,6 +4593,15 @@ const validateGroupLodgingPayload = (payload) => {
     if (city.error) return city;
     const country = requireString(payload.country, 'Country');
     if (country.error) return country;
+    const stateValue = optionalString(payload.state);
+    const postalCode = optionalString(payload.postalCode);
+    const countryCode = resolveCountryCode(country.value);
+    if (postalCode && countryCode) {
+        const rule = getPostalPatternRule(countryCode, stateValue);
+        if (rule?.regex && !rule.regex.test(postalCode)) {
+            return { error: 'Postal code format is invalid for selected country.' };
+        }
+    }
     const checkIn = requireDate(payload.checkIn, 'Check-in');
     if (checkIn.error) return checkIn;
     const checkInTime = requireTime(payload.checkInTime, 'Check-in time');
@@ -4556,8 +4635,8 @@ const validateGroupLodgingPayload = (payload) => {
             address: address.value,
             addressLine2: optionalString(payload.addressLine2),
             city: city.value,
-            state: optionalString(payload.state),
-            postalCode: optionalString(payload.postalCode),
+            state: stateValue,
+            postalCode,
             country: country.value,
             checkIn: checkIn.value,
             checkInTime: checkInTime.value,

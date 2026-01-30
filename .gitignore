@@ -371,4 +371,7 @@ data/
 .env.*
 npm-debug.log*
 public/uploads/
+!public/data/
+public/data/*
+!public/data/postal-patterns.json
 test-results/
