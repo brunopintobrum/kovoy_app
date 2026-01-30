@@ -1318,6 +1318,11 @@ app.get('/dashboard', authRequired, (req, res) => {
     return res.sendFile(path.join(PUBLIC_DIR, 'group.html'));
 });
 
+app.get('/group-details', authRequired, (req, res) => {
+    ensureCsrfCookie(req, res);
+    return res.sendFile(path.join(PUBLIC_DIR, 'group-details.html'));
+});
+
 app.get('/api/auth/google', authLimiter, (req, res) => {
     const { clientId, clientSecret, redirectUri } = getGoogleConfig(req);
     if (!clientId || !clientSecret) {

@@ -853,6 +853,79 @@
         return Number.isInteger(id) && id > 0 ? id : null;
     };
 
+    const sectionIds = [
+        'dashboard',
+        'summaryCards',
+        'balances',
+        'debts',
+        'participants',
+        'invitations',
+        'expenses',
+        'flights',
+        'lodgings',
+        'transports',
+        'tickets'
+    ];
+
+    const sectionGroups = {
+        dashboard: ['dashboard', 'summaryCards', 'balances', 'debts'],
+        balances: ['balances'],
+        debts: ['debts'],
+        participants: ['participants'],
+        invitations: ['invitations'],
+        expenses: ['expenses'],
+        flights: ['flights'],
+        lodgings: ['lodgings'],
+        transports: ['transports'],
+        tickets: ['tickets']
+    };
+
+    const applySectionVisibility = () => {
+        const hash = window.location.hash || '#dashboard';
+        const key = hash.startsWith('#') ? hash.slice(1).toLowerCase() : hash.toLowerCase();
+        const visible = sectionGroups[key] || sectionGroups.dashboard;
+
+        sectionIds.forEach((id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.toggle('d-none', !visible.includes(id));
+        });
+
+        if (visible.length === 1) {
+            const target = document.getElementById(visible[0]);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } else if (key === 'dashboard') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const bindSectionVisibility = () => {
+        applySectionVisibility();
+        window.addEventListener('hashchange', applySectionVisibility);
+    };
+
+    const getCurrentBasePath = () => {
+        const path = window.location.pathname || '/dashboard';
+        return path === '/' ? '/dashboard' : path;
+    };
+
+    const updateGroupScopedLinks = () => {
+        if (!state.groupId) return;
+        const updateLinks = (selector) => {
+            document.querySelectorAll(selector).forEach((link) => {
+                const href = link.getAttribute('href');
+                if (!href) return;
+                const url = new URL(href, window.location.origin);
+                url.searchParams.set('groupId', state.groupId);
+                link.setAttribute('href', `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
+            });
+        };
+        updateLinks('a[href^=\"/group-details\"]');
+        updateLinks('a[href^=\"/dashboard\"]');
+    };
+
     const setUserProfile = async () => {
         try {
             const me = await apiRequest('/api/me');
@@ -876,7 +949,8 @@
         state.group = state.groups.find((group) => group.id === groupId) || null;
         if (!state.group) {
             if (state.groups.length) {
-                window.location.href = `/dashboard?groupId=${state.groups[0].id}`;
+                const basePath = getCurrentBasePath();
+                window.location.href = `${basePath}?groupId=${state.groups[0].id}`;
                 return false;
             }
             window.location.href = '/groups';
@@ -950,6 +1024,7 @@
             familyBalanceMode.value = state.group.familyBalanceMode || 'participants';
             familyBalanceMode.disabled = !state.canEdit;
         }
+        updateGroupScopedLinks();
     };
 
     const renderSummary = () => {
@@ -2242,7 +2317,8 @@
         if (!selector) return;
         selector.addEventListener('change', () => {
             const nextId = selector.value;
-            window.location.href = `/dashboard?groupId=${nextId}`;
+            const basePath = getCurrentBasePath();
+            window.location.href = `${basePath}?groupId=${nextId}`;
         });
     };
 
@@ -3131,6 +3207,7 @@
         if (!ok) return;
         bindGroupSelector();
         bindFamilyBalanceModeSelector();
+        bindSectionVisibility();
         bindForms();
         await loadLodgingCountries();
         setupFlightAirlineAutocomplete();
