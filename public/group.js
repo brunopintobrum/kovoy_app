@@ -892,14 +892,7 @@
             el.classList.toggle('d-none', !visible.includes(id));
         });
 
-        if (visible.length === 1) {
-            const target = document.getElementById(visible[0]);
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        } else if (key === 'dashboard') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        // Let the browser handle anchor scrolling to avoid double scroll jumps.
     };
 
     const bindSectionVisibility = () => {
