@@ -10,6 +10,7 @@
         lodgingProperties: [],
         lodgingLocations: { cities: [], states: [] },
         lodgingCountries: [],
+        postalPatterns: null,
         airports: { from: [], to: [] },
         expenses: [],
         flights: [],
@@ -431,6 +432,95 @@
         if (match) return match.name;
         return fallbackCountryNames[codeOrName] || codeOrName;
     };
+    const resolveCountryCode = (codeOrName) => {
+        if (!codeOrName) return '';
+        const trimmed = String(codeOrName).trim();
+        if (!trimmed) return '';
+        const match = state.lodgingCountries.find(
+            (country) => country.code === trimmed || country.name.toLowerCase() === trimmed.toLowerCase()
+        );
+        if (match) return match.code;
+        if (fallbackCountryCodes[trimmed]) return fallbackCountryCodes[trimmed];
+        if (/^[A-Z]{2}$/i.test(trimmed)) return trimmed.toUpperCase();
+        return '';
+    };
+
+    const normalizePostalPattern = (pattern) => {
+        if (!pattern) return { pattern: '', flags: '' };
+        let normalized = pattern;
+        let flags = '';
+        if (normalized.startsWith('(?i)')) {
+            normalized = normalized.slice(4);
+            flags = 'i';
+        }
+        if (normalized.includes('(?i:')) {
+            normalized = normalized.replace(/\(\?i:/g, '(');
+            flags = 'i';
+        }
+        if (!normalized.startsWith('^')) normalized = `^${normalized}`;
+        if (!normalized.endsWith('$')) normalized = `${normalized}$`;
+        return { pattern: normalized, flags };
+    };
+
+    const loadPostalPatterns = async () => {
+        if (state.postalPatterns) return state.postalPatterns;
+        try {
+            const response = await fetch('/data/postal-patterns.json', { cache: 'force-cache' });
+            if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+            state.postalPatterns = await response.json();
+        } catch (err) {
+            state.postalPatterns = {};
+            console.warn('Failed to load postal patterns:', err.message);
+        }
+        return state.postalPatterns;
+    };
+
+    const findRegionPattern = (regions, regionValue) => {
+        if (!regions || !regionValue) return '';
+        const trimmed = String(regionValue).trim();
+        if (!trimmed) return '';
+        if (regions[trimmed]) return regions[trimmed];
+        const lower = trimmed.toLowerCase();
+        const match = Object.keys(regions).find((key) => key.toLowerCase() === lower);
+        return match ? regions[match] : '';
+    };
+
+    const applyPostalPattern = async (codeOrName, regionValue = '') => {
+        const input = document.getElementById('lodgingPostalCode');
+        if (!input) return;
+        const countryCode = resolveCountryCode(codeOrName);
+        if (!countryCode) {
+            input.removeAttribute('pattern');
+            input.removeAttribute('title');
+            input.removeAttribute('placeholder');
+            input.style.textTransform = '';
+            return;
+        }
+        const patterns = await loadPostalPatterns();
+        const rule = patterns[countryCode];
+        if (!rule?.pattern) {
+            input.removeAttribute('pattern');
+            input.removeAttribute('title');
+            input.removeAttribute('placeholder');
+            input.style.textTransform = '';
+            return;
+        }
+        const regionPattern = findRegionPattern(rule.regions, regionValue);
+        const { pattern } = normalizePostalPattern(regionPattern || rule.pattern);
+        input.setAttribute('pattern', pattern);
+        if (rule.example) {
+            input.setAttribute('placeholder', rule.example);
+            input.setAttribute('title', `Format example: ${rule.example}`);
+        } else {
+            input.removeAttribute('placeholder');
+            input.setAttribute('title', 'Invalid postal code format.');
+        }
+        if (/[A-Z]/.test(rule.pattern) && !/[a-z]/.test(rule.pattern)) {
+            input.style.textTransform = 'uppercase';
+        } else {
+            input.style.textTransform = '';
+        }
+    };
 
     const setupFlightAirlineAutocomplete = () => {
         const input = document.getElementById('flightAirline');
@@ -491,6 +581,7 @@
             }
             select.value = current;
         }
+        applyPostalPattern(select.value.trim(), document.getElementById('lodgingState')?.value);
     };
 
     const renderLodgingLocationOptions = () => {
@@ -646,6 +737,7 @@
     const setupLodgingLocationAutocomplete = () => {
         const select = document.getElementById('lodgingCountry');
         const cityInput = document.getElementById('lodgingCity');
+        const stateInput = document.getElementById('lodgingState');
         if (!select) return;
         let searchTimeout = null;
         select.addEventListener('change', () => {
@@ -653,6 +745,7 @@
             if (cityInput) cityInput.value = '';
             if (state) state.value = '';
             loadLodgingLocations(select.value.trim());
+            applyPostalPattern(select.value.trim(), state?.value);
         });
         if (cityInput) {
             cityInput.addEventListener('input', () => {
@@ -665,6 +758,11 @@
                 searchTimeout = setTimeout(() => {
                     loadLodgingLocations(countryCode, query);
                 }, 200);
+            });
+        }
+        if (stateInput) {
+            stateInput.addEventListener('input', () => {
+                applyPostalPattern(select.value.trim(), stateInput.value);
             });
         }
     };
@@ -1579,11 +1677,11 @@
         }
     };
 
-    const collectLinkedExpenseSplitData = (amountValue) => {
+    const collectLinkedExpenseSplitData = (amountValue, payerSelectorId) => {
         if (!state.participants.length && !state.families.length) {
             throw new Error('Add participants or families before linking an expense.');
         }
-        const payerEl = document.getElementById('expensePayer');
+        const payerEl = document.getElementById(payerSelectorId || 'expensePayer');
         const payerId = Number(payerEl?.value || 0);
         if (!payerId) {
             throw new Error('Select a payer to link an expense.');
@@ -1641,7 +1739,7 @@
         if (!toggle || !toggle.checked) return null;
         const base = defaults && typeof defaults === 'object' ? defaults : {};
         const amountValue = typeof base.amount === 'number' ? base.amount : Number(base.amount);
-        const splitData = collectLinkedExpenseSplitData(amountValue);
+        const splitData = collectLinkedExpenseSplitData(amountValue, config.payerId);
         return {
             ...base,
             ...splitData
@@ -1727,23 +1825,20 @@
         updateSplitSummary();
     };
 
-    const populateExpenseForm = (expense) => {
+    const applyExpenseSplitConfig = (expense) => {
         if (!expense) return;
-        const description = document.getElementById('expenseDescription');
-        const amount = document.getElementById('expenseAmount');
-        const currency = document.getElementById('expenseCurrency');
-        const date = document.getElementById('expenseDate');
-        const category = document.getElementById('expenseCategory');
-        const payer = document.getElementById('expensePayer');
-
-        if (description) description.value = expense.description || '';
-        if (amount) amount.value = expense.amount ?? '';
-        if (currency) currency.value = expense.currency || state.group?.defaultCurrency || 'USD';
-        if (date) date.value = expense.date || '';
-        if (category) category.value = expense.category || '';
-        if (payer) payer.value = expense.payerParticipantId ? String(expense.payerParticipantId) : '';
-
-        const rawSplitType = expense.splits && expense.splits.length ? expense.splits[0].targetType : 'participant';
+        const hasSplits = expense.splits && expense.splits.length;
+        if (!hasSplits) {
+            const splitParticipants = document.getElementById('splitParticipants');
+            const splitModeEqual = document.getElementById('splitModeEqual');
+            if (splitParticipants) splitParticipants.checked = true;
+            if (splitModeEqual) splitModeEqual.checked = true;
+            state.editing.expenseConfig = {
+                targetIds: state.participants.map((participant) => participant.id)
+            };
+            return;
+        }
+        const rawSplitType = expense.splits[0].targetType || 'participant';
         const splitType = rawSplitType === 'family' ? 'families' : 'participants';
         const splitTypeInput = document.getElementById(splitType === 'families' ? 'splitFamilies' : 'splitParticipants');
         if (splitTypeInput) splitTypeInput.checked = true;
@@ -1764,6 +1859,25 @@
             targetIds,
             manualAmounts
         };
+    };
+
+    const populateExpenseForm = (expense) => {
+        if (!expense) return;
+        const description = document.getElementById('expenseDescription');
+        const amount = document.getElementById('expenseAmount');
+        const currency = document.getElementById('expenseCurrency');
+        const date = document.getElementById('expenseDate');
+        const category = document.getElementById('expenseCategory');
+        const payer = document.getElementById('expensePayer');
+
+        if (description) description.value = expense.description || '';
+        if (amount) amount.value = expense.amount ?? '';
+        if (currency) currency.value = expense.currency || state.group?.defaultCurrency || 'USD';
+        if (date) date.value = expense.date || '';
+        if (category) category.value = expense.category || '';
+        if (payer) payer.value = expense.payerParticipantId ? String(expense.payerParticipantId) : '';
+
+        applyExpenseSplitConfig(expense);
         setExpenseFormMode('edit');
         renderSplitTargets();
         updateSplitSummary();
@@ -1876,6 +1990,11 @@
         const expense = flight.expenseId ? state.expenses.find((item) => item.id === flight.expenseId) : null;
         setModuleExpenseVisibility('flight', !!expense);
         setModuleExpensePayer('flight', expense?.payerParticipantId || null);
+        if (expense) {
+            applyExpenseSplitConfig(expense);
+            renderSplitTargets();
+            updateSplitSummary();
+        }
     };
 
     const setLodgingFormMode = (mode) => {
@@ -1913,7 +2032,7 @@
         const address = document.getElementById('lodgingAddress');
         const addressLine2 = document.getElementById('lodgingAddressLine2');
         const city = document.getElementById('lodgingCity');
-        const state = document.getElementById('lodgingState');
+        const stateInput = document.getElementById('lodgingState');
         const postalCode = document.getElementById('lodgingPostalCode');
         const country = document.getElementById('lodgingCountry');
         const checkIn = document.getElementById('lodgingCheckIn');
@@ -1935,7 +2054,7 @@
         if (address) address.value = lodging.address || '';
         if (addressLine2) addressLine2.value = lodging.addressLine2 || '';
         if (city) city.value = lodging.city || '';
-        if (state) state.value = lodging.state || '';
+        if (stateInput) stateInput.value = lodging.state || '';
         if (postalCode) postalCode.value = lodging.postalCode || '';
         if (country) {
             const rawCountry = lodging.country || '';
@@ -1947,8 +2066,11 @@
             if (match) {
                 country.value = match.code;
                 loadLodgingLocations(match.code);
+                applyPostalPattern(match.code, lodging.state);
             } else {
                 country.value = rawCountry;
+                loadLodgingLocations(rawCountry);
+                applyPostalPattern(rawCountry, lodging.state);
             }
         }
         if (checkIn) checkIn.value = lodging.checkIn || '';
@@ -1976,6 +2098,11 @@
         const expense = lodging.expenseId ? state.expenses.find((item) => item.id === lodging.expenseId) : null;
         setModuleExpenseVisibility('lodging', !!expense);
         setModuleExpensePayer('lodging', expense?.payerParticipantId || null);
+        if (expense) {
+            applyExpenseSplitConfig(expense);
+            renderSplitTargets();
+            updateSplitSummary();
+        }
     };
 
     const setTransportFormMode = (mode) => {
@@ -2043,6 +2170,11 @@
         const expense = transport.expenseId ? state.expenses.find((item) => item.id === transport.expenseId) : null;
         setModuleExpenseVisibility('transport', !!expense);
         setModuleExpensePayer('transport', expense?.payerParticipantId || null);
+        if (expense) {
+            applyExpenseSplitConfig(expense);
+            renderSplitTargets();
+            updateSplitSummary();
+        }
     };
 
     const setTicketFormMode = (mode) => {
@@ -2093,6 +2225,11 @@
         const expense = ticket.expenseId ? state.expenses.find((item) => item.id === ticket.expenseId) : null;
         setModuleExpenseVisibility('ticket', !!expense);
         setModuleExpensePayer('ticket', expense?.payerParticipantId || null);
+        if (expense) {
+            applyExpenseSplitConfig(expense);
+            renderSplitTargets();
+            updateSplitSummary();
+        }
     };
 
     const bindGroupSelector = () => {
