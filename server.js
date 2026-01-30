@@ -209,6 +209,7 @@ db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         default_currency TEXT NOT NULL,
+        family_balance_mode TEXT NOT NULL DEFAULT 'participants',
         created_by_user_id INTEGER NOT NULL,
         created_at TEXT NOT NULL,
         FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -785,6 +786,11 @@ const cityColumns = db.prepare('PRAGMA table_info(cities)').all();
 const hasCityPopulation = cityColumns.some((column) => column.name === 'population');
 if (!hasCityPopulation) {
     db.exec('ALTER TABLE cities ADD COLUMN population INTEGER');
+}
+const groupColumns = db.prepare('PRAGMA table_info(groups)').all();
+const hasFamilyBalanceMode = groupColumns.some((column) => column.name === 'family_balance_mode');
+if (!hasFamilyBalanceMode) {
+    db.exec("ALTER TABLE groups ADD COLUMN family_balance_mode TEXT NOT NULL DEFAULT 'participants'");
 }
 
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
@@ -1746,7 +1752,7 @@ const ensureLodgingPlatformId = (name, candidateId) => {
 const getGroupById = db.prepare('SELECT * FROM groups WHERE id = ?');
 const getGroupMember = db.prepare('SELECT role FROM group_members WHERE group_id = ? AND user_id = ?');
 const listGroupsForUser = db.prepare(`
-    SELECT g.id, g.name, g.default_currency, g.created_by_user_id, g.created_at, gm.role
+    SELECT g.id, g.name, g.default_currency, g.family_balance_mode, g.created_by_user_id, g.created_at, gm.role
     FROM groups g
     JOIN group_members gm ON gm.group_id = g.id
     WHERE gm.user_id = ?
@@ -1763,6 +1769,11 @@ const insertGroupMember = db.prepare(`
 const insertGroupMemberIfMissing = db.prepare(`
     INSERT OR IGNORE INTO group_members (group_id, user_id, role, created_at)
     VALUES (?, ?, ?, ?)
+`);
+const updateGroupFamilyBalanceMode = db.prepare(`
+    UPDATE groups
+    SET family_balance_mode = ?
+    WHERE id = ?
 `);
 const listGroupMembers = db.prepare(`
     SELECT gm.role, u.id as user_id, u.email, u.first_name, u.last_name, u.display_name
@@ -2135,6 +2146,7 @@ app.get('/api/groups', authRequiredApi, (req, res) => {
         id: row.id,
         name: row.name,
         defaultCurrency: row.default_currency,
+        familyBalanceMode: row.family_balance_mode || 'participants',
         createdByUserId: row.created_by_user_id,
         createdAt: row.created_at,
         role: row.role
@@ -2153,6 +2165,19 @@ app.get('/api/groups/:groupId/members', authRequiredApi, requireGroupMember, (re
     }));
     return res.json({ ok: true, data: members });
 });
+
+app.put(
+    '/api/groups/:groupId/family-balance-mode',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(['owner', 'admin']),
+    (req, res) => {
+        const mode = normalizeFamilyBalanceMode(req.body?.mode);
+        updateGroupFamilyBalanceMode.run(mode, req.groupId);
+        return res.json({ ok: true, mode });
+    }
+);
 
 app.get('/api/groups/:groupId/families', authRequiredApi, requireGroupMember, (req, res) => {
     const families = listFamilies.all(req.groupId).map((row) => ({
@@ -2473,11 +2498,12 @@ const buildEqualCentsSplits = (totalCents, targetIds) => {
     }));
 };
 
-const buildBalanceState = ({ participants, families, expenses, expenseSplits }) => {
+const buildBalanceState = ({ participants, families, expenses, expenseSplits, familyBalanceMode }) => {
     const participantById = new Map();
     const familyById = new Map();
     const participantBalances = new Map();
     const familyBalances = new Map();
+    const balanceMode = normalizeFamilyBalanceMode(familyBalanceMode);
 
     (participants || []).forEach((participant) => {
         participantById.set(participant.id, participant);
@@ -2540,6 +2566,32 @@ const buildBalanceState = ({ participants, families, expenses, expenseSplits }) 
             }
         });
     });
+
+    if (balanceMode === 'participants') {
+        familyBalances.forEach((_, familyId) => {
+            const familyParticipants = participantsByFamily.get(familyId) || [];
+            const total = familyParticipants.reduce((sum, participantId) => {
+                return sum + (participantBalances.get(participantId) || 0);
+            }, 0);
+            familyBalances.set(familyId, total);
+        });
+    } else if (familyBalances.size) {
+        const familyIds = Array.from(familyBalances.keys());
+        familyBalances.forEach((_, familyId) => {
+            familyBalances.set(familyId, 0);
+        });
+        (expenses || []).forEach((expense) => {
+            const amountCents = toCents(expense.amount);
+            const payerFamily = participantById.get(expense.payerParticipantId)?.familyId || null;
+            if (payerFamily && familyBalances.has(payerFamily)) {
+                familyBalances.set(payerFamily, familyBalances.get(payerFamily) + amountCents);
+            }
+            const shares = buildEqualCentsSplits(amountCents, familyIds);
+            shares.forEach((share) => {
+                familyBalances.set(share.targetId, familyBalances.get(share.targetId) - share.cents);
+            });
+        });
+    }
 
     return {
         participantBalances,
@@ -3614,6 +3666,7 @@ app.delete(
 );
 
 app.get('/api/groups/:groupId/summary', authRequiredApi, requireGroupMember, (req, res) => {
+    const familyBalanceMode = normalizeFamilyBalanceMode(req.group?.family_balance_mode);
     const participants = listParticipants.all(req.groupId).map((row) => ({
         id: row.id,
         familyId: row.family_id,
@@ -3638,7 +3691,13 @@ app.get('/api/groups/:groupId/summary', authRequiredApi, requireGroupMember, (re
         expenseSplits.set(expense.id, splits);
     });
 
-    const state = buildBalanceState({ participants, families, expenses, expenseSplits });
+    const state = buildBalanceState({
+        participants,
+        families,
+        expenses,
+        expenseSplits,
+        familyBalanceMode
+    });
     const participantBalances = participants.map((participant) => ({
         participantId: participant.id,
         displayName: participant.displayName,
@@ -4224,6 +4283,12 @@ const normalizeGroupRole = (value) => {
     if (typeof value !== 'string') return null;
     const trimmed = value.trim().toLowerCase();
     return trimmed || null;
+};
+
+const normalizeFamilyBalanceMode = (value) => {
+    if (typeof value !== 'string') return 'participants';
+    const trimmed = value.trim().toLowerCase();
+    return trimmed === 'families' ? 'families' : 'participants';
 };
 
 const resolveCountryCode = (value) => {

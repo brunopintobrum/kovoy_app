@@ -17,7 +17,13 @@ describe('group balance helpers', () => {
             ]]
         ]);
 
-        const state = buildBalanceState({ participants, families, expenses, expenseSplits });
+        const state = buildBalanceState({
+            participants,
+            families,
+            expenses,
+            expenseSplits,
+            familyBalanceMode: 'participants'
+        });
 
         expect(state.participantBalances.get(1)).toBe(5000);
         expect(state.participantBalances.get(2)).toBe(-5000);
@@ -43,13 +49,52 @@ describe('group balance helpers', () => {
             ]]
         ]);
 
-        const state = buildBalanceState({ participants, families, expenses, expenseSplits });
+        const state = buildBalanceState({
+            participants,
+            families,
+            expenses,
+            expenseSplits,
+            familyBalanceMode: 'participants'
+        });
 
         expect(state.familyBalances.get(10)).toBe(-4500);
-        expect(state.familyBalances.get(20)).toBe(-4500);
+        expect(state.familyBalances.get(20)).toBe(4500);
         expect(state.participantBalances.get(1)).toBe(-2250);
         expect(state.participantBalances.get(2)).toBe(-2250);
         expect(state.participantBalances.get(3)).toBe(4500);
+    });
+
+    test('computes family balance using equalized families mode', () => {
+        const participants = [
+            { id: 1, familyId: 10, displayName: 'Bruno' },
+            { id: 2, familyId: 10, displayName: 'Fernanda' },
+            { id: 3, familyId: 20, displayName: 'Wilton' }
+        ];
+        const families = [
+            { id: 10, name: 'Silva' },
+            { id: 20, name: 'Celia' }
+        ];
+        const expenses = [
+            { id: 200, amount: 90, payerParticipantId: 3 }
+        ];
+        const expenseSplits = new Map([
+            [200, [
+                { targetType: 'participant', targetId: 1, amount: 30 },
+                { targetType: 'participant', targetId: 2, amount: 30 },
+                { targetType: 'participant', targetId: 3, amount: 30 }
+            ]]
+        ]);
+
+        const state = buildBalanceState({
+            participants,
+            families,
+            expenses,
+            expenseSplits,
+            familyBalanceMode: 'families'
+        });
+
+        expect(state.familyBalances.get(10)).toBe(-4500);
+        expect(state.familyBalances.get(20)).toBe(4500);
     });
 
     test('builds debt plan from balances', () => {

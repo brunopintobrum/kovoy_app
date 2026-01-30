@@ -174,9 +174,19 @@
                                     <h4 class="mb-1" id="groupName">Group name</h4>
                                     <p class="text-muted mb-0">Default currency: <span id="groupCurrency">USD</span></p>
                                 </div>
-                                <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
-                                    <label class="form-label mb-0" for="groupSelector">Switch group</label>
-                                    <select class="form-select" id="groupSelector" style="min-width: 200px;"></select>
+                                <div class="d-flex flex-wrap align-items-end gap-3 mt-3 mt-md-0">
+                                    <div>
+                                        <label class="form-label mb-0" for="groupSelector">Switch group</label>
+                                        <select class="form-select" id="groupSelector" style="min-width: 200px;"></select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label mb-0" for="familyBalanceMode">Family balance mode</label>
+                                        <select class="form-select" id="familyBalanceMode" style="min-width: 220px;">
+                                            <option value="participants">By participants</option>
+                                            <option value="families">By families</option>
+                                        </select>
+                                        <small class="text-danger d-none" id="familyBalanceModeError"></small>
+                                    </div>
                                 </div>
                             </div>
                         </div>

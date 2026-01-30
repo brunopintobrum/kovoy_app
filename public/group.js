@@ -922,6 +922,7 @@
         const groupCurrency = document.getElementById('groupCurrency');
         const roleBadge = document.getElementById('groupRoleBadge');
         const selector = document.getElementById('groupSelector');
+        const familyBalanceMode = document.getElementById('familyBalanceMode');
 
         if (groupName) groupName.textContent = state.group.name;
         if (groupCurrency) groupCurrency.textContent = state.group.defaultCurrency;
@@ -944,6 +945,10 @@
                 if (group.id === state.groupId) option.selected = true;
                 selector.appendChild(option);
             });
+        }
+        if (familyBalanceMode) {
+            familyBalanceMode.value = state.group.familyBalanceMode || 'participants';
+            familyBalanceMode.disabled = !state.canEdit;
         }
     };
 
@@ -2241,6 +2246,33 @@
         });
     };
 
+    const bindFamilyBalanceModeSelector = () => {
+        const selector = document.getElementById('familyBalanceMode');
+        if (!selector) return;
+        selector.addEventListener('change', async () => {
+            if (!state.groupId) return;
+            const errorEl = document.getElementById('familyBalanceModeError');
+            if (errorEl) errorEl.classList.add('d-none');
+            const nextMode = selector.value === 'families' ? 'families' : 'participants';
+            const prevMode = state.group.familyBalanceMode || 'participants';
+            if (nextMode === prevMode) return;
+            try {
+                await apiRequest(`/api/groups/${state.groupId}/family-balance-mode`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ mode: nextMode })
+                });
+                state.group.familyBalanceMode = nextMode;
+                await refreshData();
+            } catch (err) {
+                if (errorEl) {
+                    errorEl.textContent = err.message;
+                    errorEl.classList.remove('d-none');
+                }
+                selector.value = prevMode;
+            }
+        });
+    };
+
     const bindForms = () => {
         const familyForm = document.getElementById('familyForm');
         const familyError = document.getElementById('familyError');
@@ -3098,6 +3130,7 @@
         const ok = await loadGroups();
         if (!ok) return;
         bindGroupSelector();
+        bindFamilyBalanceModeSelector();
         bindForms();
         await loadLodgingCountries();
         setupFlightAirlineAutocomplete();
