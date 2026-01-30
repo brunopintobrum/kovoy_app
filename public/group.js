@@ -912,6 +912,8 @@
             const label = labels[key] || 'Management';
             titleEl.textContent = label;
             breadcrumbEl.textContent = label;
+            // Keep the section title visible by returning to the top of the page content.
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Let the browser handle anchor scrolling to avoid double scroll jumps.
