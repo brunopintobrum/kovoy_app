@@ -27,6 +27,10 @@ test('register, login, and manage a group', async ({ page }) => {
     await page.waitForURL('**/dashboard?groupId=*');
     await expect(page.locator('#groupName')).toContainText('E2E Trip Group');
 
+    const dashboardUrl = new URL(page.url());
+    const groupId = dashboardUrl.searchParams.get('groupId');
+    await page.goto(`/group-details?groupId=${groupId}#participants`);
+
     await page.fill('#familyName', 'Silva');
     await page.click('#familyForm button[type="submit"]');
     await expect(page.locator('#familyList')).toContainText('Silva');
@@ -36,6 +40,8 @@ test('register, login, and manage a group', async ({ page }) => {
     await page.selectOption('#participantFamily', { label: 'Silva' });
     await page.click('#participantForm button[type="submit"]');
     await expect(page.locator('#participantList')).toContainText('Bruno');
+
+    await page.goto(`/group-details?groupId=${groupId}#expenses`);
 
     await page.fill('#expenseDescription', 'Airbnb');
     await page.fill('#expenseAmount', '120');
