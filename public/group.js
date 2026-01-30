@@ -1660,20 +1660,30 @@
         const checkIn = document.getElementById('lodgingCheckIn');
         const checkOut = document.getElementById('lodgingCheckOut');
         if (!checkIn || !checkOut) return;
+        const clearAutofill = () => {
+            delete checkOut.dataset.autofilled;
+        };
         const sync = () => {
             if (checkIn.value) {
                 checkOut.min = checkIn.value;
-                if (!checkOut.value) {
+                const checkOutValue = checkOut.value;
+                const shouldAutofill = !checkOutValue || checkOut.dataset.autofilled === '1';
+                if (shouldAutofill) {
                     checkOut.value = checkIn.value;
-                } else if (checkOut.value < checkIn.value) {
+                    checkOut.dataset.autofilled = '1';
+                } else if (checkOutValue < checkIn.value) {
                     checkOut.value = checkIn.value;
+                    checkOut.dataset.autofilled = '1';
                 }
             } else {
                 checkOut.removeAttribute('min');
+                clearAutofill();
             }
         };
         checkIn.addEventListener('change', sync);
         checkIn.addEventListener('input', sync);
+        checkOut.addEventListener('change', clearAutofill);
+        checkOut.addEventListener('input', clearAutofill);
         sync();
     };
 
