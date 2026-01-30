@@ -287,7 +287,8 @@
                                     <form id="familyForm" class="mb-3 needs-validation" novalidate>
                                         <div class="input-group">
                                             <input class="form-control" id="familyName" placeholder="Family name" maxlength="80" required>
-                                            <button class="btn btn-outline-primary" type="submit">Add</button>
+                                            <button class="btn btn-outline-secondary d-none" type="button" id="familyCancel">Cancel</button>
+                                            <button class="btn btn-outline-primary" type="submit" id="familySubmit">Add</button>
                                         </div>
                                         <div class="invalid-feedback">Enter a family name.</div>
                                     </form>
@@ -324,7 +325,8 @@
                                             </select>
                                         </div>
                                         <div class="col-md-12 d-flex justify-content-end">
-                                            <button class="btn btn-outline-primary" type="submit">Add participant</button>
+                                            <button class="btn btn-outline-secondary d-none me-2" type="button" id="participantCancel">Cancel</button>
+                                            <button class="btn btn-outline-primary" type="submit" id="participantSubmit">Add participant</button>
                                         </div>
                                     </form>
                                     <div class="alert alert-warning d-none" id="participantReadOnly">

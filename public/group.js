@@ -20,6 +20,8 @@
         summary: null,
         canEdit: false,
         editing: {
+            familyId: null,
+            participantId: null,
             flightId: null,
             flightSeatMap: {},
             flightBaggageMap: {},
@@ -1138,10 +1140,15 @@
             li.className = 'list-group-item d-flex align-items-center justify-content-between';
             li.innerHTML = `
                 <span>${family.name}</span>
-                <button class="btn btn-sm btn-outline-danger" data-action="delete-family" data-id="${family.id}">Delete</button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary" data-action="edit-family" data-id="${family.id}">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger" data-action="delete-family" data-id="${family.id}">Delete</button>
+                </div>
             `;
             if (!state.canEdit) {
-                li.querySelector('button').disabled = true;
+                li.querySelectorAll('button').forEach((button) => {
+                    button.disabled = true;
+                });
             }
             list.appendChild(li);
 
@@ -1168,11 +1175,14 @@
                 <td>${participant.familyId ? familyMap.get(participant.familyId) || '-' : '-'}</td>
                 <td class="text-capitalize">${participant.type || '-'}</td>
                 <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-participant" data-id="${participant.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-participant" data-id="${participant.id}">Delete</button>
                 </td>
             `;
             if (!state.canEdit) {
-                tr.querySelector('button').disabled = true;
+                tr.querySelectorAll('button').forEach((button) => {
+                    button.disabled = true;
+                });
             }
             list.appendChild(tr);
         });
@@ -1892,6 +1902,66 @@
         updateExpenseAvailability();
     };
 
+    const setFamilyFormMode = (mode) => {
+        const submit = document.getElementById('familySubmit');
+        const cancel = document.getElementById('familyCancel');
+        const isEdit = mode === 'edit';
+        if (submit) {
+            submit.textContent = isEdit ? 'Update family' : 'Add';
+        }
+        if (cancel) {
+            cancel.classList.toggle('d-none', !isEdit);
+        }
+    };
+
+    const resetFamilyForm = () => {
+        const form = document.getElementById('familyForm');
+        if (!form) return;
+        form.reset();
+        form.classList.remove('was-validated');
+        state.editing.familyId = null;
+        setFamilyFormMode('create');
+    };
+
+    const populateFamilyForm = (family) => {
+        const input = document.getElementById('familyName');
+        if (input) input.value = family?.name || '';
+        state.editing.familyId = family?.id || null;
+        setFamilyFormMode('edit');
+    };
+
+    const setParticipantFormMode = (mode) => {
+        const submit = document.getElementById('participantSubmit');
+        const cancel = document.getElementById('participantCancel');
+        const isEdit = mode === 'edit';
+        if (submit) {
+            submit.textContent = isEdit ? 'Update participant' : 'Add participant';
+        }
+        if (cancel) {
+            cancel.classList.toggle('d-none', !isEdit);
+        }
+    };
+
+    const resetParticipantForm = () => {
+        const form = document.getElementById('participantForm');
+        if (!form) return;
+        form.reset();
+        form.classList.remove('was-validated');
+        state.editing.participantId = null;
+        setParticipantFormMode('create');
+    };
+
+    const populateParticipantForm = (participant) => {
+        const name = document.getElementById('participantName');
+        const type = document.getElementById('participantType');
+        const family = document.getElementById('participantFamily');
+        if (name) name.value = participant?.displayName || '';
+        if (type) type.value = participant?.type || '';
+        if (family) family.value = participant?.familyId || '';
+        state.editing.participantId = participant?.id || null;
+        setParticipantFormMode('edit');
+    };
+
     const setExpenseFormMode = (mode) => {
         const submit = document.getElementById('expenseSubmit');
         const cancel = document.getElementById('expenseCancel');
@@ -2374,12 +2444,18 @@
                 if (!validateForm(familyForm)) return;
                 const name = document.getElementById('familyName')?.value || '';
                 try {
-                    await apiRequest(`/api/groups/${state.groupId}/families`, {
-                        method: 'POST',
-                        body: JSON.stringify({ name })
-                    });
-                    familyForm.reset();
-                    familyForm.classList.remove('was-validated');
+                    if (state.editing.familyId) {
+                        await apiRequest(`/api/groups/${state.groupId}/families/${state.editing.familyId}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({ name })
+                        });
+                    } else {
+                        await apiRequest(`/api/groups/${state.groupId}/families`, {
+                            method: 'POST',
+                            body: JSON.stringify({ name })
+                        });
+                    }
+                    resetFamilyForm();
                     await refreshData();
                 } catch (err) {
                     if (familyError) {
@@ -2387,6 +2463,12 @@
                         familyError.classList.remove('d-none');
                     }
                 }
+            });
+        }
+        const familyCancel = document.getElementById('familyCancel');
+        if (familyCancel) {
+            familyCancel.addEventListener('click', () => {
+                resetFamilyForm();
             });
         }
 
@@ -2749,12 +2831,18 @@
                 const familyIdValue = document.getElementById('participantFamily')?.value || '';
                 const familyId = familyIdValue ? Number(familyIdValue) : null;
                 try {
-                    await apiRequest(`/api/groups/${state.groupId}/participants`, {
-                        method: 'POST',
-                        body: JSON.stringify({ displayName, type, familyId })
-                    });
-                    participantForm.reset();
-                    participantForm.classList.remove('was-validated');
+                    if (state.editing.participantId) {
+                        await apiRequest(`/api/groups/${state.groupId}/participants/${state.editing.participantId}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({ displayName, type, familyId })
+                        });
+                    } else {
+                        await apiRequest(`/api/groups/${state.groupId}/participants`, {
+                            method: 'POST',
+                            body: JSON.stringify({ displayName, type, familyId })
+                        });
+                    }
+                    resetParticipantForm();
                     await refreshData();
                 } catch (err) {
                     if (participantError) {
@@ -2762,6 +2850,12 @@
                         participantError.classList.remove('d-none');
                     }
                 }
+            });
+        }
+        const participantCancel = document.getElementById('participantCancel');
+        if (participantCancel) {
+            participantCancel.addEventListener('click', () => {
+                resetParticipantForm();
             });
         }
 
@@ -2931,12 +3025,25 @@
 
         if (familyList) {
             familyList.addEventListener('click', async (event) => {
-                const target = event.target;
-                if (!(target instanceof HTMLButtonElement)) return;
-                if (target.dataset.action !== 'delete-family') return;
-                const id = target.dataset.id;
+                const button = event.target.closest('button');
+                if (!(button instanceof HTMLButtonElement)) return;
+                const action = button.dataset.action;
+                const id = Number(button.dataset.id);
+                if (!id) return;
+                if (action === 'edit-family') {
+                    if (!state.canEdit) return;
+                    const family = state.families.find((item) => item.id === id);
+                    if (!family) return;
+                    populateFamilyForm(family);
+                    document.getElementById('familyForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+                if (action !== 'delete-family') return;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/families/${id}`, { method: 'DELETE' });
+                    if (state.editing.familyId === id) {
+                        resetFamilyForm();
+                    }
                     await refreshData();
                 } catch (err) {
                     const familyError = document.getElementById('familyError');
@@ -2950,12 +3057,25 @@
 
         if (participantList) {
             participantList.addEventListener('click', async (event) => {
-                const target = event.target;
-                if (!(target instanceof HTMLButtonElement)) return;
-                if (target.dataset.action !== 'delete-participant') return;
-                const id = target.dataset.id;
+                const button = event.target.closest('button');
+                if (!(button instanceof HTMLButtonElement)) return;
+                const action = button.dataset.action;
+                const id = Number(button.dataset.id);
+                if (!id) return;
+                if (action === 'edit-participant') {
+                    if (!state.canEdit) return;
+                    const participant = state.participants.find((item) => item.id === id);
+                    if (!participant) return;
+                    populateParticipantForm(participant);
+                    document.getElementById('participantForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+                if (action !== 'delete-participant') return;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/participants/${id}`, { method: 'DELETE' });
+                    if (state.editing.participantId === id) {
+                        resetParticipantForm();
+                    }
                     await refreshData();
                 } catch (err) {
                     const participantError = document.getElementById('participantError');
