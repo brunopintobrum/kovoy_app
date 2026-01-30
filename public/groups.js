@@ -167,12 +167,24 @@
         });
     };
 
+    const bindMobileMenuToggleFallback = () => {
+        const btn = document.getElementById('vertical-menu-btn');
+        if (!btn) return;
+        btn.addEventListener('click', (event) => {
+            if (window.innerWidth >= 992) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            document.body.classList.toggle('sidebar-enable');
+        }, true);
+    };
+
     const init = async () => {
         await setUserProfile();
         await loadGroups();
         bindCreateGroup();
         bindAcceptInvite();
         bindLogout();
+        bindMobileMenuToggleFallback();
     };
 
     init();

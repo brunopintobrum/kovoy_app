@@ -907,6 +907,17 @@
         window.addEventListener('hashchange', applySectionVisibility);
     };
 
+    const bindMobileMenuToggleFallback = () => {
+        const btn = document.getElementById('vertical-menu-btn');
+        if (!btn) return;
+        btn.addEventListener('click', (event) => {
+            if (window.innerWidth >= 992) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            document.body.classList.toggle('sidebar-enable');
+        }, true);
+    };
+
     const getCurrentBasePath = () => {
         const path = window.location.pathname || '/dashboard';
         return path === '/' ? '/dashboard' : path;
@@ -3224,6 +3235,7 @@
         bindSplitModeToggle();
         bindModuleExpenseToggles();
         bindLogout();
+        bindMobileMenuToggleFallback();
         renderGroupHeader();
         await refreshData();
     };
