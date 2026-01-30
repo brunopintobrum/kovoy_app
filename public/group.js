@@ -858,6 +858,7 @@
         'summaryCards',
         'balances',
         'debts',
+        'quickLinks',
         'participants',
         'invitations',
         'expenses',
@@ -868,7 +869,7 @@
     ];
 
     const sectionGroups = {
-        dashboard: ['dashboard', 'summaryCards', 'balances', 'debts'],
+        dashboard: ['dashboard', 'summaryCards', 'balances', 'debts', 'quickLinks'],
         balances: ['balances'],
         debts: ['debts'],
         participants: ['participants'],
@@ -944,15 +945,14 @@
     const loadGroups = async () => {
         const data = await apiRequest('/api/groups');
         state.groups = data.data || [];
-        const groupId = state.groupId || parseGroupId();
-        state.groupId = groupId;
-        state.group = state.groups.find((group) => group.id === groupId) || null;
+        const requestedId = state.groupId || parseGroupId();
+        if (!requestedId) {
+            window.location.href = '/groups';
+            return false;
+        }
+        state.groupId = requestedId;
+        state.group = state.groups.find((group) => group.id === requestedId) || null;
         if (!state.group) {
-            if (state.groups.length) {
-                const basePath = getCurrentBasePath();
-                window.location.href = `${basePath}?groupId=${state.groups[0].id}`;
-                return false;
-            }
             window.location.href = '/groups';
             return false;
         }
@@ -1021,7 +1021,7 @@
             });
         }
         if (familyBalanceMode) {
-            familyBalanceMode.value = state.group.familyBalanceMode || 'participants';
+            familyBalanceMode.value = state.group?.familyBalanceMode || 'participants';
             familyBalanceMode.disabled = !state.canEdit;
         }
         updateGroupScopedLinks();
@@ -3224,6 +3224,7 @@
         bindSplitModeToggle();
         bindModuleExpenseToggles();
         bindLogout();
+        renderGroupHeader();
         await refreshData();
     };
 
