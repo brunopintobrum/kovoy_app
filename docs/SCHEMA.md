@@ -40,7 +40,7 @@ Last updated: 2026-01-28 12:00.
 ## Locations
 - countries: code, name
 - states: id, country_code, code, name
-- cities: id, country_code, state_code, name
+- cities: id, country_code, state_code, name, population
 
 ## Lodgings (V2)
 - group_lodgings:

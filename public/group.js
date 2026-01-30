@@ -406,6 +406,31 @@
             ]
         }
     };
+    const fallbackCountryCodes = {
+        'Australia': 'AU',
+        'Brazil': 'BR',
+        'Canada': 'CA',
+        'France': 'FR',
+        'Germany': 'DE',
+        'Italy': 'IT',
+        'Japan': 'JP',
+        'Mexico': 'MX',
+        'Portugal': 'PT',
+        'Spain': 'ES',
+        'United Kingdom': 'GB',
+        'United States': 'US'
+    };
+    const fallbackCountryNames = Object.entries(fallbackCountryCodes).reduce((acc, [name, code]) => {
+        acc[code] = name;
+        return acc;
+    }, {});
+
+    const resolveCountryName = (codeOrName) => {
+        if (!codeOrName) return '';
+        const match = state.lodgingCountries.find((country) => country.code === codeOrName);
+        if (match) return match.name;
+        return fallbackCountryNames[codeOrName] || codeOrName;
+    };
 
     const setupFlightAirlineAutocomplete = () => {
         const input = document.getElementById('flightAirline');
@@ -443,16 +468,21 @@
         const select = document.getElementById('lodgingCountry');
         if (!select) return;
         const current = select.value;
-        const options = state.lodgingCountries.length ? state.lodgingCountries : lodgingCountries;
+        const options = state.lodgingCountries.length
+            ? state.lodgingCountries
+            : lodgingCountries.map((name) => ({
+                code: fallbackCountryCodes[name] || name,
+                name
+            }));
         select.innerHTML = '<option value=\"\">Select a country</option>';
         options.forEach((country) => {
             const option = document.createElement('option');
-            option.value = country;
-            option.textContent = country;
+            option.value = country.code;
+            option.textContent = country.name;
             select.appendChild(option);
         });
         if (current) {
-            const exists = options.some((country) => country === current);
+            const exists = options.some((country) => country.code === current);
             if (!exists) {
                 const option = document.createElement('option');
                 option.value = current;
@@ -545,33 +575,51 @@
     const loadLodgingCountries = async () => {
         try {
             const response = await apiRequest('/api/locations/countries');
-            const countries = (response.data || []).map((item) => item?.name).filter(Boolean);
-            state.lodgingCountries = countries.length ? countries : lodgingCountries;
+            const countries = (response.data || [])
+                .map((item) => ({ code: item?.code, name: item?.name }))
+                .filter((item) => item.code && item.name);
+            if (countries.length) {
+                state.lodgingCountries = countries;
+            } else {
+                state.lodgingCountries = lodgingCountries.map((name) => ({
+                    code: fallbackCountryCodes[name] || name,
+                    name
+                }));
+            }
         } catch (err) {
-            state.lodgingCountries = lodgingCountries;
+            state.lodgingCountries = lodgingCountries.map((name) => ({
+                code: fallbackCountryCodes[name] || name,
+                name
+            }));
             console.warn('Failed to load lodging countries:', err.message);
         } finally {
             renderLodgingCountryOptions();
         }
     };
 
-    const loadLodgingLocations = async (country) => {
+    const loadLodgingLocations = async (country, cityQuery = '') => {
         if (!state.groupId || !country) {
             state.lodgingLocations = { cities: [], states: [] };
             renderLodgingLocationOptions();
             return;
         }
-        const fallback = lodgingFallbackLocations[country] || { cities: [], states: [] };
+        const countryName = resolveCountryName(country);
+        const fallback = lodgingFallbackLocations[countryName] || { cities: [], states: [] };
         try {
+            const queryParam = cityQuery ? `&query=${encodeURIComponent(cityQuery)}` : '';
             const [historyResponse, countriesCitiesResponse, countriesStatesResponse] = await Promise.all([
-                apiRequest(`/api/groups/${state.groupId}/lodging-locations?country=${encodeURIComponent(country)}&limit=10`),
-                apiRequest(`/api/locations/cities?country=${encodeURIComponent(country)}&limit=50`),
+                apiRequest(`/api/groups/${state.groupId}/lodging-locations?country=${encodeURIComponent(countryName)}&limit=10`),
+                apiRequest(`/api/locations/cities?country=${encodeURIComponent(country)}&limit=200${queryParam}`),
                 apiRequest(`/api/locations/states?country=${encodeURIComponent(country)}`)
             ]);
-            const cities = historyResponse.data?.cities || [];
+            let cities = historyResponse.data?.cities || [];
             const states = historyResponse.data?.states || [];
             const officialCities = (countriesCitiesResponse.data || []).map((item) => item?.name).filter(Boolean);
             const officialStates = (countriesStatesResponse.data || []).map((item) => item?.name).filter(Boolean);
+            if (cityQuery) {
+                const query = cityQuery.toLowerCase();
+                cities = cities.filter((item) => item?.name?.toLowerCase().includes(query));
+            }
             state.lodgingLocations = {
                 cities: mergeLocationSuggestions(cities, [...officialCities, ...(fallback.cities || [])], 10),
                 states: mergeLocationSuggestions(states, [...officialStates, ...(fallback.states || [])], 10)
@@ -597,14 +645,28 @@
 
     const setupLodgingLocationAutocomplete = () => {
         const select = document.getElementById('lodgingCountry');
+        const cityInput = document.getElementById('lodgingCity');
         if (!select) return;
+        let searchTimeout = null;
         select.addEventListener('change', () => {
-            const city = document.getElementById('lodgingCity');
             const state = document.getElementById('lodgingState');
-            if (city) city.value = '';
+            if (cityInput) cityInput.value = '';
             if (state) state.value = '';
             loadLodgingLocations(select.value.trim());
         });
+        if (cityInput) {
+            cityInput.addEventListener('input', () => {
+                const countryCode = select.value.trim();
+                if (!countryCode) return;
+                const query = cityInput.value.trim();
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+                searchTimeout = setTimeout(() => {
+                    loadLodgingLocations(countryCode, query);
+                }, 200);
+            });
+        }
     };
 
     const buildAirportDisplayValue = (airport) => {
@@ -1876,8 +1938,18 @@
         if (state) state.value = lodging.state || '';
         if (postalCode) postalCode.value = lodging.postalCode || '';
         if (country) {
-            country.value = lodging.country || '';
-            loadLodgingLocations(country.value.trim());
+            const rawCountry = lodging.country || '';
+            const match = state.lodgingCountries.find(
+                (item) =>
+                    item.code === rawCountry ||
+                    item.name.toLowerCase() === rawCountry.toLowerCase()
+            );
+            if (match) {
+                country.value = match.code;
+                loadLodgingLocations(match.code);
+            } else {
+                country.value = rawCountry;
+            }
         }
         if (checkIn) checkIn.value = lodging.checkIn || '';
         if (checkInTime) checkInTime.value = lodging.checkInTime || '';
@@ -2159,6 +2231,7 @@
                 event.preventDefault();
                 if (lodgingError) lodgingError.classList.add('d-none');
                 if (!validateForm(lodgingForm)) return;
+                const countryCode = document.getElementById('lodgingCountry')?.value || '';
                 const payload = {
                     name: document.getElementById('lodgingName')?.value || '',
                     address: document.getElementById('lodgingAddress')?.value || '',
@@ -2166,7 +2239,7 @@
                     city: document.getElementById('lodgingCity')?.value || '',
                     state: document.getElementById('lodgingState')?.value || '',
                     postalCode: document.getElementById('lodgingPostalCode')?.value || '',
-                    country: document.getElementById('lodgingCountry')?.value || '',
+                    country: resolveCountryName(countryCode),
                     checkIn: document.getElementById('lodgingCheckIn')?.value || '',
                     checkInTime: document.getElementById('lodgingCheckInTime')?.value || '',
                     checkOut: document.getElementById('lodgingCheckOut')?.value || '',
@@ -2708,7 +2781,7 @@
                 if (!id) return;
                 if (action === 'edit-lodging') {
                     if (!state.canEdit) return;
-                    const lodging = state.lodgings.find((item) => item.id === id);
+                    const lodging = state.lodgings.find((item) => String(item.id) === String(id));
                     if (!lodging) return;
                     state.editing.lodgingId = id;
                     populateLodgingForm(lodging);
@@ -2834,6 +2907,16 @@
             if (!toggle || !fields) return;
             toggle.addEventListener('change', () => {
                 fields.classList.toggle('d-none', !toggle.checked);
+                if (toggle.checked) {
+                    const splitParticipants = document.getElementById('splitParticipants');
+                    const splitModeEqual = document.getElementById('splitModeEqual');
+                    if (splitParticipants) splitParticipants.checked = true;
+                    if (splitModeEqual) splitModeEqual.checked = true;
+                    state.editing.expenseConfig = {
+                        targetIds: state.participants.map((participant) => participant.id)
+                    };
+                    renderSplitTargets();
+                }
             });
         });
     };

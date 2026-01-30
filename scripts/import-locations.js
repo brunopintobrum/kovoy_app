@@ -19,6 +19,12 @@ if (!fs.existsSync(dbPath)) {
 
 const db = new Database(dbPath);
 
+const cityColumns = db.prepare('PRAGMA table_info(cities)').all();
+const hasPopulation = cityColumns.some((column) => column.name === 'population');
+if (!hasPopulation) {
+    db.exec('ALTER TABLE cities ADD COLUMN population INTEGER');
+}
+
 const rows = parse(fs.readFileSync(csvPath, 'utf8'), {
     columns: true,
     skip_empty_lines: true,
@@ -32,7 +38,9 @@ if (!rows.length) {
 
 const insertCountry = db.prepare('INSERT OR IGNORE INTO countries (code, name) VALUES (?, ?)');
 const insertState = db.prepare('INSERT OR IGNORE INTO states (country_code, code, name) VALUES (?, ?, ?)');
-const insertCity = db.prepare('INSERT OR IGNORE INTO cities (country_code, state_code, name) VALUES (?, ?, ?)');
+const insertCity = db.prepare(
+    'INSERT OR IGNORE INTO cities (country_code, state_code, name, population) VALUES (?, ?, ?, ?)'
+);
 
 const runImport = db.transaction((items) => {
     if (shouldClear) {
@@ -46,6 +54,7 @@ const runImport = db.transaction((items) => {
         const stateCode = row.state_code?.trim() || null;
         const stateName = row.state_name?.trim();
         const cityName = row.city_name?.trim();
+        const population = row.population ? Number(row.population) : null;
 
         if (!countryCode || !countryName) {
             continue;
@@ -55,7 +64,7 @@ const runImport = db.transaction((items) => {
             insertState.run(countryCode, stateCode, stateName);
         }
         if (cityName) {
-            insertCity.run(countryCode, stateCode, cityName);
+            insertCity.run(countryCode, stateCode, cityName, population);
         }
     }
 });

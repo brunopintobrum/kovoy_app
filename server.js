@@ -285,6 +285,7 @@ db.exec(`
         country_code TEXT NOT NULL,
         state_code TEXT,
         name TEXT NOT NULL,
+        population INTEGER,
         FOREIGN KEY (country_code) REFERENCES countries(code) ON DELETE CASCADE,
         UNIQUE (country_code, state_code, name)
     );
@@ -717,6 +718,12 @@ const refreshTokenColumns = db.prepare('PRAGMA table_info(refresh_tokens)').all(
 const hasRememberColumn = refreshTokenColumns.some((column) => column.name === 'remember');
 if (!hasRememberColumn) {
     db.exec('ALTER TABLE refresh_tokens ADD COLUMN remember INTEGER NOT NULL DEFAULT 0');
+}
+
+const cityColumns = db.prepare('PRAGMA table_info(cities)').all();
+const hasCityPopulation = cityColumns.some((column) => column.name === 'population');
+if (!hasCityPopulation) {
+    db.exec('ALTER TABLE cities ADD COLUMN population INTEGER');
 }
 
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
@@ -1871,9 +1878,17 @@ const findLodgingPlatformByName = db.prepare('SELECT id FROM lodging_platforms W
 const insertLodgingPlatform = db.prepare('INSERT OR IGNORE INTO lodging_platforms (name) VALUES (?)');
 const listCountries = db.prepare('SELECT code, name FROM countries ORDER BY name');
 const listStatesByCountry = db.prepare('SELECT code, name FROM states WHERE country_code = ? ORDER BY name');
-const listCitiesByCountry = db.prepare('SELECT name, state_code FROM cities WHERE country_code = ? ORDER BY name LIMIT ?');
+const listCitiesByCountry = db.prepare(
+    'SELECT name, state_code FROM cities WHERE country_code = ? ORDER BY population DESC, name LIMIT ?'
+);
 const listCitiesByCountryState = db.prepare(
-    'SELECT name FROM cities WHERE country_code = ? AND state_code = ? ORDER BY name LIMIT ?'
+    'SELECT name FROM cities WHERE country_code = ? AND state_code = ? ORDER BY population DESC, name LIMIT ?'
+);
+const listCitiesByCountryQuery = db.prepare(
+    'SELECT name, state_code FROM cities WHERE country_code = ? AND LOWER(name) LIKE ? ORDER BY population DESC, name LIMIT ?'
+);
+const listCitiesByCountryStateQuery = db.prepare(
+    'SELECT name FROM cities WHERE country_code = ? AND state_code = ? AND LOWER(name) LIKE ? ORDER BY population DESC, name LIMIT ?'
 );
 const getAirportById = db.prepare('SELECT id, code, name, city, country FROM airports WHERE id = ?');
 const defaultLodgingPlatforms = [
@@ -2670,15 +2685,21 @@ app.get('/api/locations/cities', authRequiredApi, (req, res) => {
         return res.status(400).json({ error: 'Country is required.' });
     }
     const state = typeof req.query.state === 'string' ? req.query.state.trim() : '';
+    const queryRaw = typeof req.query.query === 'string' ? req.query.query.trim() : '';
     const rawLimit = typeof req.query.limit === 'string' ? req.query.limit.trim() : '';
     let limit = Number.parseInt(rawLimit, 10);
     if (!Number.isFinite(limit)) {
-        limit = 50;
+        limit = 200;
     }
-    limit = Math.max(1, Math.min(limit, 200));
+    limit = Math.max(1, Math.min(limit, 5000));
+    const query = queryRaw ? `%${queryRaw.toLowerCase()}%` : '';
     const cities = state
-        ? listCitiesByCountryState.all(country, state, limit)
-        : listCitiesByCountry.all(country, limit);
+        ? (query
+            ? listCitiesByCountryStateQuery.all(country, state, query, limit)
+            : listCitiesByCountryState.all(country, state, limit))
+        : (query
+            ? listCitiesByCountryQuery.all(country, query, limit)
+            : listCitiesByCountry.all(country, limit));
     return res.json({ ok: true, data: cities });
 });
 
@@ -3029,6 +3050,10 @@ app.post(
         try {
             const expenseId = db.transaction(() => {
                 let linkedExpenseId = null;
+                const platformName = normalized.value.platform || null;
+                const platformId = platformName
+                    ? ensureLodgingPlatformId(platformName, normalized.value.platformId)
+                    : null;
                 if (expenseNormalized.value) {
                     const expenseResult = upsertModuleExpense(req.groupId, null, expenseNormalized.value);
                     if (expenseResult.error) {

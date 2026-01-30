@@ -44,13 +44,14 @@ adminRows.forEach((cols) => {
 });
 
 const seen = new Set();
-const lines = ['country_code,country_name,state_code,state_name,city_name'];
+const lines = ['country_code,country_name,state_code,state_name,city_name,population'];
 
 const cityRows = parseTsv(fs.readFileSync(citiesPath, 'utf8'));
 cityRows.forEach((cols) => {
     const countryCode = cols[8]?.trim();
     const admin1Code = cols[10]?.trim();
     const cityName = cols[2]?.trim();
+    const population = cols[14]?.trim() || '';
     if (!countryCode || !cityName) return;
     const countryName = countries.get(countryCode);
     if (!countryName) return;
@@ -65,7 +66,8 @@ cityRows.forEach((cols) => {
             countryName,
             stateCode,
             stateName,
-            cityName
+            cityName,
+            population
         ]
             .map((value) => `"${String(value).replace(/\"/g, '""')}"`)
             .join(',')
