@@ -8,6 +8,25 @@
     const passwordToggle = document.getElementById('password-addon');
     let alertBox = document.getElementById('loginAlert');
 
+    const getReturnUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        const returnUrl = params.get('returnUrl');
+        if (returnUrl && returnUrl.startsWith('/')) {
+            return returnUrl;
+        }
+        if (returnUrl) {
+            try {
+                const url = new URL(returnUrl);
+                if (url.origin === window.location.origin) {
+                    return url.pathname + url.search;
+                }
+            } catch (e) {}
+        }
+        return '/groups';
+    };
+
+    const redirectUrl = getReturnUrl();
+
     const ensureAlert = () => {
         if (alertBox || !form) return alertBox;
         alertBox = document.createElement('div');
@@ -66,7 +85,7 @@
         try {
             const res = await fetch('/api/me');
             if (res.ok) {
-                window.location.href = '/groups';
+                window.location.href = redirectUrl;
                 return;
             }
             if (res.status === 401) {
@@ -74,7 +93,7 @@
                 if (refreshed) {
                     const retry = await fetch('/api/me');
                     if (retry.ok) {
-                        window.location.href = '/groups';
+                        window.location.href = redirectUrl;
                     }
                 }
             }
@@ -166,7 +185,7 @@
 
                 setAlert('Signed in successfully. Redirecting...', 'success');
                 setTimeout(() => {
-                    window.location.href = '/groups';
+                    window.location.href = redirectUrl;
                 }, 600);
             } catch (err) {
                 setAlert('Connection error. Please try again.', 'error');

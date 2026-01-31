@@ -8,6 +8,12 @@
     const passwordToggle = document.getElementById('password-addon');
     const confirmPasswordToggle = document.getElementById('password-confirm-addon');
     const submitButton = form ? form.querySelector('button[type="submit"]') : null;
+
+    const getReturnUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('returnUrl') || '';
+    };
+    const returnUrlParam = getReturnUrl();
     const strengthBar = document.getElementById('passwordStrengthBar');
     const strengthText = document.getElementById('passwordStrengthText');
     const rules = {
@@ -229,7 +235,7 @@
                         window.location.href = `/email-verification?email=${encodeURIComponent(emailValue)}`;
                         return;
                     }
-                    window.location.href = '/login';
+                    window.location.href = returnUrlParam ? `/login?returnUrl=${encodeURIComponent(returnUrlParam)}` : '/login';
                 }, 700);
             } catch (err) {
                 setAlert('Connection error. Please try again.', 'error');
