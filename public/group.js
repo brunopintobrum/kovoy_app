@@ -1634,6 +1634,11 @@
                         <option value="viewer"${roleValue === 'viewer' ? ' selected' : ''}>Viewer</option>
                     </select>
                 `;
+            const removeBtn = !isOwner && state.canManage
+                ? `<button class="btn btn-sm btn-outline-danger ms-1" data-action="remove-member" data-id="${member.userId}" data-name="${displayName}">
+                        <i class="bx bx-trash-alt"></i>
+                    </button>`
+                : '';
             tr.innerHTML = `
                 <td>
                     <div class="fw-semibold">${displayName}</div>
@@ -1644,6 +1649,7 @@
                     <button class="btn btn-sm btn-outline-primary" data-action="save-member-role" data-id="${member.userId}">
                         Update
                     </button>
+                    ${removeBtn}
                 </td>
             `;
             if (!canUpdate) {
@@ -3151,23 +3157,43 @@
         list.addEventListener('click', async (event) => {
             const button = event.target.closest('button');
             if (!(button instanceof HTMLButtonElement)) return;
-            if (button.dataset.action !== 'save-member-role') return;
             if (!state.canManage) return;
             if (errorEl) errorEl.classList.add('d-none');
-            const userId = Number(button.dataset.id);
+            const userId = button.dataset.id;
             if (!userId) return;
-            const select = document.querySelector(`select[data-member-role="${userId}"]`);
-            const role = select?.value || '';
-            try {
-                await apiRequest(`/api/groups/${state.groupId}/members/${userId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ role })
-                });
-                await refreshData();
-            } catch (err) {
-                if (errorEl) {
-                    errorEl.textContent = err.message;
-                    errorEl.classList.remove('d-none');
+
+            if (button.dataset.action === 'save-member-role') {
+                const select = document.querySelector(`select[data-member-role="${userId}"]`);
+                const role = select?.value || '';
+                try {
+                    await apiRequest(`/api/groups/${state.groupId}/members/${userId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ role })
+                    });
+                    await refreshData();
+                } catch (err) {
+                    if (errorEl) {
+                        errorEl.textContent = err.message;
+                        errorEl.classList.remove('d-none');
+                    }
+                }
+            }
+
+            if (button.dataset.action === 'remove-member') {
+                const memberName = button.dataset.name || 'this member';
+                if (!confirm(`Are you sure you want to remove ${memberName} from the group?`)) {
+                    return;
+                }
+                try {
+                    await apiRequest(`/api/groups/${state.groupId}/members/${userId}`, {
+                        method: 'DELETE'
+                    });
+                    await refreshData();
+                } catch (err) {
+                    if (errorEl) {
+                        errorEl.textContent = err.message;
+                        errorEl.classList.remove('d-none');
+                    }
                 }
             }
         });

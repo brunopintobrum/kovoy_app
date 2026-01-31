@@ -1312,6 +1312,7 @@ app.get('/forgot', (req, res) => {
     return res.sendFile(path.join(PUBLIC_DIR, 'forgot.html'));
 });
 app.get('/reset', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'reset.html')));
+app.get('/invite', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'invite.html')));
 app.get('/confirm-mail', (req, res) => {
     ensureCsrfCookie(req, res);
     const { token, status } = req.query || {};
@@ -2251,6 +2252,32 @@ app.delete(
             return res.status(400).json({ error: 'Owner cannot leave the group. Transfer ownership or delete the group.' });
         }
         deleteGroupMember.run(req.groupId, req.user.sub);
+        return res.json({ ok: true });
+    }
+);
+
+app.delete(
+    '/api/groups/:groupId/members/:userId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(ADMIN_ROLES),
+    (req, res) => {
+        const targetUserId = req.params.userId;
+        if (!targetUserId) {
+            return res.status(400).json({ error: 'User ID is required.' });
+        }
+        if (targetUserId === req.user.sub) {
+            return res.status(400).json({ error: 'Use the leave endpoint to remove yourself.' });
+        }
+        const targetMember = getGroupMember.get(req.groupId, targetUserId);
+        if (!targetMember) {
+            return res.status(404).json({ error: 'Member not found.' });
+        }
+        if (targetMember.role === 'owner') {
+            return res.status(400).json({ error: 'Cannot remove the group owner.' });
+        }
+        deleteGroupMember.run(req.groupId, targetUserId);
         return res.json({ ok: true });
     }
 );
