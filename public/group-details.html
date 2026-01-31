@@ -62,7 +62,6 @@
                                             <ul class="list-unstyled megamenu-list">
                                                 <li><a href="#participants">Families</a></li>
                                                 <li><a href="#participants">Participants</a></li>
-                                                <li><a href="#invitations">Invites</a></li>
                                                 <li><a href="#members">Members</a></li>
                                             </ul>
                                         </div>
@@ -140,7 +139,6 @@
                         <li><a href="/groups" class="waves-effect"><i class="bx bx-group"></i><span>My groups</span></a></li>
                         <li><a href="/dashboard" class="waves-effect"><i class="bx bx-bar-chart-alt-2"></i><span>Dashboard</span></a></li>
                         <li><a href="#participants" class="waves-effect"><i class="bx bx-user-circle"></i><span>Participants</span></a></li>
-                        <li><a href="#invitations" class="waves-effect"><i class="bx bx-mail-send"></i><span>Invites</span></a></li>
                         <li><a href="#members" class="waves-effect"><i class="bx bx-user-check"></i><span>Members</span></a></li>
                         <li><a href="#expenses" class="waves-effect"><i class="bx bx-wallet"></i><span>Expenses</span></a></li>
                         <li><a href="#flights" class="waves-effect"><i class="mdi mdi-airplane"></i><span>Flights</span></a></li>
@@ -357,54 +355,57 @@
                         </div>
                     </div>
 
-                    <div class="card mt-4" id="invitations">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <h5 class="card-title mb-0">Invite members</h5>
-                                <span class="badge bg-soft-info text-info">Owner only</span>
-                            </div>
-                            <form id="inviteForm" class="row g-3 needs-validation" novalidate>
-                                <div class="col-md-5">
-                                    <label class="form-label" for="inviteEmail">Email</label>
-                                    <input class="form-control" id="inviteEmail" type="email" placeholder="name@email.com" required>
-                                    <div class="invalid-feedback">Enter a valid email.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="inviteRole">Role</label>
-                                    <select class="form-select" id="inviteRole" required>
-                                        <option value="member" selected>Member</option>
-                                        <option value="viewer">Viewer</option>
-                                    </select>
-                                    <div class="invalid-feedback">Select a role.</div>
-                                </div>
-                                <div class="col-md-4 d-flex align-items-end justify-content-end">
-                                    <button class="btn btn-primary" type="submit">Generate invite</button>
-                                </div>
-                            </form>
-                            <div class="alert alert-warning d-none mt-3" id="inviteReadOnly">
-                                You have read-only access in this group.
-                            </div>
-                            <div class="alert alert-danger d-none mt-3" id="inviteError"></div>
-                            <div class="alert alert-success d-none mt-3" id="inviteSuccess">
-                                <div class="fw-semibold">Invite created.</div>
-                                <div class="small text-muted">Share this link with the invited member.</div>
-                                <div class="mt-2">
-                                    <a href="#" id="inviteLink" target="_blank" rel="noreferrer">Invite link</a>
-                                </div>
-                                <div class="mt-1">
-                                    Token: <span class="font-monospace" id="inviteToken"></span>
-                                </div>
-                                <div class="mt-1 text-muted small" id="inviteExpires"></div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="card mt-4" id="members">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <h5 class="card-title mb-0">Group members</h5>
-                                <span class="badge bg-soft-info text-info">Owner only</span>
+                                <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inviteCollapse" aria-expanded="false" aria-controls="inviteCollapse" id="inviteMemberBtn">
+                                    <i class="bx bx-user-plus me-1"></i> Invite member
+                                </button>
                             </div>
+
+                            <div class="collapse mb-4" id="inviteCollapse">
+                                <div class="card card-body bg-light border-0">
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <h6 class="mb-0">Send invite</h6>
+                                        <span class="badge bg-soft-info text-info">Owner only</span>
+                                    </div>
+                                    <form id="inviteForm" class="row g-3 needs-validation" novalidate>
+                                        <div class="col-md-5">
+                                            <label class="form-label" for="inviteEmail">Email</label>
+                                            <input class="form-control" id="inviteEmail" type="email" placeholder="name@email.com" required>
+                                            <div class="invalid-feedback">Enter a valid email.</div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label" for="inviteRole">Role</label>
+                                            <select class="form-select" id="inviteRole" required>
+                                                <option value="member" selected>Member</option>
+                                                <option value="viewer">Viewer</option>
+                                            </select>
+                                            <div class="invalid-feedback">Select a role.</div>
+                                        </div>
+                                        <div class="col-md-4 d-flex align-items-end justify-content-end">
+                                            <button class="btn btn-primary" type="submit">Generate invite</button>
+                                        </div>
+                                    </form>
+                                    <div class="alert alert-warning d-none mt-3" id="inviteReadOnly">
+                                        You have read-only access in this group.
+                                    </div>
+                                    <div class="alert alert-danger d-none mt-3" id="inviteError"></div>
+                                    <div class="alert alert-success d-none mt-3" id="inviteSuccess">
+                                        <div class="fw-semibold">Invite created.</div>
+                                        <div class="small text-muted">Share this link with the invited member.</div>
+                                        <div class="mt-2">
+                                            <a href="#" id="inviteLink" target="_blank" rel="noreferrer">Invite link</a>
+                                        </div>
+                                        <div class="mt-1">
+                                            Token: <span class="font-monospace" id="inviteToken"></span>
+                                        </div>
+                                        <div class="mt-1 text-muted small" id="inviteExpires"></div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="table-responsive">
                                 <table class="table align-middle table-nowrap">
                                     <thead class="table-light">

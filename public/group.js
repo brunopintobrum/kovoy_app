@@ -864,7 +864,6 @@
         'debts',
         'quickLinks',
         'participants',
-        'invitations',
         'members',
         'expenses',
         'flights',
@@ -878,7 +877,6 @@
         balances: ['balances'],
         debts: ['debts'],
         participants: ['participants'],
-        invitations: ['invitations'],
         members: ['members'],
         expenses: ['expenses'],
         flights: ['flights'],
@@ -906,7 +904,6 @@
                 balances: 'Balances',
                 debts: 'Who owes',
                 participants: 'Participants',
-                invitations: 'Invites',
                 members: 'Members',
                 expenses: 'Expenses',
                 flights: 'Flights',
@@ -1994,6 +1991,10 @@
         setReadOnlyBanner('lodgingReadOnly', !state.canEdit);
         setReadOnlyBanner('transportReadOnly', !state.canEdit);
         setReadOnlyBanner('ticketReadOnly', !state.canEdit);
+        const inviteMemberBtn = document.getElementById('inviteMemberBtn');
+        if (inviteMemberBtn) {
+            inviteMemberBtn.hidden = !state.canManage;
+        }
         const leaveGroupItem = document.getElementById('leaveGroupItem');
         if (leaveGroupItem) {
             leaveGroupItem.hidden = state.canManage;
