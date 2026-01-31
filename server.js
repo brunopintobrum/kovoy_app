@@ -249,6 +249,7 @@ db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         group_id INTEGER NOT NULL,
         family_id INTEGER,
+        user_id TEXT,
         display_name TEXT NOT NULL,
         type TEXT,
         created_at TEXT NOT NULL,
@@ -756,6 +757,12 @@ try {
 } catch (err) {
     console.warn('Role migration skipped:', err.message);
 }
+const participantColumns = db.prepare('PRAGMA table_info(participants)').all();
+const hasParticipantUserId = participantColumns.some((column) => column.name === 'user_id');
+if (!hasParticipantUserId) {
+    db.exec('ALTER TABLE participants ADD COLUMN user_id TEXT');
+}
+db.exec('CREATE INDEX IF NOT EXISTS idx_participants_user ON participants(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_participants_family ON participants(family_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_expenses_group ON expenses(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_expenses_payer ON expenses(payer_participant_id)');
@@ -798,6 +805,32 @@ const groupColumns = db.prepare('PRAGMA table_info(groups)').all();
 const hasFamilyBalanceMode = groupColumns.some((column) => column.name === 'family_balance_mode');
 if (!hasFamilyBalanceMode) {
     db.exec("ALTER TABLE groups ADD COLUMN family_balance_mode TEXT NOT NULL DEFAULT 'participants'");
+}
+
+// Migration: create participants for existing group members who don't have one
+try {
+    const membersWithoutParticipant = db.prepare(`
+        SELECT gm.group_id, gm.user_id, u.display_name, u.first_name, u.last_name, u.email
+        FROM group_members gm
+        JOIN users u ON u.id = gm.user_id
+        WHERE NOT EXISTS (
+            SELECT 1 FROM participants p WHERE p.group_id = gm.group_id AND p.user_id = gm.user_id
+        )
+    `).all();
+    if (membersWithoutParticipant.length > 0) {
+        const insertParticipantMigration = db.prepare(`
+            INSERT INTO participants (group_id, family_id, user_id, display_name, type, created_at)
+            VALUES (?, NULL, ?, ?, 'adult', ?)
+        `);
+        const now = new Date().toISOString();
+        for (const member of membersWithoutParticipant) {
+            const displayName = member.display_name || [member.first_name, member.last_name].filter(Boolean).join(' ') || member.email || 'Member';
+            insertParticipantMigration.run(member.group_id, member.user_id, displayName, now);
+        }
+        console.log(`Created ${membersWithoutParticipant.length} participants for existing members.`);
+    }
+} catch (err) {
+    console.warn('Participant migration skipped:', err.message);
 }
 
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
@@ -1849,15 +1882,16 @@ const updateFamily = db.prepare(`
 `);
 const deleteFamily = db.prepare('DELETE FROM families WHERE id = ? AND group_id = ?');
 const listParticipants = db.prepare(`
-    SELECT id, family_id, display_name, type, created_at
+    SELECT id, family_id, user_id, display_name, type, created_at
     FROM participants
     WHERE group_id = ?
     ORDER BY display_name
 `);
 const getParticipant = db.prepare('SELECT id FROM participants WHERE id = ? AND group_id = ?');
+const getParticipantByUserId = db.prepare('SELECT id FROM participants WHERE group_id = ? AND user_id = ?');
 const insertParticipant = db.prepare(`
-    INSERT INTO participants (group_id, family_id, display_name, type, created_at)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO participants (group_id, family_id, user_id, display_name, type, created_at)
+    VALUES (?, ?, ?, ?, ?, ?)
 `);
 const updateParticipant = db.prepare(`
     UPDATE participants
@@ -2173,6 +2207,17 @@ const requireGroupRole = (roles) => (req, res, next) => {
     return next();
 };
 
+const createParticipantForUser = (groupId, userId) => {
+    const existing = getParticipantByUserId.get(groupId, userId);
+    if (existing) return existing.id;
+    const user = db.prepare('SELECT display_name, first_name, last_name, email FROM users WHERE id = ?').get(userId);
+    if (!user) return null;
+    const displayName = user.display_name || [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email || 'Member';
+    const now = new Date().toISOString();
+    const result = insertParticipant.run(groupId, null, userId, displayName, 'adult', now);
+    return result.lastInsertRowid;
+};
+
 app.post('/api/groups', authRequiredApi, requireCsrfToken, (req, res) => {
     const payload = req.body || {};
     const normalized = validateGroupPayload(payload);
@@ -2187,6 +2232,7 @@ app.post('/api/groups', authRequiredApi, requireCsrfToken, (req, res) => {
         now
     );
     insertGroupMember.run(result.lastInsertRowid, req.user.sub, 'owner', now);
+    createParticipantForUser(result.lastInsertRowid, req.user.sub);
     return res.json({ ok: true, groupId: result.lastInsertRowid });
 });
 
@@ -2371,6 +2417,7 @@ app.get('/api/groups/:groupId/participants', authRequiredApi, requireGroupMember
     const participants = listParticipants.all(req.groupId).map((row) => ({
         id: row.id,
         familyId: row.family_id,
+        userId: row.user_id,
         displayName: row.display_name,
         type: row.type,
         createdAt: row.created_at
@@ -2399,6 +2446,7 @@ app.post(
         const result = insertParticipant.run(
             req.groupId,
             normalized.value.familyId,
+            null,
             normalized.value.displayName,
             normalized.value.type,
             now
@@ -3916,6 +3964,7 @@ app.post('/api/invitations/accept', authRequiredApi, requireCsrfToken, (req, res
     const now = new Date().toISOString();
     const normalizedRole = invitation.role === 'admin' ? 'member' : invitation.role;
     insertGroupMemberIfMissing.run(invitation.group_id, req.user.sub, normalizedRole, now);
+    createParticipantForUser(invitation.group_id, req.user.sub);
     updateInvitationStatus.run('accepted', req.user.sub, invitation.id);
     return res.json({ ok: true, groupId: invitation.group_id });
 });
