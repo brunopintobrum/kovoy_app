@@ -3076,10 +3076,26 @@
         const form = document.getElementById('inviteForm');
         const errorEl = document.getElementById('inviteError');
         const successEl = document.getElementById('inviteSuccess');
-        const linkEl = document.getElementById('inviteLink');
-        const tokenEl = document.getElementById('inviteToken');
+        const titleEl = document.getElementById('inviteSuccessTitle');
+        const messageEl = document.getElementById('inviteSuccessMessage');
+        const linkInputEl = document.getElementById('inviteLinkInput');
+        const copyBtn = document.getElementById('copyInviteLink');
         const expiresEl = document.getElementById('inviteExpires');
         if (!form) return;
+
+        if (copyBtn && linkInputEl) {
+            copyBtn.addEventListener('click', () => {
+                linkInputEl.select();
+                navigator.clipboard.writeText(linkInputEl.value).then(() => {
+                    const originalHtml = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="bx bx-check"></i>';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHtml;
+                    }, 2000);
+                });
+            });
+        }
+
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             if (errorEl) errorEl.classList.add('d-none');
@@ -3099,11 +3115,20 @@
                     method: 'POST',
                     body: JSON.stringify({ email, role })
                 });
-                if (linkEl) {
-                    linkEl.href = res.inviteUrl || '#';
-                    linkEl.textContent = res.inviteUrl || 'Invite link';
+
+                if (titleEl && messageEl) {
+                    if (res.emailSent) {
+                        titleEl.innerHTML = '<i class="bx bx-check-circle me-1"></i> Invite sent!';
+                        messageEl.textContent = `An invitation email has been sent to ${email}.`;
+                    } else {
+                        titleEl.innerHTML = '<i class="bx bx-info-circle me-1"></i> Invite created';
+                        messageEl.textContent = 'Email could not be sent. Please share the link below manually.';
+                    }
                 }
-                if (tokenEl) tokenEl.textContent = res.token || '';
+
+                if (linkInputEl) {
+                    linkInputEl.value = res.inviteUrl || '';
+                }
                 if (expiresEl && res.expiresAt) {
                     expiresEl.textContent = `Expires on ${new Date(res.expiresAt).toLocaleDateString('en-US')}`;
                 }

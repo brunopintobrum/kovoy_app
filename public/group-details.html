@@ -385,7 +385,7 @@
                                             <div class="invalid-feedback">Select a role.</div>
                                         </div>
                                         <div class="col-md-4 d-flex align-items-end justify-content-end">
-                                            <button class="btn btn-primary" type="submit">Generate invite</button>
+                                            <button class="btn btn-primary" type="submit">Send invite</button>
                                         </div>
                                     </form>
                                     <div class="alert alert-warning d-none mt-3" id="inviteReadOnly">
@@ -393,15 +393,18 @@
                                     </div>
                                     <div class="alert alert-danger d-none mt-3" id="inviteError"></div>
                                     <div class="alert alert-success d-none mt-3" id="inviteSuccess">
-                                        <div class="fw-semibold">Invite created.</div>
-                                        <div class="small text-muted">Share this link with the invited member.</div>
-                                        <div class="mt-2">
-                                            <a href="#" id="inviteLink" target="_blank" rel="noreferrer">Invite link</a>
+                                        <div class="fw-semibold" id="inviteSuccessTitle">Invite sent!</div>
+                                        <div class="small text-muted" id="inviteSuccessMessage">An email has been sent to the invited member.</div>
+                                        <div class="mt-3 pt-3 border-top">
+                                            <div class="small text-muted mb-1"><i class="bx bx-link me-1"></i> Backup link (if email doesn't arrive):</div>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control form-control-sm font-monospace" id="inviteLinkInput" readonly>
+                                                <button class="btn btn-outline-secondary" type="button" id="copyInviteLink" title="Copy link">
+                                                    <i class="bx bx-copy"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="mt-1">
-                                            Token: <span class="font-monospace" id="inviteToken"></span>
-                                        </div>
-                                        <div class="mt-1 text-muted small" id="inviteExpires"></div>
+                                        <div class="mt-2 text-muted small" id="inviteExpires"></div>
                                     </div>
                                 </div>
                             </div>

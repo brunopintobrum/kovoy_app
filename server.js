@@ -1097,6 +1097,37 @@ const sendVerificationEmail = async ({ to, verifyUrl }) => {
     return true;
 };
 
+const sendInviteEmail = async ({ to, inviteUrl, groupName, inviterName, role }) => {
+    const transporter = getEmailTransporter();
+    if (!transporter) return false;
+
+    const roleLabel = role === 'viewer' ? 'viewer' : 'member';
+
+    await transporter.sendMail({
+        from: SMTP_FROM,
+        to,
+        subject: `You've been invited to join ${groupName} on Kovoy`,
+        text: `Hi!\n\n${inviterName} has invited you to join the group "${groupName}" as a ${roleLabel}.\n\nClick the link below to accept the invitation:\n\n${inviteUrl}\n\nIf you don't have an account yet, you'll be able to create one.\n\nIf you did not expect this invitation, you can ignore this email.`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #556ee6;">You're invited to join a group!</h2>
+                <p>Hi!</p>
+                <p><strong>${inviterName}</strong> has invited you to join the group <strong>"${groupName}"</strong> as a <strong>${roleLabel}</strong>.</p>
+                <p style="margin: 30px 0;">
+                    <a href="${inviteUrl}" style="background-color: #556ee6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block;">Accept Invitation</a>
+                </p>
+                <p style="color: #666; font-size: 14px;">Or copy and paste this link in your browser:</p>
+                <p style="color: #666; font-size: 14px; word-break: break-all;">${inviteUrl}</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="color: #999; font-size: 12px;">If you don't have an account yet, you'll be able to create one.</p>
+                <p style="color: #999; font-size: 12px;">If you did not expect this invitation, you can ignore this email.</p>
+            </div>
+        `
+    });
+
+    return true;
+};
+
 const sendTwoFactorEmail = async ({ to, code }) => {
     const transporter = getEmailTransporter();
     if (!transporter) return false;
@@ -3785,7 +3816,7 @@ app.post(
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(ADMIN_ROLES),
-    (req, res) => {
+    async (req, res) => {
         const emailRaw = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
         if (!emailRaw || !isValidEmail(emailRaw)) {
             return res.status(400).json({ error: 'Valid email is required.' });
@@ -3809,7 +3840,26 @@ app.post(
         );
         const baseUrl = APP_BASE_URL || `http://localhost:${PORT}`;
         const inviteUrl = `${baseUrl}/invite?token=${token}`;
-        return res.json({ ok: true, token, inviteUrl, expiresAt });
+
+        // Send invite email
+        let emailSent = false;
+        try {
+            const group = getGroupById.get(req.groupId);
+            const inviter = db.prepare('SELECT email, first_name, last_name, display_name FROM users WHERE id = ?').get(req.user.sub);
+            const groupName = group?.name || 'a group';
+            const inviterName = inviter?.display_name || inviter?.first_name || inviter?.email || 'Someone';
+            emailSent = await sendInviteEmail({
+                to: emailRaw.toLowerCase(),
+                inviteUrl,
+                groupName,
+                inviterName,
+                role
+            });
+        } catch (err) {
+            console.error('Invite email error:', err);
+        }
+
+        return res.json({ ok: true, token, inviteUrl, expiresAt, emailSent });
     }
 );
 
@@ -3841,6 +3891,31 @@ app.post('/api/invitations/accept', authRequiredApi, requireCsrfToken, (req, res
     insertGroupMemberIfMissing.run(invitation.group_id, req.user.sub, normalizedRole, now);
     updateInvitationStatus.run('accepted', req.user.sub, invitation.id);
     return res.json({ ok: true, groupId: invitation.group_id });
+});
+
+app.get('/api/invitations/:token/info', (req, res) => {
+    const token = typeof req.params?.token === 'string' ? req.params.token.trim() : '';
+    if (!token) {
+        return res.status(400).json({ error: 'Invitation token is required.' });
+    }
+    const invitation = getInvitationByToken.get(token);
+    if (!invitation) {
+        return res.status(404).json({ error: 'Invitation not found.' });
+    }
+    if (invitation.status !== 'pending') {
+        return res.status(400).json({ error: 'Invitation is no longer available.' });
+    }
+    if (Date.now() > invitation.expires_at) {
+        markInvitationExpired.run('expired', invitation.id);
+        return res.status(400).json({ error: 'Invitation has expired.' });
+    }
+    const group = getGroupById.get(invitation.group_id);
+    const groupName = group ? group.name : 'Unknown Group';
+    return res.json({
+        groupName,
+        role: invitation.role,
+        expiresAt: invitation.expires_at
+    });
 });
 
 const generateTripItemId = () => {
