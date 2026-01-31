@@ -176,6 +176,108 @@
         });
     };
 
+    const bindAvatarChange = () => {
+        const trigger = document.getElementById('changeAvatarLink');
+        const modalEl = document.getElementById('avatarModal');
+        const fileInput = document.getElementById('avatarFile');
+        const preview = document.getElementById('avatarPreview');
+        const saveButton = document.getElementById('avatarSaveBtn');
+        const errorEl = document.getElementById('avatarError');
+
+        if (!trigger || !modalEl || !fileInput || !preview || !saveButton) return;
+
+        let selectedFile = null;
+
+        const showModal = () => {
+            if (window.jQuery) {
+                window.jQuery(modalEl).modal('show');
+            } else if (window.bootstrap && window.bootstrap.Modal) {
+                new window.bootstrap.Modal(modalEl).show();
+            }
+        };
+
+        const hideModal = () => {
+            if (window.jQuery) {
+                window.jQuery(modalEl).modal('hide');
+            } else if (window.bootstrap && window.bootstrap.Modal) {
+                const modal = window.bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+        };
+
+        const setError = (msg) => {
+            if (!errorEl) return;
+            if (msg) {
+                errorEl.textContent = msg;
+                errorEl.classList.remove('d-none');
+            } else {
+                errorEl.classList.add('d-none');
+            }
+        };
+
+        trigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setError('');
+            selectedFile = null;
+            fileInput.value = '';
+            const currentAvatar = document.getElementById('userAvatar');
+            preview.src = currentAvatar ? currentAvatar.src : '/assets/images/users/default-avatar.svg';
+            showModal();
+        });
+
+        fileInput.addEventListener('change', () => {
+            setError('');
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                setError('The file is too large. Max size is 2MB.');
+                fileInput.value = '';
+                return;
+            }
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        saveButton.addEventListener('click', async () => {
+            setError('');
+            const file = selectedFile;
+            if (!file) {
+                setError('Select an image first.');
+                return;
+            }
+            const originalLabel = saveButton.textContent;
+            saveButton.disabled = true;
+            saveButton.textContent = 'Saving...';
+            try {
+                const formData = new FormData();
+                formData.append('avatar', file);
+                const res = await fetch('/api/me/avatar', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'x-csrf-token': getCookie('csrf_token') || '' }
+                });
+                if (!res.ok) throw new Error('Failed to upload');
+                const data = await res.json();
+                if (data && data.avatarUrl) {
+                    const avatar = document.getElementById('userAvatar');
+                    if (avatar) avatar.src = data.avatarUrl;
+                    preview.src = data.avatarUrl;
+                }
+                hideModal();
+            } catch (err) {
+                setError('Unable to update the photo. Please try again.');
+            } finally {
+                saveButton.disabled = false;
+                saveButton.textContent = originalLabel;
+            }
+        });
+    };
+
     const bindMobileMenuToggleFallback = () => {
         const btn = document.getElementById('vertical-menu-btn');
         if (!btn) return;
@@ -224,6 +326,7 @@
         bindAcceptInvite();
         bindLeaveGroup();
         bindLogout();
+        bindAvatarChange();
         bindMobileMenuToggleFallback();
         bindMobileMenuAutoClose();
     };
