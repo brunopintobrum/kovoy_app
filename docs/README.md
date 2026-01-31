@@ -22,3 +22,8 @@ Observacao:
 - Hospedagens V2: Property com datalist + Country select com sugestoes de City/State.
 - Localizacoes: endpoints `/api/locations/*` e scripts GeoNames (download/conversao/import).
 - Hospedagens V2: formulario reorganizado em blocos (Location, Dates & Status, Rooms, Contact).
+- Avatar: imagem padrao neutra (SVG) para novos usuarios.
+- Avatar: modal de upload/troca de foto em todas as paginas.
+- Membros: opcao para sair do grupo (exceto owner).
+- Email: configuracao de Mailgun documentada.
+- Deploy: Cloudflare Tunnel como opcao para expor servidor local.

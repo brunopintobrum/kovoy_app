@@ -104,4 +104,9 @@
 - Dashboard: resumo separado da gestao em `/dashboard` e gestao completa em `/group-details`.
 - Dashboard: menu lateral direciona para secoes individuais via hash (mostra apenas o modulo selecionado).
 - Grupos: modo de saldo familiar configuravel por grupo (participants/families).
+- Membros: opcao para sair do grupo (exceto owner).
+- Avatar: imagem padrao neutra (SVG) para novos usuarios.
+- Avatar: upload e troca de foto de perfil em todas as paginas.
+- Email: configuracao de Mailgun para envio de verificacao e reset.
+- Deploy: Cloudflare Tunnel como opcao para expor servidor local.
 

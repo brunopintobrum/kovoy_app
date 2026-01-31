@@ -194,6 +194,16 @@
 19. Voos V2: Assentos/bagagens por passageiro [feito]
 20. Voos V2: Layout de formulario organizado [feito]
 
+## Funcionalidades de perfil
+- [x] Avatar padrao neutro (SVG) para novos usuarios
+- [x] Upload de foto de perfil (JPG, PNG, WEBP)
+- [x] Modal de troca de foto em todas as paginas (groups, group, group-details, dashboard)
+- [x] Membros podem sair do grupo (exceto owner)
+
+## Infraestrutura
+- [x] Suporte a Mailgun para envio de emails (verificacao, reset)
+- [x] Documentacao de deploy com Cloudflare Tunnel
+
 ## V2 - Roadmap por fases
 - V2.1 (Qualidade de dados)
   - Voos: chegada > partida (feito)

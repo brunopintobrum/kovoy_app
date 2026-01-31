@@ -23,7 +23,9 @@ Video curto (opcional): (adicione o link aqui)
 - Cadastro com email, primeiro nome, sobrenome, senha e confirmacao de senha
 - Logout, perfil e recuperacao de senha
 - Login social via Google OAuth
-- Foto do usuario via Google (campo `avatar_url`)
+- Foto do usuario via Google ou upload manual (campo `avatar_url`)
+- Avatar padrao neutro para novos usuarios
+- Troca de foto de perfil em todas as paginas (modal de upload)
 - Grupos: criar e listar, membership por groupId
 - Convites: criar e aceitar convite
 - Convites: expiracao e bloqueio de reuso
@@ -222,7 +224,7 @@ Tabela de variaveis:
 | GOOGLE_REDIRECT_URI | http://localhost:3000/api/auth/google/callback | Callback do Google (obrigatorio em prod) |
 | SEED_EMAIL | admin@exemplo.com | Usuario inicial (opcional, so se DB vazia) |
 | SEED_PASSWORD | senha-forte | Senha do usuario inicial |
-| SMTP_HOST | smtp.exemplo.com | Host SMTP (se vazio, email nao eh enviado) |
+| SMTP_HOST | smtp.mailgun.org | Host SMTP (se vazio, email nao eh enviado). Ex: smtp.mailgun.org |
 | SMTP_PORT | 587 | Porta SMTP |
 | SMTP_USER | usuario | Usuario SMTP |
 | SMTP_PASS | senha | Senha SMTP |
@@ -423,6 +425,16 @@ Passos sugeridos (ajuste conforme sua plataforma):
 4. `node server.js` (idealmente via PM2/systemd).
 5. Monitore logs em stdout/stderr.
 
+### Deploy com Cloudflare Tunnel (opcional)
+
+Para expor o servidor local sem VPS:
+
+1. Crie um tunnel no Cloudflare Zero Trust.
+2. Instale o connector (cloudflared) na maquina.
+3. Configure o tunnel para apontar para `http://localhost:3000`.
+4. Defina `APP_BASE_URL` com o dominio do tunnel (ex: `https://app.seudominio.com`).
+5. Mantenha o terminal com `node server.js` e o connector rodando.
+
 Checklist de producao:
 
 - `NODE_ENV=production` e `APP_BASE_URL` com o dominio correto
@@ -502,4 +514,8 @@ Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
 - Dashboard: resumo separado da gestao em `/dashboard` e gestao completa em `/group-details`.
 - Dashboard: menu lateral direciona para secoes individuais via hash (mostra apenas o modulo selecionado).
 - Grupos: modo de saldo familiar configuravel por grupo (participants/families).
+- Membros: opcao para sair do grupo (exceto owner).
+- Avatar: imagem padrao neutra e upload de foto propria.
+- Email: suporte a Mailgun para envio de emails de verificacao e reset.
+- Deploy: suporte a Cloudflare Tunnel para expor servidor local.
 
