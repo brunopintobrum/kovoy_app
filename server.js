@@ -1767,6 +1767,7 @@ const getGroupById = db.prepare('SELECT * FROM groups WHERE id = ?');
 const getGroupMember = db.prepare('SELECT role FROM group_members WHERE group_id = ? AND user_id = ?');
 const getGroupMemberRecord = db.prepare('SELECT id, role FROM group_members WHERE group_id = ? AND user_id = ?');
 const updateGroupMemberRole = db.prepare('UPDATE group_members SET role = ? WHERE id = ?');
+const deleteGroupMember = db.prepare('DELETE FROM group_members WHERE group_id = ? AND user_id = ?');
 const listGroupsForUser = db.prepare(`
     SELECT g.id, g.name, g.default_currency, g.family_balance_mode, g.created_by_user_id, g.created_at, gm.role
     FROM groups g
@@ -2206,6 +2207,20 @@ app.put(
         }
         updateGroupMemberRole.run(role, member.id);
         return res.json({ ok: true, role });
+    }
+);
+
+app.delete(
+    '/api/groups/:groupId/members/me',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    (req, res) => {
+        if (req.groupRole === 'owner') {
+            return res.status(400).json({ error: 'Owner cannot leave the group. Transfer ownership or delete the group.' });
+        }
+        deleteGroupMember.run(req.groupId, req.user.id);
+        return res.json({ ok: true });
     }
 );
 

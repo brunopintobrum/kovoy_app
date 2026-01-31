@@ -1994,6 +1994,10 @@
         setReadOnlyBanner('lodgingReadOnly', !state.canEdit);
         setReadOnlyBanner('transportReadOnly', !state.canEdit);
         setReadOnlyBanner('ticketReadOnly', !state.canEdit);
+        const leaveGroupItem = document.getElementById('leaveGroupItem');
+        if (leaveGroupItem) {
+            leaveGroupItem.hidden = state.canManage;
+        }
         updateExpenseAvailability();
     };
 
@@ -3444,6 +3448,23 @@
         });
     };
 
+    const bindLeaveGroup = () => {
+        const link = document.getElementById('leaveGroupLink');
+        if (!link) return;
+        link.addEventListener('click', async (event) => {
+            event.preventDefault();
+            if (!state.groupId) return;
+            const groupName = state.group?.name || 'this group';
+            if (!confirm(`Are you sure you want to leave "${groupName}"?`)) return;
+            try {
+                await apiRequest(`/api/groups/${state.groupId}/members/me`, { method: 'DELETE' });
+                window.location.href = '/groups';
+            } catch (err) {
+                alert(err.message || 'Failed to leave group.');
+            }
+        });
+    };
+
     const refreshData = async () => {
         await loadAirlines();
         await loadLodgingPlatforms();
@@ -3492,6 +3513,7 @@
         bindSplitModeToggle();
         bindModuleExpenseToggles();
         bindLogout();
+        bindLeaveGroup();
         bindMobileMenuToggleFallback();
         bindMobileMenuAutoClose();
         renderGroupHeader();

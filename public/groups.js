@@ -65,6 +65,10 @@
             const roleBadgeClass = elevatedRole
                 ? 'bg-soft-success text-success'
                 : 'bg-soft-primary text-primary';
+            const canLeave = !elevatedRole;
+            const leaveButton = canLeave
+                ? `<button class="btn btn-sm btn-outline-danger ms-1" data-action="leave" data-id="${group.id}" data-name="${group.name}">Leave</button>`
+                : '';
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>
@@ -75,7 +79,7 @@
                 <td><span class="badge ${roleBadgeClass} text-uppercase">${roleLabel}</span></td>
                 <td class="text-muted">${new Date(group.createdAt).toLocaleDateString()}</td>
                 <td class="text-end">
-                    <a class="btn btn-sm btn-outline-primary" href="/dashboard?groupId=${group.id}">Open</a>
+                    <a class="btn btn-sm btn-outline-primary" href="/dashboard?groupId=${group.id}">Open</a>${leaveButton}
                 </td>
             `;
             rows.appendChild(tr);
@@ -194,11 +198,31 @@
         });
     };
 
+    const bindLeaveGroup = () => {
+        const rows = document.getElementById('groupRows');
+        if (!rows) return;
+        rows.addEventListener('click', async (event) => {
+            const button = event.target.closest('button[data-action="leave"]');
+            if (!button) return;
+            const groupId = button.dataset.id;
+            const groupName = button.dataset.name || 'this group';
+            if (!groupId) return;
+            if (!confirm(`Are you sure you want to leave "${groupName}"?`)) return;
+            try {
+                await apiRequest(`/api/groups/${groupId}/members/me`, { method: 'DELETE' });
+                await loadGroups();
+            } catch (err) {
+                alert(err.message || 'Failed to leave group.');
+            }
+        });
+    };
+
     const init = async () => {
         await setUserProfile();
         await loadGroups();
         bindCreateGroup();
         bindAcceptInvite();
+        bindLeaveGroup();
         bindLogout();
         bindMobileMenuToggleFallback();
         bindMobileMenuAutoClose();
