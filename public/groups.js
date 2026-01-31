@@ -60,8 +60,8 @@
         }
 
         groups.forEach((group) => {
-            const roleLabel = group.role === 'admin' ? 'owner' : group.role;
-            const elevatedRole = group.role === 'owner' || group.role === 'admin';
+            const roleLabel = group.role === 'admin' ? 'member' : group.role;
+            const elevatedRole = group.role === 'owner';
             const roleBadgeClass = elevatedRole
                 ? 'bg-soft-success text-success'
                 : 'bg-soft-primary text-primary';

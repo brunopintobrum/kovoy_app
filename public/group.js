@@ -20,6 +20,7 @@
         summary: null,
         canEdit: false,
         canManage: false,
+        members: [],
         editing: {
             familyId: null,
             participantId: null,
@@ -864,6 +865,7 @@
         'quickLinks',
         'participants',
         'invitations',
+        'members',
         'expenses',
         'flights',
         'lodgings',
@@ -877,6 +879,7 @@
         debts: ['debts'],
         participants: ['participants'],
         invitations: ['invitations'],
+        members: ['members'],
         expenses: ['expenses'],
         flights: ['flights'],
         lodgings: ['lodgings'],
@@ -904,6 +907,7 @@
                 debts: 'Who owes',
                 participants: 'Participants',
                 invitations: 'Invites',
+                members: 'Members',
                 expenses: 'Expenses',
                 flights: 'Flights',
                 lodgings: 'Lodgings',
@@ -996,7 +1000,7 @@
             window.location.href = '/groups';
             return false;
         }
-        state.canManage = ['owner', 'admin'].includes(state.group.role);
+        state.canManage = state.group.role === 'owner';
         state.canEdit = state.canManage || state.group.role === 'member';
         return true;
     };
@@ -1012,9 +1016,10 @@
     };
 
     const loadGroupData = async () => {
-        const [families, participants, expenses, flights, lodgings, transports, tickets, summary] = await Promise.all([
+        const [families, participants, members, expenses, flights, lodgings, transports, tickets, summary] = await Promise.all([
             apiRequest(`/api/groups/${state.groupId}/families`),
             apiRequest(`/api/groups/${state.groupId}/participants`),
+            apiRequest(`/api/groups/${state.groupId}/members`),
             apiRequest(`/api/groups/${state.groupId}/expenses`),
             apiRequest(`/api/groups/${state.groupId}/flights`),
             apiRequest(`/api/groups/${state.groupId}/lodgings`),
@@ -1024,6 +1029,7 @@
         ]);
         state.families = families.data || [];
         state.participants = participants.data || [];
+        state.members = members.data || [];
         state.expenses = expenses.data || [];
         state.flights = flights.data || [];
         state.lodgings = lodgings.data || [];
@@ -1042,10 +1048,10 @@
         if (groupName) groupName.textContent = state.group.name;
         if (groupCurrency) groupCurrency.textContent = state.group.defaultCurrency;
         if (roleBadge) {
-            const roleLabel = state.group.role === 'admin' ? 'owner' : state.group.role;
+            const roleLabel = state.group.role === 'admin' ? 'member' : state.group.role;
             roleBadge.textContent = roleLabel;
             roleBadge.classList.remove('bg-soft-primary', 'text-primary', 'bg-soft-success', 'text-success');
-            if (['owner', 'admin'].includes(state.group.role)) {
+            if (state.group.role === 'owner') {
                 roleBadge.classList.add('bg-soft-success', 'text-success');
             } else {
                 roleBadge.classList.add('bg-soft-primary', 'text-primary');
@@ -1606,6 +1612,52 @@
         });
     };
 
+    const renderMembers = () => {
+        const list = document.getElementById('memberList');
+        if (!list) return;
+        list.innerHTML = '';
+        if (!state.members.length) {
+            list.innerHTML = '<tr><td colspan="3" class="text-muted text-center">No members yet.</td></tr>';
+            return;
+        }
+        state.members.forEach((member) => {
+            const displayName = member.displayName
+                || [member.firstName, member.lastName].filter(Boolean).join(' ')
+                || member.email
+                || 'Member';
+            const roleValue = member.role === 'admin' ? 'member' : member.role;
+            const isOwner = roleValue === 'owner';
+            const canUpdate = state.canManage && !isOwner;
+            const tr = document.createElement('tr');
+            const roleCell = isOwner
+                ? '<span class="badge bg-soft-success text-success text-uppercase">Owner</span>'
+                : `
+                    <select class="form-select form-select-sm" data-member-role="${member.userId}">
+                        <option value="member"${roleValue === 'member' ? ' selected' : ''}>Member</option>
+                        <option value="viewer"${roleValue === 'viewer' ? ' selected' : ''}>Viewer</option>
+                    </select>
+                `;
+            tr.innerHTML = `
+                <td>
+                    <div class="fw-semibold">${displayName}</div>
+                    <div class="text-muted small">${member.email || ''}</div>
+                </td>
+                <td>${roleCell}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary" data-action="save-member-role" data-id="${member.userId}">
+                        Update
+                    </button>
+                </td>
+            `;
+            if (!canUpdate) {
+                tr.querySelectorAll('select, button').forEach((el) => {
+                    el.disabled = true;
+                });
+            }
+            list.appendChild(tr);
+        });
+    };
+
     const setupFlightDateConstraints = () => {
         const depart = document.getElementById('flightDepart');
         const arrive = document.getElementById('flightArrive');
@@ -1937,6 +1989,7 @@
         setReadOnlyBanner('participantReadOnly', !state.canEdit);
         setReadOnlyBanner('expenseReadOnly', !state.canEdit);
         setReadOnlyBanner('inviteReadOnly', !state.canManage);
+        setReadOnlyBanner('membersReadOnly', !state.canManage);
         setReadOnlyBanner('flightReadOnly', !state.canEdit);
         setReadOnlyBanner('lodgingReadOnly', !state.canEdit);
         setReadOnlyBanner('transportReadOnly', !state.canEdit);
@@ -3061,6 +3114,35 @@
         });
     };
 
+    const bindMemberRoleActions = () => {
+        const list = document.getElementById('memberList');
+        const errorEl = document.getElementById('membersError');
+        if (!list) return;
+        list.addEventListener('click', async (event) => {
+            const button = event.target.closest('button');
+            if (!(button instanceof HTMLButtonElement)) return;
+            if (button.dataset.action !== 'save-member-role') return;
+            if (!state.canManage) return;
+            if (errorEl) errorEl.classList.add('d-none');
+            const userId = Number(button.dataset.id);
+            if (!userId) return;
+            const select = document.querySelector(`select[data-member-role="${userId}"]`);
+            const role = select?.value || '';
+            try {
+                await apiRequest(`/api/groups/${state.groupId}/members/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ role })
+                });
+                await refreshData();
+            } catch (err) {
+                if (errorEl) {
+                    errorEl.textContent = err.message;
+                    errorEl.classList.remove('d-none');
+                }
+            }
+        });
+    };
+
     const bindDeleteActions = () => {
         const familyList = document.getElementById('familyList');
         const participantList = document.getElementById('participantList');
@@ -3373,6 +3455,7 @@
         renderDebts();
         renderFamilies();
         renderParticipants();
+        renderMembers();
         renderExpenses();
         renderFlights();
         renderLodgings();
@@ -3403,6 +3486,7 @@
         setupLodgingDateConstraints();
         setupFlightParticipantSearch();
         bindInviteForm();
+        bindMemberRoleActions();
         bindDeleteActions();
         bindSplitTypeToggle();
         bindSplitModeToggle();

@@ -63,6 +63,7 @@
                                                 <li><a href="#participants">Families</a></li>
                                                 <li><a href="#participants">Participants</a></li>
                                                 <li><a href="#invitations">Invites</a></li>
+                                                <li><a href="#members">Members</a></li>
                                             </ul>
                                         </div>
                                         <div class="col-md-4">
@@ -138,6 +139,7 @@
                         <li><a href="/dashboard" class="waves-effect"><i class="bx bx-bar-chart-alt-2"></i><span>Dashboard</span></a></li>
                         <li><a href="#participants" class="waves-effect"><i class="bx bx-user-circle"></i><span>Participants</span></a></li>
                         <li><a href="#invitations" class="waves-effect"><i class="bx bx-mail-send"></i><span>Invites</span></a></li>
+                        <li><a href="#members" class="waves-effect"><i class="bx bx-user-check"></i><span>Members</span></a></li>
                         <li><a href="#expenses" class="waves-effect"><i class="bx bx-wallet"></i><span>Expenses</span></a></li>
                         <li><a href="#flights" class="waves-effect"><i class="mdi mdi-airplane"></i><span>Flights</span></a></li>
                         <li><a href="#lodgings" class="waves-effect"><i class="bx bx-home-alt"></i><span>Lodgings</span></a></li>
@@ -357,7 +359,7 @@
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <h5 class="card-title mb-0">Invite members</h5>
-                                <span class="badge bg-soft-info text-info">Owner/Admin only</span>
+                                <span class="badge bg-soft-info text-info">Owner only</span>
                             </div>
                             <form id="inviteForm" class="row g-3 needs-validation" novalidate>
                                 <div class="col-md-5">
@@ -369,7 +371,6 @@
                                     <label class="form-label" for="inviteRole">Role</label>
                                     <select class="form-select" id="inviteRole" required>
                                         <option value="member" selected>Member</option>
-                                        <option value="admin">Admin</option>
                                         <option value="viewer">Viewer</option>
                                     </select>
                                     <div class="invalid-feedback">Select a role.</div>
@@ -393,6 +394,31 @@
                                 </div>
                                 <div class="mt-1 text-muted small" id="inviteExpires"></div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4" id="members">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h5 class="card-title mb-0">Group members</h5>
+                                <span class="badge bg-soft-info text-info">Owner only</span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table align-middle table-nowrap">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Member</th>
+                                            <th style="width: 180px;">Role</th>
+                                            <th class="text-end" style="width: 140px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="memberList"></tbody>
+                                </table>
+                            </div>
+                            <div class="alert alert-warning d-none mt-3" id="membersReadOnly">
+                                You have read-only access in this group.
+                            </div>
+                            <div class="alert alert-danger d-none mt-3" id="membersError"></div>
                         </div>
                     </div>
 

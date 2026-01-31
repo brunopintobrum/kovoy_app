@@ -47,6 +47,18 @@ Video curto (opcional): (adicione o link aqui)
 - Protecao CSRF para operacoes de escrita
 - Rate limiting e headers de seguranca
 
+## Roles e permissões
+
+Papéis disponíveis por grupo:
+
+| Role | Pode editar módulos | Pode gerenciar convites e membros | Observações |
+| --- | --- | --- | --- |
+| Owner | Sim | Sim | Único responsável pelo grupo. |
+| Member | Sim | Não | Pode criar/editar conteúdo do grupo. |
+| Viewer | Não | Não | Somente leitura. |
+
+Observação: o papel `admin` foi removido. Registros antigos de `admin` são convertidos para `member`.
+
 ## Financeiro (MVP)
 
 - O controle financeiro (pagador e divisao) acontece somente em Expenses.

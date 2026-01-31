@@ -53,7 +53,7 @@
 ## Regras de negocio (MVP)
 - [x] Tudo pertence a um groupId
 - [x] User pode estar em varios grupos
-- [x] GroupMember com roles (owner/admin/member/viewer)
+- [x] GroupMember com roles (owner/member/viewer)
 - [x] Participant pode existir sem login
 - [x] Family e agrupador de participants
 - [x] Despesa tem pagador + split

@@ -749,6 +749,13 @@ db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_token ON invitations(
 db.exec('CREATE INDEX IF NOT EXISTS idx_invitations_group ON invitations(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_families_group ON families(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_participants_group ON participants(group_id)');
+
+try {
+    db.exec("UPDATE group_members SET role = 'member' WHERE role = 'admin'");
+    db.exec("UPDATE invitations SET role = 'member' WHERE role = 'admin'");
+} catch (err) {
+    console.warn('Role migration skipped:', err.message);
+}
 db.exec('CREATE INDEX IF NOT EXISTS idx_participants_family ON participants(family_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_expenses_group ON expenses(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_expenses_payer ON expenses(payer_participant_id)');
@@ -1668,8 +1675,8 @@ app.post('/api/me/avatar', authRequiredApi, requireCsrfToken, (req, res) => {
     });
 });
 
-const ADMIN_ROLES = ['owner', 'admin'];
-const EDITOR_ROLES = ['owner', 'admin', 'member'];
+const ADMIN_ROLES = ['owner'];
+const EDITOR_ROLES = ['owner', 'member'];
 const INVITABLE_ROLES = ['member', 'viewer'];
 
 const parseGroupId = (value) => {
@@ -1758,6 +1765,8 @@ const ensureLodgingPlatformId = (name, candidateId) => {
 
 const getGroupById = db.prepare('SELECT * FROM groups WHERE id = ?');
 const getGroupMember = db.prepare('SELECT role FROM group_members WHERE group_id = ? AND user_id = ?');
+const getGroupMemberRecord = db.prepare('SELECT id, role FROM group_members WHERE group_id = ? AND user_id = ?');
+const updateGroupMemberRole = db.prepare('UPDATE group_members SET role = ? WHERE id = ?');
 const listGroupsForUser = db.prepare(`
     SELECT g.id, g.name, g.default_currency, g.family_balance_mode, g.created_by_user_id, g.created_at, gm.role
     FROM groups g
@@ -2168,10 +2177,37 @@ app.get('/api/groups/:groupId/members', authRequiredApi, requireGroupMember, (re
         firstName: row.first_name,
         lastName: row.last_name,
         displayName: row.display_name,
-        role: row.role
+        role: row.role === 'admin' ? 'member' : row.role
     }));
     return res.json({ ok: true, data: members });
 });
+
+app.put(
+    '/api/groups/:groupId/members/:userId',
+    authRequiredApi,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(ADMIN_ROLES),
+    (req, res) => {
+        const userId = parseGroupId(req.params.userId);
+        if (!userId) {
+            return res.status(400).json({ error: 'Invalid member id.' });
+        }
+        const member = getGroupMemberRecord.get(req.groupId, userId);
+        if (!member) {
+            return res.status(404).json({ error: 'Member not found.' });
+        }
+        if (member.role === 'owner') {
+            return res.status(400).json({ error: 'Owner role cannot be changed.' });
+        }
+        const role = normalizeGroupRole(req.body?.role);
+        if (!INVITABLE_ROLES.includes(role)) {
+            return res.status(400).json({ error: 'Invalid role for member.' });
+        }
+        updateGroupMemberRole.run(role, member.id);
+        return res.json({ ok: true, role });
+    }
+);
 
 app.put(
     '/api/groups/:groupId/family-balance-mode',
@@ -3786,7 +3822,8 @@ app.post('/api/invitations/accept', authRequiredApi, requireCsrfToken, (req, res
         return res.status(403).json({ error: 'Invitation email does not match your account.' });
     }
     const now = new Date().toISOString();
-    insertGroupMemberIfMissing.run(invitation.group_id, req.user.sub, invitation.role, now);
+    const normalizedRole = invitation.role === 'admin' ? 'member' : invitation.role;
+    insertGroupMemberIfMissing.run(invitation.group_id, req.user.sub, normalizedRole, now);
     updateInvitationStatus.run('accepted', req.user.sub, invitation.id);
     return res.json({ ok: true, groupId: invitation.group_id });
 });
