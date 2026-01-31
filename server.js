@@ -3181,6 +3181,10 @@ app.put(
                         throw new Error(expenseResult.error);
                     }
                     linkedExpenseId = expenseResult.expenseId;
+                } else if (linkedExpenseId) {
+                    deleteExpenseSplits.run(linkedExpenseId);
+                    deleteExpense.run(linkedExpenseId, req.groupId);
+                    linkedExpenseId = null;
                 }
                 const airlineId = ensureAirlineId(normalized.value.airline, normalized.value.airlineId);
                 const fromValue = resolveAirportCode(normalized.value.fromAirportId, normalized.value.from);
@@ -3419,6 +3423,10 @@ app.put(
                         throw new Error(expenseResult.error);
                     }
                     linkedExpenseId = expenseResult.expenseId;
+                } else if (linkedExpenseId) {
+                    deleteExpenseSplits.run(linkedExpenseId);
+                    deleteExpense.run(linkedExpenseId, req.groupId);
+                    linkedExpenseId = null;
                 }
                 updateGroupLodging.run(
                     linkedExpenseId,
@@ -3585,6 +3593,10 @@ app.put(
                         throw new Error(expenseResult.error);
                     }
                     linkedExpenseId = expenseResult.expenseId;
+                } else if (linkedExpenseId) {
+                    deleteExpenseSplits.run(linkedExpenseId);
+                    deleteExpense.run(linkedExpenseId, req.groupId);
+                    linkedExpenseId = null;
                 }
                 updateGroupTransport.run(
                     linkedExpenseId,
@@ -3766,6 +3778,10 @@ app.put(
                         throw new Error(expenseResult.error);
                     }
                     linkedExpenseId = expenseResult.expenseId;
+                } else if (linkedExpenseId) {
+                    deleteExpenseSplits.run(linkedExpenseId);
+                    deleteExpense.run(linkedExpenseId, req.groupId);
+                    linkedExpenseId = null;
                 }
                 updateGroupTicket.run(
                     linkedExpenseId,
