@@ -60,6 +60,11 @@
         }
 
         groups.forEach((group) => {
+            const roleLabel = group.role === 'admin' ? 'owner' : group.role;
+            const elevatedRole = group.role === 'owner' || group.role === 'admin';
+            const roleBadgeClass = elevatedRole
+                ? 'bg-soft-success text-success'
+                : 'bg-soft-primary text-primary';
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>
@@ -67,7 +72,7 @@
                     <div class="text-muted small">ID ${group.id}</div>
                 </td>
                 <td>${group.defaultCurrency}</td>
-                <td><span class="badge bg-soft-primary text-primary text-uppercase">${group.role}</span></td>
+                <td><span class="badge ${roleBadgeClass} text-uppercase">${roleLabel}</span></td>
                 <td class="text-muted">${new Date(group.createdAt).toLocaleDateString()}</td>
                 <td class="text-end">
                     <a class="btn btn-sm btn-outline-primary" href="/dashboard?groupId=${group.id}">Open</a>

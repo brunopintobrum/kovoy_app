@@ -19,6 +19,7 @@
         tickets: [],
         summary: null,
         canEdit: false,
+        canManage: false,
         editing: {
             familyId: null,
             participantId: null,
@@ -995,7 +996,8 @@
             window.location.href = '/groups';
             return false;
         }
-        state.canEdit = ['owner', 'admin'].includes(state.group.role);
+        state.canManage = ['owner', 'admin'].includes(state.group.role);
+        state.canEdit = state.canManage || state.group.role === 'member';
         return true;
     };
 
@@ -1040,9 +1042,10 @@
         if (groupName) groupName.textContent = state.group.name;
         if (groupCurrency) groupCurrency.textContent = state.group.defaultCurrency;
         if (roleBadge) {
-            roleBadge.textContent = state.group.role;
+            const roleLabel = state.group.role === 'admin' ? 'owner' : state.group.role;
+            roleBadge.textContent = roleLabel;
             roleBadge.classList.remove('bg-soft-primary', 'text-primary', 'bg-soft-success', 'text-success');
-            if (state.group.role === 'owner') {
+            if (['owner', 'admin'].includes(state.group.role)) {
                 roleBadge.classList.add('bg-soft-success', 'text-success');
             } else {
                 roleBadge.classList.add('bg-soft-primary', 'text-primary');
@@ -1061,7 +1064,7 @@
         }
         if (familyBalanceMode) {
             familyBalanceMode.value = state.group?.familyBalanceMode || 'participants';
-            familyBalanceMode.disabled = !state.canEdit;
+            familyBalanceMode.disabled = !state.canManage;
         }
         updateGroupScopedLinks();
     };
@@ -1906,27 +1909,34 @@
     };
 
     const applyPermissions = () => {
-        const forms = [
+        const editForms = [
             'familyForm',
             'participantForm',
             'expenseForm',
-            'inviteForm',
             'flightForm',
             'lodgingForm',
             'transportForm',
             'ticketForm'
         ];
-        forms.forEach((id) => {
+        const manageForms = ['inviteForm'];
+        editForms.forEach((id) => {
             const form = document.getElementById(id);
             if (!form) return;
             Array.from(form.elements).forEach((el) => {
                 el.disabled = !state.canEdit;
             });
         });
+        manageForms.forEach((id) => {
+            const form = document.getElementById(id);
+            if (!form) return;
+            Array.from(form.elements).forEach((el) => {
+                el.disabled = !state.canManage;
+            });
+        });
         setReadOnlyBanner('familyReadOnly', !state.canEdit);
         setReadOnlyBanner('participantReadOnly', !state.canEdit);
         setReadOnlyBanner('expenseReadOnly', !state.canEdit);
-        setReadOnlyBanner('inviteReadOnly', !state.canEdit);
+        setReadOnlyBanner('inviteReadOnly', !state.canManage);
         setReadOnlyBanner('flightReadOnly', !state.canEdit);
         setReadOnlyBanner('lodgingReadOnly', !state.canEdit);
         setReadOnlyBanner('transportReadOnly', !state.canEdit);
@@ -3016,6 +3026,13 @@
             event.preventDefault();
             if (errorEl) errorEl.classList.add('d-none');
             if (successEl) successEl.classList.add('d-none');
+            if (!state.canManage) {
+                if (errorEl) {
+                    errorEl.textContent = 'Only owners can send invites.';
+                    errorEl.classList.remove('d-none');
+                }
+                return;
+            }
             if (!validateForm(form)) return;
             const email = document.getElementById('inviteEmail')?.value || '';
             const role = document.getElementById('inviteRole')?.value || 'member';

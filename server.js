@@ -1668,7 +1668,9 @@ app.post('/api/me/avatar', authRequiredApi, requireCsrfToken, (req, res) => {
     });
 });
 
-const INVITABLE_ROLES = ['admin', 'member', 'viewer'];
+const ADMIN_ROLES = ['owner', 'admin'];
+const EDITOR_ROLES = ['owner', 'admin', 'member'];
+const INVITABLE_ROLES = ['member', 'viewer'];
 
 const parseGroupId = (value) => {
     const id = Number(value);
@@ -2176,7 +2178,7 @@ app.put(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(ADMIN_ROLES),
     (req, res) => {
         const mode = normalizeFamilyBalanceMode(req.body?.mode);
         updateGroupFamilyBalanceMode.run(mode, req.groupId);
@@ -2198,7 +2200,7 @@ app.post(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const normalized = validateFamilyPayload(req.body || {});
         if (normalized.error) {
@@ -2215,7 +2217,7 @@ app.put(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const familyId = parseGroupId(req.params.familyId);
         if (!familyId) {
@@ -2238,7 +2240,7 @@ app.delete(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const familyId = parseGroupId(req.params.familyId);
         if (!familyId) {
@@ -2272,7 +2274,7 @@ app.post(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const normalized = validateParticipantPayload(req.body || {});
         if (normalized.error) {
@@ -2301,7 +2303,7 @@ app.put(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const participantId = parseGroupId(req.params.participantId);
         if (!participantId) {
@@ -2336,7 +2338,7 @@ app.delete(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const participantId = parseGroupId(req.params.participantId);
         if (!participantId) {
@@ -2674,7 +2676,7 @@ app.post(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const normalized = validateExpenseSplitPayload(req.body || {});
         if (normalized.error) {
@@ -2714,7 +2716,7 @@ app.put(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const expenseId = parseGroupId(req.params.expenseId);
         if (!expenseId) {
@@ -2760,7 +2762,7 @@ app.delete(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const expenseId = parseGroupId(req.params.expenseId);
         if (!expenseId) {
@@ -2884,7 +2886,7 @@ app.post(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const normalized = validateGroupFlightPayload(req.body || {});
         if (normalized.error) {
@@ -2973,7 +2975,7 @@ app.put(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const flightId = typeof req.params.flightId === 'string' ? req.params.flightId.trim() : '';
         if (!flightId) {
@@ -3069,7 +3071,7 @@ app.delete(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const flightId = typeof req.params.flightId === 'string' ? req.params.flightId.trim() : '';
         if (!flightId) {
@@ -3152,7 +3154,7 @@ app.post(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const normalized = validateGroupLodgingPayload(req.body || {});
         if (normalized.error) {
@@ -3223,7 +3225,7 @@ app.put(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const lodgingId = typeof req.params.lodgingId === 'string' ? req.params.lodgingId.trim() : '';
         if (!lodgingId) {
@@ -3304,7 +3306,7 @@ app.delete(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const lodgingId = typeof req.params.lodgingId === 'string' ? req.params.lodgingId.trim() : '';
         if (!lodgingId) {
@@ -3339,7 +3341,7 @@ app.post(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const normalized = validateGroupTransportPayload(req.body || {});
         if (normalized.error) {
@@ -3393,7 +3395,7 @@ app.put(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const transportId = typeof req.params.transportId === 'string' ? req.params.transportId.trim() : '';
         if (!transportId) {
@@ -3457,7 +3459,7 @@ app.delete(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const transportId = typeof req.params.transportId === 'string' ? req.params.transportId.trim() : '';
         if (!transportId) {
@@ -3499,7 +3501,7 @@ app.post(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const normalized = validateGroupTicketPayload(req.body || {});
         if (normalized.error) {
@@ -3566,7 +3568,7 @@ app.put(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const ticketId = typeof req.params.ticketId === 'string' ? req.params.ticketId.trim() : '';
         if (!ticketId) {
@@ -3644,7 +3646,7 @@ app.delete(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(EDITOR_ROLES),
     (req, res) => {
         const ticketId = typeof req.params.ticketId === 'string' ? req.params.ticketId.trim() : '';
         if (!ticketId) {
@@ -3731,7 +3733,7 @@ app.post(
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
-    requireGroupRole(['owner', 'admin']),
+    requireGroupRole(ADMIN_ROLES),
     (req, res) => {
         const emailRaw = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
         if (!emailRaw || !isValidEmail(emailRaw)) {
@@ -5816,3 +5818,4 @@ module.exports = {
     validateReminderPayload,
     validateTripMetaPayload
 };
+
