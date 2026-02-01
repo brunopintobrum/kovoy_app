@@ -60,57 +60,83 @@
 
     const showLoadingSkeleton = () => {
         const rows = document.getElementById('groupRows');
-        if (!rows) return;
-        rows.innerHTML = `
-            <tr>
-                <td colspan="5">
-                    <div class="placeholder-glow">
-                        <span class="placeholder col-6"></span>
-                        <span class="placeholder col-4"></span>
+        const cards = document.getElementById('groupCards');
+
+        if (rows) {
+            rows.innerHTML = `
+                <tr>
+                    <td colspan="5">
+                        <div class="placeholder-glow">
+                            <span class="placeholder col-6"></span>
+                            <span class="placeholder col-4"></span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <div class="placeholder-glow">
+                            <span class="placeholder col-7"></span>
+                            <span class="placeholder col-3"></span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <div class="placeholder-glow">
+                            <span class="placeholder col-5"></span>
+                            <span class="placeholder col-5"></span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        if (cards) {
+            cards.innerHTML = `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="placeholder-glow">
+                            <span class="placeholder col-6 mb-2"></span><br>
+                            <span class="placeholder col-4"></span>
+                        </div>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="5">
-                    <div class="placeholder-glow">
-                        <span class="placeholder col-7"></span>
-                        <span class="placeholder col-3"></span>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="placeholder-glow">
+                            <span class="placeholder col-7 mb-2"></span><br>
+                            <span class="placeholder col-5"></span>
+                        </div>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="5">
-                    <div class="placeholder-glow">
-                        <span class="placeholder col-5"></span>
-                        <span class="placeholder col-5"></span>
-                    </div>
-                </td>
-            </tr>
-        `;
+                </div>
+            `;
+        }
     };
 
     const renderGroups = (groups) => {
         const rows = document.getElementById('groupRows');
+        const cards = document.getElementById('groupCards');
         const count = document.getElementById('groupCount');
-        if (!rows || !count) return;
+        if (!rows || !cards || !count) return;
         rows.innerHTML = '';
+        cards.innerHTML = '';
         count.textContent = `${groups.length} group${groups.length === 1 ? '' : 's'}`;
 
         if (!groups.length) {
-            rows.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center py-5">
-                        <div class="mb-3">
-                            <i class="bx bx-briefcase-alt text-primary" style="font-size: 72px; opacity: 0.5;"></i>
-                        </div>
-                        <h5 class="text-muted mb-2">No groups yet</h5>
-                        <p class="text-muted mb-3">Create your first trip group to get started</p>
-                        <a href="#createGroup" class="btn btn-primary btn-sm">
-                            <i class="bx bx-plus me-1"></i>Create group
-                        </a>
-                    </td>
-                </tr>
+            const emptyState = `
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="bx bx-briefcase-alt text-primary" style="font-size: 72px; opacity: 0.5;"></i>
+                    </div>
+                    <h5 class="text-muted mb-2">No groups yet</h5>
+                    <p class="text-muted mb-3">Create your first trip group to get started</p>
+                    <a href="#createGroup" class="btn btn-primary btn-sm">
+                        <i class="bx bx-plus me-1"></i>Create group
+                    </a>
+                </div>
             `;
+            rows.innerHTML = `<tr><td colspan="5">${emptyState}</td></tr>`;
+            cards.innerHTML = emptyState;
             return;
         }
 
@@ -157,6 +183,47 @@
                 </td>
             `;
             rows.appendChild(tr);
+
+            // Render card for mobile
+            const card = document.createElement('div');
+            card.className = 'card mb-3';
+            card.innerHTML = `
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between mb-2">
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">${group.name}</h5>
+                            <div class="text-muted small mb-2">
+                                <i class="bx bx-user"></i> ${memberCount} ${memberText}
+                                <span class="mx-1">•</span>
+                                ${group.defaultCurrency}
+                            </div>
+                            <div>
+                                <span class="badge ${roleBadgeClass} text-uppercase me-2">${roleLabel}</span>
+                                <span class="text-muted small">
+                                    <i class="bx bx-calendar"></i> ${new Date(group.createdAt).toLocaleDateString()}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <a class="btn btn-primary btn-sm flex-grow-1" href="/dashboard?groupId=${group.id}">
+                            <i class="bx bx-right-arrow-alt"></i> Open
+                        </a>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/dashboard?groupId=${group.id}">
+                                    <i class="bx bx-cog me-2"></i>Group settings
+                                </a></li>
+                                ${leaveMenuItem}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            cards.appendChild(card);
         });
     };
 
