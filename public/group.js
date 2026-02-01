@@ -109,6 +109,42 @@
         return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
     };
 
+    const normalizeDisplayNameKey = (value) => {
+        return String(value || '')
+            .toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+    };
+
+    const getUniquePayerParticipants = (participants) => {
+        const byName = new Map();
+        const result = [];
+        participants.forEach((participant) => {
+            const key = normalizeDisplayNameKey(participant.displayName);
+            if (!key) {
+                result.push(participant);
+                return;
+            }
+            const existing = byName.get(key);
+            if (!existing) {
+                byName.set(key, participant);
+                result.push(participant);
+                return;
+            }
+            const existingHasUser = Boolean(existing.userId);
+            const currentHasUser = Boolean(participant.userId);
+            if (currentHasUser && !existingHasUser) {
+                const index = result.findIndex((item) => item.id === existing.id);
+                if (index >= 0) {
+                    result[index] = participant;
+                }
+                byName.set(key, participant);
+                return;
+            }
+        });
+        return result;
+    };
+
     const parseDateValue = (value) => {
         if (!value) return null;
         const parsed = new Date(value);
@@ -1540,7 +1576,7 @@
             option.textContent = 'Add a participant first';
             payerSelect.appendChild(option);
         } else {
-            state.participants.forEach((participant) => {
+            getUniquePayerParticipants(state.participants).forEach((participant) => {
                 const option = document.createElement('option');
                 option.value = participant.id;
                 option.textContent = participant.displayName;
@@ -1570,7 +1606,7 @@
             placeholder.value = '';
             placeholder.textContent = 'Select payer';
             select.appendChild(placeholder);
-            state.participants.forEach((participant) => {
+            getUniquePayerParticipants(state.participants).forEach((participant) => {
                 const option = document.createElement('option');
                 option.value = participant.id;
                 option.textContent = participant.displayName;

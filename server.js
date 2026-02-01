@@ -2236,6 +2236,18 @@ const requireGroupRole = (roles) => (req, res, next) => {
     return next();
 };
 
+const normalizeDisplayNameKey = (value) => {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+};
+
+const listParticipantsWithoutUser = db.prepare(
+    'SELECT id, display_name FROM participants WHERE group_id = ? AND user_id IS NULL'
+);
+const updateParticipantUserId = db.prepare('UPDATE participants SET user_id = ? WHERE id = ?');
+
 const createParticipantForUser = (groupId, userId) => {
     const existing = getParticipantByUserId.get(groupId, userId);
     if (existing) return existing.id;
@@ -2243,6 +2255,13 @@ const createParticipantForUser = (groupId, userId) => {
     if (!user) return null;
     const displayName = user.display_name || [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email || 'Member';
     const now = new Date().toISOString();
+    const normalizedDisplayName = normalizeDisplayNameKey(displayName);
+    const candidates = listParticipantsWithoutUser.all(groupId);
+    const matched = candidates.find((row) => normalizeDisplayNameKey(row.display_name) === normalizedDisplayName);
+    if (matched) {
+        updateParticipantUserId.run(userId, matched.id);
+        return matched.id;
+    }
     const result = insertParticipant.run(groupId, null, userId, displayName, 'adult', now);
     return result.lastInsertRowid;
 };
@@ -2442,6 +2461,39 @@ app.delete(
     }
 );
 
+const dedupeParticipantsForDisplay = (participants) => {
+    const byName = new Map();
+    const result = [];
+    participants.forEach((participant) => {
+        const key = normalizeDisplayNameKey(participant.displayName);
+        if (!key) {
+            result.push(participant);
+            return;
+        }
+        const existing = byName.get(key);
+        if (!existing) {
+            byName.set(key, participant);
+            result.push(participant);
+            return;
+        }
+        const existingHasUser = Boolean(existing.userId);
+        const currentHasUser = Boolean(participant.userId);
+        if (currentHasUser && !existingHasUser) {
+            const index = result.findIndex((item) => item.id === existing.id);
+            if (index >= 0) {
+                result[index] = participant;
+            }
+            byName.set(key, participant);
+            return;
+        }
+        if (!currentHasUser && existingHasUser) {
+            return;
+        }
+        result.push(participant);
+    });
+    return result;
+};
+
 app.get('/api/groups/:groupId/participants', authRequiredApi, requireGroupMember, (req, res) => {
     const participants = listParticipants.all(req.groupId).map((row) => ({
         id: row.id,
@@ -2451,7 +2503,7 @@ app.get('/api/groups/:groupId/participants', authRequiredApi, requireGroupMember
         type: row.type,
         createdAt: row.created_at
     }));
-    return res.json({ ok: true, data: participants });
+    return res.json({ ok: true, data: dedupeParticipantsForDisplay(participants) });
 });
 
 app.post(
