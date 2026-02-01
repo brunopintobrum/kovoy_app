@@ -833,6 +833,35 @@ try {
     console.warn('Participant migration skipped:', err.message);
 }
 
+// Migration: merge duplicate participants (same name, one with user_id, one without)
+try {
+    const duplicates = db.prepare(`
+        SELECT
+            p_new.id as new_id,
+            p_new.user_id,
+            p_old.id as old_id,
+            p_old.group_id,
+            p_old.display_name
+        FROM participants p_new
+        JOIN participants p_old ON p_old.group_id = p_new.group_id
+            AND LOWER(p_old.display_name) = LOWER(p_new.display_name)
+            AND p_old.user_id IS NULL
+            AND p_new.user_id IS NOT NULL
+            AND p_old.id != p_new.id
+    `).all();
+    if (duplicates.length > 0) {
+        const updateOldParticipant = db.prepare('UPDATE participants SET user_id = ? WHERE id = ?');
+        const deleteNewParticipant = db.prepare('DELETE FROM participants WHERE id = ?');
+        for (const dup of duplicates) {
+            updateOldParticipant.run(dup.user_id, dup.old_id);
+            deleteNewParticipant.run(dup.new_id);
+        }
+        console.log(`Merged ${duplicates.length} duplicate participants.`);
+    }
+} catch (err) {
+    console.warn('Participant merge migration skipped:', err.message);
+}
+
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
 if (countUsers.count === 0) {
     const seedEmail = process.env.SEED_EMAIL;
