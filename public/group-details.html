@@ -184,6 +184,7 @@
                                     <div>
                                         <label class="form-label mb-0" for="familyBalanceMode">Family balance mode</label>
                                         <select class="form-select" id="familyBalanceMode" style="min-width: 220px;">
+                                            <option value="">Select a balance mode</option>
                                             <option value="participants">By participants</option>
                                             <option value="families">By families</option>
                                         </select>
@@ -315,7 +316,7 @@
                                         </div>
                                         <div class="col-md-3">
                                             <select class="form-select" id="participantType">
-                                                <option value="">Type</option>
+                                                <option value="">Select a type</option>
                                                 <option value="adult">Adult</option>
                                                 <option value="child">Child</option>
                                                 <option value="infant">Infant</option>
@@ -323,7 +324,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <select class="form-select" id="participantFamily">
-                                                <option value="">No family</option>
+                                                <option value="">Select a family (optional)</option>
                                             </select>
                                         </div>
                                         <div class="col-md-12 d-flex justify-content-end">
@@ -379,7 +380,8 @@
                                         <div class="col-md-3">
                                             <label class="form-label" for="inviteRole">Role</label>
                                             <select class="form-select" id="inviteRole" required>
-                                                <option value="member" selected>Member</option>
+                                                <option value="">Select a role</option>
+                                                <option value="member">Member</option>
                                                 <option value="viewer">Viewer</option>
                                             </select>
                                             <div class="invalid-feedback">Select a role.</div>
@@ -436,7 +438,15 @@
                                     This is the MVP financial hub. Track who paid and how the split works here.
                                 </div>
                             </div>
-                            <form id="expenseForm" class="row g-3 needs-validation" novalidate>
+                            <div class="modal fade" id="expenseModal" tabindex="-1" aria-labelledby="expenseModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="expenseModalLabel">Add expense</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form id="expenseForm" class="row g-3 needs-validation" novalidate>
                                 <div class="col-md-4">
                                     <label class="form-label" for="expenseDescription">Description</label>
                                     <input class="form-control" id="expenseDescription" maxlength="140" required>
@@ -450,6 +460,7 @@
                                 <div class="col-md-2">
                                     <label class="form-label" for="expenseCurrency">Currency</label>
                                     <select class="form-select" id="expenseCurrency" required>
+                                        <option value="">Select a currency</option>
                                         <option value="USD">USD</option>
                                         <option value="CAD">CAD</option>
                                         <option value="BRL">BRL</option>
@@ -504,11 +515,11 @@
                                     <div class="text-muted small mt-2" id="splitSummary"></div>
                                     <div class="invalid-feedback d-block d-none" id="splitTargetsError">Select at least one target.</div>
                                 </div>
-                                <div class="col-md-12 d-flex justify-content-end">
-                                    <button class="btn btn-outline-secondary d-none me-2" type="button" id="expenseCancel">Cancel</button>
-                                    <button class="btn btn-primary" type="submit" id="expenseSubmit">Add expense</button>
-                                </div>
-                            </form>
+                                  <div class="col-md-12 d-none">
+                                      <button class="btn btn-outline-secondary d-none me-2" type="button" id="expenseCancel">Cancel</button>
+                                      <button class="btn btn-primary" type="submit">Add expense</button>
+                                  </div>
+                              </form>
                             <div class="alert alert-warning d-none mt-3" id="expenseReadOnly">
                                 You have read-only access in this group.
                             </div>
@@ -516,8 +527,21 @@
                                 Add at least one participant to log expenses.
                             </div>
                             <div class="alert alert-danger d-none mt-3" id="expenseError"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button class="btn btn-primary" type="submit" form="expenseForm" id="expenseSubmit">Add expense</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <div class="table-responsive mt-4">
+                              <div class="d-flex justify-content-end mt-4">
+                                  <button class="btn btn-primary" type="button" id="openExpenseModal" data-bs-toggle="modal" data-bs-target="#expenseModal">
+                                      Add expense
+                                  </button>
+                              </div>
+                              <div class="table-responsive mt-3">
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">
                                         <tr>
@@ -546,7 +570,15 @@
                                     <a class="alert-link" href="#expenses">expense</a>.
                                 </div>
                             </div>
-                            <form id="flightForm" class="row g-3 needs-validation" novalidate>
+                            <div class="modal fade" id="flightModal" tabindex="-1" aria-labelledby="flightModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="flightModalLabel">Add flight</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form id="flightForm" class="row g-3 needs-validation" novalidate>
                                 <div class="col-12">
                                     <h6 class="text-uppercase text-muted mb-0">Flight details</h6>
                                 </div>
@@ -569,6 +601,7 @@
                                 <div class="col-md-3">
                                     <label class="form-label" for="flightStatus">Status</label>
                                     <select class="form-select" id="flightStatus" required>
+                                        <option value="">Select a status</option>
                                         <option value="planned">Planned</option>
                                         <option value="paid">Paid</option>
                                         <option value="due">Due</option>
@@ -578,7 +611,7 @@
                                 <div class="col-md-4">
                                     <label class="form-label" for="flightClass">Class</label>
                                     <select class="form-select" id="flightClass">
-                                        <option value="">Select class</option>
+                                        <option value="">Select a class</option>
                                         <option value="economy">Economy</option>
                                         <option value="premium_economy">Premium economy</option>
                                         <option value="business">Business</option>
@@ -593,6 +626,7 @@
                                 <div class="col-md-4">
                                     <label class="form-label" for="flightCurrency">Currency</label>
                                     <select class="form-select" id="flightCurrency" required>
+                                        <option value="">Select a currency</option>
                                         <option value="USD">USD</option>
                                         <option value="CAD">CAD</option>
                                         <option value="BRL">BRL</option>
@@ -681,16 +715,29 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-12 d-flex justify-content-end gap-2">
-                                    <button class="btn btn-outline-secondary d-none" type="button" id="flightCancel">Cancel</button>
-                                    <button class="btn btn-primary" type="submit" id="flightSubmit">Add flight</button>
+                                  <div class="col-md-12 d-none">
+                                      <button class="btn btn-outline-secondary d-none" type="button" id="flightCancel">Cancel</button>
+                                      <button class="btn btn-primary" type="submit">Add flight</button>
+                                  </div>
+                                            </form>
+                                            <div class="alert alert-warning d-none mt-3" id="flightReadOnly">
+                                                You have read-only access in this group.
+                                            </div>
+                                            <div class="alert alert-danger d-none mt-3" id="flightError"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button class="btn btn-primary" type="submit" form="flightForm" id="flightSubmit">Add flight</button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </form>
-                            <div class="alert alert-warning d-none mt-3" id="flightReadOnly">
-                                You have read-only access in this group.
                             </div>
-                            <div class="alert alert-danger d-none mt-3" id="flightError"></div>
-                            <div class="table-responsive mt-4">
+                            <div class="d-flex justify-content-end mt-4">
+                                <button class="btn btn-primary" type="button" id="openFlightModal" data-bs-toggle="modal" data-bs-target="#flightModal">
+                                    Add flight
+                                </button>
+                            </div>
+                            <div class="table-responsive mt-3">
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">
                                             <tr>
@@ -721,167 +768,190 @@
                                     <a class="alert-link" href="#expenses">expense</a>.
                                 </div>
                             </div>
-                            <form id="lodgingForm" class="row g-3 needs-validation" novalidate>
-                                <div class="col-12">
-                                    <h6 class="text-uppercase text-muted mb-0">Location</h6>
-                                    <hr class="mt-2 mb-0">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" for="lodgingName">Property</label>
-                                    <input class="form-control" id="lodgingName" list="lodgingPropertyList" required>
-                                    <datalist id="lodgingPropertyList"></datalist>
-                                    <div class="invalid-feedback">Enter a property name.</div>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" for="lodgingAddress">Address line 1</label>
-                                    <input class="form-control" id="lodgingAddress" required>
-                                    <div class="invalid-feedback">Enter an address.</div>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" for="lodgingAddressLine2">Address line 2</label>
-                                    <input class="form-control" id="lodgingAddressLine2">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="lodgingCountry">Country</label>
-                                    <select class="form-select" id="lodgingCountry" required>
-                                        <option value="">Select a country</option>
-                                    </select>
-                                    <div class="invalid-feedback">Select a country.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="lodgingCity">City</label>
-                                    <input class="form-control" id="lodgingCity" list="lodgingCityList" required>
-                                    <datalist id="lodgingCityList"></datalist>
-                                    <div class="invalid-feedback">Enter a city.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="lodgingState">State/Province</label>
-                                    <input class="form-control" id="lodgingState" list="lodgingStateList">
-                                    <datalist id="lodgingStateList"></datalist>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="lodgingPostalCode">Postal code</label>
-                                    <input class="form-control" id="lodgingPostalCode">
-                                </div>
-                                <div class="col-12">
-                                    <h6 class="text-uppercase text-muted mb-0">Dates &amp; Status</h6>
-                                    <hr class="mt-2 mb-0">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="lodgingCheckIn">Check-in date</label>
-                                    <input class="form-control" id="lodgingCheckIn" type="date" required>
-                                    <div class="invalid-feedback">Select a check-in date.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="lodgingCheckInTime">Check-in time</label>
-                                    <input class="form-control" id="lodgingCheckInTime" type="time" required>
-                                    <div class="invalid-feedback">Select a check-in time.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="lodgingCheckOut">Check-out date</label>
-                                    <input class="form-control" id="lodgingCheckOut" type="date" required>
-                                    <div class="invalid-feedback">Select a check-out date.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="lodgingCheckOutTime">Check-out time</label>
-                                    <input class="form-control" id="lodgingCheckOutTime" type="time" required>
-                                    <div class="invalid-feedback">Select a check-out time.</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="lodgingStatus">Status</label>
-                                    <select class="form-select" id="lodgingStatus" required>
-                                        <option value="planned">Planned</option>
-                                        <option value="paid">Paid</option>
-                                        <option value="due">Due</option>
-                                    </select>
-                                    <div class="invalid-feedback">Select a status.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="lodgingCost">Total cost</label>
-                                    <input class="form-control" id="lodgingCost" type="number" step="0.01" min="0.01" required>
-                                    <div class="invalid-feedback">Enter a valid cost.</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="lodgingCurrency">Currency</label>
-                                    <select class="form-select" id="lodgingCurrency" required>
-                                        <option value="USD">USD</option>
-                                        <option value="CAD">CAD</option>
-                                        <option value="BRL">BRL</option>
-                                    </select>
-                                    <div class="invalid-feedback">Select a currency.</div>
-                                </div>
-                                <div class="col-12">
-                                    <h6 class="text-uppercase text-muted mb-0">Rooms</h6>
-                                    <hr class="mt-2 mb-0">
-                                </div>
-                                <div class="col-md-5">
-                                    <label class="form-label" for="lodgingRoomType">Room type</label>
-                                    <input class="form-control" id="lodgingRoomType" required>
-                                    <div class="invalid-feedback">Enter a room type.</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="lodgingRoomQuantity">Room quantity</label>
-                                    <input class="form-control" id="lodgingRoomQuantity" type="number" min="1" step="1" required>
-                                    <div class="invalid-feedback">Enter a quantity.</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="lodgingRoomOccupancy">Room occupancy</label>
-                                    <input class="form-control" id="lodgingRoomOccupancy" type="number" min="1" step="1" required>
-                                    <div class="invalid-feedback">Enter an occupancy.</div>
-                                </div>
-                                <div class="col-12">
-                                    <h6 class="text-uppercase text-muted mb-0">Contact</h6>
-                                    <hr class="mt-2 mb-0">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" for="lodgingHost">Host</label>
-                                    <input class="form-control" id="lodgingHost">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" for="lodgingContact">Contact name</label>
-                                    <input class="form-control" id="lodgingContact" required>
-                                    <div class="invalid-feedback">Enter a contact name.</div>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" for="lodgingContactPhone">Contact phone</label>
-                                    <input class="form-control" id="lodgingContactPhone">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" for="lodgingContactEmail">Contact email</label>
-                                    <input class="form-control" id="lodgingContactEmail" type="email">
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label" for="lodgingNotes">Notes</label>
-                                    <textarea class="form-control" id="lodgingNotes" rows="2"></textarea>
-                                </div>
-                                <div class="col-12">
-                                    <div class="border rounded p-3 bg-light">
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" id="lodgingLinkExpense">
-                                            <label class="form-check-label" for="lodgingLinkExpense">Link an expense (optional)</label>
+                            <div class="modal fade" id="lodgingModal" tabindex="-1" aria-labelledby="lodgingModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="lodgingModalLabel">Add lodging</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <div class="row g-3 d-none" id="lodgingExpenseFields">
-                                            <div class="col-md-4">
-                                                <label class="form-label" for="lodgingExpensePayer">Payer</label>
-                                                <select class="form-select" id="lodgingExpensePayer">
-                                                    <option value="">Select payer</option>
-                                                </select>
+                                        <div class="modal-body">
+                                            <form id="lodgingForm" class="row g-3 needs-validation" novalidate>
+                                                <div class="col-12">
+                                                    <h6 class="text-uppercase text-muted mb-0">Location</h6>
+                                                    <hr class="mt-2 mb-0">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label" for="lodgingName">Property</label>
+                                                    <input class="form-control" id="lodgingName" list="lodgingPropertyList" required>
+                                                    <datalist id="lodgingPropertyList"></datalist>
+                                                    <div class="invalid-feedback">Enter a property name.</div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label" for="lodgingAddress">Address line 1</label>
+                                                    <input class="form-control" id="lodgingAddress" required>
+                                                    <div class="invalid-feedback">Enter an address.</div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label" for="lodgingAddressLine2">Address line 2</label>
+                                                    <input class="form-control" id="lodgingAddressLine2">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="lodgingCountry">Country</label>
+                                                    <select class="form-select" id="lodgingCountry" required>
+                                                        <option value="">Select a country</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Select a country.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="lodgingCity">City</label>
+                                                    <input class="form-control" id="lodgingCity" list="lodgingCityList" required>
+                                                    <datalist id="lodgingCityList"></datalist>
+                                                    <div class="invalid-feedback">Enter a city.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="lodgingState">State/Province</label>
+                                                    <input class="form-control" id="lodgingState" list="lodgingStateList">
+                                                    <datalist id="lodgingStateList"></datalist>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="lodgingPostalCode">Postal code</label>
+                                                    <input class="form-control" id="lodgingPostalCode">
+                                                </div>
+                                                <div class="col-12">
+                                                    <h6 class="text-uppercase text-muted mb-0">Dates &amp; Status</h6>
+                                                    <hr class="mt-2 mb-0">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="lodgingCheckIn">Check-in date</label>
+                                                    <input class="form-control" id="lodgingCheckIn" type="date" required>
+                                                    <div class="invalid-feedback">Select a check-in date.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="lodgingCheckInTime">Check-in time</label>
+                                                    <input class="form-control" id="lodgingCheckInTime" type="time" required>
+                                                    <div class="invalid-feedback">Select a check-in time.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="lodgingCheckOut">Check-out date</label>
+                                                    <input class="form-control" id="lodgingCheckOut" type="date" required>
+                                                    <div class="invalid-feedback">Select a check-out date.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="lodgingCheckOutTime">Check-out time</label>
+                                                    <input class="form-control" id="lodgingCheckOutTime" type="time" required>
+                                                    <div class="invalid-feedback">Select a check-out time.</div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label" for="lodgingStatus">Status</label>
+                                                    <select class="form-select" id="lodgingStatus" required>
+                                                        <option value="">Select a status</option>
+                                                        <option value="planned">Planned</option>
+                                                        <option value="paid">Paid</option>
+                                                        <option value="due">Due</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Select a status.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="lodgingCost">Total cost</label>
+                                                    <input class="form-control" id="lodgingCost" type="number" step="0.01" min="0.01" required>
+                                                    <div class="invalid-feedback">Enter a valid cost.</div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label" for="lodgingCurrency">Currency</label>
+                                                    <select class="form-select" id="lodgingCurrency" required>
+                                                        <option value="">Select a currency</option>
+                                                        <option value="USD">USD</option>
+                                                        <option value="CAD">CAD</option>
+                                                        <option value="BRL">BRL</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Select a currency.</div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <h6 class="text-uppercase text-muted mb-0">Rooms</h6>
+                                                    <hr class="mt-2 mb-0">
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <label class="form-label" for="lodgingRoomType">Room type</label>
+                                                    <input class="form-control" id="lodgingRoomType" required>
+                                                    <div class="invalid-feedback">Enter a room type.</div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label" for="lodgingRoomQuantity">Room quantity</label>
+                                                    <input class="form-control" id="lodgingRoomQuantity" type="number" min="1" step="1" required>
+                                                    <div class="invalid-feedback">Enter a quantity.</div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label" for="lodgingRoomOccupancy">Room occupancy</label>
+                                                    <input class="form-control" id="lodgingRoomOccupancy" type="number" min="1" step="1" required>
+                                                    <div class="invalid-feedback">Enter an occupancy.</div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <h6 class="text-uppercase text-muted mb-0">Contact</h6>
+                                                    <hr class="mt-2 mb-0">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label" for="lodgingHost">Host</label>
+                                                    <input class="form-control" id="lodgingHost">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label" for="lodgingContact">Contact name</label>
+                                                    <input class="form-control" id="lodgingContact" required>
+                                                    <div class="invalid-feedback">Enter a contact name.</div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label" for="lodgingContactPhone">Contact phone</label>
+                                                    <input class="form-control" id="lodgingContactPhone">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label" for="lodgingContactEmail">Contact email</label>
+                                                    <input class="form-control" id="lodgingContactEmail" type="email">
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label class="form-label" for="lodgingNotes">Notes</label>
+                                                    <textarea class="form-control" id="lodgingNotes" rows="2"></textarea>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="border rounded p-3 bg-light">
+                                                        <div class="form-check form-switch mb-2">
+                                                            <input class="form-check-input" type="checkbox" id="lodgingLinkExpense">
+                                                            <label class="form-check-label" for="lodgingLinkExpense">Link an expense (optional)</label>
+                                                        </div>
+                                                        <div class="row g-3 d-none" id="lodgingExpenseFields">
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" for="lodgingExpensePayer">Payer</label>
+                                                                <select class="form-select" id="lodgingExpensePayer">
+                                                                    <option value="">Select payer</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-8 d-flex align-items-end">
+                                                                <small class="text-muted">Split is equal across all participants for now.</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 d-flex justify-content-end gap-2 d-none">
+                                                    <button class="btn btn-outline-secondary" type="button" id="lodgingCancel">Cancel</button>
+                                                    <button class="btn btn-primary" type="submit">Add lodging</button>
+                                                </div>
+                                            </form>
+                                            <div class="alert alert-warning d-none mt-3" id="lodgingReadOnly">
+                                                You have read-only access in this group.
                                             </div>
-                                            <div class="col-md-8 d-flex align-items-end">
-                                                <small class="text-muted">Split is equal across all participants for now.</small>
-                                            </div>
+                                            <div class="alert alert-danger d-none mt-3" id="lodgingError"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button class="btn btn-primary" type="submit" form="lodgingForm" id="lodgingSubmit">Add lodging</button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-12 d-flex justify-content-end gap-2">
-                                    <button class="btn btn-outline-secondary d-none" type="button" id="lodgingCancel">Cancel</button>
-                                    <button class="btn btn-primary" type="submit" id="lodgingSubmit">Add lodging</button>
-                                </div>
-                            </form>
-                            <div class="alert alert-warning d-none mt-3" id="lodgingReadOnly">
-                                You have read-only access in this group.
                             </div>
-                            <div class="alert alert-danger d-none mt-3" id="lodgingError"></div>
+                            <div class="d-flex justify-content-end mt-4">
+                                <button class="btn btn-primary" type="button" id="openLodgingModal" data-bs-toggle="modal" data-bs-target="#lodgingModal">
+                                    Add lodging
+                                </button>
+                            </div>
                             <div class="table-responsive mt-4">
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">
@@ -913,95 +983,118 @@
                                     <a class="alert-link" href="#expenses">expense</a>.
                                 </div>
                             </div>
-                            <form id="transportForm" class="row g-3 needs-validation" novalidate>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="transportType">Type</label>
-                                    <input class="form-control" id="transportType" required>
-                                    <div class="invalid-feedback">Enter a transport type.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="transportProvider">Provider</label>
-                                    <input class="form-control" id="transportProvider">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="transportLocator">Locator</label>
-                                    <input class="form-control" id="transportLocator">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="transportStatus">Status</label>
-                                    <select class="form-select" id="transportStatus" required>
-                                        <option value="planned">Planned</option>
-                                        <option value="paid">Paid</option>
-                                        <option value="due">Due</option>
-                                    </select>
-                                    <div class="invalid-feedback">Select a status.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="transportOrigin">Origin</label>
-                                    <input class="form-control" id="transportOrigin" required>
-                                    <div class="invalid-feedback">Enter an origin.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="transportDestination">Destination</label>
-                                    <input class="form-control" id="transportDestination" required>
-                                    <div class="invalid-feedback">Enter a destination.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="transportDepart">Departure</label>
-                                    <input class="form-control" id="transportDepart" type="datetime-local" required>
-                                    <div class="invalid-feedback">Select a departure time.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="transportArrive">Arrival</label>
-                                    <input class="form-control" id="transportArrive" type="datetime-local" required>
-                                    <div class="invalid-feedback">Select an arrival time.</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="transportAmount">Amount</label>
-                                    <input class="form-control" id="transportAmount" type="number" step="0.01" min="0.01" required>
-                                    <div class="invalid-feedback">Enter a valid amount.</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label" for="transportCurrency">Currency</label>
-                                    <select class="form-select" id="transportCurrency" required>
-                                        <option value="USD">USD</option>
-                                        <option value="CAD">CAD</option>
-                                        <option value="BRL">BRL</option>
-                                    </select>
-                                    <div class="invalid-feedback">Select a currency.</div>
-                                </div>
-                                <div class="col-md-8">
-                                    <label class="form-label" for="transportNotes">Notes</label>
-                                    <textarea class="form-control" id="transportNotes" rows="2"></textarea>
-                                </div>
-                                <div class="col-12">
-                                    <div class="border rounded p-3 bg-light">
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" id="transportLinkExpense">
-                                            <label class="form-check-label" for="transportLinkExpense">Link an expense (optional)</label>
+                            <div class="modal fade" id="transportModal" tabindex="-1" aria-labelledby="transportModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="transportModalLabel">Add transport</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <div class="row g-3 d-none" id="transportExpenseFields">
-                                            <div class="col-md-4">
-                                                <label class="form-label" for="transportExpensePayer">Payer</label>
-                                                <select class="form-select" id="transportExpensePayer">
-                                                    <option value="">Select payer</option>
-                                                </select>
+                                        <div class="modal-body">
+                                            <form id="transportForm" class="row g-3 needs-validation" novalidate>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="transportType">Type</label>
+                                                    <input class="form-control" id="transportType" required>
+                                                    <div class="invalid-feedback">Enter a transport type.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="transportProvider">Provider</label>
+                                                    <input class="form-control" id="transportProvider">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="transportLocator">Locator</label>
+                                                    <input class="form-control" id="transportLocator">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="transportStatus">Status</label>
+                                                    <select class="form-select" id="transportStatus" required>
+                                                        <option value="">Select a status</option>
+                                                        <option value="planned">Planned</option>
+                                                        <option value="paid">Paid</option>
+                                                        <option value="due">Due</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Select a status.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="transportOrigin">Origin</label>
+                                                    <input class="form-control" id="transportOrigin" required>
+                                                    <div class="invalid-feedback">Enter an origin.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="transportDestination">Destination</label>
+                                                    <input class="form-control" id="transportDestination" required>
+                                                    <div class="invalid-feedback">Enter a destination.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="transportDepart">Departure</label>
+                                                    <input class="form-control" id="transportDepart" type="datetime-local" required>
+                                                    <div class="invalid-feedback">Select a departure time.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="transportArrive">Arrival</label>
+                                                    <input class="form-control" id="transportArrive" type="datetime-local" required>
+                                                    <div class="invalid-feedback">Select an arrival time.</div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label" for="transportAmount">Amount</label>
+                                                    <input class="form-control" id="transportAmount" type="number" step="0.01" min="0.01" required>
+                                                    <div class="invalid-feedback">Enter a valid amount.</div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label" for="transportCurrency">Currency</label>
+                                                    <select class="form-select" id="transportCurrency" required>
+                                                        <option value="">Select a currency</option>
+                                                        <option value="USD">USD</option>
+                                                        <option value="CAD">CAD</option>
+                                                        <option value="BRL">BRL</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Select a currency.</div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <label class="form-label" for="transportNotes">Notes</label>
+                                                    <textarea class="form-control" id="transportNotes" rows="2"></textarea>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="border rounded p-3 bg-light">
+                                                        <div class="form-check form-switch mb-2">
+                                                            <input class="form-check-input" type="checkbox" id="transportLinkExpense">
+                                                            <label class="form-check-label" for="transportLinkExpense">Link an expense (optional)</label>
+                                                        </div>
+                                                        <div class="row g-3 d-none" id="transportExpenseFields">
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" for="transportExpensePayer">Payer</label>
+                                                                <select class="form-select" id="transportExpensePayer">
+                                                                    <option value="">Select payer</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-8 d-flex align-items-end">
+                                                                <small class="text-muted">Split is equal across all participants for now.</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 d-flex justify-content-end gap-2 d-none">
+                                                    <button class="btn btn-outline-secondary" type="button" id="transportCancel">Cancel</button>
+                                                    <button class="btn btn-primary" type="submit">Add transport</button>
+                                                </div>
+                                            </form>
+                                            <div class="alert alert-warning d-none mt-3" id="transportReadOnly">
+                                                You have read-only access in this group.
                                             </div>
-                                            <div class="col-md-8 d-flex align-items-end">
-                                                <small class="text-muted">Split is equal across all participants for now.</small>
-                                            </div>
+                                            <div class="alert alert-danger d-none mt-3" id="transportError"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button class="btn btn-primary" type="submit" form="transportForm" id="transportSubmit">Add transport</button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-12 d-flex justify-content-end gap-2">
-                                    <button class="btn btn-outline-secondary d-none" type="button" id="transportCancel">Cancel</button>
-                                    <button class="btn btn-primary" type="submit" id="transportSubmit">Add transport</button>
-                                </div>
-                            </form>
-                            <div class="alert alert-warning d-none mt-3" id="transportReadOnly">
-                                You have read-only access in this group.
                             </div>
-                            <div class="alert alert-danger d-none mt-3" id="transportError"></div>
+                            <div class="d-flex justify-content-end mt-4">
+                                <button class="btn btn-primary" type="button" id="openTransportModal" data-bs-toggle="modal" data-bs-target="#transportModal">
+                                    Add transport
+                                </button>
+                            </div>
                             <div class="table-responsive mt-4">
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">
@@ -1033,82 +1126,105 @@
                                     <a class="alert-link" href="#expenses">expense</a>.
                                 </div>
                             </div>
-                            <form id="ticketForm" class="row g-3 needs-validation" novalidate>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="ticketType">Ticket type</label>
-                                    <input class="form-control" id="ticketType" required>
-                                    <div class="invalid-feedback">Enter a ticket type.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="ticketEventAt">Date/time</label>
-                                    <input class="form-control" id="ticketEventAt" type="datetime-local" required>
-                                    <div class="invalid-feedback">Select a date/time.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="ticketLocation">Location</label>
-                                    <input class="form-control" id="ticketLocation" required>
-                                    <div class="invalid-feedback">Enter a location.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="ticketStatus">Status</label>
-                                    <select class="form-select" id="ticketStatus" required>
-                                        <option value="planned">Planned</option>
-                                        <option value="paid">Paid</option>
-                                        <option value="due">Due</option>
-                                    </select>
-                                    <div class="invalid-feedback">Select a status.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="ticketAmount">Amount</label>
-                                    <input class="form-control" id="ticketAmount" type="number" step="0.01" min="0.01" required>
-                                    <div class="invalid-feedback">Enter a valid amount.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label" for="ticketCurrency">Currency</label>
-                                    <select class="form-select" id="ticketCurrency" required>
-                                        <option value="USD">USD</option>
-                                        <option value="CAD">CAD</option>
-                                        <option value="BRL">BRL</option>
-                                    </select>
-                                    <div class="invalid-feedback">Select a currency.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label" for="ticketParticipants">Participants</label>
-                                    <select class="form-select" id="ticketParticipants" multiple required></select>
-                                    <small class="text-muted">Select participants (Ctrl/Cmd for multiple).</small>
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label" for="ticketNotes">Notes</label>
-                                    <textarea class="form-control" id="ticketNotes" rows="2"></textarea>
-                                </div>
-                                <div class="col-12">
-                                    <div class="border rounded p-3 bg-light">
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" id="ticketLinkExpense">
-                                            <label class="form-check-label" for="ticketLinkExpense">Link an expense (optional)</label>
+                            <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="ticketModalLabel">Add ticket</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <div class="row g-3 d-none" id="ticketExpenseFields">
-                                            <div class="col-md-4">
-                                                <label class="form-label" for="ticketExpensePayer">Payer</label>
-                                                <select class="form-select" id="ticketExpensePayer">
-                                                    <option value="">Select payer</option>
-                                                </select>
+                                        <div class="modal-body">
+                                            <form id="ticketForm" class="row g-3 needs-validation" novalidate>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="ticketType">Ticket type</label>
+                                                    <input class="form-control" id="ticketType" required>
+                                                    <div class="invalid-feedback">Enter a ticket type.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="ticketEventAt">Date/time</label>
+                                                    <input class="form-control" id="ticketEventAt" type="datetime-local" required>
+                                                    <div class="invalid-feedback">Select a date/time.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="ticketLocation">Location</label>
+                                                    <input class="form-control" id="ticketLocation" required>
+                                                    <div class="invalid-feedback">Enter a location.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="ticketStatus">Status</label>
+                                                    <select class="form-select" id="ticketStatus" required>
+                                                        <option value="">Select a status</option>
+                                                        <option value="planned">Planned</option>
+                                                        <option value="paid">Paid</option>
+                                                        <option value="due">Due</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Select a status.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="ticketAmount">Amount</label>
+                                                    <input class="form-control" id="ticketAmount" type="number" step="0.01" min="0.01" required>
+                                                    <div class="invalid-feedback">Enter a valid amount.</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label" for="ticketCurrency">Currency</label>
+                                                    <select class="form-select" id="ticketCurrency" required>
+                                                        <option value="">Select a currency</option>
+                                                        <option value="USD">USD</option>
+                                                        <option value="CAD">CAD</option>
+                                                        <option value="BRL">BRL</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Select a currency.</div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label" for="ticketParticipants">Participants</label>
+                                                    <select class="form-select" id="ticketParticipants" multiple required></select>
+                                                    <small class="text-muted">Select participants (Ctrl/Cmd for multiple).</small>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label class="form-label" for="ticketNotes">Notes</label>
+                                                    <textarea class="form-control" id="ticketNotes" rows="2"></textarea>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="border rounded p-3 bg-light">
+                                                        <div class="form-check form-switch mb-2">
+                                                            <input class="form-check-input" type="checkbox" id="ticketLinkExpense">
+                                                            <label class="form-check-label" for="ticketLinkExpense">Link an expense (optional)</label>
+                                                        </div>
+                                                        <div class="row g-3 d-none" id="ticketExpenseFields">
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" for="ticketExpensePayer">Payer</label>
+                                                                <select class="form-select" id="ticketExpensePayer">
+                                                                    <option value="">Select payer</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-8 d-flex align-items-end">
+                                                                <small class="text-muted">Split is equal across all participants for now.</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 d-flex justify-content-end gap-2 d-none">
+                                                    <button class="btn btn-outline-secondary" type="button" id="ticketCancel">Cancel</button>
+                                                    <button class="btn btn-primary" type="submit">Add ticket</button>
+                                                </div>
+                                            </form>
+                                            <div class="alert alert-warning d-none mt-3" id="ticketReadOnly">
+                                                You have read-only access in this group.
                                             </div>
-                                            <div class="col-md-8 d-flex align-items-end">
-                                                <small class="text-muted">Split is equal across all participants for now.</small>
-                                            </div>
+                                            <div class="alert alert-danger d-none mt-3" id="ticketError"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button class="btn btn-primary" type="submit" form="ticketForm" id="ticketSubmit">Add ticket</button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-12 d-flex justify-content-end gap-2">
-                                    <button class="btn btn-outline-secondary d-none" type="button" id="ticketCancel">Cancel</button>
-                                    <button class="btn btn-primary" type="submit" id="ticketSubmit">Add ticket</button>
-                                </div>
-                            </form>
-                            <div class="alert alert-warning d-none mt-3" id="ticketReadOnly">
-                                You have read-only access in this group.
                             </div>
-                            <div class="alert alert-danger d-none mt-3" id="ticketError"></div>
+                            <div class="d-flex justify-content-end mt-4">
+                                <button class="btn btn-primary" type="button" id="openTicketModal" data-bs-toggle="modal" data-bs-target="#ticketModal">
+                                    Add ticket
+                                </button>
+                            </div>
                             <div class="table-responsive mt-4">
                                     <table class="table align-middle table-nowrap mb-0">
                                         <thead class="table-light">
@@ -1184,6 +1300,6 @@
     <script src="assets/libs/simplebar/simplebar.min.js"></script>
     <script src="assets/libs/node-waves/waves.min.js"></script>
     <script src="assets/js/app.js"></script>
-    <script src="group.js?v=20260201" defer></script>
+    <script src="group.js?v=20260201c" defer></script>
 </body>
 </html>
