@@ -1293,7 +1293,7 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.flights.length) {
-            list.innerHTML = '<tr><td colspan="12" class="text-muted text-center">No flights yet.</td></tr>';
+            list.innerHTML = '<tr><td colspan="8" class="text-muted text-center">No flights yet.</td></tr>';
             return;
         }
         const participantMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
@@ -1302,6 +1302,7 @@
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
             const passengersLabel = participantNames.length ? participantNames.join(', ') : '-';
+            const passengerCount = participantNames.length;
             const seatLabels = (flight.participantIds || [])
                 .map((id) => {
                     const name = participantMap.get(id);
@@ -1321,30 +1322,59 @@
                 .filter(Boolean);
             const baggageLabel = baggageLabels.length ? baggageLabels.join(', ') : '-';
             const flightLabel = [flight.airline, flight.flightNumber].filter(Boolean).join(' ');
+            const routeLabel = `${flight.fromLabel || flight.from || '-'} → ${flight.toLabel || flight.to || '-'}`;
+            const detailsId = `flight-details-${flight.id}`;
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${flightLabel || '-'}</td>
-                <td>${flight.pnr || '-'}</td>
-                <td>${formatFlightClassLabel(flight.cabinClass)}</td>
-                <td>${seatsLabel}</td>
-                <td>${baggageLabel}</td>
-                <td>${flight.fromLabel || flight.from || '-'} -> ${flight.toLabel || flight.to || '-'}</td>
+                <td>${routeLabel}</td>
                 <td>${formatDateTime(flight.departAt)}</td>
                 <td>${formatDateTime(flight.arriveAt)}</td>
-                <td>${passengersLabel}</td>
+                <td>${passengerCount}</td>
                 <td class="text-capitalize">${flight.status || 'planned'}</td>
                 <td>${formatCurrency(flight.cost, flight.currency)}</td>
                 <td class="text-end">
+                    <button class="btn btn-sm btn-outline-secondary me-1" data-action="toggle-flight-details" data-id="${flight.id}" aria-controls="${detailsId}">Details</button>
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-flight" data-id="${flight.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-flight" data-id="${flight.id}">Delete</button>
                 </td>
             `;
             if (!state.canEdit) {
-                tr.querySelectorAll('button').forEach((button) => {
+                tr.querySelectorAll('button[data-action="edit-flight"], button[data-action="delete-flight"]').forEach((button) => {
                     button.disabled = true;
                 });
             }
             list.appendChild(tr);
+            const detailsRow = document.createElement('tr');
+            detailsRow.id = detailsId;
+            detailsRow.className = 'd-none';
+            detailsRow.innerHTML = `
+                <td colspan="8">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <div class="text-muted small">PNR</div>
+                            <div>${flight.pnr || '-'}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-muted small">Class</div>
+                            <div>${formatFlightClassLabel(flight.cabinClass)}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-muted small">Passengers</div>
+                            <div>${passengersLabel}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-muted small">Seats</div>
+                            <div>${seatsLabel}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-muted small">Baggage</div>
+                            <div>${baggageLabel}</div>
+                        </div>
+                    </div>
+                </td>
+            `;
+            list.appendChild(detailsRow);
         });
     };
 
@@ -3350,6 +3380,13 @@
                 const action = button.dataset.action;
                 const id = button.dataset.id;
                 if (!id) return;
+                if (action === 'toggle-flight-details') {
+                    const detailsRow = document.getElementById(`flight-details-${id}`);
+                    if (detailsRow) {
+                        detailsRow.classList.toggle('d-none');
+                    }
+                    return;
+                }
                 if (action === 'edit-flight') {
                     if (!state.canEdit) return;
                     const flight = state.flights.find((item) => item.id === id);
