@@ -139,7 +139,7 @@
                     </div>
 
                     <div class="row g-4">
-                        <div class="col-lg-4">
+                        <div class="col-12 col-lg-4 order-2 order-lg-1">
                             <div class="card" id="createGroup">
                                 <div class="card-body">
                                     <h5 class="card-title">Create group</h5>
@@ -167,18 +167,29 @@
                                 </div>
                             </div>
 
-                            <div class="card" id="acceptInvite">
+                            <div class="card border-primary" id="acceptInvite">
                                 <div class="card-body">
-                                    <h5 class="card-title">Accept invite</h5>
-                                    <p class="text-muted">Paste your invite token.</p>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="flex-shrink-0">
+                                            <div class="avatar-sm rounded-circle bg-primary d-flex align-items-center justify-content-center">
+                                                <i class="bx bx-mail-send text-white font-size-18"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h5 class="card-title mb-1">Accept invite</h5>
+                                            <p class="text-muted mb-0 small">Join a group using your invite token</p>
+                                        </div>
+                                    </div>
                                     <form id="acceptInviteForm" class="needs-validation" novalidate>
                                         <div class="mb-3">
                                             <label class="form-label" for="inviteToken">Invite token</label>
-                                            <input class="form-control" id="inviteToken" name="token" required>
+                                            <input class="form-control" id="inviteToken" name="token" placeholder="Paste your token here" required>
                                             <div class="invalid-feedback">Enter an invite token.</div>
                                         </div>
                                         <div class="d-flex justify-content-end">
-                                            <button class="btn btn-outline-primary" type="submit">Join group</button>
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="bx bx-check-circle me-1"></i>Join group
+                                            </button>
                                         </div>
                                     </form>
                                     <div class="alert alert-danger d-none mt-3" id="acceptInviteError"></div>
@@ -187,7 +198,7 @@
                             </div>
                         </div>
 
-                        <div class="col-lg-8">
+                        <div class="col-12 col-lg-8 order-1 order-lg-2">
                             <div class="card" id="groupList">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center justify-content-between mb-3">

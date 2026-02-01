@@ -73,7 +73,6 @@
             tr.innerHTML = `
                 <td>
                     <div class="fw-semibold">${group.name}</div>
-                    <div class="text-muted small">ID ${group.id}</div>
                 </td>
                 <td>${group.defaultCurrency}</td>
                 <td><span class="badge ${roleBadgeClass} text-uppercase">${roleLabel}</span></td>
