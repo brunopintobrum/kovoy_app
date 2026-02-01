@@ -1863,7 +1863,8 @@ const getGroupMemberRecord = db.prepare('SELECT id, role FROM group_members WHER
 const updateGroupMemberRole = db.prepare('UPDATE group_members SET role = ? WHERE id = ?');
 const deleteGroupMember = db.prepare('DELETE FROM group_members WHERE group_id = ? AND user_id = ?');
 const listGroupsForUser = db.prepare(`
-    SELECT g.id, g.name, g.default_currency, g.family_balance_mode, g.created_by_user_id, g.created_at, gm.role
+    SELECT g.id, g.name, g.default_currency, g.family_balance_mode, g.created_by_user_id, g.created_at, gm.role,
+           (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count
     FROM groups g
     JOIN group_members gm ON gm.group_id = g.id
     WHERE gm.user_id = ?
@@ -2292,7 +2293,8 @@ app.get('/api/groups', authRequiredApi, (req, res) => {
         familyBalanceMode: row.family_balance_mode || 'participants',
         createdByUserId: row.created_by_user_id,
         createdAt: row.created_at,
-        role: row.role
+        role: row.role,
+        memberCount: row.member_count || 0
     }));
     return res.json({ ok: true, data: groups });
 });

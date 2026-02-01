@@ -7,6 +7,17 @@
             ?.split('=')[1];
     };
 
+    const showToast = (type, message) => {
+        const toastId = type === 'success' ? 'successToast' : 'errorToast';
+        const messageId = type === 'success' ? 'successToastMessage' : 'errorToastMessage';
+        const toastEl = document.getElementById(toastId);
+        const messageEl = document.getElementById(messageId);
+        if (!toastEl || !messageEl) return;
+        messageEl.textContent = message;
+        const toast = new window.bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+    };
+
     const apiRequest = async (url, options = {}) => {
         const method = (options.method || 'GET').toUpperCase();
         const headers = { ...(options.headers || {}) };
@@ -47,6 +58,37 @@
         }
     };
 
+    const showLoadingSkeleton = () => {
+        const rows = document.getElementById('groupRows');
+        if (!rows) return;
+        rows.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    <div class="placeholder-glow">
+                        <span class="placeholder col-6"></span>
+                        <span class="placeholder col-4"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <div class="placeholder-glow">
+                        <span class="placeholder col-7"></span>
+                        <span class="placeholder col-3"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <div class="placeholder-glow">
+                        <span class="placeholder col-5"></span>
+                        <span class="placeholder col-5"></span>
+                    </div>
+                </td>
+            </tr>
+        `;
+    };
+
     const renderGroups = (groups) => {
         const rows = document.getElementById('groupRows');
         const count = document.getElementById('groupCount');
@@ -55,7 +97,20 @@
         count.textContent = `${groups.length} group${groups.length === 1 ? '' : 's'}`;
 
         if (!groups.length) {
-            rows.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No groups yet.</td></tr>';
+            rows.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="bx bx-briefcase-alt text-primary" style="font-size: 72px; opacity: 0.5;"></i>
+                        </div>
+                        <h5 class="text-muted mb-2">No groups yet</h5>
+                        <p class="text-muted mb-3">Create your first trip group to get started</p>
+                        <a href="#createGroup" class="btn btn-primary btn-sm">
+                            <i class="bx bx-plus me-1"></i>Create group
+                        </a>
+                    </td>
+                </tr>
+            `;
             return;
         }
 
@@ -66,19 +121,39 @@
                 ? 'bg-soft-success text-success'
                 : 'bg-soft-primary text-primary';
             const canLeave = !elevatedRole;
-            const leaveButton = canLeave
-                ? `<button class="btn btn-sm btn-outline-danger ms-1" data-action="leave" data-id="${group.id}" data-name="${group.name}">Leave</button>`
+            const leaveMenuItem = canLeave
+                ? `<li><a class="dropdown-item text-danger" href="javascript:void(0);" data-action="leave" data-id="${group.id}" data-name="${group.name}">
+                        <i class="bx bx-log-out me-2"></i>Leave group
+                   </a></li>`
                 : '';
             const tr = document.createElement('tr');
+            const memberCount = group.memberCount || 0;
+            const memberText = memberCount === 1 ? 'member' : 'members';
             tr.innerHTML = `
                 <td>
                     <div class="fw-semibold">${group.name}</div>
+                    <div class="text-muted small">
+                        <i class="bx bx-user"></i> ${memberCount} ${memberText}
+                    </div>
                 </td>
                 <td>${group.defaultCurrency}</td>
                 <td><span class="badge ${roleBadgeClass} text-uppercase">${roleLabel}</span></td>
                 <td class="text-muted">${new Date(group.createdAt).toLocaleDateString()}</td>
                 <td class="text-end">
-                    <a class="btn btn-sm btn-outline-primary" href="/dashboard?groupId=${group.id}">Open</a>${leaveButton}
+                    <a class="btn btn-sm btn-primary" href="/dashboard?groupId=${group.id}">
+                        <i class="bx bx-right-arrow-alt"></i> Open
+                    </a>
+                    <div class="btn-group ms-1">
+                        <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bx bx-dots-vertical-rounded"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/dashboard?groupId=${group.id}">
+                                <i class="bx bx-cog me-2"></i>Group settings
+                            </a></li>
+                            ${leaveMenuItem}
+                        </ul>
+                    </div>
                 </td>
             `;
             rows.appendChild(tr);
@@ -86,6 +161,7 @@
     };
 
     const loadGroups = async () => {
+        showLoadingSkeleton();
         const data = await apiRequest('/api/groups');
         renderGroups(data.data || []);
     };
@@ -122,11 +198,9 @@
                     return;
                 }
                 await loadGroups();
+                showToast('success', 'Group created successfully!');
             } catch (err) {
-                if (errorEl) {
-                    errorEl.textContent = err.message;
-                    errorEl.classList.remove('d-none');
-                }
+                showToast('error', err.message || 'Failed to create group');
             }
         });
     };
@@ -147,18 +221,12 @@
                     method: 'POST',
                     body: JSON.stringify({ token })
                 });
-                if (successEl) {
-                    successEl.textContent = 'Invite accepted. Redirecting to the group...';
-                    successEl.classList.remove('d-none');
-                }
+                showToast('success', 'Invite accepted! Redirecting to the group...');
                 setTimeout(() => {
                     window.location.href = `/dashboard?groupId=${res.groupId}`;
-                }, 800);
+                }, 1500);
             } catch (err) {
-                if (errorEl) {
-                    errorEl.textContent = err.message;
-                    errorEl.classList.remove('d-none');
-                }
+                showToast('error', err.message || 'Failed to accept invite');
             }
         });
     };
@@ -303,17 +371,19 @@
         const rows = document.getElementById('groupRows');
         if (!rows) return;
         rows.addEventListener('click', async (event) => {
-            const button = event.target.closest('button[data-action="leave"]');
-            if (!button) return;
-            const groupId = button.dataset.id;
-            const groupName = button.dataset.name || 'this group';
+            const link = event.target.closest('a[data-action="leave"]');
+            if (!link) return;
+            event.preventDefault();
+            const groupId = link.dataset.id;
+            const groupName = link.dataset.name || 'this group';
             if (!groupId) return;
             if (!confirm(`Are you sure you want to leave "${groupName}"?`)) return;
             try {
                 await apiRequest(`/api/groups/${groupId}/members/me`, { method: 'DELETE' });
                 await loadGroups();
+                showToast('success', `You have left "${groupName}"`);
             } catch (err) {
-                alert(err.message || 'Failed to leave group.');
+                showToast('error', err.message || 'Failed to leave group');
             }
         });
     };
