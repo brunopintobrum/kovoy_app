@@ -1321,6 +1321,28 @@
                 })
                 .filter(Boolean);
             const baggageLabel = baggageLabels.length ? baggageLabels.join(', ') : '-';
+            const passengerRows = (flight.participantIds || [])
+                .map((id) => {
+                    const name = participantMap.get(id);
+                    if (!name) return null;
+                    const seat = flight.participantSeats?.[id] || '-';
+                    const baggage = flight.participantBaggage?.[id] || '-';
+                    return `<tr><td>${name}</td><td>${seat}</td><td>${baggage}</td></tr>`;
+                })
+                .filter(Boolean)
+                .join('');
+            const passengerTable = passengerRows
+                ? `<div class="table-responsive mb-0"><table class="table table-sm table-nowrap align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Passenger</th>
+                                <th>Seat</th>
+                                <th>Baggage</th>
+                            </tr>
+                        </thead>
+                        <tbody>${passengerRows}</tbody>
+                    </table></div>`
+                : '<span class="text-muted">No passengers selected.</span>';
             const flightLabel = [flight.airline, flight.flightNumber].filter(Boolean).join(' ');
             const routeLabel = `${flight.fromLabel || flight.from || '-'} → ${flight.toLabel || flight.to || '-'}`;
             const detailsId = `flight-details-${flight.id}`;
@@ -1350,7 +1372,7 @@
             detailsRow.className = 'd-none';
             detailsRow.innerHTML = `
                 <td colspan="8">
-                    <div class="row g-2">
+                    <div class="row g-3">
                         <div class="col-md-3">
                             <div class="text-muted small">PNR</div>
                             <div>${flight.pnr || '-'}</div>
@@ -1361,15 +1383,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="text-muted small">Passengers</div>
-                            <div>${passengersLabel}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="text-muted small">Seats</div>
-                            <div>${seatsLabel}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="text-muted small">Baggage</div>
-                            <div>${baggageLabel}</div>
+                            ${passengerTable}
                         </div>
                     </div>
                 </td>
