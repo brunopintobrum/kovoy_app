@@ -1093,6 +1093,10 @@
 
         if (selector) {
             selector.innerHTML = '';
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Select a group';
+            selector.appendChild(placeholder);
             state.groups.forEach((group) => {
                 const option = document.createElement('option');
                 option.value = group.id;
@@ -1620,6 +1624,10 @@
             option.textContent = 'Add a participant first';
             payerSelect.appendChild(option);
         } else {
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Select a payer';
+            payerSelect.appendChild(placeholder);
             getUniquePayerParticipants(state.participants).forEach((participant) => {
                 const option = document.createElement('option');
                 option.value = participant.id;
@@ -2061,6 +2069,16 @@
                 el.disabled = !state.canEdit;
             });
         });
+        const openFlightModal = document.getElementById('openFlightModal');
+        const openExpenseModal = document.getElementById('openExpenseModal');
+        const openLodgingModal = document.getElementById('openLodgingModal');
+        const openTransportModal = document.getElementById('openTransportModal');
+        const openTicketModal = document.getElementById('openTicketModal');
+        if (openFlightModal) openFlightModal.disabled = !state.canEdit;
+        if (openExpenseModal) openExpenseModal.disabled = !state.canEdit;
+        if (openLodgingModal) openLodgingModal.disabled = !state.canEdit;
+        if (openTransportModal) openTransportModal.disabled = !state.canEdit;
+        if (openTicketModal) openTicketModal.disabled = !state.canEdit;
         manageForms.forEach((id) => {
             const form = document.getElementById(id);
             if (!form) return;
@@ -2151,13 +2169,23 @@
     const setExpenseFormMode = (mode) => {
         const submit = document.getElementById('expenseSubmit');
         const cancel = document.getElementById('expenseCancel');
+        const modalLabel = document.getElementById('expenseModalLabel');
         const isEdit = mode === 'edit';
         if (submit) {
             submit.textContent = isEdit ? 'Update expense' : 'Add expense';
         }
+        if (modalLabel) {
+            modalLabel.textContent = isEdit ? 'Edit expense' : 'Add expense';
+        }
         if (cancel) {
             cancel.classList.toggle('d-none', !isEdit);
         }
+    };
+
+    const getExpenseModalInstance = () => {
+        const modalEl = document.getElementById('expenseModal');
+        if (!modalEl || !window.bootstrap?.Modal) return null;
+        return bootstrap.Modal.getOrCreateInstance(modalEl);
     };
 
     const resetExpenseForm = () => {
@@ -2248,13 +2276,23 @@
     const setFlightFormMode = (mode) => {
         const submit = document.getElementById('flightSubmit');
         const cancel = document.getElementById('flightCancel');
+        const modalLabel = document.getElementById('flightModalLabel');
         const isEdit = mode === 'edit';
         if (submit) {
             submit.textContent = isEdit ? 'Update flight' : 'Add flight';
         }
+        if (modalLabel) {
+            modalLabel.textContent = isEdit ? 'Edit flight' : 'Add flight';
+        }
         if (cancel) {
             cancel.classList.toggle('d-none', !isEdit);
         }
+    };
+
+    const getFlightModalInstance = () => {
+        const modalEl = document.getElementById('flightModal');
+        if (!modalEl || !window.bootstrap?.Modal) return null;
+        return bootstrap.Modal.getOrCreateInstance(modalEl);
     };
 
     const resetFlightForm = () => {
@@ -2351,13 +2389,23 @@
     const setLodgingFormMode = (mode) => {
         const submit = document.getElementById('lodgingSubmit');
         const cancel = document.getElementById('lodgingCancel');
+        const modalLabel = document.getElementById('lodgingModalLabel');
         const isEdit = mode === 'edit';
         if (submit) {
             submit.textContent = isEdit ? 'Update lodging' : 'Add lodging';
         }
+        if (modalLabel) {
+            modalLabel.textContent = isEdit ? 'Edit lodging' : 'Add lodging';
+        }
         if (cancel) {
             cancel.classList.toggle('d-none', !isEdit);
         }
+    };
+
+    const getLodgingModalInstance = () => {
+        const modalEl = document.getElementById('lodgingModal');
+        if (!modalEl || !window.bootstrap?.Modal) return null;
+        return bootstrap.Modal.getOrCreateInstance(modalEl);
     };
 
     const resetLodgingForm = () => {
@@ -2459,13 +2507,23 @@
     const setTransportFormMode = (mode) => {
         const submit = document.getElementById('transportSubmit');
         const cancel = document.getElementById('transportCancel');
+        const modalLabel = document.getElementById('transportModalLabel');
         const isEdit = mode === 'edit';
         if (submit) {
             submit.textContent = isEdit ? 'Update transport' : 'Add transport';
         }
+        if (modalLabel) {
+            modalLabel.textContent = isEdit ? 'Edit transport' : 'Add transport';
+        }
         if (cancel) {
             cancel.classList.toggle('d-none', !isEdit);
         }
+    };
+
+    const getTransportModalInstance = () => {
+        const modalEl = document.getElementById('transportModal');
+        if (!modalEl || !window.bootstrap?.Modal) return null;
+        return bootstrap.Modal.getOrCreateInstance(modalEl);
     };
 
     const resetTransportForm = () => {
@@ -2531,13 +2589,23 @@
     const setTicketFormMode = (mode) => {
         const submit = document.getElementById('ticketSubmit');
         const cancel = document.getElementById('ticketCancel');
+        const modalLabel = document.getElementById('ticketModalLabel');
         const isEdit = mode === 'edit';
         if (submit) {
             submit.textContent = isEdit ? 'Update ticket' : 'Add ticket';
         }
+        if (modalLabel) {
+            modalLabel.textContent = isEdit ? 'Edit ticket' : 'Add ticket';
+        }
         if (cancel) {
             cancel.classList.toggle('d-none', !isEdit);
         }
+    };
+
+    const getTicketModalInstance = () => {
+        const modalEl = document.getElementById('ticketModal');
+        if (!modalEl || !window.bootstrap?.Modal) return null;
+        return bootstrap.Modal.getOrCreateInstance(modalEl);
     };
 
     const resetTicketForm = () => {
@@ -2660,6 +2728,8 @@
 
         const flightForm = document.getElementById('flightForm');
         const flightError = document.getElementById('flightError');
+        const openFlightModal = document.getElementById('openFlightModal');
+        const flightModal = document.getElementById('flightModal');
         if (flightForm) {
             flightForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -2737,12 +2807,24 @@
                     }
                     resetFlightForm();
                     await refreshData();
+                    getFlightModalInstance()?.hide();
                 } catch (err) {
                     if (flightError) {
                         flightError.textContent = err.message;
                         flightError.classList.remove('d-none');
                     }
                 }
+            });
+        }
+        if (openFlightModal) {
+            openFlightModal.addEventListener('click', () => {
+                resetFlightForm();
+                setFlightFormMode('create');
+            });
+        }
+        if (flightModal) {
+            flightModal.addEventListener('hidden.bs.modal', () => {
+                resetFlightForm();
             });
         }
         const flightCancel = document.getElementById('flightCancel');
@@ -2754,6 +2836,8 @@
 
         const lodgingForm = document.getElementById('lodgingForm');
         const lodgingError = document.getElementById('lodgingError');
+        const openLodgingModal = document.getElementById('openLodgingModal');
+        const lodgingModal = document.getElementById('lodgingModal');
         if (lodgingForm) {
             lodgingForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -2828,6 +2912,7 @@
                     }
                     resetLodgingForm();
                     await refreshData();
+                    getLodgingModalInstance()?.hide();
                 } catch (err) {
                     if (lodgingError) {
                         lodgingError.textContent = err.message;
@@ -2842,9 +2927,22 @@
                 resetLodgingForm();
             });
         }
+        if (openLodgingModal) {
+            openLodgingModal.addEventListener('click', () => {
+                resetLodgingForm();
+                setLodgingFormMode('create');
+            });
+        }
+        if (lodgingModal) {
+            lodgingModal.addEventListener('hidden.bs.modal', () => {
+                resetLodgingForm();
+            });
+        }
 
         const transportForm = document.getElementById('transportForm');
         const transportError = document.getElementById('transportError');
+        const openTransportModal = document.getElementById('openTransportModal');
+        const transportModal = document.getElementById('transportModal');
         if (transportForm) {
             transportForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -2907,6 +3005,7 @@
                     }
                     resetTransportForm();
                     await refreshData();
+                    getTransportModalInstance()?.hide();
                 } catch (err) {
                     if (transportError) {
                         transportError.textContent = err.message;
@@ -2921,9 +3020,22 @@
                 resetTransportForm();
             });
         }
+        if (openTransportModal) {
+            openTransportModal.addEventListener('click', () => {
+                resetTransportForm();
+                setTransportFormMode('create');
+            });
+        }
+        if (transportModal) {
+            transportModal.addEventListener('hidden.bs.modal', () => {
+                resetTransportForm();
+            });
+        }
 
         const ticketForm = document.getElementById('ticketForm');
         const ticketError = document.getElementById('ticketError');
+        const openTicketModal = document.getElementById('openTicketModal');
+        const ticketModal = document.getElementById('ticketModal');
         if (ticketForm) {
             ticketForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -2990,6 +3102,7 @@
                     }
                     resetTicketForm();
                     await refreshData();
+                    getTicketModalInstance()?.hide();
                 } catch (err) {
                     if (ticketError) {
                         ticketError.textContent = err.message;
@@ -3001,6 +3114,17 @@
         const ticketCancel = document.getElementById('ticketCancel');
         if (ticketCancel) {
             ticketCancel.addEventListener('click', () => {
+                resetTicketForm();
+            });
+        }
+        if (openTicketModal) {
+            openTicketModal.addEventListener('click', () => {
+                resetTicketForm();
+                setTicketFormMode('create');
+            });
+        }
+        if (ticketModal) {
+            ticketModal.addEventListener('hidden.bs.modal', () => {
                 resetTicketForm();
             });
         }
@@ -3048,6 +3172,8 @@
         const expenseForm = document.getElementById('expenseForm');
         const expenseError = document.getElementById('expenseError');
         const splitTargetsError = document.getElementById('splitTargetsError');
+        const openExpenseModal = document.getElementById('openExpenseModal');
+        const expenseModal = document.getElementById('expenseModal');
         if (expenseForm) {
             expenseForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -3128,6 +3254,7 @@
                     });
                     resetExpenseForm();
                     await refreshData();
+                    getExpenseModalInstance()?.hide();
                 } catch (err) {
                     if (expenseError) {
                         expenseError.textContent = err.message;
@@ -3155,6 +3282,17 @@
                     resetExpenseForm();
                 });
             }
+        }
+        if (openExpenseModal) {
+            openExpenseModal.addEventListener('click', () => {
+                resetExpenseForm();
+                setExpenseFormMode('create');
+            });
+        }
+        if (expenseModal) {
+            expenseModal.addEventListener('hidden.bs.modal', () => {
+                resetExpenseForm();
+            });
         }
     };
 
@@ -3367,7 +3505,7 @@
                     if (!expense) return;
                     state.editing.expenseId = id;
                     populateExpenseForm(expense);
-                    document.getElementById('expenseForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    getExpenseModalInstance()?.show();
                     return;
                 }
                 if (action !== 'delete-expense') return;
@@ -3409,6 +3547,7 @@
                     populateFlightForm(flight);
                     setFlightFormMode('edit');
                     flightForm?.classList.remove('was-validated');
+                    getFlightModalInstance()?.show();
                     return;
                 }
                 if (action !== 'delete-flight') return;
@@ -3441,7 +3580,7 @@
                     populateLodgingForm(lodging);
                     setLodgingFormMode('edit');
                     lodgingForm?.classList.remove('was-validated');
-                    lodgingForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    getLodgingModalInstance()?.show();
                     return;
                 }
                 if (action !== 'delete-lodging') return;
@@ -3477,7 +3616,7 @@
                     setTransportFormMode('edit');
                     const transportForm = document.getElementById('transportForm');
                     transportForm?.classList.remove('was-validated');
-                    transportForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    getTransportModalInstance()?.show();
                     return;
                 }
                 if (action !== 'delete-transport') return;
@@ -3513,7 +3652,7 @@
                     setTicketFormMode('edit');
                     const ticketForm = document.getElementById('ticketForm');
                     ticketForm?.classList.remove('was-validated');
-                    ticketForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    getTicketModalInstance()?.show();
                     return;
                 }
                 if (action !== 'delete-ticket') return;
