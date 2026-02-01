@@ -117,10 +117,10 @@
         const rows = document.getElementById('groupRows');
         const cards = document.getElementById('groupCards');
         const count = document.getElementById('groupCount');
-        if (!rows || !cards || !count) return;
-        rows.innerHTML = '';
-        cards.innerHTML = '';
-        count.textContent = `${groups.length} group${groups.length === 1 ? '' : 's'}`;
+        if (!rows && !cards) return;
+        if (rows) rows.innerHTML = '';
+        if (cards) cards.innerHTML = '';
+        if (count) count.textContent = `${groups.length} group${groups.length === 1 ? '' : 's'}`;
 
         if (!groups.length) {
             const emptyState = `
@@ -135,8 +135,8 @@
                     </a>
                 </div>
             `;
-            rows.innerHTML = `<tr><td colspan="5">${emptyState}</td></tr>`;
-            cards.innerHTML = emptyState;
+            if (rows) rows.innerHTML = `<tr><td colspan="5">${emptyState}</td></tr>`;
+            if (cards) cards.innerHTML = emptyState;
             return;
         }
 
@@ -182,12 +182,13 @@
                     </div>
                 </td>
             `;
-            rows.appendChild(tr);
+            if (rows) rows.appendChild(tr);
 
             // Render card for mobile
-            const card = document.createElement('div');
-            card.className = 'card mb-3';
-            card.innerHTML = `
+            if (cards) {
+                const card = document.createElement('div');
+                card.className = 'card mb-3';
+                card.innerHTML = `
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between mb-2">
                         <div class="flex-grow-1">
@@ -223,7 +224,8 @@
                     </div>
                 </div>
             `;
-            cards.appendChild(card);
+                cards.appendChild(card);
+            }
         });
     };
 
