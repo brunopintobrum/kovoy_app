@@ -166,24 +166,33 @@
         }
 
         groups.forEach((group) => {
-            console.log(`Group: ${group.name}, Role: ${group.role}, Can Leave: ${group.role !== 'owner'}`);
+            // Debug completo
+            console.log(`========================================`);
+            console.log(`Group: ${group.name}`);
+            console.log(`Role from API: "${group.role}"`);
+            console.log(`Role type: ${typeof group.role}`);
+
             const roleLabel = group.role === 'admin' ? 'member' : group.role;
             const isOwner = group.role === 'owner';
             const roleBadgeClass = isOwner
                 ? 'bg-soft-success text-success'
                 : 'bg-soft-primary text-primary';
-            const canLeave = group.role !== 'owner';
+
+            // APENAS owner não pode sair
+            const canLeave = (group.role !== 'owner');
+
+            console.log(`Is Owner: ${isOwner}`);
+            console.log(`Can Leave: ${canLeave}`);
+
             const leaveMenuItem = canLeave
                 ? `<li><hr class="dropdown-divider"></li>
                    <li><a class="dropdown-item text-danger" href="javascript:void(0);" data-action="leave" data-id="${group.id}" data-name="${group.name}">
                         <i class="bx bx-log-out me-2"></i>Leave group
                    </a></li>`
                 : '';
-            if (canLeave) {
-                console.log(`✅ Leave menu GERADO para ${group.name}`);
-            } else {
-                console.log(`❌ Leave menu NÃO gerado para ${group.name} (owner)`);
-            }
+
+            console.log(`Leave menu HTML length: ${leaveMenuItem.length}`);
+            console.log(canLeave ? `✅ Leave menu GERADO` : `❌ Leave menu NÃO gerado`);
             const tr = document.createElement('tr');
             const memberCount = group.memberCount || 0;
             const memberText = memberCount === 1 ? 'member' : 'members';
