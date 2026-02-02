@@ -5,12 +5,20 @@
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
     overflow: visible !important; /* Permite dropdown sair do card */
+    position: relative;
+    z-index: 1;
 }
 
 .group-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
     border-left-color: #5b73e8;
+    z-index: 2;
+}
+
+/* Card com dropdown aberto tem prioridade máxima */
+.group-card:has(.btn-group.show) {
+    z-index: 10000 !important;
 }
 
 /* Card Body - Garantir que dropdown não seja cortado */
@@ -21,7 +29,7 @@
 
 /* Dropdown menu - Garantir que apareça acima */
 .group-card .dropdown-menu {
-    z-index: 1050 !important;
+    z-index: 9999 !important;
 }
 
 /* FIX CRÍTICO: Dropdown sendo cortado */
@@ -29,16 +37,25 @@
     max-height: none !important;
     overflow: visible !important;
     min-width: 200px !important;
+    z-index: 9999 !important;
+    position: absolute !important;
 }
 
 .dropdown-menu-end {
     max-height: none !important;
     overflow: visible !important;
+    z-index: 9999 !important;
 }
 
 /* Garantir que btn-group não limite dropdown */
 .btn-group {
     position: relative;
+    z-index: 1;
+}
+
+/* CRITICAL: Dropdown menu deve estar SEMPRE acima dos cards */
+.btn-group.show {
+    z-index: 10000 !important;
 }
 
 .btn-group .dropdown-menu {
@@ -47,6 +64,7 @@
     top: 100% !important;
     right: 0 !important;
     left: auto !important;
+    z-index: 10001 !important;
 }
 
 /* Leave group item - Destacar */
