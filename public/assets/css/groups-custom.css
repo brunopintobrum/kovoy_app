@@ -4,12 +4,41 @@
 .group-card {
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
+    overflow: visible !important; /* Permite dropdown sair do card */
 }
 
 .group-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
     border-left-color: #5b73e8;
+}
+
+/* Card Body - Garantir que dropdown não seja cortado */
+.group-card .card-body {
+    overflow: visible !important;
+    position: relative;
+}
+
+/* Dropdown menu - Garantir que apareça acima */
+.group-card .dropdown-menu {
+    z-index: 1050 !important;
+}
+
+/* Leave group item - Destacar */
+.dropdown-item.text-danger {
+    color: #dc3545 !important;
+    font-weight: 500;
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* Dropdown divider */
+.dropdown-divider {
+    margin: 0.5rem 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* Table Row Hover */

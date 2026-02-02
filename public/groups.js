@@ -179,6 +179,11 @@
                         <i class="bx bx-log-out me-2"></i>Leave group
                    </a></li>`
                 : '';
+            if (canLeave) {
+                console.log(`✅ Leave menu GERADO para ${group.name}`);
+            } else {
+                console.log(`❌ Leave menu NÃO gerado para ${group.name} (owner)`);
+            }
             const tr = document.createElement('tr');
             const memberCount = group.memberCount || 0;
             const memberText = memberCount === 1 ? 'member' : 'members';
