@@ -10,6 +10,7 @@
     <link href="assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" />
     <link href="assets/css/icons.min.css" rel="stylesheet" />
     <link href="assets/css/app.min.css" id="app-style" rel="stylesheet" />
+    <link href="assets/css/groups-custom.css" rel="stylesheet" />
 </head>
 <body data-layout-mode="light" data-topbar="light" data-sidebar="dark">
     <div id="layout-wrapper">
@@ -146,12 +147,16 @@
                                     <p class="text-muted">Start a new trip group.</p>
                                     <form id="createGroupForm" class="needs-validation" novalidate>
                                         <div class="mb-3">
-                                            <label class="form-label" for="groupName">Group name</label>
-                                            <input class="form-control" id="groupName" name="name" required>
+                                            <label class="form-label" for="groupName">
+                                                <i class="bx bx-group text-primary me-1"></i>Group name
+                                            </label>
+                                            <input class="form-control" id="groupName" name="name" placeholder="Enter group name..." required>
                                             <div class="invalid-feedback">Enter a group name.</div>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label" for="groupCurrency">Default currency</label>
+                                            <label class="form-label" for="groupCurrency">
+                                                <i class="bx bx-dollar text-primary me-1"></i>Default currency
+                                            </label>
                                             <select class="form-select" id="groupCurrency" name="defaultCurrency" required>
                                                 <option value="USD">USD</option>
                                                 <option value="CAD">CAD</option>
@@ -159,8 +164,10 @@
                                             </select>
                                             <div class="invalid-feedback">Select a currency.</div>
                                         </div>
-                                        <div class="d-flex justify-content-end">
-                                            <button class="btn btn-primary" type="submit">Create group</button>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="bx bx-plus-circle me-1"></i>Create group
+                                            </button>
                                         </div>
                                     </form>
                                     <div class="alert alert-danger d-none mt-3" id="createGroupError"></div>
@@ -182,9 +189,14 @@
                                     </div>
                                     <form id="acceptInviteForm" class="needs-validation" novalidate>
                                         <div class="mb-3">
-                                            <label class="form-label" for="inviteToken">Invite token</label>
-                                            <input class="form-control" id="inviteToken" name="token" placeholder="Paste your token here" required>
+                                            <label class="form-label" for="inviteToken">
+                                                <i class="bx bx-key text-primary me-1"></i>Invite token
+                                            </label>
+                                            <input class="form-control" id="inviteToken" name="token" placeholder="Paste your invite token here..." required>
                                             <div class="invalid-feedback">Enter an invite token.</div>
+                                            <div class="form-text">
+                                                <i class="bx bx-info-circle"></i> Don't have a token? Ask a group owner to send you one.
+                                            </div>
                                         </div>
                                         <div class="d-flex justify-content-end">
                                             <button class="btn btn-primary" type="submit">

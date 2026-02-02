@@ -1,0 +1,76 @@
+/* Groups Page Custom Styles */
+
+/* Hover Effects for Cards */
+.group-card {
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.group-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    border-left-color: #5b73e8;
+}
+
+/* Table Row Hover */
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Avatar Sizes */
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+}
+
+.avatar-md {
+    width: 56px;
+    height: 56px;
+}
+
+/* Button Improvements */
+.btn-primary {
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(91, 115, 232, 0.3);
+}
+
+/* Form Input Icons */
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control:focus {
+    border-color: #5b73e8;
+    box-shadow: 0 0 0 0.2rem rgba(91, 115, 232, 0.15);
+}
+
+/* Accept Invite Card */
+#acceptInvite .card {
+    transition: all 0.3s ease;
+}
+
+#acceptInvite .card:hover {
+    box-shadow: 0 4px 12px rgba(91, 115, 232, 0.2);
+}
+
+/* Badge Improvements */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Smooth animations */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

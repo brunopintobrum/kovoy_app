@@ -18,6 +18,31 @@
         toast.show();
     };
 
+    const getGroupInitials = (name) => {
+        if (!name) return '?';
+        const words = name.trim().split(/\s+/);
+        if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+        return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+    };
+
+    const getGroupAvatarColor = (name) => {
+        const colors = [
+            { bg: '#667eea', text: '#fff' }, // Purple
+            { bg: '#764ba2', text: '#fff' }, // Deep purple
+            { bg: '#f093fb', text: '#fff' }, // Pink
+            { bg: '#4facfe', text: '#fff' }, // Blue
+            { bg: '#43e97b', text: '#fff' }, // Green
+            { bg: '#fa709a', text: '#fff' }, // Rose
+            { bg: '#feca57', text: '#2c3e50' }, // Yellow
+            { bg: '#ff6b6b', text: '#fff' }  // Red
+        ];
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return colors[Math.abs(hash) % colors.length];
+    };
+
     const apiRequest = async (url, options = {}) => {
         const method = (options.method || 'GET').toUpperCase();
         const headers = { ...(options.headers || {}) };
@@ -155,11 +180,21 @@
             const tr = document.createElement('tr');
             const memberCount = group.memberCount || 0;
             const memberText = memberCount === 1 ? 'member' : 'members';
+            const initials = getGroupInitials(group.name);
+            const avatarColor = getGroupAvatarColor(group.name);
             tr.innerHTML = `
                 <td>
-                    <div class="fw-semibold">${group.name}</div>
-                    <div class="text-muted small">
-                        <i class="bx bx-user"></i> ${memberCount} ${memberText}
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
+                             style="background: ${avatarColor.bg}; color: ${avatarColor.text}; font-weight: 600; font-size: 14px;">
+                            ${initials}
+                        </div>
+                        <div>
+                            <div class="fw-semibold">${group.name}</div>
+                            <div class="text-muted small">
+                                <i class="bx bx-user"></i> ${memberCount} ${memberText}
+                            </div>
+                        </div>
                     </div>
                 </td>
                 <td>${group.defaultCurrency}</td>
@@ -167,7 +202,7 @@
                 <td class="text-muted">${new Date(group.createdAt).toLocaleDateString()}</td>
                 <td class="text-end">
                     <a class="btn btn-sm btn-primary" href="/dashboard?groupId=${group.id}">
-                        <i class="bx bx-right-arrow-alt"></i> Open
+                        <i class="bx bx-right-arrow-alt me-1"></i> Open Group
                     </a>
                     <div class="btn-group ms-1">
                         <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -187,28 +222,37 @@
             // Render card for mobile
             if (cards) {
                 const card = document.createElement('div');
-                card.className = 'card mb-3';
+                card.className = 'card mb-3 group-card';
                 card.innerHTML = `
                 <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between mb-2">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="avatar-md rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0"
+                             style="background: ${avatarColor.bg}; color: ${avatarColor.text}; font-weight: 600; font-size: 20px;">
+                            ${initials}
+                        </div>
                         <div class="flex-grow-1">
-                            <h5 class="mb-1">${group.name}</h5>
-                            <div class="text-muted small mb-2">
-                                <i class="bx bx-user"></i> ${memberCount} ${memberText}
-                                <span class="mx-1">•</span>
-                                ${group.defaultCurrency}
-                            </div>
-                            <div>
-                                <span class="badge ${roleBadgeClass} text-uppercase me-2">${roleLabel}</span>
-                                <span class="text-muted small">
-                                    <i class="bx bx-calendar"></i> ${new Date(group.createdAt).toLocaleDateString()}
+                            <h5 class="mb-2 fw-bold">${group.name}</h5>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <span class="badge ${roleBadgeClass} text-uppercase">
+                                    <i class="bx ${elevatedRole ? 'bx-crown' : 'bx-user'} me-1"></i>${roleLabel}
                                 </span>
+                            </div>
+                            <div class="text-muted small">
+                                <div class="mb-1">
+                                    <i class="bx bx-user text-primary"></i> ${memberCount} ${memberText}
+                                </div>
+                                <div class="mb-1">
+                                    <i class="bx bx-dollar text-primary"></i> ${group.defaultCurrency}
+                                </div>
+                                <div>
+                                    <i class="bx bx-calendar text-primary"></i> ${new Date(group.createdAt).toLocaleDateString()}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex gap-2 mt-3">
+                    <div class="d-flex gap-2">
                         <a class="btn btn-primary btn-sm flex-grow-1" href="/dashboard?groupId=${group.id}">
-                            <i class="bx bx-right-arrow-alt"></i> Open
+                            <i class="bx bx-right-arrow-alt me-1"></i> Open Group
                         </a>
                         <div class="btn-group">
                             <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
