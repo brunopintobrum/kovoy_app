@@ -228,6 +228,10 @@
                             <li><a class="dropdown-item" href="/dashboard?groupId=${group.id}">
                                 <i class="bx bx-cog me-2"></i>Group settings
                             </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-warning" href="javascript:void(0);">
+                                <i class="bx bx-test-tube me-2"></i>TEST ITEM (always visible)
+                            </a></li>
                             ${leaveMenuItem}
                         </ul>
                     </div>
@@ -277,6 +281,10 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="/dashboard?groupId=${group.id}">
                                     <i class="bx bx-cog me-2"></i>Group settings
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-warning" href="javascript:void(0);">
+                                    <i class="bx bx-test-tube me-2"></i>TEST ITEM (always visible)
                                 </a></li>
                                 ${leaveMenuItem}
                             </ul>
