@@ -166,14 +166,16 @@
         }
 
         groups.forEach((group) => {
+            console.log(`Group: ${group.name}, Role: ${group.role}, Can Leave: ${group.role !== 'owner'}`);
             const roleLabel = group.role === 'admin' ? 'member' : group.role;
-            const elevatedRole = group.role === 'owner';
-            const roleBadgeClass = elevatedRole
+            const isOwner = group.role === 'owner';
+            const roleBadgeClass = isOwner
                 ? 'bg-soft-success text-success'
                 : 'bg-soft-primary text-primary';
-            const canLeave = !elevatedRole;
+            const canLeave = group.role !== 'owner';
             const leaveMenuItem = canLeave
-                ? `<li><a class="dropdown-item text-danger" href="javascript:void(0);" data-action="leave" data-id="${group.id}" data-name="${group.name}">
+                ? `<li><hr class="dropdown-divider"></li>
+                   <li><a class="dropdown-item text-danger" href="javascript:void(0);" data-action="leave" data-id="${group.id}" data-name="${group.name}">
                         <i class="bx bx-log-out me-2"></i>Leave group
                    </a></li>`
                 : '';
@@ -234,7 +236,7 @@
                             <h5 class="mb-2 fw-bold">${group.name}</h5>
                             <div class="d-flex flex-wrap gap-2 mb-2">
                                 <span class="badge ${roleBadgeClass} text-uppercase">
-                                    <i class="bx ${elevatedRole ? 'bx-crown' : 'bx-user'} me-1"></i>${roleLabel}
+                                    <i class="bx ${isOwner ? 'bx-crown' : 'bx-user'} me-1"></i>${roleLabel}
                                 </span>
                             </div>
                             <div class="text-muted small">
