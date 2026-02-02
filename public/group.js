@@ -1008,8 +1008,30 @@
         try {
             const me = await apiRequest('/api/me');
             const email = me.email || 'Account';
-            const userEmail = document.getElementById('userEmail');
-            if (userEmail) userEmail.textContent = email;
+
+            // Determine display name with fallback logic
+            let displayName = me.display_name || me.displayName;
+            if (!displayName && (me.first_name || me.firstName || me.last_name || me.lastName)) {
+                const firstName = me.first_name || me.firstName || '';
+                const lastName = me.last_name || me.lastName || '';
+                displayName = `${firstName} ${lastName}`.trim();
+            }
+            if (!displayName) {
+                displayName = email.split('@')[0];
+            }
+
+            // Set display name in header button
+            const userDisplayName = document.getElementById('userDisplayName');
+            if (userDisplayName) userDisplayName.textContent = displayName;
+
+            // Set both name and email in dropdown header
+            const dropdownUserName = document.getElementById('dropdownUserName');
+            if (dropdownUserName) dropdownUserName.textContent = displayName;
+
+            const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+            if (dropdownUserEmail) dropdownUserEmail.textContent = email;
+
+            // Set avatar if available
             if (me.avatarUrl) {
                 const avatar = document.getElementById('userAvatar');
                 if (avatar) avatar.src = me.avatarUrl;
