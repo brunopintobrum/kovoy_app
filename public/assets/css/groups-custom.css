@@ -24,6 +24,31 @@
     z-index: 1050 !important;
 }
 
+/* FIX CRÍTICO: Dropdown sendo cortado */
+.dropdown-menu {
+    max-height: none !important;
+    overflow: visible !important;
+    min-width: 200px !important;
+}
+
+.dropdown-menu-end {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* Garantir que btn-group não limite dropdown */
+.btn-group {
+    position: relative;
+}
+
+.btn-group .dropdown-menu {
+    position: absolute !important;
+    will-change: transform;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+}
+
 /* Leave group item - Destacar */
 .dropdown-item.text-danger {
     color: #dc3545 !important;
@@ -49,6 +74,19 @@
 .table tbody tr:hover {
     background-color: #f8f9fa;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* FIX: Permitir dropdown sair da tabela */
+.table-responsive {
+    overflow: visible !important;
+}
+
+.table {
+    overflow: visible !important;
+}
+
+.card-body {
+    overflow: visible !important;
 }
 
 /* Avatar Sizes */
