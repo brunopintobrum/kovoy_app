@@ -189,7 +189,7 @@
 7. Hospedagens V2: Listagem com resumo de quartos e status
 8. Transportes V2: Listagem com origem/destino + horario em destaque
 9. Tickets V2: Listagem com participantes destacados
-10. Filtros: Voos por cia/rota/status
+10. Filtros: Voos por cia/rota/status [feito]
 11. Filtros: Hospedagens por cidade/status
 12. Filtros: Transportes por status/fornecedor
 13. Filtros: Tickets por tipo/status/data
@@ -231,7 +231,7 @@
   - Tickets: participantes destacados (feito)
 - V2.3 (Usabilidade de selecao e filtros)
   - Voos: seletor de passageiros com busca (feito)
-  - Voos: filtros por cia/rota/status
+  - Voos: filtros por cia/rota/status (feito)
   - Hospedagens: filtros por cidade/status
   - Transportes: filtros por status/fornecedor
   - Tickets: filtros por tipo/status/data

@@ -742,6 +742,32 @@
                                     Add flight
                                 </button>
                             </div>
+                            <div class="row g-2 mt-3 align-items-end" id="flightFilters">
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm mb-1" for="filterFlightAirline">Airline</label>
+                                    <input type="text" class="form-control form-control-sm" id="filterFlightAirline" placeholder="Filter by airline...">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label form-label-sm mb-1" for="filterFlightFrom">From</label>
+                                    <input type="text" class="form-control form-control-sm" id="filterFlightFrom" placeholder="Filter...">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label form-label-sm mb-1" for="filterFlightTo">To</label>
+                                    <input type="text" class="form-control form-control-sm" id="filterFlightTo" placeholder="Filter...">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label form-label-sm mb-1" for="filterFlightStatus">Status</label>
+                                    <select class="form-select form-select-sm" id="filterFlightStatus">
+                                        <option value="">All</option>
+                                        <option value="planned">Planned</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="due">Due</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="clearFlightFilters">Clear filters</button>
+                                </div>
+                            </div>
                             <div class="table-responsive mt-3">
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">

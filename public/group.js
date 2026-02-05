@@ -32,6 +32,9 @@
             ticketId: null,
             expenseId: null,
             expenseConfig: null
+        },
+        filters: {
+            flights: { airline: '', from: '', to: '', status: '' }
         }
     };
 
@@ -1364,8 +1367,29 @@
             list.innerHTML = '<tr><td colspan="8" class="text-muted text-center">No flights yet.</td></tr>';
             return;
         }
+        const filters = state.filters.flights;
+        const filtered = state.flights.filter((flight) => {
+            if (filters.airline && !flight.airline?.toLowerCase().includes(filters.airline.toLowerCase())) return false;
+            if (filters.from) {
+                const fromMatch = flight.fromLabel?.toLowerCase().includes(filters.from.toLowerCase()) ||
+                    flight.from?.toLowerCase().includes(filters.from.toLowerCase());
+                if (!fromMatch) return false;
+            }
+            if (filters.to) {
+                const toMatch = flight.toLabel?.toLowerCase().includes(filters.to.toLowerCase()) ||
+                    flight.to?.toLowerCase().includes(filters.to.toLowerCase());
+                if (!toMatch) return false;
+            }
+            if (filters.status && flight.status !== filters.status) return false;
+            return true;
+        });
+        if (!filtered.length) {
+            const message = state.flights.length ? 'No flights match the filters.' : 'No flights yet.';
+            list.innerHTML = `<tr><td colspan="8" class="text-muted text-center">${message}</td></tr>`;
+            return;
+        }
         const participantMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
-        state.flights.forEach((flight) => {
+        filtered.forEach((flight) => {
             const participantNames = (flight.participantIds || [])
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
@@ -3901,6 +3925,33 @@
         }
     };
 
+    const bindFlightFilters = () => {
+        const airlineInput = document.getElementById('filterFlightAirline');
+        const fromInput = document.getElementById('filterFlightFrom');
+        const toInput = document.getElementById('filterFlightTo');
+        const statusSelect = document.getElementById('filterFlightStatus');
+        const clearBtn = document.getElementById('clearFlightFilters');
+        const updateFilters = () => {
+            state.filters.flights.airline = airlineInput?.value || '';
+            state.filters.flights.from = fromInput?.value || '';
+            state.filters.flights.to = toInput?.value || '';
+            state.filters.flights.status = statusSelect?.value || '';
+            renderFlights();
+        };
+        airlineInput?.addEventListener('input', updateFilters);
+        fromInput?.addEventListener('input', updateFilters);
+        toInput?.addEventListener('input', updateFilters);
+        statusSelect?.addEventListener('change', updateFilters);
+        clearBtn?.addEventListener('click', () => {
+            if (airlineInput) airlineInput.value = '';
+            if (fromInput) fromInput.value = '';
+            if (toInput) toInput.value = '';
+            if (statusSelect) statusSelect.value = '';
+            state.filters.flights = { airline: '', from: '', to: '', status: '' };
+            renderFlights();
+        });
+    };
+
     const bindSplitTypeToggle = () => {
         const inputs = document.querySelectorAll('input[name="splitType"]');
         inputs.forEach((input) => {
@@ -4115,6 +4166,7 @@
         bindInviteForm();
         bindMemberRoleActions();
         bindDeleteActions();
+        bindFlightFilters();
         bindSplitTypeToggle();
         bindSplitModeToggle();
         bindModuleExpenseToggles();
