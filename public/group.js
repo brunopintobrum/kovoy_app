@@ -4471,5 +4471,38 @@
         await refreshData();
     };
 
+    // Force mobile table styles via JavaScript (CSP prevents inline scripts)
+    const applyMobileTableStyles = () => {
+        if (window.matchMedia('(max-width: 767px)').matches) {
+            document.querySelectorAll('table.table-mobile-cards').forEach(table => {
+                const thead = table.querySelector('thead');
+                if (thead) {
+                    thead.style.cssText = 'display: none !important; visibility: hidden !important;';
+                }
+                table.style.cssText = 'display: block !important; width: 100% !important;';
+                const tbody = table.querySelector('tbody');
+                if (tbody) {
+                    tbody.style.cssText = 'display: block !important; width: 100% !important;';
+                    tbody.querySelectorAll('tr').forEach(tr => {
+                        tr.style.cssText = 'display: block !important; margin-bottom: 1rem !important; border: 1px solid #dee2e6 !important; border-radius: 0.25rem !important; padding: 1rem !important; background-color: #fff !important;';
+                        tr.querySelectorAll('td').forEach((td, index, arr) => {
+                            if (index === arr.length - 1) {
+                                td.style.cssText = 'display: block !important; width: 100% !important; padding: 1rem 0 0 0 !important; border: none !important; border-top: 1px solid #dee2e6 !important; margin-top: 0.75rem !important; text-align: right !important;';
+                            } else {
+                                td.style.cssText = 'display: block !important; width: 100% !important; padding: 0.5rem 0 !important; border: none !important; position: relative !important; padding-left: 50% !important; text-align: left !important; min-height: 1.5rem !important;';
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    };
+
+    window.addEventListener('resize', applyMobileTableStyles);
+    window.addEventListener('orientationchange', applyMobileTableStyles);
+
     init();
+
+    setTimeout(applyMobileTableStyles, 100);
+    setTimeout(applyMobileTableStyles, 500);
 })();
