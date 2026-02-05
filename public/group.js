@@ -4477,19 +4477,26 @@
             document.querySelectorAll('table.table-mobile-cards').forEach(table => {
                 const thead = table.querySelector('thead');
                 if (thead) {
-                    thead.style.cssText = 'display: none !important; visibility: hidden !important;';
+                    thead.style.cssText = 'display: none !important;';
                 }
-                table.style.cssText = 'display: block !important; width: 100% !important;';
+                table.style.cssText = 'display: block !important; width: 100% !important; border: 0 !important;';
                 const tbody = table.querySelector('tbody');
                 if (tbody) {
                     tbody.style.cssText = 'display: block !important; width: 100% !important;';
                     tbody.querySelectorAll('tr').forEach(tr => {
-                        tr.style.cssText = 'display: block !important; margin-bottom: 1rem !important; border: 1px solid #dee2e6 !important; border-radius: 0.25rem !important; padding: 1rem !important; background-color: #fff !important;';
+                        tr.style.cssText = 'display: block !important; margin-bottom: 1rem !important; border: 1px solid #e3e6ea !important; border-radius: 0.375rem !important; padding: 0.75rem !important; background: white !important; box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;';
                         tr.querySelectorAll('td').forEach((td, index, arr) => {
+                            const label = td.getAttribute('data-label');
                             if (index === arr.length - 1) {
-                                td.style.cssText = 'display: block !important; width: 100% !important; padding: 1rem 0 0 0 !important; border: none !important; border-top: 1px solid #dee2e6 !important; margin-top: 0.75rem !important; text-align: right !important;';
-                            } else {
-                                td.style.cssText = 'display: block !important; width: 100% !important; padding: 0.5rem 0 !important; border: none !important; position: relative !important; padding-left: 50% !important; text-align: left !important; min-height: 1.5rem !important;';
+                                // Actions cell
+                                td.style.cssText = 'display: block !important; width: 100% !important; padding: 0.75rem 0 0 0 !important; border: none !important; border-top: 1px solid #e3e6ea !important; margin-top: 0.5rem !important; text-align: center !important;';
+                            } else if (label) {
+                                // Regular cell with label
+                                if (!td.querySelector('.mobile-label')) {
+                                    const originalContent = td.innerHTML;
+                                    td.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.375rem 0; min-height: 2rem;"><span class="mobile-label" style="font-weight: 600; color: #495057; font-size: 0.875rem; flex-shrink: 0; margin-right: 1rem;">${label}:</span><span style="text-align: right; color: #212529; flex-grow: 1;">${originalContent}</span></div>`;
+                                }
+                                td.style.cssText = 'display: block !important; width: 100% !important; border: none !important; padding: 0 !important;';
                             }
                         });
                     });
