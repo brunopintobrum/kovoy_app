@@ -168,7 +168,7 @@
 - [x] Desabilitar botoes durante requisicoes API (prevenir duplicatas)
 - [x] Indicador visual de expense vinculada nas listagens dos modulos
 - [ ] Ordenacao por coluna nas tabelas (client-side)
-- [ ] Estado vazio com CTA nos modulos
+- [x] Estado vazio com CTA nos modulos
 - [ ] Listagens responsivas (mobile) em group-details
 - [ ] Categorias avancadas e filtros (por data, status, responsavel)
 - [ ] Multi-moeda e cambio (taxas por data + conversao no dashboard)
@@ -205,7 +205,7 @@
 23. Desabilitar botoes durante requisicoes API [feito]
 24. Indicador visual de expense vinculada nas listagens [feito]
 25. Ordenacao por coluna nas tabelas
-26. Estado vazio com CTA nos modulos
+26. Estado vazio com CTA nos modulos [feito]
 27. Listagens responsivas (mobile) em group-details
 
 ## Funcionalidades de perfil
@@ -246,7 +246,7 @@
   - Desabilitar botoes durante requisicoes API (prevenir duplicatas) (feito)
   - Indicador visual de expense vinculada nas listagens (feito)
   - Ordenacao por coluna nas tabelas (client-side)
-  - Estado vazio com CTA nos modulos
+  - Estado vazio com CTA nos modulos (feito)
   - Listagens responsivas (mobile) em group-details
 
 

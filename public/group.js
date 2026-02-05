@@ -1269,7 +1269,13 @@
         select.innerHTML = '<option value="">No family</option>';
 
         if (!state.families.length) {
-            list.innerHTML = '<li class="list-group-item text-muted text-center">No families yet.</li>';
+            list.innerHTML = `
+                <li class="list-group-item text-center py-4">
+                    <div class="text-muted mb-3">No families yet. Create your first family to group participants together.</div>
+                    <button class="btn btn-sm btn-primary" onclick="document.getElementById('familyName').focus()">
+                        <i class="mdi mdi-plus me-1"></i>Create first family
+                    </button>
+                </li>`;
             return;
         }
 
@@ -1302,7 +1308,13 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.participants.length) {
-            list.innerHTML = '<tr><td colspan="4" class="text-muted text-center">No participants yet.</td></tr>';
+            list.innerHTML = `
+                <tr><td colspan="4" class="text-center py-4">
+                    <div class="text-muted mb-3">No participants yet. Add people who will join this trip.</div>
+                    <button class="btn btn-sm btn-primary" onclick="document.getElementById('participantName').focus()">
+                        <i class="mdi mdi-plus me-1"></i>Add first participant
+                    </button>
+                </td></tr>`;
             return;
         }
         const familyMap = new Map(state.families.map((family) => [family.id, family.name]));
@@ -1331,7 +1343,13 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.expenses.length) {
-            list.innerHTML = '<tr><td colspan="6" class="text-muted text-center">No expenses yet.</td></tr>';
+            list.innerHTML = `
+                <tr><td colspan="6" class="text-center py-4">
+                    <div class="text-muted mb-3">No expenses yet. Start tracking shared costs for this trip.</div>
+                    <button class="btn btn-sm btn-primary" onclick="document.getElementById('openExpenseModal')?.click()">
+                        <i class="mdi mdi-plus me-1"></i>Add first expense
+                    </button>
+                </td></tr>`;
             return;
         }
         const participantMap = new Map(state.participants.map((p) => [p.id, p.displayName]));
@@ -1367,7 +1385,13 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.flights.length) {
-            list.innerHTML = '<tr><td colspan="8" class="text-muted text-center">No flights yet.</td></tr>';
+            list.innerHTML = `
+                <tr><td colspan="8" class="text-center py-4">
+                    <div class="text-muted mb-3">No flights yet. Add your flight bookings to keep track of travel plans.</div>
+                    <button class="btn btn-sm btn-primary" onclick="document.getElementById('openFlightModal')?.click()">
+                        <i class="mdi mdi-plane me-1"></i>Add first flight
+                    </button>
+                </td></tr>`;
             return;
         }
         const filters = state.filters.flights;
@@ -1493,7 +1517,13 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.lodgings.length) {
-            list.innerHTML = '<tr><td colspan="8" class="text-muted text-center">No lodgings yet.</td></tr>';
+            list.innerHTML = `
+                <tr><td colspan="8" class="text-center py-4">
+                    <div class="text-muted mb-3">No lodgings yet. Add hotels, rentals, or accommodations for your trip.</div>
+                    <button class="btn btn-sm btn-primary" onclick="document.getElementById('openLodgingModal')?.click()">
+                        <i class="mdi mdi-home me-1"></i>Add first lodging
+                    </button>
+                </td></tr>`;
             return;
         }
         const filters = state.filters.lodgings;
@@ -1572,7 +1602,13 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.transports.length) {
-            list.innerHTML = '<tr><td colspan="8" class="text-muted text-center">No transports yet.</td></tr>';
+            list.innerHTML = `
+                <tr><td colspan="8" class="text-center py-4">
+                    <div class="text-muted mb-3">No transports yet. Track car rentals, transfers, and local transportation.</div>
+                    <button class="btn btn-sm btn-primary" onclick="document.getElementById('openTransportModal')?.click()">
+                        <i class="mdi mdi-car me-1"></i>Add first transport
+                    </button>
+                </td></tr>`;
             return;
         }
         const filters = state.filters.transports;
@@ -1648,7 +1684,13 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.tickets.length) {
-            list.innerHTML = '<tr><td colspan="7" class="text-muted text-center">No tickets yet.</td></tr>';
+            list.innerHTML = `
+                <tr><td colspan="7" class="text-center py-4">
+                    <div class="text-muted mb-3">No tickets yet. Add tickets for theme parks, events, museums, and attractions.</div>
+                    <button class="btn btn-sm btn-primary" onclick="document.getElementById('openTicketModal')?.click()">
+                        <i class="mdi mdi-ticket me-1"></i>Add first ticket
+                    </button>
+                </td></tr>`;
             return;
         }
         const filters = state.filters.tickets;
