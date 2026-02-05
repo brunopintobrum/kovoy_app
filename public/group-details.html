@@ -11,68 +11,86 @@
     <link href="assets/css/icons.min.css" rel="stylesheet" />
     <link href="assets/css/app.min.css" id="app-style" rel="stylesheet" />
     <style>
-        /* Mobile-responsive tables */
-        @media screen and (max-width: 767px) {
-            /* Hide table headers */
-            table.table-mobile-cards thead {
-                position: absolute !important;
-                top: -9999px !important;
-                left: -9999px !important;
+        /* Mobile-responsive tables - Ultra specific selectors */
+        @media only screen and (max-width: 767px) {
+            /* Hide table headers completely */
+            body table.table.table-mobile-cards thead,
+            body .table-responsive table.table-mobile-cards thead {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                overflow: hidden !important;
             }
 
-            /* Force table elements to block */
-            table.table-mobile-cards,
-            table.table-mobile-cards tbody,
-            table.table-mobile-cards tr,
-            table.table-mobile-cards td {
+            /* Force table elements to block display */
+            body table.table.table-mobile-cards,
+            body table.table.table-mobile-cards tbody,
+            body table.table.table-mobile-cards tbody tr,
+            body table.table.table-mobile-cards tbody tr td {
                 display: block !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
 
-            /* Remove default table spacing */
-            table.table-mobile-cards {
+            /* Remove table default styling */
+            body table.table.table-mobile-cards {
+                border: 0 !important;
+                margin-bottom: 0 !important;
+            }
+
+            body table.table.table-mobile-cards tbody {
                 border: 0 !important;
             }
 
             /* Style each row as a card */
-            table.table-mobile-cards tr {
+            body table.table.table-mobile-cards tbody tr {
+                display: block !important;
                 margin-bottom: 1rem !important;
                 border: 1px solid #dee2e6 !important;
                 border-radius: 0.25rem !important;
-                padding: 0.75rem !important;
-                background-color: #fff !important;
+                padding: 1rem !important;
+                background-color: #ffffff !important;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
             }
 
             /* Style cells with labels */
-            table.table-mobile-cards td {
+            body table.table.table-mobile-cards tbody tr td {
+                display: block !important;
                 border: none !important;
                 padding: 0.5rem 0 !important;
                 position: relative !important;
                 padding-left: 50% !important;
+                min-height: 1.5rem !important;
                 text-align: left !important;
             }
 
             /* Add label before each cell */
-            table.table-mobile-cards td:before {
+            body table.table.table-mobile-cards tbody tr td:before {
                 content: attr(data-label);
                 position: absolute !important;
                 left: 0 !important;
+                top: 0.5rem !important;
                 width: 45% !important;
                 padding-right: 10px !important;
                 white-space: nowrap !important;
-                font-weight: 600 !important;
+                font-weight: 700 !important;
                 text-align: left !important;
+                color: #495057 !important;
             }
 
-            /* Action buttons cell */
-            table.table-mobile-cards td:last-child {
+            /* Action buttons cell - full width at bottom */
+            body table.table.table-mobile-cards tbody tr td:last-child {
+                display: block !important;
                 padding-left: 0 !important;
-                padding-top: 0.75rem !important;
+                padding-top: 1rem !important;
+                padding-bottom: 0 !important;
                 border-top: 1px solid #dee2e6 !important;
-                margin-top: 0.5rem !important;
+                margin-top: 0.75rem !important;
                 text-align: right !important;
             }
 
-            table.table-mobile-cards td:last-child:before {
+            body table.table.table-mobile-cards tbody tr td:last-child:before {
+                display: none !important;
                 content: none !important;
             }
         }
