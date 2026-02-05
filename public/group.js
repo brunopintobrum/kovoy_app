@@ -1440,10 +1440,11 @@
                 : '<span class="text-muted">No passengers selected.</span>';
             const flightLabel = [flight.airline, flight.flightNumber].filter(Boolean).join(' ');
             const routeLabel = `${flight.fromLabel || flight.from || '-'} → ${flight.toLabel || flight.to || '-'}`;
+            const expenseBadge = flight.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const detailsId = `flight-details-${flight.id}`;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${flightLabel || '-'}</td>
+                <td>${flightLabel || '-'}${expenseBadge}</td>
                 <td>${routeLabel}</td>
                 <td>${formatDateTime(flight.departAt)}</td>
                 <td>${formatDateTime(flight.arriveAt)}</td>
@@ -1518,9 +1519,10 @@
             const detailsId = `lodging-details-${lodging.id}`;
             const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean);
             const addressLabel = addressParts.join(', ') || '-';
+            const expenseBadge = lodging.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${lodging.name || '-'}</td>
+                <td>${lodging.name || '-'}${expenseBadge}</td>
                 <td>${location || '-'}</td>
                 <td>${checkIn} → ${checkOut}</td>
                 <td>${rooms}</td>
@@ -1589,11 +1591,12 @@
             const provider = transport.provider || '-';
             const locator = transport.locator || '-';
             const providerLine = [provider, locator].filter((value) => value && value !== '-').join(' · ') || '-';
+            const expenseBadge = transport.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const detailsId = `transport-details-${transport.id}`;
             const hasDetails = transport.notes || (provider !== '-') || (locator !== '-');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${transport.type || '-'}</td>
+                <td>${transport.type || '-'}${expenseBadge}</td>
                 <td><strong>${route}</strong></td>
                 <td>${formatDateTime(transport.departAt)}</td>
                 <td>${formatDateTime(transport.arriveAt)}</td>
@@ -1672,10 +1675,11 @@
             const participantBadges = participantNames.length
                 ? participantNames.map((name) => `<span class="badge bg-soft-primary text-primary me-1">${name}</span>`).join('')
                 : '<span class="text-muted">-</span>';
+            const expenseBadge = ticket.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const detailsId = `ticket-details-${ticket.id}`;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${ticket.type || '-'}</td>
+                <td>${ticket.type || '-'}${expenseBadge}</td>
                 <td>${formatDateTime(ticket.eventAt)}</td>
                 <td>${ticket.location || '-'}</td>
                 <td>${formatStatusBadge(ticket.status)}</td>

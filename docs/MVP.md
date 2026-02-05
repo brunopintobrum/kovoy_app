@@ -166,7 +166,7 @@
 - [x] Confirmacao antes de deletar (todos os modulos)
 - [x] Toast de feedback apos salvar/deletar nos modulos
 - [x] Desabilitar botoes durante requisicoes API (prevenir duplicatas)
-- [ ] Indicador visual de expense vinculada nas listagens dos modulos
+- [x] Indicador visual de expense vinculada nas listagens dos modulos
 - [ ] Ordenacao por coluna nas tabelas (client-side)
 - [ ] Estado vazio com CTA nos modulos
 - [ ] Listagens responsivas (mobile) em group-details
@@ -203,7 +203,7 @@
 21. Confirmacao antes de deletar (todos os modulos) [feito]
 22. Toast de feedback apos salvar/deletar nos modulos [feito]
 23. Desabilitar botoes durante requisicoes API [feito]
-24. Indicador visual de expense vinculada nas listagens
+24. Indicador visual de expense vinculada nas listagens [feito]
 25. Ordenacao por coluna nas tabelas
 26. Estado vazio com CTA nos modulos
 27. Listagens responsivas (mobile) em group-details
@@ -241,10 +241,10 @@
   - Hospedagens: contato obrigatorio quando necessario (feito)
   - Tickets: local obrigatorio quando type exige (feito)
 - V2.5 (Qualidade UX)
-  - Confirmacao antes de deletar (todos os modulos)
-  - Toast de feedback apos salvar/deletar nos modulos
-  - Desabilitar botoes durante requisicoes API (prevenir duplicatas)
-  - Indicador visual de expense vinculada nas listagens
+  - Confirmacao antes de deletar (todos os modulos) (feito)
+  - Toast de feedback apos salvar/deletar nos modulos (feito)
+  - Desabilitar botoes durante requisicoes API (prevenir duplicatas) (feito)
+  - Indicador visual de expense vinculada nas listagens (feito)
   - Ordenacao por coluna nas tabelas (client-side)
   - Estado vazio com CTA nos modulos
   - Listagens responsivas (mobile) em group-details
