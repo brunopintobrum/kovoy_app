@@ -38,6 +38,14 @@
             lodgings: { city: '', status: '' },
             transports: { status: '', provider: '' },
             tickets: { type: '', status: '', dateFrom: '', dateTo: '' }
+        },
+        sorting: {
+            participants: { field: null, direction: 'asc' },
+            expenses: { field: null, direction: 'asc' },
+            flights: { field: null, direction: 'asc' },
+            lodgings: { field: null, direction: 'asc' },
+            transports: { field: null, direction: 'asc' },
+            tickets: { field: null, direction: 'asc' }
         }
     };
 
@@ -1318,7 +1326,8 @@
             return;
         }
         const familyMap = new Map(state.families.map((family) => [family.id, family.name]));
-        state.participants.forEach((participant) => {
+        const sortedParticipants = applySorting(state.participants, 'participants');
+        sortedParticipants.forEach((participant) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${participant.displayName}</td>
@@ -1353,7 +1362,8 @@
             return;
         }
         const participantMap = new Map(state.participants.map((p) => [p.id, p.displayName]));
-        state.expenses.forEach((expense) => {
+        const sortedExpenses = applySorting(state.expenses, 'expenses');
+        sortedExpenses.forEach((expense) => {
             const rawSplitType = expense.splits && expense.splits.length ? expense.splits[0].targetType : '-';
             const splitType = rawSplitType === 'participant' ? 'participants'
                 : rawSplitType === 'family'
@@ -1416,7 +1426,8 @@
             return;
         }
         const participantMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
-        filtered.forEach((flight) => {
+        const sorted = applySorting(filtered, 'flights');
+        sorted.forEach((flight) => {
             const participantNames = (flight.participantIds || [])
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
@@ -1537,7 +1548,8 @@
             list.innerHTML = `<tr><td colspan="8" class="text-muted text-center">${message}</td></tr>`;
             return;
         }
-        filtered.forEach((lodging) => {
+        const sorted = applySorting(filtered, 'lodgings');
+        sorted.forEach((lodging) => {
             const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).join(', ');
             const checkIn = `${formatDate(lodging.checkIn)} ${lodging.checkInTime || ''}`.trim();
             const checkOut = `${formatDate(lodging.checkOut)} ${lodging.checkOutTime || ''}`.trim();
@@ -1622,7 +1634,8 @@
             list.innerHTML = `<tr><td colspan="8" class="text-muted text-center">${message}</td></tr>`;
             return;
         }
-        filtered.forEach((transport) => {
+        const sorted = applySorting(filtered, 'transports');
+        sorted.forEach((transport) => {
             const route = `${transport.origin || '-'} → ${transport.destination || '-'}`;
             const provider = transport.provider || '-';
             const locator = transport.locator || '-';
@@ -1710,7 +1723,8 @@
             return;
         }
         const participantMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
-        filtered.forEach((ticket) => {
+        const sorted = applySorting(filtered, 'tickets');
+        sorted.forEach((ticket) => {
             const participantNames = (ticket.participantIds || [])
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
@@ -4337,6 +4351,96 @@
         applyPermissions();
     };
 
+    const applySorting = (dataArray, moduleName) => {
+        const sortConfig = state.sorting[moduleName];
+        if (!sortConfig || !sortConfig.field) return dataArray;
+
+        const sorted = [...dataArray].sort((a, b) => {
+            let aVal = a[sortConfig.field];
+            let bVal = b[sortConfig.field];
+
+            // Special handling for participantIds (count)
+            if (sortConfig.field === 'participantIds') {
+                aVal = (a.participantIds || []).length;
+                bVal = (b.participantIds || []).length;
+            }
+
+            // Handle null/undefined
+            if (aVal == null && bVal == null) return 0;
+            if (aVal == null) return 1;
+            if (bVal == null) return -1;
+
+            // String comparison
+            if (typeof aVal === 'string' && typeof bVal === 'string') {
+                const comparison = aVal.toLowerCase().localeCompare(bVal.toLowerCase());
+                return sortConfig.direction === 'asc' ? comparison : -comparison;
+            }
+
+            // Number comparison
+            const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+            return sortConfig.direction === 'asc' ? comparison : -comparison;
+        });
+
+        return sorted;
+    };
+
+    const bindTableSorting = () => {
+        document.querySelectorAll('th.sortable').forEach((th) => {
+            th.addEventListener('click', () => {
+                const sortField = th.dataset.sort;
+                if (!sortField) return;
+
+                // Determine module from the nearest table
+                const table = th.closest('table');
+                const tbody = table?.querySelector('tbody');
+                if (!tbody) return;
+
+                const moduleName = tbody.id.replace('List', '').toLowerCase();
+                if (!state.sorting[moduleName + 's']) {
+                    // Try plural form
+                    const pluralModule = moduleName + 's';
+                    if (state.sorting[pluralModule]) {
+                        moduleName = pluralModule;
+                    } else {
+                        return;
+                    }
+                }
+
+                const module = moduleName === 'participant' ? 'participants' :
+                              moduleName === 'expense' ? 'expenses' :
+                              moduleName === 'flight' ? 'flights' :
+                              moduleName === 'lodging' ? 'lodgings' :
+                              moduleName === 'transport' ? 'transports' :
+                              moduleName === 'ticket' ? 'tickets' : null;
+
+                if (!module) return;
+
+                // Toggle direction if same field, otherwise default to asc
+                if (state.sorting[module].field === sortField) {
+                    state.sorting[module].direction = state.sorting[module].direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    state.sorting[module].field = sortField;
+                    state.sorting[module].direction = 'asc';
+                }
+
+                // Update sort icons
+                table.querySelectorAll('th.sortable .sort-icon').forEach((icon) => icon.textContent = '');
+                const icon = th.querySelector('.sort-icon');
+                if (icon) {
+                    icon.textContent = state.sorting[module].direction === 'asc' ? ' ▲' : ' ▼';
+                }
+
+                // Re-render
+                if (module === 'participants') renderParticipants();
+                else if (module === 'expenses') renderExpenses();
+                else if (module === 'flights') renderFlights();
+                else if (module === 'lodgings') renderLodgings();
+                else if (module === 'transports') renderTransports();
+                else if (module === 'tickets') renderTickets();
+            });
+        });
+    };
+
     const init = async () => {
         await setUserProfile();
         const ok = await loadGroups();
@@ -4364,6 +4468,7 @@
         bindLodgingFilters();
         bindTransportFilters();
         bindTicketFilters();
+        bindTableSorting();
         bindSplitTypeToggle();
         bindSplitModeToggle();
         bindModuleExpenseToggles();

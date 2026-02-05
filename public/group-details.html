@@ -345,9 +345,9 @@
                                         <table class="table table-sm align-middle mb-0">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th>Name</th>
-                                                    <th>Family</th>
-                                                    <th>Type</th>
+                                                    <th class="sortable" data-sort="name" style="cursor:pointer">Name <span class="sort-icon"></span></th>
+                                                    <th class="sortable" data-sort="familyId" style="cursor:pointer">Family <span class="sort-icon"></span></th>
+                                                    <th class="sortable" data-sort="type" style="cursor:pointer">Type <span class="sort-icon"></span></th>
                                                     <th class="text-end">Action</th>
                                                 </tr>
                                             </thead>
@@ -550,10 +550,10 @@
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Description</th>
-                                            <th>Amount</th>
-                                            <th>Date</th>
-                                            <th>Paid by</th>
+                                            <th class="sortable" data-sort="description" style="cursor:pointer">Description <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="amount" style="cursor:pointer">Amount <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="date" style="cursor:pointer">Date <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="payerParticipantId" style="cursor:pointer">Paid by <span class="sort-icon"></span></th>
                                             <th>Split</th>
                                             <th class="text-end">Action</th>
                                         </tr>
@@ -772,13 +772,13 @@
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">
                                             <tr>
-                                                <th>Flight</th>
-                                                <th>Route</th>
-                                                <th>Departure</th>
-                                                <th>Arrival</th>
-                                                <th>Pax</th>
-                                                <th>Status</th>
-                                                <th>Cost</th>
+                                                <th class="sortable" data-sort="airline" style="cursor:pointer">Flight <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="from" style="cursor:pointer">Route <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="departAt" style="cursor:pointer">Departure <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="arriveAt" style="cursor:pointer">Arrival <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="participantIds" style="cursor:pointer">Pax <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="status" style="cursor:pointer">Status <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="cost" style="cursor:pointer">Cost <span class="sort-icon"></span></th>
                                                 <th class="text-end">Action</th>
                                             </tr>
                                       </thead>
@@ -1005,12 +1005,12 @@
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Property</th>
-                                            <th>Location</th>
-                                            <th>Dates</th>
+                                            <th class="sortable" data-sort="name" style="cursor:pointer">Property <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="city" style="cursor:pointer">Location <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="checkIn" style="cursor:pointer">Dates <span class="sort-icon"></span></th>
                                             <th>Rooms</th>
-                                            <th>Status</th>
-                                            <th>Cost</th>
+                                            <th class="sortable" data-sort="status" style="cursor:pointer">Status <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="cost" style="cursor:pointer">Cost <span class="sort-icon"></span></th>
                                             <th>Contact</th>
                                             <th class="text-end">Action</th>
                                         </tr>
@@ -1166,12 +1166,12 @@
                                 <table class="table align-middle table-nowrap mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Type</th>
-                                            <th>Route</th>
-                                            <th>Departure</th>
-                                            <th>Arrival</th>
-                                            <th>Status</th>
-                                            <th>Amount</th>
+                                            <th class="sortable" data-sort="type" style="cursor:pointer">Type <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="origin" style="cursor:pointer">Route <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="departAt" style="cursor:pointer">Departure <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="arriveAt" style="cursor:pointer">Arrival <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="status" style="cursor:pointer">Status <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="amount" style="cursor:pointer">Amount <span class="sort-icon"></span></th>
                                             <th>Provider/Locator</th>
                                             <th class="text-end">Action</th>
                                         </tr>
@@ -1322,11 +1322,11 @@
                                     <table class="table align-middle table-nowrap mb-0">
                                         <thead class="table-light">
                                             <tr>
-                                                <th>Type</th>
-                                                <th>When</th>
-                                                <th>Location</th>
-                                                <th>Status</th>
-                                                <th>Amount</th>
+                                                <th class="sortable" data-sort="type" style="cursor:pointer">Type <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="eventAt" style="cursor:pointer">When <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="location" style="cursor:pointer">Location <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="status" style="cursor:pointer">Status <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="amount" style="cursor:pointer">Amount <span class="sort-icon"></span></th>
                                                 <th>Participants</th>
                                                 <th class="text-end">Action</th>
                                             </tr>

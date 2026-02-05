@@ -167,7 +167,7 @@
 - [x] Toast de feedback apos salvar/deletar nos modulos
 - [x] Desabilitar botoes durante requisicoes API (prevenir duplicatas)
 - [x] Indicador visual de expense vinculada nas listagens dos modulos
-- [ ] Ordenacao por coluna nas tabelas (client-side)
+- [x] Ordenacao por coluna nas tabelas (client-side)
 - [x] Estado vazio com CTA nos modulos
 - [ ] Listagens responsivas (mobile) em group-details
 - [ ] Categorias avancadas e filtros (por data, status, responsavel)
@@ -204,7 +204,7 @@
 22. Toast de feedback apos salvar/deletar nos modulos [feito]
 23. Desabilitar botoes durante requisicoes API [feito]
 24. Indicador visual de expense vinculada nas listagens [feito]
-25. Ordenacao por coluna nas tabelas
+25. Ordenacao por coluna nas tabelas [feito]
 26. Estado vazio com CTA nos modulos [feito]
 27. Listagens responsivas (mobile) em group-details
 
@@ -245,7 +245,7 @@
   - Toast de feedback apos salvar/deletar nos modulos (feito)
   - Desabilitar botoes durante requisicoes API (prevenir duplicatas) (feito)
   - Indicador visual de expense vinculada nas listagens (feito)
-  - Ordenacao por coluna nas tabelas (client-side)
+  - Ordenacao por coluna nas tabelas (client-side) (feito)
   - Estado vazio com CTA nos modulos (feito)
   - Listagens responsivas (mobile) em group-details
 
