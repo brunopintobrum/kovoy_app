@@ -169,7 +169,7 @@
 - [x] Indicador visual de expense vinculada nas listagens dos modulos
 - [x] Ordenacao por coluna nas tabelas (client-side)
 - [x] Estado vazio com CTA nos modulos
-- [ ] Listagens responsivas (mobile) em group-details
+- [x] Listagens responsivas (mobile) em group-details
 - [ ] Categorias avancadas e filtros (por data, status, responsavel)
 - [ ] Multi-moeda e cambio (taxas por data + conversao no dashboard)
 - [ ] Timeline do grupo (eventos e marcos por data)
@@ -206,7 +206,7 @@
 24. Indicador visual de expense vinculada nas listagens [feito]
 25. Ordenacao por coluna nas tabelas [feito]
 26. Estado vazio com CTA nos modulos [feito]
-27. Listagens responsivas (mobile) em group-details
+27. Listagens responsivas (mobile) em group-details [feito]
 
 ## Funcionalidades de perfil
 - [x] Avatar padrao neutro (SVG) para novos usuarios
@@ -247,7 +247,7 @@
   - Indicador visual de expense vinculada nas listagens (feito)
   - Ordenacao por coluna nas tabelas (client-side) (feito)
   - Estado vazio com CTA nos modulos (feito)
-  - Listagens responsivas (mobile) em group-details
+  - Listagens responsivas (mobile) em group-details (feito)
 
 
 

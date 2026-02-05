@@ -1371,11 +1371,11 @@
                     : rawSplitType;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${expense.description}</td>
-                <td>${formatCurrency(expense.amount, expense.currency)}</td>
-                <td>${expense.date}</td>
-                <td>${participantMap.get(expense.payerParticipantId) || '-'}</td>
-                <td class="text-capitalize">${splitType}</td>
+                <td data-label="Description">${expense.description}</td>
+                <td data-label="Amount">${formatCurrency(expense.amount, expense.currency)}</td>
+                <td data-label="Date">${expense.date}</td>
+                <td data-label="Paid by">${participantMap.get(expense.payerParticipantId) || '-'}</td>
+                <td data-label="Split" class="text-capitalize">${splitType}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-expense" data-id="${expense.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-expense" data-id="${expense.id}">Delete</button>
@@ -1479,13 +1479,13 @@
             const detailsId = `flight-details-${flight.id}`;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${flightLabel || '-'}${expenseBadge}</td>
-                <td>${routeLabel}</td>
-                <td>${formatDateTime(flight.departAt)}</td>
-                <td>${formatDateTime(flight.arriveAt)}</td>
-                <td>${passengerCount}</td>
-                <td class="text-capitalize">${flight.status || 'planned'}</td>
-                <td>${formatCurrency(flight.cost, flight.currency)}</td>
+                <td data-label="Flight">${flightLabel || '-'}${expenseBadge}</td>
+                <td data-label="Route">${routeLabel}</td>
+                <td data-label="Departure">${formatDateTime(flight.departAt)}</td>
+                <td data-label="Arrival">${formatDateTime(flight.arriveAt)}</td>
+                <td data-label="Pax">${passengerCount}</td>
+                <td data-label="Status" class="text-capitalize">${flight.status || 'planned'}</td>
+                <td data-label="Cost">${formatCurrency(flight.cost, flight.currency)}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-secondary me-1" data-action="toggle-flight-details" data-id="${flight.id}" aria-controls="${detailsId}">Details</button>
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-flight" data-id="${flight.id}">Edit</button>
@@ -1564,13 +1564,13 @@
             const expenseBadge = lodging.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${lodging.name || '-'}${expenseBadge}</td>
-                <td>${location || '-'}</td>
-                <td>${checkIn} → ${checkOut}</td>
-                <td>${rooms}</td>
-                <td>${formatStatusBadge(lodging.status)}</td>
-                <td>${formatCurrency(lodging.cost, lodging.currency)}</td>
-                <td>${contact}</td>
+                <td data-label="Property">${lodging.name || '-'}${expenseBadge}</td>
+                <td data-label="Location">${location || '-'}</td>
+                <td data-label="Dates">${checkIn} → ${checkOut}</td>
+                <td data-label="Rooms">${rooms}</td>
+                <td data-label="Status">${formatStatusBadge(lodging.status)}</td>
+                <td data-label="Cost">${formatCurrency(lodging.cost, lodging.currency)}</td>
+                <td data-label="Contact">${contact}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-secondary me-1" data-action="toggle-lodging-details" data-id="${lodging.id}" aria-controls="${detailsId}">Details</button>
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-lodging" data-id="${lodging.id}">Edit</button>
@@ -1645,13 +1645,13 @@
             const hasDetails = transport.notes || (provider !== '-') || (locator !== '-');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${transport.type || '-'}${expenseBadge}</td>
-                <td><strong>${route}</strong></td>
-                <td>${formatDateTime(transport.departAt)}</td>
-                <td>${formatDateTime(transport.arriveAt)}</td>
-                <td>${formatStatusBadge(transport.status)}</td>
-                <td>${formatCurrency(transport.amount, transport.currency)}</td>
-                <td>${providerLine}</td>
+                <td data-label="Type">${transport.type || '-'}${expenseBadge}</td>
+                <td data-label="Route"><strong>${route}</strong></td>
+                <td data-label="Departure">${formatDateTime(transport.departAt)}</td>
+                <td data-label="Arrival">${formatDateTime(transport.arriveAt)}</td>
+                <td data-label="Status">${formatStatusBadge(transport.status)}</td>
+                <td data-label="Amount">${formatCurrency(transport.amount, transport.currency)}</td>
+                <td data-label="Provider">${providerLine}</td>
                 <td class="text-end">
                     ${hasDetails ? `<button class="btn btn-sm btn-outline-secondary me-1" data-action="toggle-transport-details" data-id="${transport.id}" aria-controls="${detailsId}">Details</button>` : ''}
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-transport" data-id="${transport.id}">Edit</button>
@@ -1735,12 +1735,12 @@
             const detailsId = `ticket-details-${ticket.id}`;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${ticket.type || '-'}${expenseBadge}</td>
-                <td>${formatDateTime(ticket.eventAt)}</td>
-                <td>${ticket.location || '-'}</td>
-                <td>${formatStatusBadge(ticket.status)}</td>
-                <td>${formatCurrency(ticket.amount, ticket.currency)}</td>
-                <td>${participantBadges}</td>
+                <td data-label="Type">${ticket.type || '-'}${expenseBadge}</td>
+                <td data-label="When">${formatDateTime(ticket.eventAt)}</td>
+                <td data-label="Location">${ticket.location || '-'}</td>
+                <td data-label="Status">${formatStatusBadge(ticket.status)}</td>
+                <td data-label="Amount">${formatCurrency(ticket.amount, ticket.currency)}</td>
+                <td data-label="Participants">${participantBadges}</td>
                 <td class="text-end">
                     ${ticket.notes ? `<button class="btn btn-sm btn-outline-secondary me-1" data-action="toggle-ticket-details" data-id="${ticket.id}" aria-controls="${detailsId}">Details</button>` : ''}
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-ticket" data-id="${ticket.id}">Edit</button>
