@@ -1510,5 +1510,46 @@
     <script src="assets/libs/node-waves/waves.min.js"></script>
     <script src="assets/js/app.js"></script>
     <script src="group.js" defer></script>
+    <script>
+        // Force mobile styles via JavaScript when CSS fails
+        function applyMobileTableStyles() {
+            if (window.matchMedia('(max-width: 767px)').matches) {
+                document.querySelectorAll('table.table-mobile-cards').forEach(table => {
+                    // Hide thead
+                    const thead = table.querySelector('thead');
+                    if (thead) {
+                        thead.style.cssText = 'display: none !important; visibility: hidden !important;';
+                    }
+
+                    // Force block display on table elements
+                    table.style.cssText = 'display: block !important; width: 100% !important;';
+                    const tbody = table.querySelector('tbody');
+                    if (tbody) {
+                        tbody.style.cssText = 'display: block !important; width: 100% !important;';
+
+                        tbody.querySelectorAll('tr').forEach(tr => {
+                            tr.style.cssText = 'display: block !important; margin-bottom: 1rem !important; border: 1px solid #dee2e6 !important; border-radius: 0.25rem !important; padding: 1rem !important; background-color: #fff !important;';
+
+                            tr.querySelectorAll('td').forEach((td, index, arr) => {
+                                if (index === arr.length - 1) {
+                                    // Last td (actions)
+                                    td.style.cssText = 'display: block !important; width: 100% !important; padding: 1rem 0 0 0 !important; border: none !important; border-top: 1px solid #dee2e6 !important; margin-top: 0.75rem !important; text-align: right !important;';
+                                } else {
+                                    // Regular td
+                                    td.style.cssText = 'display: block !important; width: 100% !important; padding: 0.5rem 0 !important; border: none !important; position: relative !important; padding-left: 50% !important; text-align: left !important; min-height: 1.5rem !important;';
+                                }
+                            });
+                        });
+                    }
+                });
+            }
+        }
+
+        // Apply on load and resize
+        window.addEventListener('DOMContentLoaded', applyMobileTableStyles);
+        window.addEventListener('resize', applyMobileTableStyles);
+        // Also apply after a short delay to catch dynamically loaded content
+        setTimeout(applyMobileTableStyles, 500);
+    </script>
 </body>
 </html>
