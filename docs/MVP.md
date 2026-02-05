@@ -163,6 +163,13 @@
   - [x] Autocomplete/validacao para hospedagens (Country + City/State + Property)
   - [ ] Autocomplete/validacao para transportes (origem/destino)
   - [ ] Autocomplete/validacao para tickets (local)
+- [ ] Confirmacao antes de deletar (todos os modulos)
+- [ ] Toast de feedback apos salvar/deletar nos modulos
+- [ ] Desabilitar botoes durante requisicoes API (prevenir duplicatas)
+- [ ] Indicador visual de expense vinculada nas listagens dos modulos
+- [ ] Ordenacao por coluna nas tabelas (client-side)
+- [ ] Estado vazio com CTA nos modulos
+- [ ] Listagens responsivas (mobile) em group-details
 - [ ] Categorias avancadas e filtros (por data, status, responsavel)
 - [ ] Multi-moeda e cambio (taxas por data + conversao no dashboard)
 - [ ] Timeline do grupo (eventos e marcos por data)
@@ -193,6 +200,13 @@
 18. Voos V2: Autocomplete de aeroportos (From/To) e IDs persistidos [feito]
 19. Voos V2: Assentos/bagagens por passageiro [feito]
 20. Voos V2: Layout de formulario organizado [feito]
+21. Confirmacao antes de deletar (todos os modulos)
+22. Toast de feedback apos salvar/deletar nos modulos
+23. Desabilitar botoes durante requisicoes API
+24. Indicador visual de expense vinculada nas listagens
+25. Ordenacao por coluna nas tabelas
+26. Estado vazio com CTA nos modulos
+27. Listagens responsivas (mobile) em group-details
 
 ## Funcionalidades de perfil
 - [x] Avatar padrao neutro (SVG) para novos usuarios
@@ -226,6 +240,14 @@
   - Transportes: provider + locator obrigatorios quando status=paid
   - Hospedagens: contato obrigatorio quando necessario
   - Tickets: local obrigatorio quando type exige
+- V2.5 (Qualidade UX)
+  - Confirmacao antes de deletar (todos os modulos)
+  - Toast de feedback apos salvar/deletar nos modulos
+  - Desabilitar botoes durante requisicoes API (prevenir duplicatas)
+  - Indicador visual de expense vinculada nas listagens
+  - Ordenacao por coluna nas tabelas (client-side)
+  - Estado vazio com CTA nos modulos
+  - Listagens responsivas (mobile) em group-details
 
 
 
