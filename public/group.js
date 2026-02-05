@@ -1523,6 +1523,93 @@
         });
     };
 
+    const openLodgingDetailsModal = (lodgingId) => {
+        const lodging = state.lodgings.find((l) => l.id === lodgingId);
+        if (!lodging) return;
+
+        const content = document.getElementById('lodgingDetailsContent');
+        if (!content) return;
+
+        const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).join(', ');
+        const checkIn = `${formatDate(lodging.checkIn)} ${lodging.checkInTime || ''}`.trim();
+        const checkOut = `${formatDate(lodging.checkOut)} ${lodging.checkOutTime || ''}`.trim();
+        const rooms = lodging.roomType
+            ? `${lodging.roomQuantity || 1} × ${lodging.roomType} (${lodging.roomOccupancy || 0} guests)`
+            : 'Not specified';
+        const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean);
+        const contact = contactParts.length ? contactParts.join(' • ') : 'Not specified';
+        const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean);
+        const fullAddress = addressParts.join(', ') || 'Not specified';
+        const expenseInfo = lodging.expenseId
+            ? '<span class="badge bg-success">Linked to expense</span>'
+            : '<span class="text-muted">No linked expense</span>';
+
+        content.innerHTML = `
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Property Information</h6>
+                <div class="mb-2"><strong>Name:</strong> ${lodging.name || 'Not specified'}</div>
+                <div class="mb-2"><strong>Status:</strong> ${formatStatusBadge(lodging.status)}</div>
+            </div>
+            <div class="col-12"><hr></div>
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Location</h6>
+                <div class="mb-2"><strong>Address:</strong> ${fullAddress}</div>
+                <div class="mb-2"><strong>Summary:</strong> ${location || 'Not specified'}</div>
+            </div>
+            <div class="col-12"><hr></div>
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Dates</h6>
+                <div class="mb-2"><strong>Check-in:</strong> ${checkIn}</div>
+                <div class="mb-2"><strong>Check-out:</strong> ${checkOut}</div>
+            </div>
+            <div class="col-12"><hr></div>
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Rooms & Cost</h6>
+                <div class="mb-2"><strong>Rooms:</strong> ${rooms}</div>
+                <div class="mb-2"><strong>Cost:</strong> ${formatCurrency(lodging.cost, lodging.currency)}</div>
+                <div class="mb-2"><strong>Expense:</strong> ${expenseInfo}</div>
+            </div>
+            <div class="col-12"><hr></div>
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Contact</h6>
+                <div class="mb-2">${contact}</div>
+            </div>
+            ${lodging.notes ? `
+            <div class="col-12"><hr></div>
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Notes</h6>
+                <div>${lodging.notes}</div>
+            </div>
+            ` : ''}
+        `;
+
+        // Set up action buttons
+        const editBtn = document.getElementById('lodgingDetailsEdit');
+        const deleteBtn = document.getElementById('lodgingDetailsDelete');
+
+        if (editBtn) {
+            editBtn.onclick = () => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('lodgingDetailsModal'));
+                modal?.hide();
+                document.querySelector('[data-action="edit-lodging"][data-id="' + lodgingId + '"]')?.click();
+            };
+            editBtn.disabled = !state.canEdit;
+        }
+
+        if (deleteBtn) {
+            deleteBtn.onclick = () => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('lodgingDetailsModal'));
+                modal?.hide();
+                document.querySelector('[data-action="delete-lodging"][data-id="' + lodgingId + '"]')?.click();
+            };
+            deleteBtn.disabled = !state.canEdit;
+        }
+
+        // Open modal
+        const modal = new bootstrap.Modal(document.getElementById('lodgingDetailsModal'));
+        modal.show();
+    };
+
     const renderLodgings = () => {
         const list = document.getElementById('lodgingList');
         if (!list) return;
@@ -1583,29 +1670,33 @@
                 });
             }
             list.appendChild(tr);
-            const detailsRow = document.createElement('tr');
-            detailsRow.id = detailsId;
-            detailsRow.className = 'd-none';
-            detailsRow.innerHTML = `
-                <td colspan="8">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="text-muted small">Full address</div>
-                            <div>${addressLabel}</div>
+            // Only add inline details row on desktop (mobile uses modal instead)
+            const isMobile = window.matchMedia('(max-width: 767px)').matches;
+            if (!isMobile) {
+                const detailsRow = document.createElement('tr');
+                detailsRow.id = detailsId;
+                detailsRow.className = 'd-none';
+                detailsRow.innerHTML = `
+                    <td colspan="8">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="text-muted small">Full address</div>
+                                <div>${addressLabel}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-muted small">Check-in / Check-out</div>
+                                <div>${checkIn} → ${checkOut}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-muted small">Contact</div>
+                                <div>${contact}</div>
+                            </div>
+                            ${lodging.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${lodging.notes}</div></div>` : ''}
                         </div>
-                        <div class="col-md-4">
-                            <div class="text-muted small">Check-in / Check-out</div>
-                            <div>${checkIn} → ${checkOut}</div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="text-muted small">Contact</div>
-                            <div>${contact}</div>
-                        </div>
-                        ${lodging.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${lodging.notes}</div></div>` : ''}
-                    </div>
-                </td>
-            `;
-            list.appendChild(detailsRow);
+                    </td>
+                `;
+                list.appendChild(detailsRow);
+            }
         });
     };
 
@@ -3935,8 +4026,13 @@
                 const id = button.dataset.id;
                 if (!id) return;
                 if (action === 'toggle-lodging-details') {
-                    const detailsRow = document.getElementById(`lodging-details-${id}`);
-                    if (detailsRow) detailsRow.classList.toggle('d-none');
+                    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+                    if (isMobile) {
+                        openLodgingDetailsModal(id);
+                    } else {
+                        const detailsRow = document.getElementById(`lodging-details-${id}`);
+                        if (detailsRow) detailsRow.classList.toggle('d-none');
+                    }
                     return;
                 }
                 if (action === 'edit-lodging') {
@@ -4092,23 +4188,47 @@
         });
     };
 
+    const updateLodgingFilterBadge = () => {
+        const badge = document.getElementById('lodgingFilterCount');
+        if (!badge) return;
+        const count = [state.filters.lodgings.city, state.filters.lodgings.status].filter(Boolean).length;
+        if (count > 0) {
+            badge.textContent = count;
+            badge.classList.remove('d-none');
+        } else {
+            badge.classList.add('d-none');
+        }
+    };
+
     const bindLodgingFilters = () => {
         const cityInput = document.getElementById('filterLodgingCity');
         const statusSelect = document.getElementById('filterLodgingStatus');
         const clearBtn = document.getElementById('clearLodgingFilters');
+        const toggleBtn = document.getElementById('toggleLodgingFilters');
+        const filtersContainer = document.getElementById('lodgingFilters');
+
         const updateFilters = () => {
             state.filters.lodgings.city = cityInput?.value || '';
             state.filters.lodgings.status = statusSelect?.value || '';
+            updateLodgingFilterBadge();
             renderLodgings();
         };
+
         cityInput?.addEventListener('input', updateFilters);
         statusSelect?.addEventListener('change', updateFilters);
         clearBtn?.addEventListener('click', () => {
             if (cityInput) cityInput.value = '';
             if (statusSelect) statusSelect.value = '';
             state.filters.lodgings = { city: '', status: '' };
+            updateLodgingFilterBadge();
             renderLodgings();
         });
+
+        toggleBtn?.addEventListener('click', () => {
+            filtersContainer?.classList.toggle('show');
+        });
+
+        updateLodgingFilterBadge();
     };
 
     const bindTransportFilters = () => {

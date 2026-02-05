@@ -93,6 +93,15 @@
                 display: none !important;
                 content: none !important;
             }
+
+            /* Collapsible filters on mobile */
+            .lodging-filters-container {
+                display: none !important;
+            }
+
+            .lodging-filters-container.show {
+                display: flex !important;
+            }
         }
     </style>
 </head>
@@ -1063,12 +1072,35 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="modal fade" id="lodgingDetailsModal" tabindex="-1" aria-labelledby="lodgingDetailsModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="lodgingDetailsModalLabel">Lodging Details</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row g-3" id="lodgingDetailsContent">
+                                                <!-- Content will be populated dynamically -->
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-outline-primary" id="lodgingDetailsEdit">Edit</button>
+                                            <button type="button" class="btn btn-outline-danger" id="lodgingDetailsDelete">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="d-flex justify-content-end mt-4">
                                 <button class="btn btn-primary" type="button" id="openLodgingModal" data-bs-toggle="modal" data-bs-target="#lodgingModal">
                                     Add lodging
                                 </button>
                             </div>
-                            <div class="row g-2 mt-3 align-items-end" id="lodgingFilters">
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-3 d-md-none" id="toggleLodgingFilters">
+                                🔍 Filtros <span class="badge bg-primary ms-1 d-none" id="lodgingFilterCount">0</span>
+                            </button>
+                            <div class="row g-2 mt-3 align-items-end lodging-filters-container" id="lodgingFilters">
                                 <div class="col-md-4">
                                     <label class="form-label form-label-sm mb-1" for="filterLodgingCity">City</label>
                                     <input type="text" class="form-control form-control-sm" id="filterLodgingCity" placeholder="Filter by city...">
