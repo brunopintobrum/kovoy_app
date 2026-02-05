@@ -53,6 +53,30 @@
         toast.show();
     };
 
+    const confirmAction = (message) => {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirmDeleteModal');
+            const messageEl = document.getElementById('confirmDeleteMessage');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            if (messageEl) messageEl.textContent = message;
+            let confirmed = false;
+            const onConfirm = () => {
+                confirmed = true;
+                resolve(true);
+                bsModal.hide();
+            };
+            const onHidden = () => {
+                confirmBtn?.removeEventListener('click', onConfirm);
+                modal?.removeEventListener('hidden.bs.modal', onHidden);
+                if (!confirmed) resolve(false);
+            };
+            confirmBtn?.addEventListener('click', onConfirm);
+            modal?.addEventListener('hidden.bs.modal', onHidden);
+            const bsModal = window.bootstrap.Modal.getInstance(modal) || new window.bootstrap.Modal(modal);
+            bsModal.show();
+        });
+    };
+
     const getCookie = (name) => {
         return document.cookie
             .split(';')
@@ -3598,7 +3622,7 @@
                     return;
                 }
                 if (action !== 'delete-family') return;
-                if (!confirm('Are you sure you want to delete this family?')) return;
+                if (!(await confirmAction('Are you sure you want to delete this family?'))) return;
                 button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/families/${id}`, { method: 'DELETE' });
@@ -3635,7 +3659,7 @@
                     return;
                 }
                 if (action !== 'delete-participant') return;
-                if (!confirm('Are you sure you want to delete this participant?')) return;
+                if (!(await confirmAction('Are you sure you want to delete this participant?'))) return;
                 button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/participants/${id}`, { method: 'DELETE' });
@@ -3673,7 +3697,7 @@
                     return;
                 }
                 if (action !== 'delete-expense') return;
-                if (!confirm('Are you sure you want to delete this expense?')) return;
+                if (!(await confirmAction('Are you sure you want to delete this expense?'))) return;
                 button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/expenses/${id}`, { method: 'DELETE' });
@@ -3720,7 +3744,7 @@
                     return;
                 }
                 if (action !== 'delete-flight') return;
-                if (!confirm('Are you sure you want to delete this flight?')) return;
+                if (!(await confirmAction('Are you sure you want to delete this flight?'))) return;
                 button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/flights/${id}`, { method: 'DELETE' });
@@ -3763,7 +3787,7 @@
                     return;
                 }
                 if (action !== 'delete-lodging') return;
-                if (!confirm('Are you sure you want to delete this lodging?')) return;
+                if (!(await confirmAction('Are you sure you want to delete this lodging?'))) return;
                 button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/lodgings/${id}`, { method: 'DELETE' });
@@ -3809,7 +3833,7 @@
                     return;
                 }
                 if (action !== 'delete-transport') return;
-                if (!confirm('Are you sure you want to delete this transport?')) return;
+                if (!(await confirmAction('Are you sure you want to delete this transport?'))) return;
                 button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/transports/${id}`, { method: 'DELETE' });
@@ -3855,7 +3879,7 @@
                     return;
                 }
                 if (action !== 'delete-ticket') return;
-                if (!confirm('Are you sure you want to delete this ticket?')) return;
+                if (!(await confirmAction('Are you sure you want to delete this ticket?'))) return;
                 button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/tickets/${id}`, { method: 'DELETE' });
