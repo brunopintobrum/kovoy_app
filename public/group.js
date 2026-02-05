@@ -34,7 +34,10 @@
             expenseConfig: null
         },
         filters: {
-            flights: { airline: '', from: '', to: '', status: '' }
+            flights: { airline: '', from: '', to: '', status: '' },
+            lodgings: { city: '', status: '' },
+            transports: { status: '', provider: '' },
+            tickets: { type: '', status: '', dateFrom: '', dateTo: '' }
         }
     };
 
@@ -1492,7 +1495,18 @@
             list.innerHTML = '<tr><td colspan="8" class="text-muted text-center">No lodgings yet.</td></tr>';
             return;
         }
-        state.lodgings.forEach((lodging) => {
+        const filters = state.filters.lodgings;
+        const filtered = state.lodgings.filter((lodging) => {
+            if (filters.city && !lodging.city?.toLowerCase().includes(filters.city.toLowerCase())) return false;
+            if (filters.status && lodging.status !== filters.status) return false;
+            return true;
+        });
+        if (!filtered.length) {
+            const message = state.lodgings.length ? 'No lodgings match the filters.' : 'No lodgings yet.';
+            list.innerHTML = `<tr><td colspan="8" class="text-muted text-center">${message}</td></tr>`;
+            return;
+        }
+        filtered.forEach((lodging) => {
             const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).join(', ');
             const checkIn = `${formatDate(lodging.checkIn)} ${lodging.checkInTime || ''}`.trim();
             const checkOut = `${formatDate(lodging.checkOut)} ${lodging.checkOutTime || ''}`.trim();
@@ -1559,7 +1573,18 @@
             list.innerHTML = '<tr><td colspan="8" class="text-muted text-center">No transports yet.</td></tr>';
             return;
         }
-        state.transports.forEach((transport) => {
+        const filters = state.filters.transports;
+        const filtered = state.transports.filter((transport) => {
+            if (filters.status && transport.status !== filters.status) return false;
+            if (filters.provider && !transport.provider?.toLowerCase().includes(filters.provider.toLowerCase())) return false;
+            return true;
+        });
+        if (!filtered.length) {
+            const message = state.transports.length ? 'No transports match the filters.' : 'No transports yet.';
+            list.innerHTML = `<tr><td colspan="8" class="text-muted text-center">${message}</td></tr>`;
+            return;
+        }
+        filtered.forEach((transport) => {
             const route = `${transport.origin || '-'} → ${transport.destination || '-'}`;
             const provider = transport.provider || '-';
             const locator = transport.locator || '-';
@@ -1623,8 +1648,24 @@
             list.innerHTML = '<tr><td colspan="7" class="text-muted text-center">No tickets yet.</td></tr>';
             return;
         }
+        const filters = state.filters.tickets;
+        const filtered = state.tickets.filter((ticket) => {
+            if (filters.type && !ticket.type?.toLowerCase().includes(filters.type.toLowerCase())) return false;
+            if (filters.status && ticket.status !== filters.status) return false;
+            if (filters.dateFrom || filters.dateTo) {
+                const eventDate = ticket.eventAt ? ticket.eventAt.split('T')[0] : '';
+                if (filters.dateFrom && eventDate < filters.dateFrom) return false;
+                if (filters.dateTo && eventDate > filters.dateTo) return false;
+            }
+            return true;
+        });
+        if (!filtered.length) {
+            const message = state.tickets.length ? 'No tickets match the filters.' : 'No tickets yet.';
+            list.innerHTML = `<tr><td colspan="7" class="text-muted text-center">${message}</td></tr>`;
+            return;
+        }
         const participantMap = new Map(state.participants.map((participant) => [participant.id, participant.displayName]));
-        state.tickets.forEach((ticket) => {
+        filtered.forEach((ticket) => {
             const participantNames = (ticket.participantIds || [])
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
@@ -3952,6 +3993,71 @@
         });
     };
 
+    const bindLodgingFilters = () => {
+        const cityInput = document.getElementById('filterLodgingCity');
+        const statusSelect = document.getElementById('filterLodgingStatus');
+        const clearBtn = document.getElementById('clearLodgingFilters');
+        const updateFilters = () => {
+            state.filters.lodgings.city = cityInput?.value || '';
+            state.filters.lodgings.status = statusSelect?.value || '';
+            renderLodgings();
+        };
+        cityInput?.addEventListener('input', updateFilters);
+        statusSelect?.addEventListener('change', updateFilters);
+        clearBtn?.addEventListener('click', () => {
+            if (cityInput) cityInput.value = '';
+            if (statusSelect) statusSelect.value = '';
+            state.filters.lodgings = { city: '', status: '' };
+            renderLodgings();
+        });
+    };
+
+    const bindTransportFilters = () => {
+        const statusSelect = document.getElementById('filterTransportStatus');
+        const providerInput = document.getElementById('filterTransportProvider');
+        const clearBtn = document.getElementById('clearTransportFilters');
+        const updateFilters = () => {
+            state.filters.transports.status = statusSelect?.value || '';
+            state.filters.transports.provider = providerInput?.value || '';
+            renderTransports();
+        };
+        statusSelect?.addEventListener('change', updateFilters);
+        providerInput?.addEventListener('input', updateFilters);
+        clearBtn?.addEventListener('click', () => {
+            if (statusSelect) statusSelect.value = '';
+            if (providerInput) providerInput.value = '';
+            state.filters.transports = { status: '', provider: '' };
+            renderTransports();
+        });
+    };
+
+    const bindTicketFilters = () => {
+        const typeInput = document.getElementById('filterTicketType');
+        const statusSelect = document.getElementById('filterTicketStatus');
+        const dateFromInput = document.getElementById('filterTicketDateFrom');
+        const dateToInput = document.getElementById('filterTicketDateTo');
+        const clearBtn = document.getElementById('clearTicketFilters');
+        const updateFilters = () => {
+            state.filters.tickets.type = typeInput?.value || '';
+            state.filters.tickets.status = statusSelect?.value || '';
+            state.filters.tickets.dateFrom = dateFromInput?.value || '';
+            state.filters.tickets.dateTo = dateToInput?.value || '';
+            renderTickets();
+        };
+        typeInput?.addEventListener('input', updateFilters);
+        statusSelect?.addEventListener('change', updateFilters);
+        dateFromInput?.addEventListener('change', updateFilters);
+        dateToInput?.addEventListener('change', updateFilters);
+        clearBtn?.addEventListener('click', () => {
+            if (typeInput) typeInput.value = '';
+            if (statusSelect) statusSelect.value = '';
+            if (dateFromInput) dateFromInput.value = '';
+            if (dateToInput) dateToInput.value = '';
+            state.filters.tickets = { type: '', status: '', dateFrom: '', dateTo: '' };
+            renderTickets();
+        });
+    };
+
     const bindSplitTypeToggle = () => {
         const inputs = document.querySelectorAll('input[name="splitType"]');
         inputs.forEach((input) => {
@@ -4167,6 +4273,9 @@
         bindMemberRoleActions();
         bindDeleteActions();
         bindFlightFilters();
+        bindLodgingFilters();
+        bindTransportFilters();
+        bindTicketFilters();
         bindSplitTypeToggle();
         bindSplitModeToggle();
         bindModuleExpenseToggles();

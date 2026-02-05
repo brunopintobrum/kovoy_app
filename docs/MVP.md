@@ -190,9 +190,9 @@
 8. Transportes V2: Listagem com origem/destino + horario em destaque
 9. Tickets V2: Listagem com participantes destacados
 10. Filtros: Voos por cia/rota/status [feito]
-11. Filtros: Hospedagens por cidade/status
-12. Filtros: Transportes por status/fornecedor
-13. Filtros: Tickets por tipo/status/data
+11. Filtros: Hospedagens por cidade/status [feito]
+12. Filtros: Transportes por status/fornecedor [feito]
+13. Filtros: Tickets por tipo/status/data [feito]
 14. Voos V2: Prefilling por airline + flight number
 15. Transportes V2: Provider + locator obrigatorios quando status=paid
 16. Hospedagens V2: Contato obrigatorio quando necessario
@@ -232,9 +232,9 @@
 - V2.3 (Usabilidade de selecao e filtros)
   - Voos: seletor de passageiros com busca (feito)
   - Voos: filtros por cia/rota/status (feito)
-  - Hospedagens: filtros por cidade/status
-  - Transportes: filtros por status/fornecedor
-  - Tickets: filtros por tipo/status/data
+  - Hospedagens: filtros por cidade/status (feito)
+  - Transportes: filtros por status/fornecedor (feito)
+  - Tickets: filtros por tipo/status/data (feito)
 - V2.4 (Regras condicionais)
   - Voos: prefilling por airline + flight number
   - Transportes: provider + locator obrigatorios quando status=paid
