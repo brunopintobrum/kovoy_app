@@ -14,30 +14,31 @@
         /* Mobile-responsive tables */
         @media (max-width: 768px) {
             .table-responsive table.table-mobile-cards thead {
-                display: none;
+                display: none !important;
             }
 
+            .table-responsive table.table-mobile-cards,
             .table-responsive table.table-mobile-cards tbody,
             .table-responsive table.table-mobile-cards tbody tr {
-                display: block;
-                width: 100%;
+                display: block !important;
+                width: 100% !important;
             }
 
             .table-responsive table.table-mobile-cards tbody tr {
-                margin-bottom: 1rem;
-                border: 1px solid #eff2f7;
-                border-radius: 0.375rem;
-                padding: 0.75rem;
-                background: #fff;
-                box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+                margin-bottom: 1rem !important;
+                border: 1px solid #eff2f7 !important;
+                border-radius: 0.375rem !important;
+                padding: 0.75rem !important;
+                background: #fff !important;
+                box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075) !important;
             }
 
             .table-responsive table.table-mobile-cards tbody tr td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0.5rem 0;
-                border: none;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 0.5rem 0 !important;
+                border: none !important;
                 text-align: left !important;
             }
 
@@ -50,14 +51,14 @@
             }
 
             .table-responsive table.table-mobile-cards tbody tr td:last-child {
-                justify-content: flex-end;
-                padding-top: 0.75rem;
-                border-top: 1px solid #eff2f7;
-                margin-top: 0.5rem;
+                justify-content: flex-end !important;
+                padding-top: 0.75rem !important;
+                border-top: 1px solid #eff2f7 !important;
+                margin-top: 0.5rem !important;
             }
 
             .table-responsive table.table-mobile-cards tbody tr td:last-child:before {
-                display: none;
+                display: none !important;
             }
         }
     </style>
