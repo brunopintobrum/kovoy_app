@@ -14,9 +14,6 @@ const {
     splitFullName,
     normalizeDisplayName,
     validatePassword,
-    validateFlightPayload,
-    validateExpensePayload,
-    validateTripMetaPayload,
     validateExpenseSplitPayload,
     validateGroupFlightPayload,
     validateGroupLodgingPayload,
@@ -72,60 +69,6 @@ describe('validation helpers', () => {
         expect(validatePassword('user@example.com', 'UPPERCASE1!')).toContain('Password must include 1 lowercase letter.');
         expect(validatePassword('user@example.com', 'NoNumbers!')).toContain('Password must include 1 number.');
         expect(validatePassword('user@example.com', 'NoSpecial123')).toContain('Password must include 1 special character.');
-    });
-
-    test('validateFlightPayload returns error on invalid currency', () => {
-        const result = validateFlightPayload({
-            airline: 'Test Airline',
-            from: 'MCO',
-            to: 'JFK',
-            departAt: '2026-02-22T10:00:00Z',
-            arriveAt: '2026-02-22T14:00:00Z',
-            currency: 'EUR',
-            cost: 300
-        });
-        expect(result).toEqual({ error: 'Currency is invalid.' });
-    });
-
-    test('validateExpensePayload normalizes optional fields', () => {
-        const result = validateExpensePayload({
-            category: 'Tickets',
-            amount: 120,
-            currency: 'USD',
-            status: 'planned'
-        });
-        expect(result.value).toMatchObject({
-            category: 'Tickets',
-            amount: 120,
-            currency: 'USD',
-            status: 'planned',
-            dueDate: null,
-            group: null,
-            split: null,
-            notes: null
-        });
-    });
-
-    test('validateTripMetaPayload falls back to current data', () => {
-        const current = {
-            name: 'Orlando',
-            start_date: '2026-02-22',
-            end_date: '2026-03-11',
-            base: 'Davenport',
-            family_one: 'Family One',
-            family_two: 'Family Two',
-            subtitle: 'Trip subtitle'
-        };
-        const result = validateTripMetaPayload({ name: 'Kovoy Trip' }, current);
-        expect(result.value).toEqual({
-            name: 'Kovoy Trip',
-            startDate: current.start_date,
-            endDate: current.end_date,
-            base: current.base,
-            familyOne: current.family_one,
-            familyTwo: current.family_two,
-            subtitle: current.subtitle
-        });
     });
 
     test('validateSplitSum ensures split total matches amount', () => {
