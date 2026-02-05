@@ -136,7 +136,7 @@
     - [x] UI: check-out sincroniza com check-in quando o campo esta vazio
     - [x] Validar check-out > check-in (backend)
     - [x] Validar check-out > check-in (UI)
-    - [ ] Listagem: resumo de quartos e status
+    - [x] Listagem: resumo de quartos e status
     - [ ] Filtros por cidade/status
     - [ ] Dados: contato obrigatorio quando necessario
   - [x] Transportes
@@ -146,7 +146,7 @@
     - [x] Validar chegada > partida (backend)
     - [x] Validar chegada > partida (UI)
     - [x] UI: chegada sincroniza com partida quando o campo esta vazio
-    - [ ] Listagem: origem/destino + horario em destaque
+    - [x] Listagem: origem/destino + horario em destaque
     - [ ] Filtros por status/fornecedor
     - [ ] Dados: provider + locator obrigatorios quando status=paid
   - [x] Tickets
@@ -155,7 +155,7 @@
     - [x] Status e observacoes
     - [x] Validar data/hora coerente (backend)
     - [x] Validar data/hora coerente (UI)
-    - [ ] Listagem: participantes destacados
+    - [x] Listagem: participantes destacados
     - [ ] Filtros por tipo/status/data
     - [ ] Dados: local obrigatorio quando type exige
   - [x] Unificar custos com Expenses (pagador + split dentro do modulo) *(panel split agora reaproveitado automaticamente nos módulos logísticos)*
@@ -212,9 +212,9 @@
   - Tickets: data/hora coerente (backend feito, UI feito)
 - V2.2 (Listagens mais uteis)
   - Voos: classe/assento/bagagem na lista (feito)
-  - Hospedagens: resumo de quartos e status
-  - Transportes: origem/destino + horario em destaque
-  - Tickets: participantes destacados
+  - Hospedagens: resumo de quartos e status (feito)
+  - Transportes: origem/destino + horario em destaque (feito)
+  - Tickets: participantes destacados (feito)
 - V2.3 (Usabilidade de selecao e filtros)
   - Voos: seletor de passageiros com busca (feito)
   - Voos: filtros por cia/rota/status
