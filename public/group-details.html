@@ -12,53 +12,68 @@
     <link href="assets/css/app.min.css" id="app-style" rel="stylesheet" />
     <style>
         /* Mobile-responsive tables */
-        @media (max-width: 768px) {
-            .table-responsive table.table-mobile-cards thead {
-                display: none !important;
+        @media screen and (max-width: 767px) {
+            /* Hide table headers */
+            table.table-mobile-cards thead {
+                position: absolute !important;
+                top: -9999px !important;
+                left: -9999px !important;
             }
 
-            .table-responsive table.table-mobile-cards,
-            .table-responsive table.table-mobile-cards tbody,
-            .table-responsive table.table-mobile-cards tbody tr {
+            /* Force table elements to block */
+            table.table-mobile-cards,
+            table.table-mobile-cards tbody,
+            table.table-mobile-cards tr,
+            table.table-mobile-cards td {
                 display: block !important;
-                width: 100% !important;
             }
 
-            .table-responsive table.table-mobile-cards tbody tr {
+            /* Remove default table spacing */
+            table.table-mobile-cards {
+                border: 0 !important;
+            }
+
+            /* Style each row as a card */
+            table.table-mobile-cards tr {
                 margin-bottom: 1rem !important;
-                border: 1px solid #eff2f7 !important;
-                border-radius: 0.375rem !important;
+                border: 1px solid #dee2e6 !important;
+                border-radius: 0.25rem !important;
                 padding: 0.75rem !important;
-                background: #fff !important;
-                box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075) !important;
+                background-color: #fff !important;
             }
 
-            .table-responsive table.table-mobile-cards tbody tr td {
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                padding: 0.5rem 0 !important;
+            /* Style cells with labels */
+            table.table-mobile-cards td {
                 border: none !important;
+                padding: 0.5rem 0 !important;
+                position: relative !important;
+                padding-left: 50% !important;
                 text-align: left !important;
             }
 
-            .table-responsive table.table-mobile-cards tbody tr td:before {
+            /* Add label before each cell */
+            table.table-mobile-cards td:before {
                 content: attr(data-label);
-                font-weight: 600;
-                color: #495057;
-                margin-right: 1rem;
-                flex-shrink: 0;
+                position: absolute !important;
+                left: 0 !important;
+                width: 45% !important;
+                padding-right: 10px !important;
+                white-space: nowrap !important;
+                font-weight: 600 !important;
+                text-align: left !important;
             }
 
-            .table-responsive table.table-mobile-cards tbody tr td:last-child {
-                justify-content: flex-end !important;
+            /* Action buttons cell */
+            table.table-mobile-cards td:last-child {
+                padding-left: 0 !important;
                 padding-top: 0.75rem !important;
-                border-top: 1px solid #eff2f7 !important;
+                border-top: 1px solid #dee2e6 !important;
                 margin-top: 0.5rem !important;
+                text-align: right !important;
             }
 
-            .table-responsive table.table-mobile-cards tbody tr td:last-child:before {
-                display: none !important;
+            table.table-mobile-cards td:last-child:before {
+                content: none !important;
             }
         }
     </style>
