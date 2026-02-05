@@ -4473,14 +4473,18 @@
 
     // Force mobile table styles via JavaScript (CSP prevents inline scripts)
     const applyMobileTableStyles = () => {
-        if (window.matchMedia('(max-width: 767px)').matches) {
-            document.querySelectorAll('table.table-mobile-cards').forEach(table => {
-                const thead = table.querySelector('thead');
+        const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+        document.querySelectorAll('table.table-mobile-cards').forEach(table => {
+            const thead = table.querySelector('thead');
+            const tbody = table.querySelector('tbody');
+
+            if (isMobile) {
+                // Apply mobile card styles
                 if (thead) {
                     thead.style.cssText = 'display: none !important;';
                 }
                 table.style.cssText = 'display: block !important; width: 100% !important; border: 0 !important;';
-                const tbody = table.querySelector('tbody');
                 if (tbody) {
                     tbody.style.cssText = 'display: block !important; width: 100% !important;';
                     tbody.querySelectorAll('tr').forEach(tr => {
@@ -4491,9 +4495,12 @@
                                 // Actions cell
                                 td.style.cssText = 'display: block !important; width: 100% !important; padding: 0.75rem 0 0 0 !important; border: none !important; border-top: 1px solid #e3e6ea !important; margin-top: 0.5rem !important; text-align: center !important;';
                             } else if (label) {
-                                // Regular cell with label
+                                // Regular cell with label - store original content if not already stored
+                                if (!td.hasAttribute('data-original-content')) {
+                                    td.setAttribute('data-original-content', td.innerHTML);
+                                }
                                 if (!td.querySelector('.mobile-label')) {
-                                    const originalContent = td.innerHTML;
+                                    const originalContent = td.getAttribute('data-original-content');
                                     td.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.375rem 0; min-height: 2rem;"><span class="mobile-label" style="font-weight: 600; color: #495057; font-size: 0.875rem; flex-shrink: 0; margin-right: 1rem;">${label}:</span><span style="text-align: right; color: #212529; flex-grow: 1;">${originalContent}</span></div>`;
                                 }
                                 td.style.cssText = 'display: block !important; width: 100% !important; border: none !important; padding: 0 !important;';
@@ -4501,8 +4508,27 @@
                         });
                     });
                 }
-            });
-        }
+            } else {
+                // Restore desktop table styles
+                if (thead) {
+                    thead.style.cssText = '';
+                }
+                table.style.cssText = '';
+                if (tbody) {
+                    tbody.style.cssText = '';
+                    tbody.querySelectorAll('tr').forEach(tr => {
+                        tr.style.cssText = '';
+                        tr.querySelectorAll('td').forEach(td => {
+                            // Restore original content if it was modified for mobile
+                            if (td.hasAttribute('data-original-content')) {
+                                td.innerHTML = td.getAttribute('data-original-content');
+                            }
+                            td.style.cssText = '';
+                        });
+                    });
+                }
+            }
+        });
     };
 
     window.addEventListener('resize', applyMobileTableStyles);
