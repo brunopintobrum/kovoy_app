@@ -42,6 +42,17 @@
         { prefix: 'ticket', toggleId: 'ticketLinkExpense', fieldsId: 'ticketExpenseFields', payerId: 'ticketExpensePayer' }
     ];
 
+    const showToast = (type, message) => {
+        const toastId = type === 'success' ? 'successToast' : 'errorToast';
+        const messageId = type === 'success' ? 'successToastMessage' : 'errorToastMessage';
+        const toastEl = document.getElementById(toastId);
+        const messageEl = document.getElementById(messageId);
+        if (!toastEl || !messageEl) return;
+        messageEl.textContent = message;
+        const toast = new window.bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+    };
+
     const getCookie = (name) => {
         return document.cookie
             .split(';')
@@ -2805,6 +2816,8 @@
                 if (familyError) familyError.classList.add('d-none');
                 if (!validateForm(familyForm)) return;
                 const name = document.getElementById('familyName')?.value || '';
+                const submitBtn = familyForm.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
                 try {
                     if (state.editing.familyId) {
                         await apiRequest(`/api/groups/${state.groupId}/families/${state.editing.familyId}`, {
@@ -2817,6 +2830,7 @@
                             body: JSON.stringify({ name })
                         });
                     }
+                    showToast('success', state.editing.familyId ? 'Family updated.' : 'Family created.');
                     resetFamilyForm();
                     await refreshData();
                 } catch (err) {
@@ -2824,6 +2838,8 @@
                         familyError.textContent = err.message;
                         familyError.classList.remove('d-none');
                     }
+                } finally {
+                    if (submitBtn) submitBtn.disabled = false;
                 }
             });
         }
@@ -2900,6 +2916,8 @@
                 if (expensePayload) {
                     payload.expense = expensePayload;
                 }
+                const submitBtn = flightForm.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
                 try {
                     const flightId = state.editing.flightId;
                     const endpoint = flightId
@@ -2913,6 +2931,7 @@
                     if (expensePayload && !ensureLinkedExpense(response, flightError)) {
                         return;
                     }
+                    showToast('success', flightId ? 'Flight updated.' : 'Flight created.');
                     resetFlightForm();
                     await refreshData();
                     getFlightModalInstance()?.hide();
@@ -2921,6 +2940,8 @@
                         flightError.textContent = err.message;
                         flightError.classList.remove('d-none');
                     }
+                } finally {
+                    if (submitBtn) submitBtn.disabled = false;
                 }
             });
         }
@@ -3005,6 +3026,8 @@
                 if (expensePayload) {
                     payload.expense = expensePayload;
                 }
+                const submitBtn = lodgingForm.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
                 try {
                     const lodgingId = state.editing.lodgingId;
                     const endpoint = lodgingId
@@ -3018,6 +3041,7 @@
                     if (expensePayload && !ensureLinkedExpense(response, lodgingError)) {
                         return;
                     }
+                    showToast('success', lodgingId ? 'Lodging updated.' : 'Lodging created.');
                     resetLodgingForm();
                     await refreshData();
                     getLodgingModalInstance()?.hide();
@@ -3026,6 +3050,8 @@
                         lodgingError.textContent = err.message;
                         lodgingError.classList.remove('d-none');
                     }
+                } finally {
+                    if (submitBtn) submitBtn.disabled = false;
                 }
             });
         }
@@ -3098,6 +3124,8 @@
                 if (expensePayload) {
                     payload.expense = expensePayload;
                 }
+                const submitBtn = transportForm.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
                 try {
                     const transportId = state.editing.transportId;
                     const endpoint = transportId
@@ -3111,6 +3139,7 @@
                     if (expensePayload && !ensureLinkedExpense(response, transportError)) {
                         return;
                     }
+                    showToast('success', transportId ? 'Transport updated.' : 'Transport created.');
                     resetTransportForm();
                     await refreshData();
                     getTransportModalInstance()?.hide();
@@ -3119,6 +3148,8 @@
                         transportError.textContent = err.message;
                         transportError.classList.remove('d-none');
                     }
+                } finally {
+                    if (submitBtn) submitBtn.disabled = false;
                 }
             });
         }
@@ -3195,6 +3226,8 @@
                 if (expensePayload) {
                     payload.expense = expensePayload;
                 }
+                const submitBtn = ticketForm.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
                 try {
                     const ticketId = state.editing.ticketId;
                     const endpoint = ticketId
@@ -3208,6 +3241,7 @@
                     if (expensePayload && !ensureLinkedExpense(response, ticketError)) {
                         return;
                     }
+                    showToast('success', ticketId ? 'Ticket updated.' : 'Ticket created.');
                     resetTicketForm();
                     await refreshData();
                     getTicketModalInstance()?.hide();
@@ -3216,6 +3250,8 @@
                         ticketError.textContent = err.message;
                         ticketError.classList.remove('d-none');
                     }
+                } finally {
+                    if (submitBtn) submitBtn.disabled = false;
                 }
             });
         }
@@ -3248,6 +3284,8 @@
                 const type = document.getElementById('participantType')?.value || '';
                 const familyIdValue = document.getElementById('participantFamily')?.value || '';
                 const familyId = familyIdValue ? Number(familyIdValue) : null;
+                const submitBtn = participantForm.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
                 try {
                     if (state.editing.participantId) {
                         await apiRequest(`/api/groups/${state.groupId}/participants/${state.editing.participantId}`, {
@@ -3260,6 +3298,7 @@
                             body: JSON.stringify({ displayName, type, familyId })
                         });
                     }
+                    showToast('success', state.editing.participantId ? 'Participant updated.' : 'Participant created.');
                     resetParticipantForm();
                     await refreshData();
                 } catch (err) {
@@ -3267,6 +3306,8 @@
                         participantError.textContent = err.message;
                         participantError.classList.remove('d-none');
                     }
+                } finally {
+                    if (submitBtn) submitBtn.disabled = false;
                 }
             });
         }
@@ -3350,6 +3391,8 @@
                     payload.familyIds = targetIds;
                 }
 
+                const submitBtn = expenseForm.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
                 try {
                     const expenseId = state.editing.expenseId;
                     const endpoint = expenseId
@@ -3360,6 +3403,7 @@
                         method,
                         body: JSON.stringify(payload)
                     });
+                    showToast('success', expenseId ? 'Expense updated.' : 'Expense created.');
                     resetExpenseForm();
                     await refreshData();
                     getExpenseModalInstance()?.hide();
@@ -3368,6 +3412,8 @@
                         expenseError.textContent = err.message;
                         expenseError.classList.remove('d-none');
                     }
+                } finally {
+                    if (submitBtn) submitBtn.disabled = false;
                 }
             });
 
@@ -3552,11 +3598,14 @@
                     return;
                 }
                 if (action !== 'delete-family') return;
+                if (!confirm('Are you sure you want to delete this family?')) return;
+                button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/families/${id}`, { method: 'DELETE' });
                     if (state.editing.familyId === id) {
                         resetFamilyForm();
                     }
+                    showToast('success', 'Family deleted.');
                     await refreshData();
                 } catch (err) {
                     const familyError = document.getElementById('familyError');
@@ -3564,6 +3613,8 @@
                         familyError.textContent = err.message;
                         familyError.classList.remove('d-none');
                     }
+                } finally {
+                    button.disabled = false;
                 }
             });
         }
@@ -3584,11 +3635,14 @@
                     return;
                 }
                 if (action !== 'delete-participant') return;
+                if (!confirm('Are you sure you want to delete this participant?')) return;
+                button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/participants/${id}`, { method: 'DELETE' });
                     if (state.editing.participantId === id) {
                         resetParticipantForm();
                     }
+                    showToast('success', 'Participant deleted.');
                     await refreshData();
                 } catch (err) {
                     const participantError = document.getElementById('participantError');
@@ -3596,6 +3650,8 @@
                         participantError.textContent = err.message;
                         participantError.classList.remove('d-none');
                     }
+                } finally {
+                    button.disabled = false;
                 }
             });
         }
@@ -3617,11 +3673,14 @@
                     return;
                 }
                 if (action !== 'delete-expense') return;
+                if (!confirm('Are you sure you want to delete this expense?')) return;
+                button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/expenses/${id}`, { method: 'DELETE' });
                     if (state.editing.expenseId === id) {
                         resetExpenseForm();
                     }
+                    showToast('success', 'Expense deleted.');
                     await refreshData();
                 } catch (err) {
                     const expenseError = document.getElementById('expenseError');
@@ -3629,6 +3688,8 @@
                         expenseError.textContent = err.message;
                         expenseError.classList.remove('d-none');
                     }
+                } finally {
+                    button.disabled = false;
                 }
             });
         }
@@ -3659,9 +3720,12 @@
                     return;
                 }
                 if (action !== 'delete-flight') return;
+                if (!confirm('Are you sure you want to delete this flight?')) return;
+                button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/flights/${id}`, { method: 'DELETE' });
                     resetFlightForm();
+                    showToast('success', 'Flight deleted.');
                     await refreshData();
                 } catch (err) {
                     const flightError = document.getElementById('flightError');
@@ -3669,6 +3733,8 @@
                         flightError.textContent = err.message;
                         flightError.classList.remove('d-none');
                     }
+                } finally {
+                    button.disabled = false;
                 }
             });
         }
@@ -3697,11 +3763,14 @@
                     return;
                 }
                 if (action !== 'delete-lodging') return;
+                if (!confirm('Are you sure you want to delete this lodging?')) return;
+                button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/lodgings/${id}`, { method: 'DELETE' });
                     if (state.editing.lodgingId === id) {
                         resetLodgingForm();
                     }
+                    showToast('success', 'Lodging deleted.');
                     await refreshData();
                 } catch (err) {
                     const lodgingError = document.getElementById('lodgingError');
@@ -3709,6 +3778,8 @@
                         lodgingError.textContent = err.message;
                         lodgingError.classList.remove('d-none');
                     }
+                } finally {
+                    button.disabled = false;
                 }
             });
         }
@@ -3738,11 +3809,14 @@
                     return;
                 }
                 if (action !== 'delete-transport') return;
+                if (!confirm('Are you sure you want to delete this transport?')) return;
+                button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/transports/${id}`, { method: 'DELETE' });
                     if (state.editing.transportId === id) {
                         resetTransportForm();
                     }
+                    showToast('success', 'Transport deleted.');
                     await refreshData();
                 } catch (err) {
                     const transportError = document.getElementById('transportError');
@@ -3750,6 +3824,8 @@
                         transportError.textContent = err.message;
                         transportError.classList.remove('d-none');
                     }
+                } finally {
+                    button.disabled = false;
                 }
             });
         }
@@ -3779,11 +3855,14 @@
                     return;
                 }
                 if (action !== 'delete-ticket') return;
+                if (!confirm('Are you sure you want to delete this ticket?')) return;
+                button.disabled = true;
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/tickets/${id}`, { method: 'DELETE' });
                     if (state.editing.ticketId === id) {
                         resetTicketForm();
                     }
+                    showToast('success', 'Ticket deleted.');
                     await refreshData();
                 } catch (err) {
                     const ticketError = document.getElementById('ticketError');
@@ -3791,6 +3870,8 @@
                         ticketError.textContent = err.message;
                         ticketError.classList.remove('d-none');
                     }
+                } finally {
+                    button.disabled = false;
                 }
             });
         }

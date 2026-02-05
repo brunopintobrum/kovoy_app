@@ -163,9 +163,9 @@
   - [x] Autocomplete/validacao para hospedagens (Country + City/State + Property)
   - [ ] Autocomplete/validacao para transportes (origem/destino)
   - [ ] Autocomplete/validacao para tickets (local)
-- [ ] Confirmacao antes de deletar (todos os modulos)
-- [ ] Toast de feedback apos salvar/deletar nos modulos
-- [ ] Desabilitar botoes durante requisicoes API (prevenir duplicatas)
+- [x] Confirmacao antes de deletar (todos os modulos)
+- [x] Toast de feedback apos salvar/deletar nos modulos
+- [x] Desabilitar botoes durante requisicoes API (prevenir duplicatas)
 - [ ] Indicador visual de expense vinculada nas listagens dos modulos
 - [ ] Ordenacao por coluna nas tabelas (client-side)
 - [ ] Estado vazio com CTA nos modulos
@@ -200,9 +200,9 @@
 18. Voos V2: Autocomplete de aeroportos (From/To) e IDs persistidos [feito]
 19. Voos V2: Assentos/bagagens por passageiro [feito]
 20. Voos V2: Layout de formulario organizado [feito]
-21. Confirmacao antes de deletar (todos os modulos)
-22. Toast de feedback apos salvar/deletar nos modulos
-23. Desabilitar botoes durante requisicoes API
+21. Confirmacao antes de deletar (todos os modulos) [feito]
+22. Toast de feedback apos salvar/deletar nos modulos [feito]
+23. Desabilitar botoes durante requisicoes API [feito]
 24. Indicador visual de expense vinculada nas listagens
 25. Ordenacao por coluna nas tabelas
 26. Estado vazio com CTA nos modulos
