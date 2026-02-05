@@ -157,7 +157,7 @@
     - [x] Validar data/hora coerente (UI)
     - [x] Listagem: participantes destacados
     - [ ] Filtros por tipo/status/data
-    - [ ] Dados: local obrigatorio quando type exige
+    - [x] Dados: local obrigatorio quando type exige
   - [x] Unificar custos com Expenses (pagador + split dentro do modulo) *(panel split agora reaproveitado automaticamente nos módulos logísticos)*
   - [ ] Anexos/recibos por item (upload, visualizacao e download)
   - [x] Autocomplete/validacao para hospedagens (Country + City/State + Property)
@@ -194,9 +194,9 @@
 12. Filtros: Transportes por status/fornecedor [feito]
 13. Filtros: Tickets por tipo/status/data [feito]
 14. Voos V2: Prefilling por airline + flight number
-15. Transportes V2: Provider + locator obrigatorios quando status=paid
-16. Hospedagens V2: Contato obrigatorio quando necessario
-17. Tickets V2: Local obrigatorio quando type exige
+15. Transportes V2: Provider + locator obrigatorios quando status=paid [feito]
+16. Hospedagens V2: Contato obrigatorio quando necessario [feito]
+17. Tickets V2: Local obrigatorio quando type exige [feito]
 18. Voos V2: Autocomplete de aeroportos (From/To) e IDs persistidos [feito]
 19. Voos V2: Assentos/bagagens por passageiro [feito]
 20. Voos V2: Layout de formulario organizado [feito]
@@ -237,9 +237,9 @@
   - Tickets: filtros por tipo/status/data (feito)
 - V2.4 (Regras condicionais)
   - Voos: prefilling por airline + flight number
-  - Transportes: provider + locator obrigatorios quando status=paid
-  - Hospedagens: contato obrigatorio quando necessario
-  - Tickets: local obrigatorio quando type exige
+  - Transportes: provider + locator obrigatorios quando status=paid (feito)
+  - Hospedagens: contato obrigatorio quando necessario (feito)
+  - Tickets: local obrigatorio quando type exige (feito)
 - V2.5 (Qualidade UX)
   - Confirmacao antes de deletar (todos os modulos)
   - Toast de feedback apos salvar/deletar nos modulos

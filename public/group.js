@@ -1893,6 +1893,32 @@
         });
     };
 
+    const setupLodgingConditionalValidation = () => {
+        const statusSelect = document.getElementById('lodgingStatus');
+        const contactInput = document.getElementById('lodgingContact');
+        const updateRequired = () => {
+            const isPaid = statusSelect?.value === 'paid';
+            if (contactInput) contactInput.required = isPaid;
+        };
+        statusSelect?.addEventListener('change', updateRequired);
+        updateRequired();
+    };
+
+    const setupTicketConditionalValidation = () => {
+        const typeInput = document.getElementById('ticketType');
+        const locationInput = document.getElementById('ticketLocation');
+        const updateRequired = () => {
+            const typeValue = (typeInput?.value || '').toLowerCase();
+            const isDigitalType = typeValue.includes('digital') ||
+                                  typeValue.includes('virtual') ||
+                                  typeValue.includes('online') ||
+                                  typeValue.includes('email');
+            if (locationInput) locationInput.required = !isDigitalType;
+        };
+        typeInput?.addEventListener('input', updateRequired);
+        updateRequired();
+    };
+
     const setupFlightParticipantSearch = () => {
         const search = document.getElementById('flightParticipantSearch');
         const select = document.getElementById('flightParticipants');
@@ -2008,6 +2034,19 @@
         arrive.addEventListener('change', clearAutofill);
         arrive.addEventListener('input', clearAutofill);
         sync();
+    };
+
+    const setupTransportConditionalValidation = () => {
+        const statusSelect = document.getElementById('transportStatus');
+        const providerInput = document.getElementById('transportProvider');
+        const locatorInput = document.getElementById('transportLocator');
+        const updateRequired = () => {
+            const isPaid = statusSelect?.value === 'paid';
+            if (providerInput) providerInput.required = isPaid;
+            if (locatorInput) locatorInput.required = isPaid;
+        };
+        statusSelect?.addEventListener('change', updateRequired);
+        updateRequired();
     };
 
     const setupLodgingDateConstraints = () => {
@@ -4267,7 +4306,10 @@
         setupFlightAirportAutocomplete();
         setupFlightDateConstraints();
         setupTransportDateConstraints();
+        setupTransportConditionalValidation();
         setupLodgingDateConstraints();
+        setupLodgingConditionalValidation();
+        setupTicketConditionalValidation();
         setupFlightParticipantSearch();
         bindInviteForm();
         bindMemberRoleActions();

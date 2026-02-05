@@ -4578,8 +4578,14 @@ const validateGroupLodgingPayload = (payload) => {
     if (currency.error) return currency;
     const cost = requireNumber(payload.cost, 'Total cost');
     if (cost.error) return cost;
-    const contact = requireString(payload.contact, 'Contact name');
-    if (contact.error) return contact;
+    let contact;
+    if (status.value === 'paid') {
+        const contactResult = requireString(payload.contact, 'Contact name');
+        if (contactResult.error) return { error: 'Contact name is required when status is paid.' };
+        contact = contactResult.value;
+    } else {
+        contact = optionalString(payload.contact);
+    }
     return {
         value: {
             name: name.value,
@@ -4602,7 +4608,7 @@ const validateGroupLodgingPayload = (payload) => {
             cost: cost.value,
             currency: currency.value,
             host: optionalString(payload.host),
-            contact: contact.value,
+            contact,
             contactPhone: optionalString(payload.contactPhone),
             contactEmail: optionalString(payload.contactEmail),
             notes: optionalString(payload.notes)
@@ -4630,6 +4636,18 @@ const validateGroupTransportPayload = (payload) => {
     if (currency.error) return currency;
     const amount = requireNumber(payload.amount, 'Amount');
     if (amount.error) return amount;
+    let provider, locator;
+    if (status.value === 'paid') {
+        const providerResult = requireString(payload.provider, 'Provider');
+        if (providerResult.error) return { error: 'Provider is required when status is paid.' };
+        provider = providerResult.value;
+        const locatorResult = requireString(payload.locator, 'Locator');
+        if (locatorResult.error) return { error: 'Locator is required when status is paid.' };
+        locator = locatorResult.value;
+    } else {
+        provider = optionalString(payload.provider);
+        locator = optionalString(payload.locator);
+    }
     return {
         value: {
             type: type.value,
@@ -4637,8 +4655,8 @@ const validateGroupTransportPayload = (payload) => {
             destination: destination.value,
             departAt: departAt.value,
             arriveAt: arriveAt.value,
-            provider: optionalString(payload.provider),
-            locator: optionalString(payload.locator),
+            provider,
+            locator,
             status: status.value,
             amount: amount.value,
             currency: currency.value,
@@ -4652,8 +4670,23 @@ const validateGroupTicketPayload = (payload) => {
     if (type.error) return type;
     const eventAt = requireDate(payload.eventAt, 'Date/time');
     if (eventAt.error) return eventAt;
-    const location = requireString(payload.location, 'Location');
-    if (location.error) return location;
+
+    // Location is required unless the ticket type explicitly indicates it's digital/virtual
+    const typeValue = type.value.toLowerCase();
+    const isDigitalType = typeValue.includes('digital') ||
+                          typeValue.includes('virtual') ||
+                          typeValue.includes('online') ||
+                          typeValue.includes('email');
+
+    let location;
+    if (isDigitalType) {
+        location = { value: optionalString(payload.location) };
+    } else {
+        const locationResult = requireString(payload.location, 'Location');
+        if (locationResult.error) return { error: 'Location is required for physical tickets.' };
+        location = locationResult;
+    }
+
     const status = payload.status ? requireStatus(payload.status) : { value: 'planned' };
     if (status.error) return status;
     if (status.value === 'planned' && new Date(eventAt.value).getTime() <= Date.now()) {
