@@ -1330,9 +1330,9 @@
         sortedParticipants.forEach((participant) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${participant.displayName}</td>
-                <td>${participant.familyId ? familyMap.get(participant.familyId) || '-' : '-'}</td>
-                <td class="text-capitalize">${participant.type || '-'}</td>
+                <td data-label="Name">${participant.displayName}</td>
+                <td data-label="Family">${participant.familyId ? familyMap.get(participant.familyId) || '-' : '-'}</td>
+                <td data-label="Type" class="text-capitalize">${participant.type || '-'}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-participant" data-id="${participant.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-participant" data-id="${participant.id}">Delete</button>

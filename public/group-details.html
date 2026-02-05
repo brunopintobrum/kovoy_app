@@ -10,6 +10,57 @@
     <link href="assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" />
     <link href="assets/css/icons.min.css" rel="stylesheet" />
     <link href="assets/css/app.min.css" id="app-style" rel="stylesheet" />
+    <style>
+        /* Mobile-responsive tables */
+        @media (max-width: 768px) {
+            .table-responsive table.table-mobile-cards thead {
+                display: none;
+            }
+
+            .table-responsive table.table-mobile-cards tbody,
+            .table-responsive table.table-mobile-cards tbody tr {
+                display: block;
+                width: 100%;
+            }
+
+            .table-responsive table.table-mobile-cards tbody tr {
+                margin-bottom: 1rem;
+                border: 1px solid #eff2f7;
+                border-radius: 0.375rem;
+                padding: 0.75rem;
+                background: #fff;
+                box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            }
+
+            .table-responsive table.table-mobile-cards tbody tr td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 0;
+                border: none;
+                text-align: left !important;
+            }
+
+            .table-responsive table.table-mobile-cards tbody tr td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #495057;
+                margin-right: 1rem;
+                flex-shrink: 0;
+            }
+
+            .table-responsive table.table-mobile-cards tbody tr td:last-child {
+                justify-content: flex-end;
+                padding-top: 0.75rem;
+                border-top: 1px solid #eff2f7;
+                margin-top: 0.5rem;
+            }
+
+            .table-responsive table.table-mobile-cards tbody tr td:last-child:before {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body data-layout-mode="light" data-topbar="light" data-sidebar="dark">
     <div id="layout-wrapper">
@@ -342,7 +393,7 @@
                                     </div>
                                     <div class="alert alert-danger d-none" id="participantError"></div>
                                     <div class="table-responsive">
-                                        <table class="table table-sm align-middle mb-0">
+                                        <table class="table table-sm align-middle mb-0 table-mobile-cards">
                                             <thead class="table-light">
                                                 <tr>
                                                     <th class="sortable" data-sort="displayName" style="cursor:pointer">Name <span class="sort-icon"></span></th>
@@ -547,7 +598,7 @@
                                   </button>
                               </div>
                               <div class="table-responsive mt-3">
-                                <table class="table align-middle table-nowrap mb-0">
+                                <table class="table align-middle table-nowrap mb-0 table-mobile-cards">
                                     <thead class="table-light">
                                         <tr>
                                             <th class="sortable" data-sort="description" style="cursor:pointer">Description <span class="sort-icon"></span></th>
@@ -769,7 +820,7 @@
                                 </div>
                             </div>
                             <div class="table-responsive mt-3">
-                                <table class="table align-middle table-nowrap mb-0">
+                                <table class="table align-middle table-nowrap mb-0 table-mobile-cards">
                                     <thead class="table-light">
                                             <tr>
                                                 <th class="sortable" data-sort="airline" style="cursor:pointer">Flight <span class="sort-icon"></span></th>
@@ -1002,7 +1053,7 @@
                                 </div>
                             </div>
                             <div class="table-responsive mt-3">
-                                <table class="table align-middle table-nowrap mb-0">
+                                <table class="table align-middle table-nowrap mb-0 table-mobile-cards">
                                     <thead class="table-light">
                                         <tr>
                                             <th class="sortable" data-sort="name" style="cursor:pointer">Property <span class="sort-icon"></span></th>
@@ -1163,7 +1214,7 @@
                                 </div>
                             </div>
                             <div class="table-responsive mt-3">
-                                <table class="table align-middle table-nowrap mb-0">
+                                <table class="table align-middle table-nowrap mb-0 table-mobile-cards">
                                     <thead class="table-light">
                                         <tr>
                                             <th class="sortable" data-sort="type" style="cursor:pointer">Type <span class="sort-icon"></span></th>
@@ -1319,7 +1370,7 @@
                                 </div>
                             </div>
                             <div class="table-responsive mt-3">
-                                    <table class="table align-middle table-nowrap mb-0">
+                                    <table class="table align-middle table-nowrap mb-0 table-mobile-cards">
                                         <thead class="table-light">
                                             <tr>
                                                 <th class="sortable" data-sort="type" style="cursor:pointer">Type <span class="sort-icon"></span></th>
