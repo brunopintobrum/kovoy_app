@@ -887,6 +887,13 @@
             .join(' ');
     };
 
+    const formatStatusBadge = (status) => {
+        const s = (status || 'planned').toLowerCase();
+        const colorMap = { planned: 'primary', paid: 'success', due: 'warning' };
+        const color = colorMap[s] || 'secondary';
+        return `<span class="badge bg-soft-${color} text-${color} text-capitalize">${s}</span>`;
+    };
+
     const parseGroupId = () => {
         const params = new URLSearchParams(window.location.search);
         const id = Number(params.get('groupId'));
@@ -1431,30 +1438,57 @@
             const checkIn = `${formatDate(lodging.checkIn)} ${lodging.checkInTime || ''}`.trim();
             const checkOut = `${formatDate(lodging.checkOut)} ${lodging.checkOutTime || ''}`.trim();
             const rooms = lodging.roomType
-                ? `${lodging.roomQuantity || 0} x ${lodging.roomType} (occ ${lodging.roomOccupancy || 0})`
+                ? `${lodging.roomQuantity || 1} × ${lodging.roomType} (${lodging.roomOccupancy || 0} guests)`
                 : '-';
             const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean);
             const contact = contactParts.length ? contactParts.join(' · ') : '-';
+            const detailsId = `lodging-details-${lodging.id}`;
+            const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean);
+            const addressLabel = addressParts.join(', ') || '-';
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${lodging.name || '-'}</td>
                 <td>${location || '-'}</td>
-                <td>${checkIn} -> ${checkOut}</td>
+                <td>${checkIn} → ${checkOut}</td>
                 <td>${rooms}</td>
-                <td class="text-capitalize">${lodging.status || 'planned'}</td>
+                <td>${formatStatusBadge(lodging.status)}</td>
                 <td>${formatCurrency(lodging.cost, lodging.currency)}</td>
                 <td>${contact}</td>
                 <td class="text-end">
+                    <button class="btn btn-sm btn-outline-secondary me-1" data-action="toggle-lodging-details" data-id="${lodging.id}" aria-controls="${detailsId}">Details</button>
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-lodging" data-id="${lodging.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-lodging" data-id="${lodging.id}">Delete</button>
                 </td>
             `;
             if (!state.canEdit) {
-                tr.querySelectorAll('button').forEach((button) => {
+                tr.querySelectorAll('button[data-action="edit-lodging"], button[data-action="delete-lodging"]').forEach((button) => {
                     button.disabled = true;
                 });
             }
             list.appendChild(tr);
+            const detailsRow = document.createElement('tr');
+            detailsRow.id = detailsId;
+            detailsRow.className = 'd-none';
+            detailsRow.innerHTML = `
+                <td colspan="8">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="text-muted small">Full address</div>
+                            <div>${addressLabel}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-muted small">Check-in / Check-out</div>
+                            <div>${checkIn} → ${checkOut}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-muted small">Contact</div>
+                            <div>${contact}</div>
+                        </div>
+                        ${lodging.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${lodging.notes}</div></div>` : ''}
+                    </div>
+                </td>
+            `;
+            list.appendChild(detailsRow);
         });
     };
 
@@ -1467,30 +1501,58 @@
             return;
         }
         state.transports.forEach((transport) => {
-            const route = `${transport.origin || '-'} -> ${transport.destination || '-'}`;
+            const route = `${transport.origin || '-'} → ${transport.destination || '-'}`;
             const provider = transport.provider || '-';
             const locator = transport.locator || '-';
             const providerLine = [provider, locator].filter((value) => value && value !== '-').join(' · ') || '-';
+            const detailsId = `transport-details-${transport.id}`;
+            const hasDetails = transport.notes || (provider !== '-') || (locator !== '-');
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${transport.type || '-'}</td>
-                <td>${route}</td>
+                <td><strong>${route}</strong></td>
                 <td>${formatDateTime(transport.departAt)}</td>
                 <td>${formatDateTime(transport.arriveAt)}</td>
-                <td class="text-capitalize">${transport.status || 'planned'}</td>
+                <td>${formatStatusBadge(transport.status)}</td>
                 <td>${formatCurrency(transport.amount, transport.currency)}</td>
                 <td>${providerLine}</td>
                 <td class="text-end">
+                    ${hasDetails ? `<button class="btn btn-sm btn-outline-secondary me-1" data-action="toggle-transport-details" data-id="${transport.id}" aria-controls="${detailsId}">Details</button>` : ''}
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-transport" data-id="${transport.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-transport" data-id="${transport.id}">Delete</button>
                 </td>
             `;
             if (!state.canEdit) {
-                tr.querySelectorAll('button').forEach((button) => {
+                tr.querySelectorAll('button[data-action="edit-transport"], button[data-action="delete-transport"]').forEach((button) => {
                     button.disabled = true;
                 });
             }
             list.appendChild(tr);
+            if (hasDetails) {
+                const detailsRow = document.createElement('tr');
+                detailsRow.id = detailsId;
+                detailsRow.className = 'd-none';
+                detailsRow.innerHTML = `
+                    <td colspan="8">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="text-muted small">Origin → Destination</div>
+                                <div><strong>${transport.origin || '-'}</strong> → <strong>${transport.destination || '-'}</strong></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-muted small">Departure / Arrival</div>
+                                <div>${formatDateTime(transport.departAt)} → ${formatDateTime(transport.arriveAt)}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-muted small">Provider / Locator</div>
+                                <div>${providerLine}</div>
+                            </div>
+                            ${transport.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${transport.notes}</div></div>` : ''}
+                        </div>
+                    </td>
+                `;
+                list.appendChild(detailsRow);
+            }
         });
     };
 
@@ -1507,26 +1569,50 @@
             const participantNames = (ticket.participantIds || [])
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
-            const participantsLabel = participantNames.join(', ') || '-';
+            const participantBadges = participantNames.length
+                ? participantNames.map((name) => `<span class="badge bg-soft-primary text-primary me-1">${name}</span>`).join('')
+                : '<span class="text-muted">-</span>';
+            const detailsId = `ticket-details-${ticket.id}`;
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${ticket.type || '-'}</td>
                 <td>${formatDateTime(ticket.eventAt)}</td>
                 <td>${ticket.location || '-'}</td>
-                <td class="text-capitalize">${ticket.status || 'planned'}</td>
+                <td>${formatStatusBadge(ticket.status)}</td>
                 <td>${formatCurrency(ticket.amount, ticket.currency)}</td>
-                <td>${participantsLabel}</td>
+                <td>${participantBadges}</td>
                 <td class="text-end">
+                    ${ticket.notes ? `<button class="btn btn-sm btn-outline-secondary me-1" data-action="toggle-ticket-details" data-id="${ticket.id}" aria-controls="${detailsId}">Details</button>` : ''}
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-ticket" data-id="${ticket.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-ticket" data-id="${ticket.id}">Delete</button>
                 </td>
             `;
             if (!state.canEdit) {
-                tr.querySelectorAll('button').forEach((button) => {
+                tr.querySelectorAll('button[data-action="edit-ticket"], button[data-action="delete-ticket"]').forEach((button) => {
                     button.disabled = true;
                 });
             }
             list.appendChild(tr);
+            if (ticket.notes) {
+                const detailsRow = document.createElement('tr');
+                detailsRow.id = detailsId;
+                detailsRow.className = 'd-none';
+                detailsRow.innerHTML = `
+                    <td colspan="7">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="text-muted small">Participants</div>
+                                <div>${participantBadges}</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="text-muted small">Notes</div>
+                                <div>${ticket.notes}</div>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                list.appendChild(detailsRow);
+            }
         });
     };
 
@@ -3594,6 +3680,11 @@
                 const action = button.dataset.action;
                 const id = button.dataset.id;
                 if (!id) return;
+                if (action === 'toggle-lodging-details') {
+                    const detailsRow = document.getElementById(`lodging-details-${id}`);
+                    if (detailsRow) detailsRow.classList.toggle('d-none');
+                    return;
+                }
                 if (action === 'edit-lodging') {
                     if (!state.canEdit) return;
                     const lodging = state.lodgings.find((item) => String(item.id) === String(id));
@@ -3629,6 +3720,11 @@
                 const action = button.dataset.action;
                 const id = button.dataset.id;
                 if (!id) return;
+                if (action === 'toggle-transport-details') {
+                    const detailsRow = document.getElementById(`transport-details-${id}`);
+                    if (detailsRow) detailsRow.classList.toggle('d-none');
+                    return;
+                }
                 if (action === 'edit-transport') {
                     if (!state.canEdit) return;
                     const transport = state.transports.find((item) => item.id === id);
@@ -3665,6 +3761,11 @@
                 const action = button.dataset.action;
                 const id = button.dataset.id;
                 if (!id) return;
+                if (action === 'toggle-ticket-details') {
+                    const detailsRow = document.getElementById(`ticket-details-${id}`);
+                    if (detailsRow) detailsRow.classList.toggle('d-none');
+                    return;
+                }
                 if (action === 'edit-ticket') {
                     if (!state.canEdit) return;
                     const ticket = state.tickets.find((item) => item.id === id);
