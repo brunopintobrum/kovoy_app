@@ -4395,25 +4395,15 @@
                 const tbody = table?.querySelector('tbody');
                 if (!tbody) return;
 
-                const moduleName = tbody.id.replace('List', '').toLowerCase();
-                if (!state.sorting[moduleName + 's']) {
-                    // Try plural form
-                    const pluralModule = moduleName + 's';
-                    if (state.sorting[pluralModule]) {
-                        moduleName = pluralModule;
-                    } else {
-                        return;
-                    }
-                }
+                const baseModuleName = tbody.id.replace('List', '').toLowerCase();
+                const module = baseModuleName === 'participant' ? 'participants' :
+                              baseModuleName === 'expense' ? 'expenses' :
+                              baseModuleName === 'flight' ? 'flights' :
+                              baseModuleName === 'lodging' ? 'lodgings' :
+                              baseModuleName === 'transport' ? 'transports' :
+                              baseModuleName === 'ticket' ? 'tickets' : null;
 
-                const module = moduleName === 'participant' ? 'participants' :
-                              moduleName === 'expense' ? 'expenses' :
-                              moduleName === 'flight' ? 'flights' :
-                              moduleName === 'lodging' ? 'lodgings' :
-                              moduleName === 'transport' ? 'transports' :
-                              moduleName === 'ticket' ? 'tickets' : null;
-
-                if (!module) return;
+                if (!module || !state.sorting[module]) return;
 
                 // Toggle direction if same field, otherwise default to asc
                 if (state.sorting[module].field === sortField) {
