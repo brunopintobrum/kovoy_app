@@ -4225,9 +4225,13 @@
         });
 
         toggleBtn?.addEventListener('click', () => {
+            console.log('🔍 Toggle filters button clicked');
+            console.log('Container before:', filtersContainer?.className);
             filtersContainer?.classList.toggle('show');
+            console.log('Container after:', filtersContainer?.className);
         });
 
+        console.log('🎯 Lodging filters initialized. Toggle button:', toggleBtn, 'Container:', filtersContainer);
         updateLodgingFilterBadge();
     };
 

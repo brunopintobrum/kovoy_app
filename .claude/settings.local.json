@@ -6,7 +6,13 @@
       "Bash(git commit:*)",
       "Bash(git push)",
       "Bash(curl:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "Bash(ls:*)",
+      "Bash(node:*)",
+      "Bash(npx jest --no-coverage)",
+      "Bash(npx jest:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)"
     ]
   }
 }

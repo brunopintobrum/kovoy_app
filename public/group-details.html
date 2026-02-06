@@ -96,11 +96,17 @@
 
             /* Collapsible filters on mobile */
             .lodging-filters-container {
-                display: none !important;
+                max-height: 0 !important;
+                overflow: hidden !important;
+                opacity: 0 !important;
+                margin-top: 0 !important;
+                transition: all 0.3s ease !important;
             }
 
             .lodging-filters-container.show {
-                display: flex !important;
+                max-height: 500px !important;
+                opacity: 1 !important;
+                margin-top: 1rem !important;
             }
         }
     </style>
