@@ -57,6 +57,7 @@ test('register, login, and manage a group', async ({ page }) => {
     await page.fill('#expenseDescription', 'Airbnb');
     await page.fill('#expenseAmount', '120');
     await page.fill('#expenseDate', '2026-02-22');
+    await page.selectOption('#expenseCurrency', 'USD'); // Campo que estava faltando!
     await page.fill('#expenseCategory', 'Lodging');
     await page.selectOption('#expensePayer', { label: 'Bruno' });
 
@@ -70,11 +71,22 @@ test('register, login, and manage a group', async ({ page }) => {
     // Aguarda checkbox estar marcado
     await page.waitForTimeout(500);
 
+    // Captura screenshot antes do submit
+    await page.screenshot({ path: 'test-results/before-submit.png' });
+
     // Usa o botão do footer do modal (mais confiável)
     await page.click('#expenseSubmit');
 
     // Aguarda despesa ser processada (modal pode demorar a fechar)
     await page.waitForTimeout(3000);
+
+    // Captura screenshot após submit
+    await page.screenshot({ path: 'test-results/after-submit.png' });
+
+    // Verifica se há mensagens de erro visíveis
+    const errorMsg = await page.locator('.invalid-feedback:visible, .alert-danger:visible, #splitTargetsError:visible').textContent().catch(() => 'No error visible');
+    console.log('Error messages:', errorMsg);
+
     await expect(page.locator('#expenseList')).toContainText('Airbnb');
     await expect(page.locator('#summaryTotal')).toContainText('$120.00');
 });
