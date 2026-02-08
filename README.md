@@ -1,5 +1,7 @@
 # Orlando 2026
 
+[![CI](https://github.com/brunopintobrum/kovoy_app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/brunopintobrum/kovoy_app/actions/workflows/ci.yml)
+
 App web com autenticacao (email/senha e Google OAuth) e painel protegido para organizar viagens em grupo (grupos, participantes, despesas, saldos e quem deve pra quem).
 
 Deploy: sem deploy publico no momento.
@@ -78,7 +80,7 @@ Observação: o papel `admin` foi removido. Registros antigos de `admin` são co
 - Importacao/exportacao (CSV/JSON)
 - Auditoria de alteracoes
 - Ampliar cobertura E2E e testes de seguranca
-- CI/CD basico com lint/test/build
+- ~~CI/CD basico com lint/test/build~~ (concluido)
 - Observabilidade (logs estruturados/metrics)
 
 ## Stack e arquitetura
