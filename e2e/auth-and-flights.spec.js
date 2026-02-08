@@ -50,6 +50,8 @@ test('register, login, and manage a group', async ({ page }) => {
 
     await page.goto(`/group-details?groupId=${groupId}#expenses`);
 
+    // Aguarda seção de despesas estar visível antes de preencher
+    await page.waitForSelector('#expenseDescription', { state: 'visible', timeout: 10000 });
     await page.fill('#expenseDescription', 'Airbnb');
     await page.fill('#expenseAmount', '120');
     await page.fill('#expenseDate', '2026-02-22');
