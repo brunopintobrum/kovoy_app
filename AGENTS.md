@@ -2,7 +2,7 @@
 
 ## Contexto obrigatorio
 - Leia `CONTEXT.md` antes de qualquer tarefa.
-- O template Skote em `D:\ChatGPT\Skote_Asp.net_v3.2.0\Skote Asp.net Core\Skote` e a fonte da verdade para UI/UX e padroes.
+- O template Skote ASP.NET Core e a fonte da verdade para UI/UX e padroes (caminho local não versionado).
 - Campos obrigatorios no cadastro: email, first name, last name, password, confirm password.
 - Padrao de idioma da UI: ingles nas paginas do painel e menus.
 - Preferencia de fluxo: quando houver escolha A/P, o assistente seleciona automaticamente sem perguntar.

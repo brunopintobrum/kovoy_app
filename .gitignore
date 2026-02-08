@@ -375,3 +375,5 @@ public/uploads/
 public/data/*
 !public/data/postal-patterns.json
 test-results/
+.claude/
+.vscode/

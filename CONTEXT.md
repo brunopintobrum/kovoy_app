@@ -43,7 +43,7 @@
 - Colunas de banco em snake_case.
 
 ## Skote Template (Regra Absoluta)
-- Caminho do template: `D:\ChatGPT\Skote_Asp.net_v3.2.0\Skote Asp.net Core\Skote`.
+- Template de referência: Skote ASP.NET Core (caminho local não versionado).
 - Antes de qualquer implementacao: analisar estrutura, Controllers/Views/ViewModels/Services, layouts, componentes, CSS/JS, validacoes e mensagens.
 - Replicar organizacao de pastas e padroes visuais/estruturais do Skote no projeto atual.
 - Nao criar estruturas novas se ja existir equivalente no Skote; nao mudar nomenclaturas sem justificativa tecnica.

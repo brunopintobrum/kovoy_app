@@ -302,4 +302,4 @@ git push
 Dúvidas sobre o workflow? Entre em contato:
 
 **Bruno Pinto Brum**
-brunobrum@gmail.com | +1 (514) 926-9447
+brunobrum@gmail.com

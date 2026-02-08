@@ -218,4 +218,4 @@ git branch -d feature/minha-feature
 - 🔄 Detalhes da migração: `docs/RENAME_MASTER_TO_MAIN.md`
 
 **Contato:**
-Bruno Pinto Brum | brunobrum@gmail.com | +1 (514) 926-9447
+Bruno Pinto Brum | brunobrum@gmail.com

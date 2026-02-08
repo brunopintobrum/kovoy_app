@@ -489,7 +489,7 @@ Nao definida. Adicione um `LICENSE` quando decidir.
 ## Creditos / autores / contato
 
 Mantenedor: Bruno Pinto Brum
-Contato: brunobrum@gmail.com | +1 (514) 926-9447 (Canada)
+Contato: brunobrum@gmail.com
 
 ## Atualizacoes recentes
 
