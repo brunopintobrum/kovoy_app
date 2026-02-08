@@ -61,7 +61,8 @@ test('register, login, and manage a group', async ({ page }) => {
     await page.selectOption('#expensePayer', { label: 'Bruno' });
 
     await page.locator('#splitTargets label', { hasText: 'Bruno' }).locator('input').check();
-    await page.click('#expenseForm button[type="submit"]');
+    // Usa o botão do footer do modal (mais confiável)
+    await page.click('#expenseSubmit');
 
     // Aguarda despesa ser criada e aparecer na lista
     await page.waitForTimeout(1000);
