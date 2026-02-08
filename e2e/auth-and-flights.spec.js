@@ -50,7 +50,9 @@ test('register, login, and manage a group', async ({ page }) => {
 
     await page.goto(`/group-details?groupId=${groupId}#expenses`);
 
-    // Aguarda seção de despesas estar visível antes de preencher
+    // Abre o modal de adicionar despesa
+    await page.click('#openExpenseModal');
+    // Aguarda modal abrir e campo estar visível
     await page.waitForSelector('#expenseDescription', { state: 'visible', timeout: 10000 });
     await page.fill('#expenseDescription', 'Airbnb');
     await page.fill('#expenseAmount', '120');
