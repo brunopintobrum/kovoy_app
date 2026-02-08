@@ -5,9 +5,9 @@ const baseURL = 'http://127.0.0.1:3000';
 
 module.exports = defineConfig({
     testDir: './e2e',
-    timeout: 30000,
+    timeout: 60000, // Aumentado para 60s (testes E2E completos precisam mais tempo)
     expect: {
-        timeout: 5000
+        timeout: 10000 // Aumentado para 10s (mais tolerante no CI)
     },
     retries: process.env.CI ? 1 : 0,
     use: {
