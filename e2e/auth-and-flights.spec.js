@@ -60,12 +60,16 @@ test('register, login, and manage a group', async ({ page }) => {
     await page.fill('#expenseCategory', 'Lodging');
     await page.selectOption('#expensePayer', { label: 'Bruno' });
 
+    // Garante que split mode é "equal" (dividir igualmente)
+    await page.check('#splitModeEqual');
+    // Marca Bruno para receber o split
     await page.locator('#splitTargets label', { hasText: 'Bruno' }).locator('input').check();
     // Usa o botão do footer do modal (mais confiável)
     await page.click('#expenseSubmit');
 
-    // Aguarda despesa ser criada e aparecer na lista
-    await page.waitForTimeout(1000);
+    // Aguarda modal fechar e despesa ser criada
+    await page.waitForSelector('#expenseModal', { state: 'hidden', timeout: 10000 });
+    await page.waitForTimeout(2000);
     await expect(page.locator('#expenseList')).toContainText('Airbnb');
     await expect(page.locator('#summaryTotal')).toContainText('$120.00');
 });
