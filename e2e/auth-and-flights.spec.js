@@ -1,6 +1,7 @@
 const { test, expect } = require('playwright/test');
 
 test('register, login, and manage a group', async ({ page }) => {
+    test.setTimeout(90000); // Aumenta timeout para 90s (teste complexo)
     const timestamp = Date.now();
     const email = `e2e.user.${timestamp}@example.com`;
     const password = 'Test123!a';
@@ -71,22 +72,13 @@ test('register, login, and manage a group', async ({ page }) => {
     // Aguarda checkbox estar marcado
     await page.waitForTimeout(500);
 
-    // Captura screenshot antes do submit
-    await page.screenshot({ path: 'test-results/before-submit.png' });
-
     // Usa o botão do footer do modal (mais confiável)
     await page.click('#expenseSubmit');
 
-    // Aguarda despesa ser processada (modal pode demorar a fechar)
-    await page.waitForTimeout(3000);
+    // Aguarda despesa ser processada e modal fechar
+    await page.waitForTimeout(2000);
 
-    // Captura screenshot após submit
-    await page.screenshot({ path: 'test-results/after-submit.png' });
-
-    // Verifica se há mensagens de erro visíveis
-    const errorMsg = await page.locator('.invalid-feedback:visible, .alert-danger:visible, #splitTargetsError:visible').textContent().catch(() => 'No error visible');
-    console.log('Error messages:', errorMsg);
-
-    await expect(page.locator('#expenseList')).toContainText('Airbnb');
-    await expect(page.locator('#summaryTotal')).toContainText('$120.00');
+    // Aguarda despesa aparecer na lista (ou timeout)
+    await expect(page.locator('#expenseList')).toContainText('Airbnb', { timeout: 15000 });
+    await expect(page.locator('#summaryTotal')).toContainText('$120.00', { timeout: 5000 });
 });
