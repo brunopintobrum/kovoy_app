@@ -455,11 +455,21 @@ Pipeline basico via GitHub Actions:
 
 ## Contribuicao
 
-Sem politica formal no momento. Sugestao:
+Este projeto segue **GitHub Flow**. Veja o guia completo em [`docs/GIT_WORKFLOW.md`](docs/GIT_WORKFLOW.md).
 
-- Branches: `feature/`, `fix/`
-- Commits: Conventional Commits
-- PR com descricao e passos de teste
+**Resumo rapido:**
+
+1. Crie uma branch: `git checkout -b feature/nome-descritivo`
+2. Desenvolva e commite: `git commit -m "feat: adiciona nova funcionalidade"`
+3. Push: `git push -u origin feature/nome-descritivo`
+4. Abra Pull Request no GitHub (template automatico)
+5. Aguarde CI passar (testes automaticos)
+6. Merge via PR (nunca push direto em `main`)
+
+**Convencoes:**
+- Branches: `feature/`, `fix/`, `hotfix/`
+- Commits: Conventional Commits (`feat:`, `fix:`, `refactor:`, etc)
+- PRs: Use o template automatico (`.github/pull_request_template.md`)
 
 ## Versionamento e changelog
 
