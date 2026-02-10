@@ -377,3 +377,8 @@ public/data/*
 test-results/
 .claude/
 .vscode/
+.docker-codex/
+.glitchtip-*.local.txt
+.env
+.env.production
+.env.glitchtip

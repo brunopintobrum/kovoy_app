@@ -175,6 +175,21 @@ npm install
 npm start
 ```
 
+## Observabilidade (GlitchTip)
+
+1. Copie `glitchtip.env.example` para `.env.glitchtip` e ajuste os valores.
+2. Suba o GlitchTip:
+   - `docker compose --env-file .env.glitchtip -f docker-compose.glitchtip.yml up -d`
+3. Acesse `http://localhost:8000`, crie uma org e dois projetos (backend e frontend) e copie os DSNs.
+4. Preencha no `.env` do app:
+   - `GLITCHTIP_DSN_BACKEND`
+   - `GLITCHTIP_DSN_FRONTEND`
+   - `GLITCHTIP_PUBLIC_ORIGIN` (ex: `http://localhost:8000`)
+5. Rode `npm install` para instalar as dependências do backend.
+
+Integração opcional (automática):
+- GlitchTip -> GitHub Issues via Cloudflare Worker: `docs/GLITCHTIP_GITHUB_ISSUES.md`
+
 URLs locais:
 
 - http://localhost:3000/login
@@ -238,6 +253,12 @@ Tabela de variaveis:
 | TWO_FACTOR_TTL_MINUTES | 10 | TTL do codigo de two-factor |
 | TWO_FACTOR_ATTEMPT_LIMIT | 5 | Tentativas maximas do two-factor |
 | RESET_TOKEN_TTL_MINUTES | 30 | TTL do token de reset |
+| GLITCHTIP_DSN_BACKEND | https://... | DSN do projeto backend no GlitchTip |
+| GLITCHTIP_DSN_FRONTEND | https://... | DSN do projeto frontend no GlitchTip |
+| GLITCHTIP_PUBLIC_ORIGIN | http://localhost:8000 | Base URL do GlitchTip (para CSP no browser) |
+| GLITCHTIP_ENVIRONMENT | development | Ambiente reportado ao GlitchTip |
+| GLITCHTIP_RELEASE | 1.0.0 | Release opcional para agrupar issues |
+| GLITCHTIP_TRACES_SAMPLE_RATE | 0.1 | Taxa de amostragem de tracing |
 | ACCESS_TOKEN_TTL_MINUTES | 30 | TTL do access token |
 | REFRESH_TOKEN_TTL_DAYS_SESSION | 1 | TTL do refresh token (sessao) |
 | REFRESH_TOKEN_TTL_DAYS_REMEMBER | 30 | TTL do refresh token (lembrar) |

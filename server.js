@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const Database = require('better-sqlite3');
+const Sentry = require('@sentry/node');
 
 const ROOT_DIR = __dirname;
 const ENV_PATH = path.join(ROOT_DIR, '.env');
@@ -74,6 +75,13 @@ const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
 const SMTP_FROM = process.env.SMTP_FROM || 'no-reply@example.com';
 const APP_BASE_URL = process.env.APP_BASE_URL;
 const INVITE_TOKEN_TTL_DAYS = Number(process.env.INVITE_TOKEN_TTL_DAYS || 7);
+const GLITCHTIP_DSN_BACKEND = process.env.GLITCHTIP_DSN_BACKEND || process.env.SENTRY_DSN;
+const GLITCHTIP_DSN_FRONTEND = process.env.GLITCHTIP_DSN_FRONTEND;
+const GLITCHTIP_ENVIRONMENT = process.env.GLITCHTIP_ENVIRONMENT || process.env.NODE_ENV || 'development';
+const GLITCHTIP_RELEASE = process.env.GLITCHTIP_RELEASE;
+const GLITCHTIP_TRACES_SAMPLE_RATE = Number(process.env.GLITCHTIP_TRACES_SAMPLE_RATE || 0);
+const GLITCHTIP_PUBLIC_ORIGIN = process.env.GLITCHTIP_PUBLIC_ORIGIN || '';
+const sentryEnabled = Boolean(GLITCHTIP_DSN_BACKEND);
 
 const loadPostalPatterns = () => {
     try {
@@ -771,7 +779,29 @@ if (countUsers.count === 0) {
     }
 }
 
+if (sentryEnabled) {
+    Sentry.init({
+        dsn: GLITCHTIP_DSN_BACKEND,
+        environment: GLITCHTIP_ENVIRONMENT,
+        release: GLITCHTIP_RELEASE,
+        tracesSampleRate: GLITCHTIP_TRACES_SAMPLE_RATE
+    });
+    app.use(Sentry.Handlers.requestHandler());
+}
+
 app.disable('x-powered-by');
+const scriptSrc = ["'self'"];
+if (GLITCHTIP_DSN_FRONTEND) {
+    scriptSrc.push('https://browser.sentry-cdn.com');
+}
+const connectSrc = ["'self'"];
+if (GLITCHTIP_DSN_FRONTEND) {
+    // Allows fetching the Sentry browser SDK sourcemap without CSP warnings.
+    connectSrc.push('https://browser.sentry-cdn.com');
+}
+if (GLITCHTIP_PUBLIC_ORIGIN) {
+    connectSrc.push(GLITCHTIP_PUBLIC_ORIGIN);
+}
 app.use(helmet({
     contentSecurityPolicy: {
         useDefaults: true,
@@ -780,9 +810,10 @@ app.use(helmet({
             'base-uri': ["'self'"],
             'frame-ancestors': ["'none'"],
             'img-src': ["'self'", 'data:', 'https://lh3.googleusercontent.com'],
-            'script-src': ["'self'"],
+            'script-src': scriptSrc,
             'style-src': ["'self'", 'https://fonts.googleapis.com'],
-            'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:']
+            'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
+            'connect-src': connectSrc
         }
     }
 }));
@@ -790,6 +821,17 @@ app.set('trust proxy', 1);
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(PUBLIC_DIR));
+// Some deployments keep a locale prefix (e.g. `/br`) in the URL while still serving the same HTML.
+// Our HTML uses relative asset paths (`assets/...`), so we also expose the same static root under `/br`.
+app.use('/br', express.static(PUBLIC_DIR));
+app.get('/api/config/sentry', (req, res) => {
+    res.json({
+        dsn: GLITCHTIP_DSN_FRONTEND || null,
+        environment: GLITCHTIP_ENVIRONMENT,
+        release: GLITCHTIP_RELEASE || null,
+        tracesSampleRate: GLITCHTIP_TRACES_SAMPLE_RATE
+    });
+});
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -4982,6 +5024,10 @@ app.post('/api/reset', sensitiveLimiter, originGuard, (req, res) => {
 
     return res.json({ ok: true });
 });
+
+if (sentryEnabled) {
+    app.use(Sentry.Handlers.errorHandler());
+}
 
 const startServer = (port = PORT, onReady) => {
     const server = app.listen(port, () => {
