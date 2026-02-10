@@ -2285,7 +2285,7 @@ app.delete(
     requireCsrfToken,
     requireGroupMember,
     (req, res) => {
-        if (req.groupRole === 'owner') {
+        if (req.groupMember.role === 'owner') {
             return res.status(400).json({ error: 'Owner cannot leave the group. Transfer ownership or delete the group.' });
         }
         deleteGroupMember.run(req.groupId, req.user.sub);
