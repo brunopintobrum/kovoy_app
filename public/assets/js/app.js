@@ -52,7 +52,9 @@ File: Main Js File
 
     function initMetisMenu() {
         //metis menu
-        $("#side-menu").metisMenu();
+        if ($.fn && $.fn.metisMenu) {
+            $("#side-menu").metisMenu();
+        }
     }
 
     function initLeftMenuCollapse() {
@@ -289,7 +291,9 @@ File: Main Js File
         initSettings();
         initLanguage();
         initPreloader();
-        Waves.init();
+        if (window.Waves && typeof Waves.init === "function") {
+            Waves.init();
+        }
         initCheckAll();
     }
     $(document).ready(function () {
