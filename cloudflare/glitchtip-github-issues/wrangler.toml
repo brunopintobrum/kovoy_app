@@ -1,0 +1,21 @@
+name = "glitchtip-github-issues"
+main = "src/index.mjs"
+compatibility_date = "2026-02-08"
+account_id = "7e499b27df0e0848ce03be9eaafc63c6"
+
+# Create a KV namespace and fill these IDs (or remove this section to run without dedupe).
+kv_namespaces = [
+  { binding = "ISSUE_MAP", id = "853a90f7febd4b3c813b7f6de3c24f02", preview_id = "194d0886931845aaa26807f45cdf871b" }
+]
+
+[vars]
+# GitHub target
+GITHUB_OWNER = "brunopintobrum"
+GITHUB_REPO = "kovoy_app"
+GITHUB_LABELS = "bug,glitchtip"
+GITHUB_ASSIGNEE = ""
+
+# Behavior
+CREATE_ON = "new_or_unmapped"
+ON_REPEAT = "ignore"
+ISSUE_TITLE_PREFIX = "[GlitchTip]"
