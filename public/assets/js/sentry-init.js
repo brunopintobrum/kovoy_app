@@ -1,6 +1,6 @@
 (() => {
     const configUrl = '/api/config/sentry';
-    const sentryCdnUrl = 'https://browser.sentry-cdn.com/7.60.0/bundle.min.js';
+    const sentryCdnUrl = 'https://browser.sentry-cdn.com/7.120.0/bundle.min.js';
 
     const loadScript = (src) => new Promise((resolve, reject) => {
         const script = document.createElement('script');
