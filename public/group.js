@@ -56,6 +56,16 @@
         { prefix: 'ticket', toggleId: 'ticketLinkExpense', fieldsId: 'ticketExpenseFields', payerId: 'ticketExpensePayer' }
     ];
 
+    const escapeHtml = (str) => {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
     const showToast = (type, message) => {
         const toastId = type === 'success' ? 'successToast' : 'errorToast';
         const messageId = type === 'success' ? 'successToastMessage' : 'errorToastMessage';
@@ -1217,7 +1227,7 @@
                     const tr = document.createElement('tr');
                     const badgeClass = item.balance >= 0 ? 'text-success' : 'text-danger';
                     tr.innerHTML = `
-                        <td>${item.displayName}</td>
+                        <td>${escapeHtml(item.displayName)}</td>
                         <td class="text-end ${badgeClass}">${formatCurrency(item.balance, state.group.defaultCurrency)}</td>
                     `;
                     participantRows.appendChild(tr);
@@ -1235,7 +1245,7 @@
                     const tr = document.createElement('tr');
                     const badgeClass = item.balance >= 0 ? 'text-success' : 'text-danger';
                     tr.innerHTML = `
-                        <td>${item.name}</td>
+                        <td>${escapeHtml(item.name)}</td>
                         <td class="text-end ${badgeClass}">${formatCurrency(item.balance, state.group.defaultCurrency)}</td>
                     `;
                     familyRows.appendChild(tr);
@@ -1260,8 +1270,8 @@
             li.className = 'list-group-item d-flex align-items-center justify-content-between';
             li.innerHTML = `
                 <div>
-                    <div class="fw-semibold">${from ? from.displayName : `#${debt.fromParticipantId}`}</div>
-                    <small class="text-muted">pays ${to ? to.displayName : `#${debt.toParticipantId}`}</small>
+                    <div class="fw-semibold">${from ? escapeHtml(from.displayName) : `#${debt.fromParticipantId}`}</div>
+                    <small class="text-muted">pays ${to ? escapeHtml(to.displayName) : `#${debt.toParticipantId}`}</small>
                 </div>
                 <span class="badge bg-soft-danger text-danger">${formatCurrency(debt.amount, state.group.defaultCurrency)}</span>
             `;
@@ -1291,7 +1301,7 @@
             const li = document.createElement('li');
             li.className = 'list-group-item d-flex align-items-center justify-content-between';
             li.innerHTML = `
-                <span>${family.name}</span>
+                <span>${escapeHtml(family.name)}</span>
                 <div class="d-flex gap-2">
                     <button class="btn btn-sm btn-outline-primary" data-action="edit-family" data-id="${family.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-family" data-id="${family.id}">Delete</button>
@@ -1330,9 +1340,9 @@
         sortedParticipants.forEach((participant) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td data-label="Name">${participant.displayName}</td>
-                <td data-label="Family">${participant.familyId ? familyMap.get(participant.familyId) || '-' : '-'}</td>
-                <td data-label="Type" class="text-capitalize">${participant.type || '-'}</td>
+                <td data-label="Name">${escapeHtml(participant.displayName)}</td>
+                <td data-label="Family">${participant.familyId ? escapeHtml(familyMap.get(participant.familyId)) || '-' : '-'}</td>
+                <td data-label="Type" class="text-capitalize">${escapeHtml(participant.type) || '-'}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-participant" data-id="${participant.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-participant" data-id="${participant.id}">Delete</button>
@@ -1371,11 +1381,11 @@
                     : rawSplitType;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td data-label="Description">${expense.description}</td>
+                <td data-label="Description">${escapeHtml(expense.description)}</td>
                 <td data-label="Amount">${formatCurrency(expense.amount, expense.currency)}</td>
-                <td data-label="Date">${expense.date}</td>
-                <td data-label="Paid by">${participantMap.get(expense.payerParticipantId) || '-'}</td>
-                <td data-label="Split" class="text-capitalize">${splitType}</td>
+                <td data-label="Date">${escapeHtml(expense.date)}</td>
+                <td data-label="Paid by">${escapeHtml(participantMap.get(expense.payerParticipantId)) || '-'}</td>
+                <td data-label="Split" class="text-capitalize">${escapeHtml(splitType)}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-expense" data-id="${expense.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-expense" data-id="${expense.id}">Delete</button>
@@ -1431,14 +1441,14 @@
             const participantNames = (flight.participantIds || [])
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
-            const passengersLabel = participantNames.length ? participantNames.join(', ') : '-';
+            const passengersLabel = participantNames.length ? participantNames.map(n => escapeHtml(n)).join(', ') : '-';
             const passengerCount = participantNames.length;
             const seatLabels = (flight.participantIds || [])
                 .map((id) => {
                     const name = participantMap.get(id);
                     if (!name) return null;
                     const seat = flight.participantSeats?.[id];
-                    return seat ? `${name} (${seat})` : name;
+                    return seat ? `${escapeHtml(name)} (${escapeHtml(seat)})` : escapeHtml(name);
                 })
                 .filter(Boolean);
             const seatsLabel = seatLabels.length ? seatLabels.join(', ') : '-';
@@ -1447,7 +1457,7 @@
                     const name = participantMap.get(id);
                     if (!name) return null;
                     const baggage = flight.participantBaggage?.[id];
-                    return baggage ? `${name} (${baggage})` : name;
+                    return baggage ? `${escapeHtml(name)} (${escapeHtml(baggage)})` : escapeHtml(name);
                 })
                 .filter(Boolean);
             const baggageLabel = baggageLabels.length ? baggageLabels.join(', ') : '-';
@@ -1457,7 +1467,7 @@
                     if (!name) return null;
                     const seat = flight.participantSeats?.[id] || '-';
                     const baggage = flight.participantBaggage?.[id] || '-';
-                    return `<tr><td>${name}</td><td>${seat}</td><td>${baggage}</td></tr>`;
+                    return `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(seat)}</td><td>${escapeHtml(baggage)}</td></tr>`;
                 })
                 .filter(Boolean)
                 .join('');
@@ -1473,8 +1483,8 @@
                         <tbody>${passengerRows}</tbody>
                     </table></div>`
                 : '<span class="text-muted">No passengers selected.</span>';
-            const flightLabel = [flight.airline, flight.flightNumber].filter(Boolean).join(' ');
-            const routeLabel = `${flight.fromLabel || flight.from || '-'} → ${flight.toLabel || flight.to || '-'}`;
+            const flightLabel = escapeHtml([flight.airline, flight.flightNumber].filter(Boolean).join(' '));
+            const routeLabel = `${escapeHtml(flight.fromLabel || flight.from) || '-'} → ${escapeHtml(flight.toLabel || flight.to) || '-'}`;
             const expenseBadge = flight.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const detailsId = `flight-details-${flight.id}`;
             const tr = document.createElement('tr');
@@ -1506,7 +1516,7 @@
                     <div class="row g-3">
                         <div class="col-md-3">
                             <div class="text-muted small">PNR</div>
-                            <div>${flight.pnr || '-'}</div>
+                            <div>${escapeHtml(flight.pnr) || '-'}</div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-muted small">Class</div>
@@ -1530,15 +1540,15 @@
         const content = document.getElementById('lodgingDetailsContent');
         if (!content) return;
 
-        const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).join(', ');
-        const checkIn = `${formatDate(lodging.checkIn)} ${lodging.checkInTime || ''}`.trim();
-        const checkOut = `${formatDate(lodging.checkOut)} ${lodging.checkOutTime || ''}`.trim();
+        const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).map(s => escapeHtml(s)).join(', ');
+        const checkIn = `${formatDate(lodging.checkIn)} ${escapeHtml(lodging.checkInTime) || ''}`.trim();
+        const checkOut = `${formatDate(lodging.checkOut)} ${escapeHtml(lodging.checkOutTime) || ''}`.trim();
         const rooms = lodging.roomType
-            ? `${lodging.roomQuantity || 1} × ${lodging.roomType} (${lodging.roomOccupancy || 0} guests)`
+            ? `${lodging.roomQuantity || 1} × ${escapeHtml(lodging.roomType)} (${lodging.roomOccupancy || 0} guests)`
             : 'Not specified';
-        const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean);
+        const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean).map(s => escapeHtml(s));
         const contact = contactParts.length ? contactParts.join(' • ') : 'Not specified';
-        const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean);
+        const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean).map(s => escapeHtml(s));
         const fullAddress = addressParts.join(', ') || 'Not specified';
         const expenseInfo = lodging.expenseId
             ? '<span class="badge bg-success">Linked to expense</span>'
@@ -1547,7 +1557,7 @@
         content.innerHTML = `
             <div class="col-12">
                 <h6 class="text-uppercase text-muted mb-2">Property Information</h6>
-                <div class="mb-2"><strong>Name:</strong> ${lodging.name || 'Not specified'}</div>
+                <div class="mb-2"><strong>Name:</strong> ${escapeHtml(lodging.name) || 'Not specified'}</div>
                 <div class="mb-2"><strong>Status:</strong> ${formatStatusBadge(lodging.status)}</div>
             </div>
             <div class="col-12"><hr></div>
@@ -1578,7 +1588,7 @@
             <div class="col-12"><hr></div>
             <div class="col-12">
                 <h6 class="text-uppercase text-muted mb-2">Notes</h6>
-                <div>${lodging.notes}</div>
+                <div>${escapeHtml(lodging.notes)}</div>
             </div>
             ` : ''}
         `;
@@ -1637,21 +1647,21 @@
         }
         const sorted = applySorting(filtered, 'lodgings');
         sorted.forEach((lodging) => {
-            const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).join(', ');
-            const checkIn = `${formatDate(lodging.checkIn)} ${lodging.checkInTime || ''}`.trim();
-            const checkOut = `${formatDate(lodging.checkOut)} ${lodging.checkOutTime || ''}`.trim();
+            const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).map(s => escapeHtml(s)).join(', ');
+            const checkIn = `${formatDate(lodging.checkIn)} ${escapeHtml(lodging.checkInTime) || ''}`.trim();
+            const checkOut = `${formatDate(lodging.checkOut)} ${escapeHtml(lodging.checkOutTime) || ''}`.trim();
             const rooms = lodging.roomType
-                ? `${lodging.roomQuantity || 1} × ${lodging.roomType} (${lodging.roomOccupancy || 0} guests)`
+                ? `${lodging.roomQuantity || 1} × ${escapeHtml(lodging.roomType)} (${lodging.roomOccupancy || 0} guests)`
                 : '-';
-            const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean);
+            const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean).map(s => escapeHtml(s));
             const contact = contactParts.length ? contactParts.join(' · ') : '-';
             const detailsId = `lodging-details-${lodging.id}`;
-            const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean);
+            const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean).map(s => escapeHtml(s));
             const addressLabel = addressParts.join(', ') || '-';
             const expenseBadge = lodging.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td data-label="Property">${lodging.name || '-'}${expenseBadge}</td>
+                <td data-label="Property">${escapeHtml(lodging.name) || '-'}${expenseBadge}</td>
                 <td data-label="Location">${location || '-'}</td>
                 <td data-label="Dates">${checkIn} → ${checkOut}</td>
                 <td data-label="Rooms">${rooms}</td>
@@ -1691,7 +1701,7 @@
                                 <div class="text-muted small">Contact</div>
                                 <div>${contact}</div>
                             </div>
-                            ${lodging.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${lodging.notes}</div></div>` : ''}
+                            ${lodging.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${escapeHtml(lodging.notes)}</div></div>` : ''}
                         </div>
                     </td>
                 `;
@@ -1727,16 +1737,16 @@
         }
         const sorted = applySorting(filtered, 'transports');
         sorted.forEach((transport) => {
-            const route = `${transport.origin || '-'} → ${transport.destination || '-'}`;
-            const provider = transport.provider || '-';
-            const locator = transport.locator || '-';
+            const route = `${escapeHtml(transport.origin) || '-'} → ${escapeHtml(transport.destination) || '-'}`;
+            const provider = escapeHtml(transport.provider) || '-';
+            const locator = escapeHtml(transport.locator) || '-';
             const providerLine = [provider, locator].filter((value) => value && value !== '-').join(' · ') || '-';
             const expenseBadge = transport.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const detailsId = `transport-details-${transport.id}`;
             const hasDetails = transport.notes || (provider !== '-') || (locator !== '-');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td data-label="Type">${transport.type || '-'}${expenseBadge}</td>
+                <td data-label="Type">${escapeHtml(transport.type) || '-'}${expenseBadge}</td>
                 <td data-label="Route"><strong>${route}</strong></td>
                 <td data-label="Departure">${formatDateTime(transport.departAt)}</td>
                 <td data-label="Arrival">${formatDateTime(transport.arriveAt)}</td>
@@ -1764,7 +1774,7 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <div class="text-muted small">Origin → Destination</div>
-                                <div><strong>${transport.origin || '-'}</strong> → <strong>${transport.destination || '-'}</strong></div>
+                                <div><strong>${escapeHtml(transport.origin) || '-'}</strong> → <strong>${escapeHtml(transport.destination) || '-'}</strong></div>
                             </div>
                             <div class="col-md-4">
                                 <div class="text-muted small">Departure / Arrival</div>
@@ -1774,7 +1784,7 @@
                                 <div class="text-muted small">Provider / Locator</div>
                                 <div>${providerLine}</div>
                             </div>
-                            ${transport.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${transport.notes}</div></div>` : ''}
+                            ${transport.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${escapeHtml(transport.notes)}</div></div>` : ''}
                         </div>
                     </td>
                 `;
@@ -1820,15 +1830,15 @@
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
             const participantBadges = participantNames.length
-                ? participantNames.map((name) => `<span class="badge bg-soft-primary text-primary me-1">${name}</span>`).join('')
+                ? participantNames.map((name) => `<span class="badge bg-soft-primary text-primary me-1">${escapeHtml(name)}</span>`).join('')
                 : '<span class="text-muted">-</span>';
             const expenseBadge = ticket.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const detailsId = `ticket-details-${ticket.id}`;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td data-label="Type">${ticket.type || '-'}${expenseBadge}</td>
+                <td data-label="Type">${escapeHtml(ticket.type) || '-'}${expenseBadge}</td>
                 <td data-label="When">${formatDateTime(ticket.eventAt)}</td>
-                <td data-label="Location">${ticket.location || '-'}</td>
+                <td data-label="Location">${escapeHtml(ticket.location) || '-'}</td>
                 <td data-label="Status">${formatStatusBadge(ticket.status)}</td>
                 <td data-label="Amount">${formatCurrency(ticket.amount, ticket.currency)}</td>
                 <td data-label="Participants">${participantBadges}</td>
@@ -1857,7 +1867,7 @@
                             </div>
                             <div class="col-12">
                                 <div class="text-muted small">Notes</div>
-                                <div>${ticket.notes}</div>
+                                <div>${escapeHtml(ticket.notes)}</div>
                             </div>
                         </div>
                     </td>
@@ -2108,14 +2118,14 @@
                     </select>
                 `;
             const removeBtn = !isOwner && state.canManage
-                ? `<button class="btn btn-sm btn-outline-danger ms-1" data-action="remove-member" data-id="${member.userId}" data-name="${displayName}">
+                ? `<button class="btn btn-sm btn-outline-danger ms-1" data-action="remove-member" data-id="${member.userId}" data-name="${escapeHtml(displayName)}">
                         <i class="bx bx-trash-alt"></i>
                     </button>`
                 : '';
             tr.innerHTML = `
                 <td>
-                    <div class="fw-semibold">${displayName}</div>
-                    <div class="text-muted small">${member.email || ''}</div>
+                    <div class="fw-semibold">${escapeHtml(displayName)}</div>
+                    <div class="text-muted small">${escapeHtml(member.email) || ''}</div>
                 </td>
                 <td>${roleCell}</td>
                 <td class="text-end">

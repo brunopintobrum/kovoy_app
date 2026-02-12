@@ -18,6 +18,16 @@
         toast.show();
     };
 
+    const escapeHtml = (str) => {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
     const getGroupInitials = (name) => {
         if (!name) return '?';
         const words = name.trim().split(/\s+/);
@@ -196,7 +206,7 @@
             const canLeave = group.role !== 'owner';
             const leaveMenuItem = canLeave
                 ? `<li><hr class="dropdown-divider"></li>
-                   <li><a class="dropdown-item text-danger" href="javascript:void(0);" data-action="leave" data-id="${group.id}" data-name="${group.name}">
+                   <li><a class="dropdown-item text-danger" href="javascript:void(0);" data-action="leave" data-id="${group.id}" data-name="${escapeHtml(group.name)}">
                         <i class="bx bx-log-out me-2"></i>Leave group
                    </a></li>`
                 : '';
@@ -213,7 +223,7 @@
                             ${initials}
                         </div>
                         <div>
-                            <div class="fw-semibold">${group.name}</div>
+                            <div class="fw-semibold">${escapeHtml(group.name)}</div>
                             <div class="text-muted small">
                                 <i class="bx bx-user"></i> ${memberCount} ${memberText}
                             </div>
@@ -254,7 +264,7 @@
                             ${initials}
                         </div>
                         <div class="flex-grow-1">
-                            <h5 class="mb-2 fw-bold">${group.name}</h5>
+                            <h5 class="mb-2 fw-bold">${escapeHtml(group.name)}</h5>
                             <div class="d-flex flex-wrap gap-2 mb-2">
                                 <span class="badge ${roleBadgeClass} text-uppercase">
                                     <i class="bx ${isOwner ? 'bx-crown' : 'bx-user'} me-1"></i>${roleLabel}
