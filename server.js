@@ -4291,26 +4291,38 @@ const mapReminderRow = (row) => ({
 
 const trimString = (value) => (typeof value === 'string' ? value.trim() : '');
 
+const sanitizeString = (value) => {
+    // Trim whitespace
+    let sanitized = trimString(value);
+    if (!sanitized) return sanitized;
+
+    // Remove control characters (0x00-0x1F) except tab (0x09)
+    // and remove other non-printing characters (0x7F and above, except common safe ones)
+    sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+
+    return sanitized;
+};
+
 const requireString = (value, field) => {
-    const trimmed = trimString(value);
-    if (!trimmed) {
+    const sanitized = sanitizeString(value);
+    if (!sanitized) {
         return { error: `${field} is required.` };
     }
-    return { value: trimmed };
+    return { value: sanitized };
 };
 
 const optionalString = (value) => {
-    const trimmed = trimString(value);
-    return trimmed ? trimmed : null;
+    const sanitized = sanitizeString(value);
+    return sanitized ? sanitized : null;
 };
 
 const optionalStringWithMaxLength = (value, maxLength) => {
-    const trimmed = trimString(value);
-    if (!trimmed) return null;
-    if (trimmed.length > maxLength) {
+    const sanitized = sanitizeString(value);
+    if (!sanitized) return null;
+    if (sanitized.length > maxLength) {
         return null;
     }
-    return trimmed;
+    return sanitized;
 };
 
 const normalizeGroupRole = (value) => {
@@ -4334,7 +4346,7 @@ const resolveCountryCode = (value) => {
 };
 
 const validateGroupPayload = (payload) => {
-    const name = typeof payload?.name === 'string' ? payload.name.trim() : '';
+    const name = sanitizeString(payload?.name);
     if (!name) {
         return { error: 'Group name is required.' };
     }
@@ -4347,11 +4359,14 @@ const validateGroupPayload = (payload) => {
     if (!/^[A-Z]{3}$/.test(currencyRaw)) {
         return { error: 'Default currency must be a 3-letter code.' };
     }
+    if (!ISO_4217_CURRENCIES.includes(currencyRaw)) {
+        return { error: 'Default currency is not a valid ISO 4217 code.' };
+    }
     return { value: { name, defaultCurrency: currencyRaw } };
 };
 
 const validateFamilyPayload = (payload) => {
-    const name = typeof payload?.name === 'string' ? payload.name.trim() : '';
+    const name = sanitizeString(payload?.name);
     if (!name) {
         return { error: 'Family name is required.' };
     }
@@ -4362,7 +4377,7 @@ const validateFamilyPayload = (payload) => {
 };
 
 const validateParticipantPayload = (payload) => {
-    const displayName = typeof payload?.displayName === 'string' ? payload.displayName.trim() : '';
+    const displayName = sanitizeString(payload?.displayName);
     if (!displayName) {
         return { error: 'Participant name is required.' };
     }
@@ -4395,10 +4410,43 @@ const normalizeSplitMode = (value) => {
     return trimmed || 'equal';
 };
 
+// ISO 4217 currency codes (alphabetically ordered)
+const ISO_4217_CURRENCIES = [
+    'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN',
+    'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD',
+    'CAD', 'CDF', 'CHE', 'CHF', 'CHW', 'CLF', 'CLP', 'CNY', 'COP', 'COU', 'CRC', 'CUC', 'CUP', 'CVE', 'CZK',
+    'DJF', 'DKK', 'DOP', 'DZD',
+    'EGP', 'ERN', 'ETB', 'EUR',
+    'FJD', 'FKP',
+    'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD',
+    'HKD', 'HNL', 'HRK', 'HTG', 'HUF',
+    'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK',
+    'JMD', 'JOD', 'JPY',
+    'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT',
+    'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD',
+    'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MYR', 'MZN',
+    'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD',
+    'OMR',
+    'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG',
+    'QAR',
+    'RON', 'RSD', 'RUB', 'RWF',
+    'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SLL', 'SOS', 'SPL', 'SRD', 'STN', 'SYP', 'SZL',
+    'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS',
+    'UAH', 'UGX', 'USD', 'USN', 'UYI', 'UYU', 'UYW', 'UZS',
+    'VED', 'VES', 'VND', 'VUV',
+    'WST',
+    'XAF', 'XAG', 'XAU', 'XBA', 'XBB', 'XBC', 'XBD', 'XCD', 'XDR', 'XOF', 'XPD', 'XPF', 'XPT', 'XSU', 'XTS', 'XUA', 'XXX',
+    'YER',
+    'ZAR', 'ZMW', 'ZWL'
+];
+
 const requireCurrencyCode = (value) => {
     const trimmed = typeof value === 'string' ? value.trim().toUpperCase() : '';
     if (!/^[A-Z]{3}$/.test(trimmed)) {
         return { error: 'Currency is invalid.' };
+    }
+    if (!ISO_4217_CURRENCIES.includes(trimmed)) {
+        return { error: 'Currency is not a valid ISO 4217 code.' };
     }
     return { value: trimmed };
 };
@@ -4418,8 +4466,14 @@ const parseManualSplits = (items) => {
             return { error: 'Split target is duplicated.' };
         }
         const amount = Number(item?.amount);
-        if (!Number.isFinite(amount) || amount <= 0) {
+        if (!Number.isFinite(amount)) {
+            return { error: 'Split amount must be a number.' };
+        }
+        if (amount <= 0) {
             return { error: 'Split amount must be greater than zero.' };
+        }
+        if (amount > MAX_AMOUNT) {
+            return { error: `Split amount must not exceed ${MAX_AMOUNT}.` };
         }
         seen.add(targetId);
         rows.push({ targetId, amount });
@@ -4443,17 +4497,18 @@ const parseIdArray = (items) => {
 };
 
 const validateExpenseSplitPayload = (payload) => {
-    const description = typeof payload?.description === 'string' ? payload.description.trim() : '';
+    const description = sanitizeString(payload?.description);
     if (!description) {
         return { error: 'Description is required.' };
     }
     if (description.length > 500) {
         return { error: 'Description must be 500 characters or less.' };
     }
-    const amount = Number(payload?.amount);
-    if (!Number.isFinite(amount) || amount <= 0) {
-        return { error: 'Amount must be greater than zero.' };
+    const amountResult = requirePositiveAmount(payload?.amount, 'Amount');
+    if (amountResult.error) {
+        return amountResult;
     }
+    const amount = amountResult.value;
     const currency = requireCurrencyCode(payload?.currency);
     if (currency.error) return currency;
     const date = requireDate(payload?.date, 'Date');
@@ -4507,10 +4562,26 @@ const validateExpenseSplitPayload = (payload) => {
     };
 };
 
+const MAX_AMOUNT = 999999.99; // Maximum reasonable amount for financial transactions
+
 const requireNumber = (value, field) => {
     const number = Number(value);
     if (!Number.isFinite(number)) {
         return { error: `${field} must be a number.` };
+    }
+    return { value: number };
+};
+
+const requirePositiveAmount = (value, field) => {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+        return { error: `${field} must be a number.` };
+    }
+    if (number <= 0) {
+        return { error: `${field} must be greater than zero.` };
+    }
+    if (number > MAX_AMOUNT) {
+        return { error: `${field} must not exceed ${MAX_AMOUNT}.` };
     }
     return { value: number };
 };
@@ -4554,11 +4625,11 @@ const requireTime = (value, field) => {
 };
 
 const requireCurrency = (value) => {
-    const valid = ['USD', 'CAD', 'BRL'];
-    if (!valid.includes(value)) {
-        return { error: 'Currency is invalid.' };
+    const trimmed = typeof value === 'string' ? value.trim().toUpperCase() : '';
+    if (!ISO_4217_CURRENCIES.includes(trimmed)) {
+        return { error: 'Currency is not a valid ISO 4217 code.' };
     }
-    return { value };
+    return { value: trimmed };
 };
 
 const requireStatus = (value) => {
@@ -4658,7 +4729,7 @@ const validateGroupFlightPayload = (payload) => {
     if (status.error) return status;
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
-    const cost = requireNumber(payload.cost, 'Cost');
+    const cost = requirePositiveAmount(payload.cost, 'Cost');
     if (cost.error) return cost;
     const notesValue = optionalStringWithMaxLength(payload.notes, 1000);
     if (payload.notes && !notesValue) {
@@ -4726,7 +4797,7 @@ const validateGroupLodgingPayload = (payload) => {
     if (status.error) return status;
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
-    const cost = requireNumber(payload.cost, 'Total cost');
+    const cost = requirePositiveAmount(payload.cost, 'Total cost');
     if (cost.error) return cost;
     let contact;
     if (status.value === 'paid') {
@@ -4788,7 +4859,7 @@ const validateGroupTransportPayload = (payload) => {
     if (status.error) return status;
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
-    const amount = requireNumber(payload.amount, 'Amount');
+    const amount = requirePositiveAmount(payload.amount, 'Amount');
     if (amount.error) return amount;
     let provider, locator;
     if (status.value === 'paid') {
@@ -4852,7 +4923,7 @@ const validateGroupTicketPayload = (payload) => {
     }
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
-    const amount = requireNumber(payload.amount, 'Amount');
+    const amount = requirePositiveAmount(payload.amount, 'Amount');
     if (amount.error) return amount;
     const notesValue = optionalStringWithMaxLength(payload.notes, 1000);
     if (payload.notes && !notesValue) {
