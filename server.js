@@ -4454,8 +4454,14 @@ const parseManualSplits = (items) => {
             return { error: 'Split target is duplicated.' };
         }
         const amount = Number(item?.amount);
-        if (!Number.isFinite(amount) || amount <= 0) {
+        if (!Number.isFinite(amount)) {
+            return { error: 'Split amount must be a number.' };
+        }
+        if (amount <= 0) {
             return { error: 'Split amount must be greater than zero.' };
+        }
+        if (amount > MAX_AMOUNT) {
+            return { error: `Split amount must not exceed ${MAX_AMOUNT}.` };
         }
         seen.add(targetId);
         rows.push({ targetId, amount });
@@ -4486,10 +4492,11 @@ const validateExpenseSplitPayload = (payload) => {
     if (description.length > 500) {
         return { error: 'Description must be 500 characters or less.' };
     }
-    const amount = Number(payload?.amount);
-    if (!Number.isFinite(amount) || amount <= 0) {
-        return { error: 'Amount must be greater than zero.' };
+    const amountResult = requirePositiveAmount(payload?.amount, 'Amount');
+    if (amountResult.error) {
+        return amountResult;
     }
+    const amount = amountResult.value;
     const currency = requireCurrencyCode(payload?.currency);
     if (currency.error) return currency;
     const date = requireDate(payload?.date, 'Date');
@@ -4543,10 +4550,26 @@ const validateExpenseSplitPayload = (payload) => {
     };
 };
 
+const MAX_AMOUNT = 999999.99; // Maximum reasonable amount for financial transactions
+
 const requireNumber = (value, field) => {
     const number = Number(value);
     if (!Number.isFinite(number)) {
         return { error: `${field} must be a number.` };
+    }
+    return { value: number };
+};
+
+const requirePositiveAmount = (value, field) => {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+        return { error: `${field} must be a number.` };
+    }
+    if (number <= 0) {
+        return { error: `${field} must be greater than zero.` };
+    }
+    if (number > MAX_AMOUNT) {
+        return { error: `${field} must not exceed ${MAX_AMOUNT}.` };
     }
     return { value: number };
 };
@@ -4694,7 +4717,7 @@ const validateGroupFlightPayload = (payload) => {
     if (status.error) return status;
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
-    const cost = requireNumber(payload.cost, 'Cost');
+    const cost = requirePositiveAmount(payload.cost, 'Cost');
     if (cost.error) return cost;
     const notesValue = optionalStringWithMaxLength(payload.notes, 1000);
     if (payload.notes && !notesValue) {
@@ -4762,7 +4785,7 @@ const validateGroupLodgingPayload = (payload) => {
     if (status.error) return status;
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
-    const cost = requireNumber(payload.cost, 'Total cost');
+    const cost = requirePositiveAmount(payload.cost, 'Total cost');
     if (cost.error) return cost;
     let contact;
     if (status.value === 'paid') {
@@ -4824,7 +4847,7 @@ const validateGroupTransportPayload = (payload) => {
     if (status.error) return status;
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
-    const amount = requireNumber(payload.amount, 'Amount');
+    const amount = requirePositiveAmount(payload.amount, 'Amount');
     if (amount.error) return amount;
     let provider, locator;
     if (status.value === 'paid') {
@@ -4888,7 +4911,7 @@ const validateGroupTicketPayload = (payload) => {
     }
     const currency = requireCurrency(payload.currency);
     if (currency.error) return currency;
-    const amount = requireNumber(payload.amount, 'Amount');
+    const amount = requirePositiveAmount(payload.amount, 'Amount');
     if (amount.error) return amount;
     const notesValue = optionalStringWithMaxLength(payload.notes, 1000);
     if (payload.notes && !notesValue) {
