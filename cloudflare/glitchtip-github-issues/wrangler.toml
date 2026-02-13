@@ -1,7 +1,6 @@
 name = "glitchtip-github-issues"
 main = "src/index.mjs"
 compatibility_date = "2026-02-08"
-account_id = "7e499b27df0e0848ce03be9eaafc63c6"
 
 # Create a KV namespace and fill these IDs (or remove this section to run without dedupe).
 kv_namespaces = [
