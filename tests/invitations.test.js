@@ -166,7 +166,7 @@ describe('invitation flow', () => {
         const body = await res.json();
         expect(body.error).toBe('Invitation has expired.');
 
-        const record = db.prepare('SELECT status FROM invitations WHERE token_hash = ?').get(hashValue(token));
+        const record = db.prepare('SELECT status FROM invitations WHERE token = ?').get(token);
         expect(record.status).toBe('expired');
     });
 
