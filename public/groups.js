@@ -205,92 +205,180 @@
             const memberText = memberCount === 1 ? 'member' : 'members';
             const initials = getGroupInitials(group.name);
             const avatarColor = getGroupAvatarColor(group.name);
-            tr.innerHTML = `
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar-sm rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
-                             style="background: ${avatarColor.bg}; color: ${avatarColor.text}; font-weight: 600; font-size: 14px;">
-                            ${initials}
-                        </div>
-                        <div>
-                            <div class="fw-semibold">${group.name}</div>
-                            <div class="text-muted small">
-                                <i class="bx bx-user"></i> ${memberCount} ${memberText}
-                            </div>
-                        </div>
-                    </div>
-                </td>
-                <td>${group.defaultCurrency}</td>
-                <td><span class="badge ${roleBadgeClass} text-uppercase">${roleLabel}</span></td>
-                <td class="text-muted">${new Date(group.createdAt).toLocaleDateString()}</td>
-                <td class="text-end">
-                    <a class="btn btn-sm btn-primary" href="/dashboard?groupId=${group.id}">
-                        <i class="bx bx-right-arrow-alt me-1"></i> Open Group
-                    </a>
-                    <div class="btn-group ms-1">
-                        <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bx bx-dots-vertical-rounded"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/dashboard?groupId=${group.id}">
-                                <i class="bx bx-cog me-2"></i>Group settings
-                            </a></li>
-                            ${leaveMenuItem}
-                        </ul>
-                    </div>
-                </td>
-            `;
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'fw-semibold';
+            nameDiv.textContent = group.name;
+
+            const memberInfoDiv = document.createElement('div');
+            memberInfoDiv.className = 'text-muted small';
+            memberInfoDiv.innerHTML = `<i class="bx bx-user"></i> ${memberCount} ${memberText}`;
+
+            const infoDiv = document.createElement('div');
+            infoDiv.appendChild(nameDiv);
+            infoDiv.appendChild(memberInfoDiv);
+
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'avatar-sm rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0';
+            avatarDiv.style.background = avatarColor.bg;
+            avatarDiv.style.color = avatarColor.text;
+            avatarDiv.style.fontWeight = '600';
+            avatarDiv.style.fontSize = '14px';
+            avatarDiv.textContent = initials;
+
+            const containerDiv = document.createElement('div');
+            containerDiv.className = 'd-flex align-items-center';
+            containerDiv.appendChild(avatarDiv);
+            containerDiv.appendChild(infoDiv);
+
+            const td1 = document.createElement('td');
+            td1.appendChild(containerDiv);
+
+            const td2 = document.createElement('td');
+            td2.textContent = group.defaultCurrency;
+
+            const badgeSpan = document.createElement('span');
+            badgeSpan.className = `badge ${roleBadgeClass} text-uppercase`;
+            badgeSpan.textContent = roleLabel;
+
+            const td3 = document.createElement('td');
+            td3.appendChild(badgeSpan);
+
+            const td4 = document.createElement('td');
+            td4.className = 'text-muted';
+            td4.textContent = new Date(group.createdAt).toLocaleDateString();
+
+            const openLink = document.createElement('a');
+            openLink.className = 'btn btn-sm btn-primary';
+            openLink.href = `/dashboard?groupId=${group.id}`;
+            openLink.innerHTML = `<i class="bx bx-right-arrow-alt me-1"></i> Open Group`;
+
+            const dropdownBtn = document.createElement('button');
+            dropdownBtn.type = 'button';
+            dropdownBtn.className = 'btn btn-sm btn-light dropdown-toggle';
+            dropdownBtn.setAttribute('data-bs-toggle', 'dropdown');
+            dropdownBtn.setAttribute('aria-expanded', 'false');
+            dropdownBtn.innerHTML = `<i class="bx bx-dots-vertical-rounded"></i>`;
+
+            const settingsLink = document.createElement('a');
+            settingsLink.className = 'dropdown-item';
+            settingsLink.href = `/dashboard?groupId=${group.id}`;
+            settingsLink.innerHTML = `<i class="bx bx-cog me-2"></i>Group settings`;
+
+            const menuLi = document.createElement('li');
+            menuLi.appendChild(settingsLink);
+
+            const menuUl = document.createElement('ul');
+            menuUl.className = 'dropdown-menu dropdown-menu-end';
+            menuUl.appendChild(menuLi);
+            if (leaveMenuItem) {
+                menuUl.innerHTML += leaveMenuItem;
+            }
+
+            const btnGroup = document.createElement('div');
+            btnGroup.className = 'btn-group ms-1';
+            btnGroup.appendChild(dropdownBtn);
+            btnGroup.appendChild(menuUl);
+
+            const td5 = document.createElement('td');
+            td5.className = 'text-end';
+            td5.appendChild(openLink);
+            td5.appendChild(btnGroup);
+
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            tr.appendChild(td4);
+            tr.appendChild(td5);
             if (rows) rows.appendChild(tr);
 
             // Render card for mobile
             if (cards) {
                 const card = document.createElement('div');
                 card.className = 'card mb-3 group-card';
-                card.innerHTML = `
-                <div class="card-body">
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="avatar-md rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0"
-                             style="background: ${avatarColor.bg}; color: ${avatarColor.text}; font-weight: 600; font-size: 20px;">
-                            ${initials}
-                        </div>
-                        <div class="flex-grow-1">
-                            <h5 class="mb-2 fw-bold">${group.name}</h5>
-                            <div class="d-flex flex-wrap gap-2 mb-2">
-                                <span class="badge ${roleBadgeClass} text-uppercase">
-                                    <i class="bx ${isOwner ? 'bx-crown' : 'bx-user'} me-1"></i>${roleLabel}
-                                </span>
-                            </div>
-                            <div class="text-muted small">
-                                <div class="mb-1">
-                                    <i class="bx bx-user text-primary"></i> ${memberCount} ${memberText}
-                                </div>
-                                <div class="mb-1">
-                                    <i class="bx bx-dollar text-primary"></i> ${group.defaultCurrency}
-                                </div>
-                                <div>
-                                    <i class="bx bx-calendar text-primary"></i> ${new Date(group.createdAt).toLocaleDateString()}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a class="btn btn-primary btn-sm flex-grow-1" href="/dashboard?groupId=${group.id}">
-                            <i class="bx bx-right-arrow-alt me-1"></i> Open Group
-                        </a>
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bx bx-dots-vertical-rounded"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="/dashboard?groupId=${group.id}">
-                                    <i class="bx bx-cog me-2"></i>Group settings
-                                </a></li>
-                                ${leaveMenuItem}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            `;
+
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+
+                const cardAvatar = document.createElement('div');
+                cardAvatar.className = 'avatar-md rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0';
+                cardAvatar.style.background = avatarColor.bg;
+                cardAvatar.style.color = avatarColor.text;
+                cardAvatar.style.fontWeight = '600';
+                cardAvatar.style.fontSize = '20px';
+                cardAvatar.textContent = initials;
+
+                const cardTitle = document.createElement('h5');
+                cardTitle.className = 'mb-2 fw-bold';
+                cardTitle.textContent = group.name;
+
+                const cardBadgeSpan = document.createElement('span');
+                cardBadgeSpan.className = `badge ${roleBadgeClass} text-uppercase`;
+                cardBadgeSpan.innerHTML = `<i class="bx ${isOwner ? 'bx-crown' : 'bx-user'} me-1"></i>${roleLabel}`;
+
+                const cardBadgeDiv = document.createElement('div');
+                cardBadgeDiv.className = 'd-flex flex-wrap gap-2 mb-2';
+                cardBadgeDiv.appendChild(cardBadgeSpan);
+
+                const cardInfoDiv = document.createElement('div');
+                cardInfoDiv.className = 'text-muted small';
+                cardInfoDiv.innerHTML = `
+                    <div class="mb-1"><i class="bx bx-user text-primary"></i> ${memberCount} ${memberText}</div>
+                    <div class="mb-1"><i class="bx bx-dollar text-primary"></i> ${group.defaultCurrency}</div>
+                    <div><i class="bx bx-calendar text-primary"></i> ${new Date(group.createdAt).toLocaleDateString()}</div>
+                `;
+
+                const cardInfoCol = document.createElement('div');
+                cardInfoCol.className = 'flex-grow-1';
+                cardInfoCol.appendChild(cardTitle);
+                cardInfoCol.appendChild(cardBadgeDiv);
+                cardInfoCol.appendChild(cardInfoDiv);
+
+                const cardHeader = document.createElement('div');
+                cardHeader.className = 'd-flex align-items-start mb-3';
+                cardHeader.appendChild(cardAvatar);
+                cardHeader.appendChild(cardInfoCol);
+
+                const cardOpenLink = document.createElement('a');
+                cardOpenLink.className = 'btn btn-primary btn-sm flex-grow-1';
+                cardOpenLink.href = `/dashboard?groupId=${group.id}`;
+                cardOpenLink.innerHTML = `<i class="bx bx-right-arrow-alt me-1"></i> Open Group`;
+
+                const cardDropdownBtn = document.createElement('button');
+                cardDropdownBtn.type = 'button';
+                cardDropdownBtn.className = 'btn btn-sm btn-light dropdown-toggle';
+                cardDropdownBtn.setAttribute('data-bs-toggle', 'dropdown');
+                cardDropdownBtn.setAttribute('aria-expanded', 'false');
+                cardDropdownBtn.innerHTML = `<i class="bx bx-dots-vertical-rounded"></i>`;
+
+                const cardSettingsLink = document.createElement('a');
+                cardSettingsLink.className = 'dropdown-item';
+                cardSettingsLink.href = `/dashboard?groupId=${group.id}`;
+                cardSettingsLink.innerHTML = `<i class="bx bx-cog me-2"></i>Group settings`;
+
+                const cardMenuLi = document.createElement('li');
+                cardMenuLi.appendChild(cardSettingsLink);
+
+                const cardMenuUl = document.createElement('ul');
+                cardMenuUl.className = 'dropdown-menu dropdown-menu-end';
+                cardMenuUl.appendChild(cardMenuLi);
+                if (leaveMenuItem) {
+                    cardMenuUl.innerHTML += leaveMenuItem;
+                }
+
+                const cardBtnGroup = document.createElement('div');
+                cardBtnGroup.className = 'btn-group';
+                cardBtnGroup.appendChild(cardDropdownBtn);
+                cardBtnGroup.appendChild(cardMenuUl);
+
+                const cardFooter = document.createElement('div');
+                cardFooter.className = 'd-flex gap-2';
+                cardFooter.appendChild(cardOpenLink);
+                cardFooter.appendChild(cardBtnGroup);
+
+                cardBody.appendChild(cardHeader);
+                cardBody.appendChild(cardFooter);
+                card.appendChild(cardBody);
                 cards.appendChild(card);
             }
         });

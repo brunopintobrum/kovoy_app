@@ -56,6 +56,12 @@
         { prefix: 'ticket', toggleId: 'ticketLinkExpense', fieldsId: 'ticketExpenseFields', payerId: 'ticketExpensePayer' }
     ];
 
+    const escapeHtml = (text) => {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        return String(text).replace(/[&<>"']/g, (char) => map[char]);
+    };
+
     const showToast = (type, message) => {
         const toastId = type === 'success' ? 'successToast' : 'errorToast';
         const messageId = type === 'success' ? 'successToastMessage' : 'errorToastMessage';
@@ -1216,10 +1222,16 @@
                 balances.forEach((item) => {
                     const tr = document.createElement('tr');
                     const badgeClass = item.balance >= 0 ? 'text-success' : 'text-danger';
-                    tr.innerHTML = `
-                        <td>${item.displayName}</td>
-                        <td class="text-end ${badgeClass}">${formatCurrency(item.balance, state.group.defaultCurrency)}</td>
-                    `;
+
+                    const td1 = document.createElement('td');
+                    td1.textContent = item.displayName;
+
+                    const td2 = document.createElement('td');
+                    td2.className = `text-end ${badgeClass}`;
+                    td2.textContent = formatCurrency(item.balance, state.group.defaultCurrency);
+
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
                     participantRows.appendChild(tr);
                 });
             }
@@ -1258,13 +1270,25 @@
             const to = state.participants.find((p) => p.id === debt.toParticipantId);
             const li = document.createElement('li');
             li.className = 'list-group-item d-flex align-items-center justify-content-between';
-            li.innerHTML = `
-                <div>
-                    <div class="fw-semibold">${from ? from.displayName : `#${debt.fromParticipantId}`}</div>
-                    <small class="text-muted">pays ${to ? to.displayName : `#${debt.toParticipantId}`}</small>
-                </div>
-                <span class="badge bg-soft-danger text-danger">${formatCurrency(debt.amount, state.group.defaultCurrency)}</span>
-            `;
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'fw-semibold';
+            nameDiv.textContent = from ? from.displayName : `#${debt.fromParticipantId}`;
+
+            const paysSpan = document.createElement('small');
+            paysSpan.className = 'text-muted';
+            paysSpan.textContent = `pays ${to ? to.displayName : `#${debt.toParticipantId}`}`;
+
+            const infoDiv = document.createElement('div');
+            infoDiv.appendChild(nameDiv);
+            infoDiv.appendChild(paysSpan);
+
+            const badgeSpan = document.createElement('span');
+            badgeSpan.className = 'badge bg-soft-danger text-danger';
+            badgeSpan.textContent = formatCurrency(debt.amount, state.group.defaultCurrency);
+
+            li.appendChild(infoDiv);
+            li.appendChild(badgeSpan);
             list.appendChild(li);
         });
     };
@@ -1290,13 +1314,30 @@
         state.families.forEach((family) => {
             const li = document.createElement('li');
             li.className = 'list-group-item d-flex align-items-center justify-content-between';
-            li.innerHTML = `
-                <span>${family.name}</span>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary" data-action="edit-family" data-id="${family.id}">Edit</button>
-                    <button class="btn btn-sm btn-outline-danger" data-action="delete-family" data-id="${family.id}">Delete</button>
-                </div>
-            `;
+
+            const span = document.createElement('span');
+            span.textContent = family.name;
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-sm btn-outline-primary';
+            editBtn.setAttribute('data-action', 'edit-family');
+            editBtn.setAttribute('data-id', family.id);
+            editBtn.textContent = 'Edit';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-sm btn-outline-danger';
+            deleteBtn.setAttribute('data-action', 'delete-family');
+            deleteBtn.setAttribute('data-id', family.id);
+            deleteBtn.textContent = 'Delete';
+
+            const btnDiv = document.createElement('div');
+            btnDiv.className = 'd-flex gap-2';
+            btnDiv.appendChild(editBtn);
+            btnDiv.appendChild(deleteBtn);
+
+            li.appendChild(span);
+            li.appendChild(btnDiv);
+
             if (!state.canEdit) {
                 li.querySelectorAll('button').forEach((button) => {
                     button.disabled = true;
@@ -1329,15 +1370,43 @@
         const sortedParticipants = applySorting(state.participants, 'participants');
         sortedParticipants.forEach((participant) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td data-label="Name">${participant.displayName}</td>
-                <td data-label="Family">${participant.familyId ? familyMap.get(participant.familyId) || '-' : '-'}</td>
-                <td data-label="Type" class="text-capitalize">${participant.type || '-'}</td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-participant" data-id="${participant.id}">Edit</button>
-                    <button class="btn btn-sm btn-outline-danger" data-action="delete-participant" data-id="${participant.id}">Delete</button>
-                </td>
-            `;
+
+            const td1 = document.createElement('td');
+            td1.setAttribute('data-label', 'Name');
+            td1.textContent = participant.displayName;
+
+            const familyName = participant.familyId ? familyMap.get(participant.familyId) || '-' : '-';
+            const td2 = document.createElement('td');
+            td2.setAttribute('data-label', 'Family');
+            td2.textContent = familyName;
+
+            const td3 = document.createElement('td');
+            td3.setAttribute('data-label', 'Type');
+            td3.className = 'text-capitalize';
+            td3.textContent = participant.type || '-';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-sm btn-outline-primary me-1';
+            editBtn.setAttribute('data-action', 'edit-participant');
+            editBtn.setAttribute('data-id', participant.id);
+            editBtn.textContent = 'Edit';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-sm btn-outline-danger';
+            deleteBtn.setAttribute('data-action', 'delete-participant');
+            deleteBtn.setAttribute('data-id', participant.id);
+            deleteBtn.textContent = 'Delete';
+
+            const td4 = document.createElement('td');
+            td4.className = 'text-end';
+            td4.appendChild(editBtn);
+            td4.appendChild(deleteBtn);
+
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            tr.appendChild(td4);
+
             if (!state.canEdit) {
                 tr.querySelectorAll('button').forEach((button) => {
                     button.disabled = true;
