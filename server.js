@@ -81,7 +81,78 @@ const GLITCHTIP_ENVIRONMENT = process.env.GLITCHTIP_ENVIRONMENT || process.env.N
 const GLITCHTIP_RELEASE = process.env.GLITCHTIP_RELEASE;
 const GLITCHTIP_TRACES_SAMPLE_RATE = Number(process.env.GLITCHTIP_TRACES_SAMPLE_RATE || 0);
 const GLITCHTIP_PUBLIC_ORIGIN = process.env.GLITCHTIP_PUBLIC_ORIGIN || '';
-const sentryEnabled = Boolean(GLITCHTIP_DSN_BACKEND);
+const sentryEnabled = Boolean(GLITCHTIP_DSN_BACKEND) && process.env.NODE_ENV !== 'test';
+const INTERNAL_SERVER_ERROR_MESSAGE = 'Internal server error.';
+
+const ROUTE_WRAPPED_MARK = Symbol('routeWrapped');
+
+const normalizeError = (error, fallbackMessage = 'Unknown error') => {
+    if (error instanceof Error) {
+        return error;
+    }
+    if (typeof error === 'string' && error.trim()) {
+        return new Error(error.trim());
+    }
+    return new Error(fallbackMessage);
+};
+
+const withErrorHandling = (handler) => {
+    if (typeof handler !== 'function') {
+        return handler;
+    }
+    if (handler.length === 4) {
+        return handler;
+    }
+    if (handler[ROUTE_WRAPPED_MARK]) {
+        return handler;
+    }
+    const wrapped = (req, res, next) => {
+        try {
+            const maybePromise = handler(req, res, next);
+            if (maybePromise && typeof maybePromise.then === 'function') {
+                return maybePromise.catch((error) => next(error));
+            }
+            return maybePromise;
+        } catch (error) {
+            return next(error);
+        }
+    };
+    wrapped[ROUTE_WRAPPED_MARK] = true;
+    return wrapped;
+};
+
+const wrapRouteEntry = (entry) => {
+    if (Array.isArray(entry)) {
+        return entry.map((nested) => wrapRouteEntry(nested));
+    }
+    return withErrorHandling(entry);
+};
+
+['get', 'post', 'put', 'delete', 'patch'].forEach((method) => {
+    const originalMethod = app[method].bind(app);
+    app[method] = (...args) => {
+        return originalMethod(...args.map((entry) => wrapRouteEntry(entry)));
+    };
+});
+
+const reportProcessError = (label, error) => {
+    const normalized = normalizeError(error, label);
+    console.error(`${label}:`, normalized);
+    if (sentryEnabled) {
+        Sentry.captureException(normalized);
+    }
+};
+
+const PROCESS_ERROR_HANDLERS_FLAG = '__kovoy_process_error_handlers_registered__';
+if (!process[PROCESS_ERROR_HANDLERS_FLAG]) {
+    process.on('unhandledRejection', (reason) => {
+        reportProcessError('Unhandled promise rejection', reason);
+    });
+    process.on('uncaughtException', (error) => {
+        reportProcessError('Uncaught exception', error);
+    });
+    process[PROCESS_ERROR_HANDLERS_FLAG] = true;
+}
 
 const loadPostalPatterns = () => {
     try {
@@ -5029,6 +5100,20 @@ if (sentryEnabled) {
     app.use(Sentry.Handlers.errorHandler());
 }
 
+const globalErrorHandler = (err, req, res, next) => {
+    if (res.headersSent) {
+        return next(err);
+    }
+    const normalized = normalizeError(err, 'Unhandled request error');
+    console.error(`Request error on ${req.method} ${req.originalUrl}:`, normalized);
+    if (sentryEnabled) {
+        Sentry.captureException(normalized);
+    }
+    return res.status(500).json({ error: INTERNAL_SERVER_ERROR_MESSAGE });
+};
+
+app.use(globalErrorHandler);
+
 const startServer = (port = PORT, onReady) => {
     const server = app.listen(port, () => {
         if (typeof onReady === 'function') {
@@ -5064,5 +5149,7 @@ module.exports = {
     validateSplitSum,
     buildBalanceState,
     buildDebtPlan,
+    withErrorHandling,
+    globalErrorHandler,
 };
 
