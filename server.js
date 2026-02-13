@@ -727,6 +727,7 @@ db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_hash ON refresh_tokens(to
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_group_members_unique ON group_members(group_id, user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_members_group ON group_members(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_members_user ON group_members(user_id)');
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_token ON invitations(token)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_invitations_group ON invitations(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_families_group ON families(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_participants_group ON participants(group_id)');
@@ -834,17 +835,6 @@ try {
     console.warn('Participant merge migration skipped:', err.message);
 }
 
-// Migration: hash invitation tokens
-const hasTokenHash = db.prepare("SELECT COUNT(*) as cnt FROM pragma_table_info('invitations') WHERE name = 'token_hash'").get();
-if (!hasTokenHash.cnt) {
-    db.exec('ALTER TABLE invitations ADD COLUMN token_hash TEXT');
-    const rows = db.prepare('SELECT id, token FROM invitations WHERE token IS NOT NULL').all();
-    const update = db.prepare('UPDATE invitations SET token_hash = ? WHERE id = ?');
-    rows.forEach((row) => update.run(hashValue(row.token), row.id));
-    db.exec('DROP INDEX IF EXISTS idx_invitations_token');
-    db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_token_hash ON invitations(token_hash)');
-}
-
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
 if (countUsers.count === 0) {
     const seedEmail = process.env.SEED_EMAIL;
@@ -929,10 +919,11 @@ const sensitiveLimiter = rateLimit({
 });
 
 const dataLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 60 * 1000,
     max: 100,
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    skip: (req) => !req.user
 });
 
 const signAccessToken = (user) => {
@@ -1751,7 +1742,7 @@ app.get('/api/me', authRequiredApi, (req, res) => {
     const user = db.prepare(
         'SELECT email, first_name, last_name, display_name, avatar_url FROM users WHERE id = ?'
     ).get(req.user.sub);
-    if (!user) return res.status(401).json({ error: 'Not authenticated.' });
+    if (!user) return res.status(401).json({ error: 'Não autenticado.' });
     return res.json({
         email: user.email,
         firstName: user.first_name,
@@ -2225,10 +2216,10 @@ const updateGroupTicket = db.prepare(`
 const deleteGroupTicket = db.prepare('DELETE FROM group_tickets WHERE id = ? AND group_id = ?');
 const insertInvitation = db.prepare(`
     INSERT INTO invitations
-    (group_id, email, role, token, token_hash, expires_at, status, invited_by_user_id, created_at)
-    VALUES (?, ?, ?, '', ?, ?, ?, ?, ?)
+    (group_id, email, role, token, expires_at, status, invited_by_user_id, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `);
-const getInvitationByToken = db.prepare('SELECT * FROM invitations WHERE token_hash = ?');
+const getInvitationByToken = db.prepare('SELECT * FROM invitations WHERE token = ?');
 const updateInvitationStatus = db.prepare('UPDATE invitations SET status = ?, accepted_by_user_id = ? WHERE id = ?');
 const markInvitationExpired = db.prepare('UPDATE invitations SET status = ? WHERE id = ?');
 const getUserEmail = db.prepare('SELECT email FROM users WHERE id = ?');
@@ -2248,6 +2239,7 @@ const requireGroupMember = (req, res, next) => {
     }
     req.group = group;
     req.groupMember = member;
+    req.groupRole = member.role;
     req.groupId = groupId;
     return next();
 };
@@ -2424,8 +2416,8 @@ app.get('/api/groups/:groupId/families', authRequiredApi, requireGroupMember, (r
 
 app.post(
     '/api/groups/:groupId/families',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -2442,8 +2434,8 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/families/:familyId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -2466,8 +2458,8 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/families/:familyId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -2535,8 +2527,8 @@ app.get('/api/groups/:groupId/participants', authRequiredApi, requireGroupMember
 
 app.post(
     '/api/groups/:groupId/participants',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -2566,8 +2558,8 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/participants/:participantId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -2602,8 +2594,8 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/participants/:participantId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -2941,8 +2933,8 @@ app.get('/api/groups/:groupId/expenses', authRequiredApi, requireGroupMember, (r
 
 app.post(
     '/api/groups/:groupId/expenses',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -2982,8 +2974,8 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/expenses/:expenseId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3029,8 +3021,8 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/expenses/:expenseId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3154,8 +3146,8 @@ app.get('/api/groups/:groupId/flights', authRequiredApi, requireGroupMember, (re
 
 app.post(
     '/api/groups/:groupId/flights',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3244,8 +3236,8 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/flights/:flightId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3345,8 +3337,8 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/flights/:flightId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3429,8 +3421,8 @@ app.get('/api/groups/:groupId/lodging-locations', authRequiredApi, requireGroupM
 
 app.post(
     '/api/groups/:groupId/lodgings',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3501,8 +3493,8 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/lodgings/:lodgingId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3587,8 +3579,8 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/lodgings/:lodgingId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3623,8 +3615,8 @@ app.get('/api/groups/:groupId/transports', authRequiredApi, requireGroupMember, 
 
 app.post(
     '/api/groups/:groupId/transports',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3678,8 +3670,8 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/transports/:transportId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3747,8 +3739,8 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/transports/:transportId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3790,8 +3782,8 @@ app.get('/api/groups/:groupId/tickets', authRequiredApi, requireGroupMember, (re
 
 app.post(
     '/api/groups/:groupId/tickets',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3858,8 +3850,8 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/tickets/:ticketId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -3941,8 +3933,8 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/tickets/:ticketId',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(EDITOR_ROLES),
@@ -4029,8 +4021,8 @@ app.get('/api/groups/:groupId/summary', authRequiredApi, requireGroupMember, (re
 
 app.post(
     '/api/groups/:groupId/invitations',
-    dataLimiter,
     authRequiredApi,
+    dataLimiter,
     requireCsrfToken,
     requireGroupMember,
     requireGroupRole(ADMIN_ROLES),
@@ -4044,14 +4036,13 @@ app.post(
             return res.status(400).json({ error: 'Invalid role for invitation.' });
         }
         const token = crypto.randomBytes(24).toString('hex');
-        const tokenHash = hashValue(token);
         const expiresAt = Date.now() + INVITE_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000;
         const now = new Date().toISOString();
         insertInvitation.run(
             req.groupId,
             emailRaw.toLowerCase(),
             role,
-            tokenHash,
+            token,
             expiresAt,
             'pending',
             req.user.sub,
@@ -4082,12 +4073,12 @@ app.post(
     }
 );
 
-app.post('/api/invitations/accept', dataLimiter, authRequiredApi, requireCsrfToken, (req, res) => {
+app.post('/api/invitations/accept', authRequiredApi, requireCsrfToken, (req, res) => {
     const token = typeof req.body?.token === 'string' ? req.body.token.trim() : '';
     if (!token) {
         return res.status(400).json({ error: 'Invitation token is required.' });
     }
-    const invitation = getInvitationByToken.get(hashValue(token));
+    const invitation = getInvitationByToken.get(token);
     if (!invitation) {
         return res.status(404).json({ error: 'Invitation not found.' });
     }
@@ -4113,12 +4104,12 @@ app.post('/api/invitations/accept', dataLimiter, authRequiredApi, requireCsrfTok
     return res.json({ ok: true, groupId: invitation.group_id });
 });
 
-app.get('/api/invitations/:token/info', sensitiveLimiter, (req, res) => {
+app.get('/api/invitations/:token/info', authRequiredApi, (req, res) => {
     const token = typeof req.params?.token === 'string' ? req.params.token.trim() : '';
     if (!token) {
         return res.status(400).json({ error: 'Invitation token is required.' });
     }
-    const invitation = getInvitationByToken.get(hashValue(token));
+    const invitation = getInvitationByToken.get(token);
     if (!invitation) {
         return res.status(404).json({ error: 'Invitation not found.' });
     }
@@ -4313,6 +4304,15 @@ const optionalString = (value) => {
     return trimmed ? trimmed : null;
 };
 
+const optionalStringWithMaxLength = (value, maxLength) => {
+    const trimmed = trimString(value);
+    if (!trimmed) return null;
+    if (trimmed.length > maxLength) {
+        return null;
+    }
+    return trimmed;
+};
+
 const normalizeGroupRole = (value) => {
     if (typeof value !== 'string') return null;
     const trimmed = value.trim().toLowerCase();
@@ -4338,8 +4338,8 @@ const validateGroupPayload = (payload) => {
     if (!name) {
         return { error: 'Group name is required.' };
     }
-    if (name.length > 80) {
-        return { error: 'Group name must be 80 characters or less.' };
+    if (name.length > 100) {
+        return { error: 'Group name must be 100 characters or less.' };
     }
     const currencyRaw = typeof payload?.defaultCurrency === 'string'
         ? payload.defaultCurrency.trim().toUpperCase()
@@ -4447,8 +4447,8 @@ const validateExpenseSplitPayload = (payload) => {
     if (!description) {
         return { error: 'Description is required.' };
     }
-    if (description.length > 140) {
-        return { error: 'Description must be 140 characters or less.' };
+    if (description.length > 500) {
+        return { error: 'Description must be 500 characters or less.' };
     }
     const amount = Number(payload?.amount);
     if (!Number.isFinite(amount) || amount <= 0) {
@@ -4660,6 +4660,10 @@ const validateGroupFlightPayload = (payload) => {
     if (currency.error) return currency;
     const cost = requireNumber(payload.cost, 'Cost');
     if (cost.error) return cost;
+    const notesValue = optionalStringWithMaxLength(payload.notes, 1000);
+    if (payload.notes && !notesValue) {
+        return { error: 'Notes must be 1000 characters or less.' };
+    }
     return {
         value: {
             airline: airline.value,
@@ -4675,7 +4679,7 @@ const validateGroupFlightPayload = (payload) => {
             toAirportId,
             departAt: departAt.value,
             arriveAt: arriveAt.value,
-            notes: optionalString(payload.notes),
+            notes: notesValue,
             airlineId
         }
     };
@@ -4732,6 +4736,10 @@ const validateGroupLodgingPayload = (payload) => {
     } else {
         contact = optionalString(payload.contact);
     }
+    const notesValue = optionalStringWithMaxLength(payload.notes, 1000);
+    if (payload.notes && !notesValue) {
+        return { error: 'Notes must be 1000 characters or less.' };
+    }
     return {
         value: {
             name: name.value,
@@ -4757,7 +4765,7 @@ const validateGroupLodgingPayload = (payload) => {
             contact,
             contactPhone: optionalString(payload.contactPhone),
             contactEmail: optionalString(payload.contactEmail),
-            notes: optionalString(payload.notes)
+            notes: notesValue
         }
     };
 };
@@ -4794,6 +4802,10 @@ const validateGroupTransportPayload = (payload) => {
         provider = optionalString(payload.provider);
         locator = optionalString(payload.locator);
     }
+    const notesValue = optionalStringWithMaxLength(payload.notes, 1000);
+    if (payload.notes && !notesValue) {
+        return { error: 'Notes must be 1000 characters or less.' };
+    }
     return {
         value: {
             type: type.value,
@@ -4806,7 +4818,7 @@ const validateGroupTransportPayload = (payload) => {
             status: status.value,
             amount: amount.value,
             currency: currency.value,
-            notes: optionalString(payload.notes)
+            notes: notesValue
         }
     };
 };
@@ -4842,6 +4854,10 @@ const validateGroupTicketPayload = (payload) => {
     if (currency.error) return currency;
     const amount = requireNumber(payload.amount, 'Amount');
     if (amount.error) return amount;
+    const notesValue = optionalStringWithMaxLength(payload.notes, 1000);
+    if (payload.notes && !notesValue) {
+        return { error: 'Notes must be 1000 characters or less.' };
+    }
     return {
         value: {
             type: type.value,
@@ -4850,7 +4866,7 @@ const validateGroupTicketPayload = (payload) => {
             status: status.value,
             amount: amount.value,
             currency: currency.value,
-            notes: optionalString(payload.notes)
+            notes: notesValue
         }
     };
 };

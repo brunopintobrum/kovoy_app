@@ -56,14 +56,10 @@
         { prefix: 'ticket', toggleId: 'ticketLinkExpense', fieldsId: 'ticketExpenseFields', payerId: 'ticketExpensePayer' }
     ];
 
-    const escapeHtml = (str) => {
-        if (str == null) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+    const escapeHtml = (text) => {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        return String(text).replace(/[&<>"']/g, (char) => map[char]);
     };
 
     const showToast = (type, message) => {
@@ -1226,10 +1222,16 @@
                 balances.forEach((item) => {
                     const tr = document.createElement('tr');
                     const badgeClass = item.balance >= 0 ? 'text-success' : 'text-danger';
-                    tr.innerHTML = `
-                        <td>${escapeHtml(item.displayName)}</td>
-                        <td class="text-end ${badgeClass}">${formatCurrency(item.balance, state.group.defaultCurrency)}</td>
-                    `;
+
+                    const td1 = document.createElement('td');
+                    td1.textContent = item.displayName;
+
+                    const td2 = document.createElement('td');
+                    td2.className = `text-end ${badgeClass}`;
+                    td2.textContent = formatCurrency(item.balance, state.group.defaultCurrency);
+
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
                     participantRows.appendChild(tr);
                 });
             }
@@ -1245,7 +1247,7 @@
                     const tr = document.createElement('tr');
                     const badgeClass = item.balance >= 0 ? 'text-success' : 'text-danger';
                     tr.innerHTML = `
-                        <td>${escapeHtml(item.name)}</td>
+                        <td>${item.name}</td>
                         <td class="text-end ${badgeClass}">${formatCurrency(item.balance, state.group.defaultCurrency)}</td>
                     `;
                     familyRows.appendChild(tr);
@@ -1268,13 +1270,25 @@
             const to = state.participants.find((p) => p.id === debt.toParticipantId);
             const li = document.createElement('li');
             li.className = 'list-group-item d-flex align-items-center justify-content-between';
-            li.innerHTML = `
-                <div>
-                    <div class="fw-semibold">${from ? escapeHtml(from.displayName) : `#${debt.fromParticipantId}`}</div>
-                    <small class="text-muted">pays ${to ? escapeHtml(to.displayName) : `#${debt.toParticipantId}`}</small>
-                </div>
-                <span class="badge bg-soft-danger text-danger">${formatCurrency(debt.amount, state.group.defaultCurrency)}</span>
-            `;
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'fw-semibold';
+            nameDiv.textContent = from ? from.displayName : `#${debt.fromParticipantId}`;
+
+            const paysSpan = document.createElement('small');
+            paysSpan.className = 'text-muted';
+            paysSpan.textContent = `pays ${to ? to.displayName : `#${debt.toParticipantId}`}`;
+
+            const infoDiv = document.createElement('div');
+            infoDiv.appendChild(nameDiv);
+            infoDiv.appendChild(paysSpan);
+
+            const badgeSpan = document.createElement('span');
+            badgeSpan.className = 'badge bg-soft-danger text-danger';
+            badgeSpan.textContent = formatCurrency(debt.amount, state.group.defaultCurrency);
+
+            li.appendChild(infoDiv);
+            li.appendChild(badgeSpan);
             list.appendChild(li);
         });
     };
@@ -1300,13 +1314,30 @@
         state.families.forEach((family) => {
             const li = document.createElement('li');
             li.className = 'list-group-item d-flex align-items-center justify-content-between';
-            li.innerHTML = `
-                <span>${escapeHtml(family.name)}</span>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary" data-action="edit-family" data-id="${family.id}">Edit</button>
-                    <button class="btn btn-sm btn-outline-danger" data-action="delete-family" data-id="${family.id}">Delete</button>
-                </div>
-            `;
+
+            const span = document.createElement('span');
+            span.textContent = family.name;
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-sm btn-outline-primary';
+            editBtn.setAttribute('data-action', 'edit-family');
+            editBtn.setAttribute('data-id', family.id);
+            editBtn.textContent = 'Edit';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-sm btn-outline-danger';
+            deleteBtn.setAttribute('data-action', 'delete-family');
+            deleteBtn.setAttribute('data-id', family.id);
+            deleteBtn.textContent = 'Delete';
+
+            const btnDiv = document.createElement('div');
+            btnDiv.className = 'd-flex gap-2';
+            btnDiv.appendChild(editBtn);
+            btnDiv.appendChild(deleteBtn);
+
+            li.appendChild(span);
+            li.appendChild(btnDiv);
+
             if (!state.canEdit) {
                 li.querySelectorAll('button').forEach((button) => {
                     button.disabled = true;
@@ -1339,15 +1370,43 @@
         const sortedParticipants = applySorting(state.participants, 'participants');
         sortedParticipants.forEach((participant) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td data-label="Name">${escapeHtml(participant.displayName)}</td>
-                <td data-label="Family">${participant.familyId ? escapeHtml(familyMap.get(participant.familyId)) || '-' : '-'}</td>
-                <td data-label="Type" class="text-capitalize">${escapeHtml(participant.type) || '-'}</td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-participant" data-id="${participant.id}">Edit</button>
-                    <button class="btn btn-sm btn-outline-danger" data-action="delete-participant" data-id="${participant.id}">Delete</button>
-                </td>
-            `;
+
+            const td1 = document.createElement('td');
+            td1.setAttribute('data-label', 'Name');
+            td1.textContent = participant.displayName;
+
+            const familyName = participant.familyId ? familyMap.get(participant.familyId) || '-' : '-';
+            const td2 = document.createElement('td');
+            td2.setAttribute('data-label', 'Family');
+            td2.textContent = familyName;
+
+            const td3 = document.createElement('td');
+            td3.setAttribute('data-label', 'Type');
+            td3.className = 'text-capitalize';
+            td3.textContent = participant.type || '-';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-sm btn-outline-primary me-1';
+            editBtn.setAttribute('data-action', 'edit-participant');
+            editBtn.setAttribute('data-id', participant.id);
+            editBtn.textContent = 'Edit';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-sm btn-outline-danger';
+            deleteBtn.setAttribute('data-action', 'delete-participant');
+            deleteBtn.setAttribute('data-id', participant.id);
+            deleteBtn.textContent = 'Delete';
+
+            const td4 = document.createElement('td');
+            td4.className = 'text-end';
+            td4.appendChild(editBtn);
+            td4.appendChild(deleteBtn);
+
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            tr.appendChild(td4);
+
             if (!state.canEdit) {
                 tr.querySelectorAll('button').forEach((button) => {
                     button.disabled = true;
@@ -1381,11 +1440,11 @@
                     : rawSplitType;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td data-label="Description">${escapeHtml(expense.description)}</td>
+                <td data-label="Description">${expense.description}</td>
                 <td data-label="Amount">${formatCurrency(expense.amount, expense.currency)}</td>
-                <td data-label="Date">${escapeHtml(expense.date)}</td>
-                <td data-label="Paid by">${escapeHtml(participantMap.get(expense.payerParticipantId)) || '-'}</td>
-                <td data-label="Split" class="text-capitalize">${escapeHtml(splitType)}</td>
+                <td data-label="Date">${expense.date}</td>
+                <td data-label="Paid by">${participantMap.get(expense.payerParticipantId) || '-'}</td>
+                <td data-label="Split" class="text-capitalize">${splitType}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit-expense" data-id="${expense.id}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" data-action="delete-expense" data-id="${expense.id}">Delete</button>
@@ -1441,14 +1500,14 @@
             const participantNames = (flight.participantIds || [])
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
-            const passengersLabel = participantNames.length ? participantNames.map(n => escapeHtml(n)).join(', ') : '-';
+            const passengersLabel = participantNames.length ? participantNames.join(', ') : '-';
             const passengerCount = participantNames.length;
             const seatLabels = (flight.participantIds || [])
                 .map((id) => {
                     const name = participantMap.get(id);
                     if (!name) return null;
                     const seat = flight.participantSeats?.[id];
-                    return seat ? `${escapeHtml(name)} (${escapeHtml(seat)})` : escapeHtml(name);
+                    return seat ? `${name} (${seat})` : name;
                 })
                 .filter(Boolean);
             const seatsLabel = seatLabels.length ? seatLabels.join(', ') : '-';
@@ -1457,7 +1516,7 @@
                     const name = participantMap.get(id);
                     if (!name) return null;
                     const baggage = flight.participantBaggage?.[id];
-                    return baggage ? `${escapeHtml(name)} (${escapeHtml(baggage)})` : escapeHtml(name);
+                    return baggage ? `${name} (${baggage})` : name;
                 })
                 .filter(Boolean);
             const baggageLabel = baggageLabels.length ? baggageLabels.join(', ') : '-';
@@ -1467,7 +1526,7 @@
                     if (!name) return null;
                     const seat = flight.participantSeats?.[id] || '-';
                     const baggage = flight.participantBaggage?.[id] || '-';
-                    return `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(seat)}</td><td>${escapeHtml(baggage)}</td></tr>`;
+                    return `<tr><td>${name}</td><td>${seat}</td><td>${baggage}</td></tr>`;
                 })
                 .filter(Boolean)
                 .join('');
@@ -1483,8 +1542,8 @@
                         <tbody>${passengerRows}</tbody>
                     </table></div>`
                 : '<span class="text-muted">No passengers selected.</span>';
-            const flightLabel = escapeHtml([flight.airline, flight.flightNumber].filter(Boolean).join(' '));
-            const routeLabel = `${escapeHtml(flight.fromLabel || flight.from) || '-'} → ${escapeHtml(flight.toLabel || flight.to) || '-'}`;
+            const flightLabel = [flight.airline, flight.flightNumber].filter(Boolean).join(' ');
+            const routeLabel = `${flight.fromLabel || flight.from || '-'} → ${flight.toLabel || flight.to || '-'}`;
             const expenseBadge = flight.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const detailsId = `flight-details-${flight.id}`;
             const tr = document.createElement('tr');
@@ -1516,7 +1575,7 @@
                     <div class="row g-3">
                         <div class="col-md-3">
                             <div class="text-muted small">PNR</div>
-                            <div>${escapeHtml(flight.pnr) || '-'}</div>
+                            <div>${flight.pnr || '-'}</div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-muted small">Class</div>
@@ -1540,15 +1599,15 @@
         const content = document.getElementById('lodgingDetailsContent');
         if (!content) return;
 
-        const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).map(s => escapeHtml(s)).join(', ');
-        const checkIn = `${formatDate(lodging.checkIn)} ${escapeHtml(lodging.checkInTime) || ''}`.trim();
-        const checkOut = `${formatDate(lodging.checkOut)} ${escapeHtml(lodging.checkOutTime) || ''}`.trim();
+        const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).join(', ');
+        const checkIn = `${formatDate(lodging.checkIn)} ${lodging.checkInTime || ''}`.trim();
+        const checkOut = `${formatDate(lodging.checkOut)} ${lodging.checkOutTime || ''}`.trim();
         const rooms = lodging.roomType
-            ? `${lodging.roomQuantity || 1} × ${escapeHtml(lodging.roomType)} (${lodging.roomOccupancy || 0} guests)`
+            ? `${lodging.roomQuantity || 1} × ${lodging.roomType} (${lodging.roomOccupancy || 0} guests)`
             : 'Not specified';
-        const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean).map(s => escapeHtml(s));
+        const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean);
         const contact = contactParts.length ? contactParts.join(' • ') : 'Not specified';
-        const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean).map(s => escapeHtml(s));
+        const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean);
         const fullAddress = addressParts.join(', ') || 'Not specified';
         const expenseInfo = lodging.expenseId
             ? '<span class="badge bg-success">Linked to expense</span>'
@@ -1557,7 +1616,7 @@
         content.innerHTML = `
             <div class="col-12">
                 <h6 class="text-uppercase text-muted mb-2">Property Information</h6>
-                <div class="mb-2"><strong>Name:</strong> ${escapeHtml(lodging.name) || 'Not specified'}</div>
+                <div class="mb-2"><strong>Name:</strong> ${lodging.name || 'Not specified'}</div>
                 <div class="mb-2"><strong>Status:</strong> ${formatStatusBadge(lodging.status)}</div>
             </div>
             <div class="col-12"><hr></div>
@@ -1588,7 +1647,7 @@
             <div class="col-12"><hr></div>
             <div class="col-12">
                 <h6 class="text-uppercase text-muted mb-2">Notes</h6>
-                <div>${escapeHtml(lodging.notes)}</div>
+                <div>${lodging.notes}</div>
             </div>
             ` : ''}
         `;
@@ -1647,21 +1706,21 @@
         }
         const sorted = applySorting(filtered, 'lodgings');
         sorted.forEach((lodging) => {
-            const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).map(s => escapeHtml(s)).join(', ');
-            const checkIn = `${formatDate(lodging.checkIn)} ${escapeHtml(lodging.checkInTime) || ''}`.trim();
-            const checkOut = `${formatDate(lodging.checkOut)} ${escapeHtml(lodging.checkOutTime) || ''}`.trim();
+            const location = [lodging.city, lodging.state, lodging.country].filter(Boolean).join(', ');
+            const checkIn = `${formatDate(lodging.checkIn)} ${lodging.checkInTime || ''}`.trim();
+            const checkOut = `${formatDate(lodging.checkOut)} ${lodging.checkOutTime || ''}`.trim();
             const rooms = lodging.roomType
-                ? `${lodging.roomQuantity || 1} × ${escapeHtml(lodging.roomType)} (${lodging.roomOccupancy || 0} guests)`
+                ? `${lodging.roomQuantity || 1} × ${lodging.roomType} (${lodging.roomOccupancy || 0} guests)`
                 : '-';
-            const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean).map(s => escapeHtml(s));
+            const contactParts = [lodging.contact, lodging.contactPhone, lodging.contactEmail].filter(Boolean);
             const contact = contactParts.length ? contactParts.join(' · ') : '-';
             const detailsId = `lodging-details-${lodging.id}`;
-            const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean).map(s => escapeHtml(s));
+            const addressParts = [lodging.address, lodging.postalCode, lodging.city, lodging.state, lodging.country].filter(Boolean);
             const addressLabel = addressParts.join(', ') || '-';
             const expenseBadge = lodging.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td data-label="Property">${escapeHtml(lodging.name) || '-'}${expenseBadge}</td>
+                <td data-label="Property">${lodging.name || '-'}${expenseBadge}</td>
                 <td data-label="Location">${location || '-'}</td>
                 <td data-label="Dates">${checkIn} → ${checkOut}</td>
                 <td data-label="Rooms">${rooms}</td>
@@ -1701,7 +1760,7 @@
                                 <div class="text-muted small">Contact</div>
                                 <div>${contact}</div>
                             </div>
-                            ${lodging.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${escapeHtml(lodging.notes)}</div></div>` : ''}
+                            ${lodging.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${lodging.notes}</div></div>` : ''}
                         </div>
                     </td>
                 `;
@@ -1737,16 +1796,16 @@
         }
         const sorted = applySorting(filtered, 'transports');
         sorted.forEach((transport) => {
-            const route = `${escapeHtml(transport.origin) || '-'} → ${escapeHtml(transport.destination) || '-'}`;
-            const provider = escapeHtml(transport.provider) || '-';
-            const locator = escapeHtml(transport.locator) || '-';
+            const route = `${transport.origin || '-'} → ${transport.destination || '-'}`;
+            const provider = transport.provider || '-';
+            const locator = transport.locator || '-';
             const providerLine = [provider, locator].filter((value) => value && value !== '-').join(' · ') || '-';
             const expenseBadge = transport.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const detailsId = `transport-details-${transport.id}`;
             const hasDetails = transport.notes || (provider !== '-') || (locator !== '-');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td data-label="Type">${escapeHtml(transport.type) || '-'}${expenseBadge}</td>
+                <td data-label="Type">${transport.type || '-'}${expenseBadge}</td>
                 <td data-label="Route"><strong>${route}</strong></td>
                 <td data-label="Departure">${formatDateTime(transport.departAt)}</td>
                 <td data-label="Arrival">${formatDateTime(transport.arriveAt)}</td>
@@ -1774,7 +1833,7 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <div class="text-muted small">Origin → Destination</div>
-                                <div><strong>${escapeHtml(transport.origin) || '-'}</strong> → <strong>${escapeHtml(transport.destination) || '-'}</strong></div>
+                                <div><strong>${transport.origin || '-'}</strong> → <strong>${transport.destination || '-'}</strong></div>
                             </div>
                             <div class="col-md-4">
                                 <div class="text-muted small">Departure / Arrival</div>
@@ -1784,7 +1843,7 @@
                                 <div class="text-muted small">Provider / Locator</div>
                                 <div>${providerLine}</div>
                             </div>
-                            ${transport.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${escapeHtml(transport.notes)}</div></div>` : ''}
+                            ${transport.notes ? `<div class="col-12"><div class="text-muted small">Notes</div><div>${transport.notes}</div></div>` : ''}
                         </div>
                     </td>
                 `;
@@ -1830,15 +1889,15 @@
                 .map((id) => participantMap.get(id))
                 .filter(Boolean);
             const participantBadges = participantNames.length
-                ? participantNames.map((name) => `<span class="badge bg-soft-primary text-primary me-1">${escapeHtml(name)}</span>`).join('')
+                ? participantNames.map((name) => `<span class="badge bg-soft-primary text-primary me-1">${name}</span>`).join('')
                 : '<span class="text-muted">-</span>';
             const expenseBadge = ticket.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const detailsId = `ticket-details-${ticket.id}`;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td data-label="Type">${escapeHtml(ticket.type) || '-'}${expenseBadge}</td>
+                <td data-label="Type">${ticket.type || '-'}${expenseBadge}</td>
                 <td data-label="When">${formatDateTime(ticket.eventAt)}</td>
-                <td data-label="Location">${escapeHtml(ticket.location) || '-'}</td>
+                <td data-label="Location">${ticket.location || '-'}</td>
                 <td data-label="Status">${formatStatusBadge(ticket.status)}</td>
                 <td data-label="Amount">${formatCurrency(ticket.amount, ticket.currency)}</td>
                 <td data-label="Participants">${participantBadges}</td>
@@ -1867,7 +1926,7 @@
                             </div>
                             <div class="col-12">
                                 <div class="text-muted small">Notes</div>
-                                <div>${escapeHtml(ticket.notes)}</div>
+                                <div>${ticket.notes}</div>
                             </div>
                         </div>
                     </td>
@@ -2118,14 +2177,14 @@
                     </select>
                 `;
             const removeBtn = !isOwner && state.canManage
-                ? `<button class="btn btn-sm btn-outline-danger ms-1" data-action="remove-member" data-id="${member.userId}" data-name="${escapeHtml(displayName)}">
+                ? `<button class="btn btn-sm btn-outline-danger ms-1" data-action="remove-member" data-id="${member.userId}" data-name="${displayName}">
                         <i class="bx bx-trash-alt"></i>
                     </button>`
                 : '';
             tr.innerHTML = `
                 <td>
-                    <div class="fw-semibold">${escapeHtml(displayName)}</div>
-                    <div class="text-muted small">${escapeHtml(member.email) || ''}</div>
+                    <div class="fw-semibold">${displayName}</div>
+                    <div class="text-muted small">${member.email || ''}</div>
                 </td>
                 <td>${roleCell}</td>
                 <td class="text-end">
