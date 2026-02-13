@@ -4291,26 +4291,38 @@ const mapReminderRow = (row) => ({
 
 const trimString = (value) => (typeof value === 'string' ? value.trim() : '');
 
+const sanitizeString = (value) => {
+    // Trim whitespace
+    let sanitized = trimString(value);
+    if (!sanitized) return sanitized;
+
+    // Remove control characters (0x00-0x1F) except tab (0x09)
+    // and remove other non-printing characters (0x7F and above, except common safe ones)
+    sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+
+    return sanitized;
+};
+
 const requireString = (value, field) => {
-    const trimmed = trimString(value);
-    if (!trimmed) {
+    const sanitized = sanitizeString(value);
+    if (!sanitized) {
         return { error: `${field} is required.` };
     }
-    return { value: trimmed };
+    return { value: sanitized };
 };
 
 const optionalString = (value) => {
-    const trimmed = trimString(value);
-    return trimmed ? trimmed : null;
+    const sanitized = sanitizeString(value);
+    return sanitized ? sanitized : null;
 };
 
 const optionalStringWithMaxLength = (value, maxLength) => {
-    const trimmed = trimString(value);
-    if (!trimmed) return null;
-    if (trimmed.length > maxLength) {
+    const sanitized = sanitizeString(value);
+    if (!sanitized) return null;
+    if (sanitized.length > maxLength) {
         return null;
     }
-    return trimmed;
+    return sanitized;
 };
 
 const normalizeGroupRole = (value) => {
@@ -4334,7 +4346,7 @@ const resolveCountryCode = (value) => {
 };
 
 const validateGroupPayload = (payload) => {
-    const name = typeof payload?.name === 'string' ? payload.name.trim() : '';
+    const name = sanitizeString(payload?.name);
     if (!name) {
         return { error: 'Group name is required.' };
     }
@@ -4354,7 +4366,7 @@ const validateGroupPayload = (payload) => {
 };
 
 const validateFamilyPayload = (payload) => {
-    const name = typeof payload?.name === 'string' ? payload.name.trim() : '';
+    const name = sanitizeString(payload?.name);
     if (!name) {
         return { error: 'Family name is required.' };
     }
@@ -4365,7 +4377,7 @@ const validateFamilyPayload = (payload) => {
 };
 
 const validateParticipantPayload = (payload) => {
-    const displayName = typeof payload?.displayName === 'string' ? payload.displayName.trim() : '';
+    const displayName = sanitizeString(payload?.displayName);
     if (!displayName) {
         return { error: 'Participant name is required.' };
     }
@@ -4485,7 +4497,7 @@ const parseIdArray = (items) => {
 };
 
 const validateExpenseSplitPayload = (payload) => {
-    const description = typeof payload?.description === 'string' ? payload.description.trim() : '';
+    const description = sanitizeString(payload?.description);
     if (!description) {
         return { error: 'Description is required.' };
     }
