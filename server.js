@@ -4347,6 +4347,9 @@ const validateGroupPayload = (payload) => {
     if (!/^[A-Z]{3}$/.test(currencyRaw)) {
         return { error: 'Default currency must be a 3-letter code.' };
     }
+    if (!ISO_4217_CURRENCIES.includes(currencyRaw)) {
+        return { error: 'Default currency is not a valid ISO 4217 code.' };
+    }
     return { value: { name, defaultCurrency: currencyRaw } };
 };
 
@@ -4395,10 +4398,43 @@ const normalizeSplitMode = (value) => {
     return trimmed || 'equal';
 };
 
+// ISO 4217 currency codes (alphabetically ordered)
+const ISO_4217_CURRENCIES = [
+    'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN',
+    'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD',
+    'CAD', 'CDF', 'CHE', 'CHF', 'CHW', 'CLF', 'CLP', 'CNY', 'COP', 'COU', 'CRC', 'CUC', 'CUP', 'CVE', 'CZK',
+    'DJF', 'DKK', 'DOP', 'DZD',
+    'EGP', 'ERN', 'ETB', 'EUR',
+    'FJD', 'FKP',
+    'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD',
+    'HKD', 'HNL', 'HRK', 'HTG', 'HUF',
+    'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK',
+    'JMD', 'JOD', 'JPY',
+    'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT',
+    'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD',
+    'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MYR', 'MZN',
+    'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD',
+    'OMR',
+    'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG',
+    'QAR',
+    'RON', 'RSD', 'RUB', 'RWF',
+    'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SLL', 'SOS', 'SPL', 'SRD', 'STN', 'SYP', 'SZL',
+    'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS',
+    'UAH', 'UGX', 'USD', 'USN', 'UYI', 'UYU', 'UYW', 'UZS',
+    'VED', 'VES', 'VND', 'VUV',
+    'WST',
+    'XAF', 'XAG', 'XAU', 'XBA', 'XBB', 'XBC', 'XBD', 'XCD', 'XDR', 'XOF', 'XPD', 'XPF', 'XPT', 'XSU', 'XTS', 'XUA', 'XXX',
+    'YER',
+    'ZAR', 'ZMW', 'ZWL'
+];
+
 const requireCurrencyCode = (value) => {
     const trimmed = typeof value === 'string' ? value.trim().toUpperCase() : '';
     if (!/^[A-Z]{3}$/.test(trimmed)) {
         return { error: 'Currency is invalid.' };
+    }
+    if (!ISO_4217_CURRENCIES.includes(trimmed)) {
+        return { error: 'Currency is not a valid ISO 4217 code.' };
     }
     return { value: trimmed };
 };
@@ -4554,11 +4590,11 @@ const requireTime = (value, field) => {
 };
 
 const requireCurrency = (value) => {
-    const valid = ['USD', 'CAD', 'BRL'];
-    if (!valid.includes(value)) {
-        return { error: 'Currency is invalid.' };
+    const trimmed = typeof value === 'string' ? value.trim().toUpperCase() : '';
+    if (!ISO_4217_CURRENCIES.includes(trimmed)) {
+        return { error: 'Currency is not a valid ISO 4217 code.' };
     }
-    return { value };
+    return { value: trimmed };
 };
 
 const requireStatus = (value) => {
