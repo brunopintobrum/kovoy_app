@@ -1966,6 +1966,11 @@ const listExpenses = db.prepare(`
     WHERE group_id = ?
     ORDER BY date DESC, id DESC
 `);
+const countExpenses = db.prepare('SELECT COUNT(*) AS total FROM expenses WHERE group_id = ?');
+const listExpensesPaginated = db.prepare(`
+    SELECT id, description, amount, currency, date, category, payer_participant_id, created_at
+    FROM expenses WHERE group_id = ? ORDER BY date DESC, id DESC LIMIT ? OFFSET ?
+`);
 const getExpense = db.prepare('SELECT id FROM expenses WHERE id = ? AND group_id = ?');
 const insertExpense = db.prepare(`
     INSERT INTO expenses (group_id, description, amount, currency, date, category, payer_participant_id, created_at)
@@ -1996,6 +2001,12 @@ const listGroupFlights = db.prepare(`
     FROM group_flights
     WHERE group_id = ?
     ORDER BY depart_at DESC, id DESC
+`);
+const countGroupFlights = db.prepare('SELECT COUNT(*) AS total FROM group_flights WHERE group_id = ?');
+const listGroupFlightsPaginated = db.prepare(`
+    SELECT id, expense_id, airline, airline_id, flight_number, pnr, cabin_class, status,
+           cost, currency, from_city, to_city, from_airport_id, to_airport_id, depart_at, arrive_at, notes
+    FROM group_flights WHERE group_id = ? ORDER BY depart_at DESC, id DESC LIMIT ? OFFSET ?
 `);
 const getGroupFlight = db.prepare('SELECT id, expense_id FROM group_flights WHERE id = ? AND group_id = ?');
 const insertGroupFlight = db.prepare(`
@@ -2129,6 +2140,13 @@ const listGroupLodgings = db.prepare(`
     WHERE group_id = ?
     ORDER BY check_in DESC, id DESC
 `);
+const countGroupLodgings = db.prepare('SELECT COUNT(*) AS total FROM group_lodgings WHERE group_id = ?');
+const listGroupLodgingsPaginated = db.prepare(`
+    SELECT id, expense_id, name, platform, platform_id, address, address_line2, city, state, postal_code, country,
+           check_in, check_in_time, check_out, check_out_time, room_type, room_quantity, room_occupancy,
+           status, cost, currency, host, contact, contact_phone, contact_email, notes
+    FROM group_lodgings WHERE group_id = ? ORDER BY check_in DESC, id DESC LIMIT ? OFFSET ?
+`);
 const listGroupLodgingProperties = db.prepare(`
     SELECT name, COUNT(*) as usage_count
     FROM group_lodgings
@@ -2178,6 +2196,11 @@ const listGroupTransports = db.prepare(`
     WHERE group_id = ?
     ORDER BY depart_at DESC, id DESC
 `);
+const countGroupTransports = db.prepare('SELECT COUNT(*) AS total FROM group_transports WHERE group_id = ?');
+const listGroupTransportsPaginated = db.prepare(`
+    SELECT id, expense_id, type, origin, destination, depart_at, arrive_at, provider, locator, status, amount, currency, notes
+    FROM group_transports WHERE group_id = ? ORDER BY depart_at DESC, id DESC LIMIT ? OFFSET ?
+`);
 const getGroupTransport = db.prepare('SELECT id, expense_id FROM group_transports WHERE id = ? AND group_id = ?');
 const insertGroupTransport = db.prepare(`
     INSERT INTO group_transports (
@@ -2198,6 +2221,11 @@ const listGroupTickets = db.prepare(`
     FROM group_tickets
     WHERE group_id = ?
     ORDER BY COALESCE(event_at, date) DESC, id DESC
+`);
+const countGroupTickets = db.prepare('SELECT COUNT(*) AS total FROM group_tickets WHERE group_id = ?');
+const listGroupTicketsPaginated = db.prepare(`
+    SELECT id, expense_id, type, event_at, location, status, name, date, amount, currency, holder, notes
+    FROM group_tickets WHERE group_id = ? ORDER BY COALESCE(event_at, date) DESC, id DESC LIMIT ? OFFSET ?
 `);
 const getGroupTicket = db.prepare('SELECT id, expense_id FROM group_tickets WHERE id = ? AND group_id = ?');
 const insertGroupTicket = db.prepare(`
@@ -2911,7 +2939,10 @@ const buildDebtPlan = (participantBalances) => {
 };
 
 app.get('/api/groups/:groupId/expenses', authRequiredApi, requireGroupMember, (req, res) => {
-    const expenses = listExpenses.all(req.groupId).map((row) => {
+    const { page, limit, offset } = parsePagination(req.query);
+    const total = countExpenses.get(req.groupId).total;
+    const pages = Math.ceil(total / limit) || 1;
+    const expenses = listExpensesPaginated.all(req.groupId, limit, offset).map((row) => {
         const splits = listExpenseSplits.all(row.id).map((split) => ({
             targetType: split.target_type,
             targetId: split.target_id,
@@ -2928,7 +2959,7 @@ app.get('/api/groups/:groupId/expenses', authRequiredApi, requireGroupMember, (r
             splits
         };
     });
-    return res.json({ ok: true, data: expenses });
+    return res.json({ ok: true, data: expenses, total, page, limit, pages });
 });
 
 app.post(
@@ -3119,11 +3150,17 @@ app.get('/api/routes/airlines', authRequiredApi, (req, res) => {
 });
 
 app.get('/api/groups/:groupId/flights', authRequiredApi, requireGroupMember, (req, res) => {
-    const participants = listGroupFlightParticipants.all(req.groupId);
+    const { page, limit, offset } = parsePagination(req.query);
+    const total = countGroupFlights.get(req.groupId).total;
+    const pages = Math.ceil(total / limit) || 1;
+    const flightRows = listGroupFlightsPaginated.all(req.groupId, limit, offset);
+    const flightIdSet = new Set(flightRows.map(r => r.id));
+    const allParticipants = listGroupFlightParticipants.all(req.groupId)
+        .filter(p => flightIdSet.has(p.flight_id));
     const participantMap = new Map();
     const seatMap = new Map();
     const baggageMap = new Map();
-    participants.forEach((row) => {
+    allParticipants.forEach((row) => {
         const list = participantMap.get(row.flight_id) || [];
         list.push(row.participant_id);
         participantMap.set(row.flight_id, list);
@@ -3138,10 +3175,10 @@ app.get('/api/groups/:groupId/flights', authRequiredApi, requireGroupMember, (re
         }
         baggageMap.set(row.flight_id, baggage);
     });
-    const flights = listGroupFlights.all(req.groupId).map((row) =>
+    const flights = flightRows.map((row) =>
         mapGroupFlightRow(row, participantMap, seatMap, baggageMap)
     );
-    return res.json({ ok: true, data: flights });
+    return res.json({ ok: true, data: flights, total, page, limit, pages });
 });
 
 app.post(
@@ -3368,8 +3405,11 @@ app.delete(
 );
 
 app.get('/api/groups/:groupId/lodgings', authRequiredApi, requireGroupMember, (req, res) => {
-    const lodgings = listGroupLodgings.all(req.groupId).map(mapGroupLodgingRow);
-    return res.json({ ok: true, data: lodgings });
+    const { page, limit, offset } = parsePagination(req.query);
+    const total = countGroupLodgings.get(req.groupId).total;
+    const pages = Math.ceil(total / limit) || 1;
+    const lodgings = listGroupLodgingsPaginated.all(req.groupId, limit, offset).map(mapGroupLodgingRow);
+    return res.json({ ok: true, data: lodgings, total, page, limit, pages });
 });
 
 app.get('/api/groups/:groupId/lodging-properties', authRequiredApi, requireGroupMember, (req, res) => {
@@ -3609,8 +3649,11 @@ app.delete(
 );
 
 app.get('/api/groups/:groupId/transports', authRequiredApi, requireGroupMember, (req, res) => {
-    const transports = listGroupTransports.all(req.groupId).map(mapGroupTransportRow);
-    return res.json({ ok: true, data: transports });
+    const { page, limit, offset } = parsePagination(req.query);
+    const total = countGroupTransports.get(req.groupId).total;
+    const pages = Math.ceil(total / limit) || 1;
+    const transports = listGroupTransportsPaginated.all(req.groupId, limit, offset).map(mapGroupTransportRow);
+    return res.json({ ok: true, data: transports, total, page, limit, pages });
 });
 
 app.post(
@@ -3769,15 +3812,21 @@ app.delete(
 );
 
 app.get('/api/groups/:groupId/tickets', authRequiredApi, requireGroupMember, (req, res) => {
-    const participants = listGroupTicketParticipants.all(req.groupId);
+    const { page, limit, offset } = parsePagination(req.query);
+    const total = countGroupTickets.get(req.groupId).total;
+    const pages = Math.ceil(total / limit) || 1;
+    const ticketRows = listGroupTicketsPaginated.all(req.groupId, limit, offset);
+    const ticketIdSet = new Set(ticketRows.map(r => r.id));
+    const allParticipants = listGroupTicketParticipants.all(req.groupId)
+        .filter(p => ticketIdSet.has(p.ticket_id));
     const participantMap = new Map();
-    participants.forEach((row) => {
+    allParticipants.forEach((row) => {
         const list = participantMap.get(row.ticket_id) || [];
         list.push(row.participant_id);
         participantMap.set(row.ticket_id, list);
     });
-    const tickets = listGroupTickets.all(req.groupId).map((row) => mapGroupTicketRow(row, participantMap));
-    return res.json({ ok: true, data: tickets });
+    const tickets = ticketRows.map((row) => mapGroupTicketRow(row, participantMap));
+    return res.json({ ok: true, data: tickets, total, page, limit, pages });
 });
 
 app.post(
@@ -4494,6 +4543,17 @@ const parseIdArray = (items) => {
         }
     });
     return output;
+};
+
+const parsePagination = (query, defaultLimit = 20) => {
+    const pageRaw = typeof query.page === 'string' ? query.page.trim() : '';
+    const limitRaw = typeof query.limit === 'string' ? query.limit.trim() : '';
+    let page = Number.parseInt(pageRaw, 10);
+    if (!Number.isFinite(page) || page < 1) page = 1;
+    let limit = Number.parseInt(limitRaw, 10);
+    if (!Number.isFinite(limit) || limit < 1) limit = defaultLimit;
+    limit = Math.min(limit, 100);
+    return { page, limit, offset: (page - 1) * limit };
 };
 
 const validateExpenseSplitPayload = (payload) => {
