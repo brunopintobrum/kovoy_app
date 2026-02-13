@@ -147,7 +147,7 @@ describe('invitation flow', () => {
         const groupId = await createGroup(baseUrl, ownerJar);
         const token = await createInvite(baseUrl, ownerJar, groupId, inviteeEmail);
 
-        db.prepare('UPDATE invitations SET expires_at = ? WHERE token_hash = ?').run(Date.now() - 1000, hashValue(token));
+        db.prepare('UPDATE invitations SET expires_at = ? WHERE token = ?').run(Date.now() - 1000, token);
 
         await registerUser(baseUrl, inviteeEmail, password);
         const inviteeJar = await loginUser(baseUrl, inviteeEmail, password);
