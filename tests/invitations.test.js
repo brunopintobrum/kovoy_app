@@ -12,7 +12,10 @@ process.env.TWO_FACTOR_REQUIRED = 'false';
 process.env.SMTP_HOST = '';
 process.env.DB_PATH = path.join(os.tmpdir(), `orlando-test-invitations-${Date.now()}.db`);
 
+const crypto = require('crypto');
 const { startServer, db } = require('../server');
+
+const hashValue = (value) => crypto.createHash('sha256').update(value).digest('hex');
 
 const getSetCookies = (res) => {
     if (typeof res.headers.getSetCookie === 'function') {
@@ -144,7 +147,7 @@ describe('invitation flow', () => {
         const groupId = await createGroup(baseUrl, ownerJar);
         const token = await createInvite(baseUrl, ownerJar, groupId, inviteeEmail);
 
-        db.prepare('UPDATE invitations SET expires_at = ? WHERE token = ?').run(Date.now() - 1000, token);
+        db.prepare('UPDATE invitations SET expires_at = ? WHERE token_hash = ?').run(Date.now() - 1000, hashValue(token));
 
         await registerUser(baseUrl, inviteeEmail, password);
         const inviteeJar = await loginUser(baseUrl, inviteeEmail, password);
@@ -163,7 +166,7 @@ describe('invitation flow', () => {
         const body = await res.json();
         expect(body.error).toBe('Invitation has expired.');
 
-        const record = db.prepare('SELECT status FROM invitations WHERE token = ?').get(token);
+        const record = db.prepare('SELECT status FROM invitations WHERE token_hash = ?').get(hashValue(token));
         expect(record.status).toBe('expired');
     });
 

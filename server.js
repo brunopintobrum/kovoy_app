@@ -727,7 +727,6 @@ db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_hash ON refresh_tokens(to
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_group_members_unique ON group_members(group_id, user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_members_group ON group_members(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_members_user ON group_members(user_id)');
-db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_token ON invitations(token)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_invitations_group ON invitations(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_families_group ON families(group_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_participants_group ON participants(group_id)');
@@ -835,6 +834,17 @@ try {
     console.warn('Participant merge migration skipped:', err.message);
 }
 
+// Migration: hash invitation tokens
+const hasTokenHash = db.prepare("SELECT COUNT(*) as cnt FROM pragma_table_info('invitations') WHERE name = 'token_hash'").get();
+if (!hasTokenHash.cnt) {
+    db.exec('ALTER TABLE invitations ADD COLUMN token_hash TEXT');
+    const rows = db.prepare('SELECT id, token FROM invitations WHERE token IS NOT NULL').all();
+    const update = db.prepare('UPDATE invitations SET token_hash = ? WHERE id = ?');
+    rows.forEach((row) => update.run(hashValue(row.token), row.id));
+    db.exec('DROP INDEX IF EXISTS idx_invitations_token');
+    db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_token_hash ON invitations(token_hash)');
+}
+
 const countUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
 if (countUsers.count === 0) {
     const seedEmail = process.env.SEED_EMAIL;
@@ -914,6 +924,13 @@ const authLimiter = rateLimit({
 const sensitiveLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10,
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+const dataLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     standardHeaders: true,
     legacyHeaders: false
 });
@@ -1720,7 +1737,7 @@ app.post('/api/login', sensitiveLimiter, originGuard, async (req, res) => {
     return res.json({ ok: true });
 });
 
-app.post('/api/logout', originGuard, (req, res) => {
+app.post('/api/logout', originGuard, requireCsrfToken, (req, res) => {
     res.clearCookie(COOKIE_NAME);
     if (req.cookies[REFRESH_COOKIE]) {
         revokeRefreshToken(req.cookies[REFRESH_COOKIE]);
@@ -1730,25 +1747,18 @@ app.post('/api/logout', originGuard, (req, res) => {
     return res.json({ ok: true });
 });
 
-app.get('/api/me', (req, res) => {
-    const token = req.cookies[COOKIE_NAME];
-    if (!token) return res.status(401).json({ error: 'Não autenticado.' });
-    try {
-        const payload = jwt.verify(token, JWT_SECRET);
-        const user = db.prepare(
-            'SELECT email, first_name, last_name, display_name, avatar_url FROM users WHERE id = ?'
-        ).get(payload.sub);
-        if (!user) return res.status(401).json({ error: 'NÃ£o autenticado.' });
-        return res.json({
-            email: user.email,
-            firstName: user.first_name,
-            lastName: user.last_name,
-            displayName: user.display_name,
-            avatarUrl: user.avatar_url
-        });
-    } catch (err) {
-        return res.status(401).json({ error: 'Não autenticado.' });
-    }
+app.get('/api/me', authRequiredApi, (req, res) => {
+    const user = db.prepare(
+        'SELECT email, first_name, last_name, display_name, avatar_url FROM users WHERE id = ?'
+    ).get(req.user.sub);
+    if (!user) return res.status(401).json({ error: 'Not authenticated.' });
+    return res.json({
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        displayName: user.display_name,
+        avatarUrl: user.avatar_url
+    });
 });
 
 app.post('/api/me/avatar', authRequiredApi, requireCsrfToken, (req, res) => {
@@ -2215,10 +2225,10 @@ const updateGroupTicket = db.prepare(`
 const deleteGroupTicket = db.prepare('DELETE FROM group_tickets WHERE id = ? AND group_id = ?');
 const insertInvitation = db.prepare(`
     INSERT INTO invitations
-    (group_id, email, role, token, expires_at, status, invited_by_user_id, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    (group_id, email, role, token, token_hash, expires_at, status, invited_by_user_id, created_at)
+    VALUES (?, ?, ?, '', ?, ?, ?, ?, ?)
 `);
-const getInvitationByToken = db.prepare('SELECT * FROM invitations WHERE token = ?');
+const getInvitationByToken = db.prepare('SELECT * FROM invitations WHERE token_hash = ?');
 const updateInvitationStatus = db.prepare('UPDATE invitations SET status = ?, accepted_by_user_id = ? WHERE id = ?');
 const markInvitationExpired = db.prepare('UPDATE invitations SET status = ? WHERE id = ?');
 const getUserEmail = db.prepare('SELECT email FROM users WHERE id = ?');
@@ -2414,6 +2424,7 @@ app.get('/api/groups/:groupId/families', authRequiredApi, requireGroupMember, (r
 
 app.post(
     '/api/groups/:groupId/families',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -2431,6 +2442,7 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/families/:familyId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -2454,6 +2466,7 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/families/:familyId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -2522,6 +2535,7 @@ app.get('/api/groups/:groupId/participants', authRequiredApi, requireGroupMember
 
 app.post(
     '/api/groups/:groupId/participants',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -2552,6 +2566,7 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/participants/:participantId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -2587,6 +2602,7 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/participants/:participantId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -2925,6 +2941,7 @@ app.get('/api/groups/:groupId/expenses', authRequiredApi, requireGroupMember, (r
 
 app.post(
     '/api/groups/:groupId/expenses',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -2965,6 +2982,7 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/expenses/:expenseId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3011,6 +3029,7 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/expenses/:expenseId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3135,6 +3154,7 @@ app.get('/api/groups/:groupId/flights', authRequiredApi, requireGroupMember, (re
 
 app.post(
     '/api/groups/:groupId/flights',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3224,6 +3244,7 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/flights/:flightId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3324,6 +3345,7 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/flights/:flightId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3407,6 +3429,7 @@ app.get('/api/groups/:groupId/lodging-locations', authRequiredApi, requireGroupM
 
 app.post(
     '/api/groups/:groupId/lodgings',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3478,6 +3501,7 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/lodgings/:lodgingId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3563,6 +3587,7 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/lodgings/:lodgingId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3598,6 +3623,7 @@ app.get('/api/groups/:groupId/transports', authRequiredApi, requireGroupMember, 
 
 app.post(
     '/api/groups/:groupId/transports',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3652,6 +3678,7 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/transports/:transportId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3720,6 +3747,7 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/transports/:transportId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3762,6 +3790,7 @@ app.get('/api/groups/:groupId/tickets', authRequiredApi, requireGroupMember, (re
 
 app.post(
     '/api/groups/:groupId/tickets',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3829,6 +3858,7 @@ app.post(
 
 app.put(
     '/api/groups/:groupId/tickets/:ticketId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3911,6 +3941,7 @@ app.put(
 
 app.delete(
     '/api/groups/:groupId/tickets/:ticketId',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -3998,6 +4029,7 @@ app.get('/api/groups/:groupId/summary', authRequiredApi, requireGroupMember, (re
 
 app.post(
     '/api/groups/:groupId/invitations',
+    dataLimiter,
     authRequiredApi,
     requireCsrfToken,
     requireGroupMember,
@@ -4012,13 +4044,14 @@ app.post(
             return res.status(400).json({ error: 'Invalid role for invitation.' });
         }
         const token = crypto.randomBytes(24).toString('hex');
+        const tokenHash = hashValue(token);
         const expiresAt = Date.now() + INVITE_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000;
         const now = new Date().toISOString();
         insertInvitation.run(
             req.groupId,
             emailRaw.toLowerCase(),
             role,
-            token,
+            tokenHash,
             expiresAt,
             'pending',
             req.user.sub,
@@ -4049,12 +4082,12 @@ app.post(
     }
 );
 
-app.post('/api/invitations/accept', authRequiredApi, requireCsrfToken, (req, res) => {
+app.post('/api/invitations/accept', dataLimiter, authRequiredApi, requireCsrfToken, (req, res) => {
     const token = typeof req.body?.token === 'string' ? req.body.token.trim() : '';
     if (!token) {
         return res.status(400).json({ error: 'Invitation token is required.' });
     }
-    const invitation = getInvitationByToken.get(token);
+    const invitation = getInvitationByToken.get(hashValue(token));
     if (!invitation) {
         return res.status(404).json({ error: 'Invitation not found.' });
     }
@@ -4080,12 +4113,12 @@ app.post('/api/invitations/accept', authRequiredApi, requireCsrfToken, (req, res
     return res.json({ ok: true, groupId: invitation.group_id });
 });
 
-app.get('/api/invitations/:token/info', (req, res) => {
+app.get('/api/invitations/:token/info', sensitiveLimiter, (req, res) => {
     const token = typeof req.params?.token === 'string' ? req.params.token.trim() : '';
     if (!token) {
         return res.status(400).json({ error: 'Invitation token is required.' });
     }
-    const invitation = getInvitationByToken.get(token);
+    const invitation = getInvitationByToken.get(hashValue(token));
     if (!invitation) {
         return res.status(404).json({ error: 'Invitation not found.' });
     }
