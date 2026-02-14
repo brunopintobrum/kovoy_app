@@ -441,6 +441,30 @@
                                         You have read-only access in this group.
                                     </div>
                                     <div class="alert alert-danger d-none" id="participantError"></div>
+                                    <div class="row g-2 mt-3 align-items-end" id="participantFilters">
+                                        <div class="col-md-4">
+                                            <label class="form-label form-label-sm mb-1" for="filterParticipantSearch">Name</label>
+                                            <input type="text" class="form-control form-control-sm" id="filterParticipantSearch" placeholder="Search by name...">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label form-label-sm mb-1" for="filterParticipantType">Type</label>
+                                            <select class="form-select form-select-sm" id="filterParticipantType">
+                                                <option value="">All</option>
+                                                <option value="adult">Adult</option>
+                                                <option value="child">Child</option>
+                                                <option value="infant">Infant</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label form-label-sm mb-1" for="filterParticipantFamily">Family</label>
+                                            <select class="form-select form-select-sm" id="filterParticipantFamily">
+                                                <option value="">All</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" id="clearParticipantFilters">Clear filters</button>
+                                        </div>
+                                    </div>
                                     <div class="table-responsive">
                                         <table class="table table-sm align-middle mb-0 table-mobile-cards">
                                             <thead class="table-light">
@@ -645,6 +669,21 @@
                                   <button class="btn btn-primary" type="button" id="openExpenseModal" data-bs-toggle="modal" data-bs-target="#expenseModal">
                                       Add expense
                                   </button>
+                              </div>
+                              <div class="row g-2 mt-3 align-items-end" id="expenseFilters">
+                                  <div class="col-md-5">
+                                      <label class="form-label form-label-sm mb-1" for="filterExpenseSearch">Description</label>
+                                      <input type="text" class="form-control form-control-sm" id="filterExpenseSearch" placeholder="Search by description...">
+                                  </div>
+                                  <div class="col-md-4">
+                                      <label class="form-label form-label-sm mb-1" for="filterExpensePayer">Paid by</label>
+                                      <select class="form-select form-select-sm" id="filterExpensePayer">
+                                          <option value="">All</option>
+                                      </select>
+                                  </div>
+                                  <div class="col-md-3">
+                                      <button type="button" class="btn btn-sm btn-outline-secondary" id="clearExpenseFilters">Clear filters</button>
+                                  </div>
                               </div>
                               <div class="table-responsive mt-3">
                                 <table class="table align-middle table-nowrap mb-0 table-mobile-cards">

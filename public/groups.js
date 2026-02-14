@@ -18,6 +18,19 @@
         toast.show();
     };
 
+    const setButtonLoading = (btn, text = 'Saving...') => {
+        if (!btn) return;
+        btn._originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>${text}`;
+    };
+
+    const resetButtonLoading = (btn) => {
+        if (!btn) return;
+        btn.innerHTML = btn._originalHTML || btn.innerHTML;
+        btn.disabled = false;
+    };
+
     const getGroupInitials = (name) => {
         if (!name) return '?';
         const words = name.trim().split(/\s+/);
@@ -410,6 +423,8 @@
             if (!validateForm(form)) return;
             const name = document.getElementById('groupName')?.value || '';
             const defaultCurrency = document.getElementById('groupCurrency')?.value || '';
+            const submitBtn = form.querySelector('button[type="submit"]');
+            setButtonLoading(submitBtn, 'Creating...');
             try {
                 const res = await apiRequest('/api/groups', {
                     method: 'POST',
@@ -425,6 +440,8 @@
                 showToast('success', 'Group created successfully!');
             } catch (err) {
                 showToast('error', err.message || 'Failed to create group');
+            } finally {
+                resetButtonLoading(submitBtn);
             }
         });
     };
@@ -440,6 +457,8 @@
             if (successEl) successEl.classList.add('d-none');
             if (!validateForm(form)) return;
             const token = document.getElementById('inviteToken')?.value || '';
+            const submitBtn = form.querySelector('button[type="submit"]');
+            setButtonLoading(submitBtn, 'Accepting...');
             try {
                 const res = await apiRequest('/api/invitations/accept', {
                     method: 'POST',
@@ -451,6 +470,8 @@
                 }, 1500);
             } catch (err) {
                 showToast('error', err.message || 'Failed to accept invite');
+            } finally {
+                resetButtonLoading(submitBtn);
             }
         });
     };

@@ -36,4 +36,19 @@
             }
         });
     }
+
+    // Offline detection banner
+    const offlineBanner = document.createElement('div');
+    offlineBanner.id = 'offlineBanner';
+    offlineBanner.className = 'alert alert-warning d-none d-flex align-items-center mb-0';
+    offlineBanner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:12000;border-radius:0;';
+    offlineBanner.innerHTML = '<i class="mdi mdi-wifi-off me-2"></i>Sem conexão com a internet. Algumas funcionalidades podem não funcionar.';
+    document.body.prepend(offlineBanner);
+
+    const setOfflineVisible = (offline) => {
+        offlineBanner.classList.toggle('d-none', !offline);
+    };
+    window.addEventListener('online', () => setOfflineVisible(false));
+    window.addEventListener('offline', () => setOfflineVisible(true));
+    if (!navigator.onLine) setOfflineVisible(true);
 })();
