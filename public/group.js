@@ -34,6 +34,8 @@
             expenseConfig: null
         },
         filters: {
+            participants: { search: '', type: '', family: '' },
+            expenses: { search: '', payer: '' },
             flights: { airline: '', from: '', to: '', status: '' },
             lodgings: { city: '', status: '' },
             transports: { status: '', provider: '' },
@@ -128,6 +130,60 @@
         }
         const text = await res.text();
         return text ? JSON.parse(text) : {};
+    };
+
+    const showSkeletonLoading = () => {
+        const skeletonRow = (colspan) => `
+            <tr><td colspan="${colspan}">
+                <div class="placeholder-glow">
+                    <span class="placeholder col-6"></span>
+                    <span class="placeholder col-4"></span>
+                </div>
+            </td></tr>
+            <tr><td colspan="${colspan}">
+                <div class="placeholder-glow">
+                    <span class="placeholder col-7"></span>
+                    <span class="placeholder col-3"></span>
+                </div>
+            </td></tr>
+            <tr><td colspan="${colspan}">
+                <div class="placeholder-glow">
+                    <span class="placeholder col-5"></span>
+                    <span class="placeholder col-5"></span>
+                </div>
+            </td></tr>`;
+        const tbodyTargets = [
+            { id: 'participantList', colspan: 4 },
+            { id: 'expenseList', colspan: 6 },
+            { id: 'flightList', colspan: 8 },
+            { id: 'lodgingList', colspan: 8 },
+            { id: 'transportList', colspan: 8 },
+            { id: 'ticketList', colspan: 7 }
+        ];
+        tbodyTargets.forEach(({ id, colspan }) => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = skeletonRow(colspan);
+        });
+        const familyList = document.getElementById('familyList');
+        if (familyList) {
+            familyList.innerHTML = `
+                <li class="list-group-item"><div class="placeholder-glow"><span class="placeholder col-6"></span></div></li>
+                <li class="list-group-item"><div class="placeholder-glow"><span class="placeholder col-7"></span></div></li>
+                <li class="list-group-item"><div class="placeholder-glow"><span class="placeholder col-5"></span></div></li>`;
+        }
+    };
+
+    const setButtonLoading = (btn, text = 'Saving...') => {
+        if (!btn) return;
+        btn._originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>${text}`;
+    };
+
+    const resetButtonLoading = (btn) => {
+        if (!btn) return;
+        btn.innerHTML = btn._originalHTML || btn.innerHTML;
+        btn.disabled = false;
     };
 
     const formatCurrency = (amount, currency) => {
@@ -1367,7 +1423,18 @@
             return;
         }
         const familyMap = new Map(state.families.map((family) => [family.id, family.name]));
-        const sortedParticipants = applySorting(state.participants, 'participants');
+        const filters = state.filters.participants;
+        const filtered = state.participants.filter((p) => {
+            if (filters.search && !p.displayName?.toLowerCase().includes(filters.search.toLowerCase())) return false;
+            if (filters.type && p.type !== filters.type) return false;
+            if (filters.family && String(p.familyId) !== filters.family) return false;
+            return true;
+        });
+        if (!filtered.length) {
+            list.innerHTML = `<tr><td colspan="4" class="text-muted text-center">No participants match the filters.</td></tr>`;
+            return;
+        }
+        const sortedParticipants = applySorting(filtered, 'participants');
         sortedParticipants.forEach((participant) => {
             const tr = document.createElement('tr');
 
@@ -1431,7 +1498,17 @@
             return;
         }
         const participantMap = new Map(state.participants.map((p) => [p.id, p.displayName]));
-        const sortedExpenses = applySorting(state.expenses, 'expenses');
+        const filters = state.filters.expenses;
+        const filtered = state.expenses.filter((e) => {
+            if (filters.search && !e.description?.toLowerCase().includes(filters.search.toLowerCase())) return false;
+            if (filters.payer && String(e.payerParticipantId) !== filters.payer) return false;
+            return true;
+        });
+        if (!filtered.length) {
+            list.innerHTML = `<tr><td colspan="6" class="text-muted text-center">No expenses match the filters.</td></tr>`;
+            return;
+        }
+        const sortedExpenses = applySorting(filtered, 'expenses');
         sortedExpenses.forEach((expense) => {
             const rawSplitType = expense.splits && expense.splits.length ? expense.splits[0].targetType : '-';
             const splitType = rawSplitType === 'participant' ? 'participants'
@@ -3165,7 +3242,7 @@
                 if (!validateForm(familyForm)) return;
                 const name = document.getElementById('familyName')?.value || '';
                 const submitBtn = familyForm.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
+                setButtonLoading(submitBtn, 'Saving...');
                 try {
                     if (state.editing.familyId) {
                         await apiRequest(`/api/groups/${state.groupId}/families/${state.editing.familyId}`, {
@@ -3187,7 +3264,7 @@
                         familyError.classList.remove('d-none');
                     }
                 } finally {
-                    if (submitBtn) submitBtn.disabled = false;
+                    resetButtonLoading(submitBtn);
                 }
             });
         }
@@ -3265,7 +3342,7 @@
                     payload.expense = expensePayload;
                 }
                 const submitBtn = flightForm.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
+                setButtonLoading(submitBtn, 'Saving...');
                 try {
                     const flightId = state.editing.flightId;
                     const endpoint = flightId
@@ -3289,7 +3366,7 @@
                         flightError.classList.remove('d-none');
                     }
                 } finally {
-                    if (submitBtn) submitBtn.disabled = false;
+                    resetButtonLoading(submitBtn);
                 }
             });
         }
@@ -3301,7 +3378,8 @@
         }
         if (flightModal) {
             flightModal.addEventListener('hidden.bs.modal', () => {
-                resetFlightForm();
+                const hasError = flightError && !flightError.classList.contains('d-none');
+                if (!hasError) resetFlightForm();
             });
         }
         const flightCancel = document.getElementById('flightCancel');
@@ -3375,7 +3453,7 @@
                     payload.expense = expensePayload;
                 }
                 const submitBtn = lodgingForm.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
+                setButtonLoading(submitBtn, 'Saving...');
                 try {
                     const lodgingId = state.editing.lodgingId;
                     const endpoint = lodgingId
@@ -3399,7 +3477,7 @@
                         lodgingError.classList.remove('d-none');
                     }
                 } finally {
-                    if (submitBtn) submitBtn.disabled = false;
+                    resetButtonLoading(submitBtn);
                 }
             });
         }
@@ -3417,7 +3495,8 @@
         }
         if (lodgingModal) {
             lodgingModal.addEventListener('hidden.bs.modal', () => {
-                resetLodgingForm();
+                const hasError = lodgingError && !lodgingError.classList.contains('d-none');
+                if (!hasError) resetLodgingForm();
             });
         }
 
@@ -3473,7 +3552,7 @@
                     payload.expense = expensePayload;
                 }
                 const submitBtn = transportForm.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
+                setButtonLoading(submitBtn, 'Saving...');
                 try {
                     const transportId = state.editing.transportId;
                     const endpoint = transportId
@@ -3497,7 +3576,7 @@
                         transportError.classList.remove('d-none');
                     }
                 } finally {
-                    if (submitBtn) submitBtn.disabled = false;
+                    resetButtonLoading(submitBtn);
                 }
             });
         }
@@ -3515,7 +3594,8 @@
         }
         if (transportModal) {
             transportModal.addEventListener('hidden.bs.modal', () => {
-                resetTransportForm();
+                const hasError = transportError && !transportError.classList.contains('d-none');
+                if (!hasError) resetTransportForm();
             });
         }
 
@@ -3575,7 +3655,7 @@
                     payload.expense = expensePayload;
                 }
                 const submitBtn = ticketForm.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
+                setButtonLoading(submitBtn, 'Saving...');
                 try {
                     const ticketId = state.editing.ticketId;
                     const endpoint = ticketId
@@ -3599,7 +3679,7 @@
                         ticketError.classList.remove('d-none');
                     }
                 } finally {
-                    if (submitBtn) submitBtn.disabled = false;
+                    resetButtonLoading(submitBtn);
                 }
             });
         }
@@ -3617,7 +3697,8 @@
         }
         if (ticketModal) {
             ticketModal.addEventListener('hidden.bs.modal', () => {
-                resetTicketForm();
+                const hasError = ticketError && !ticketError.classList.contains('d-none');
+                if (!hasError) resetTicketForm();
             });
         }
 
@@ -3633,7 +3714,7 @@
                 const familyIdValue = document.getElementById('participantFamily')?.value || '';
                 const familyId = familyIdValue ? Number(familyIdValue) : null;
                 const submitBtn = participantForm.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
+                setButtonLoading(submitBtn, 'Saving...');
                 try {
                     if (state.editing.participantId) {
                         await apiRequest(`/api/groups/${state.groupId}/participants/${state.editing.participantId}`, {
@@ -3655,7 +3736,7 @@
                         participantError.classList.remove('d-none');
                     }
                 } finally {
-                    if (submitBtn) submitBtn.disabled = false;
+                    resetButtonLoading(submitBtn);
                 }
             });
         }
@@ -3740,7 +3821,7 @@
                 }
 
                 const submitBtn = expenseForm.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
+                setButtonLoading(submitBtn, 'Saving...');
                 try {
                     const expenseId = state.editing.expenseId;
                     const endpoint = expenseId
@@ -3761,7 +3842,7 @@
                         expenseError.classList.remove('d-none');
                     }
                 } finally {
-                    if (submitBtn) submitBtn.disabled = false;
+                    resetButtonLoading(submitBtn);
                 }
             });
 
@@ -3793,7 +3874,8 @@
         }
         if (expenseModal) {
             expenseModal.addEventListener('hidden.bs.modal', () => {
-                resetExpenseForm();
+                const hasError = expenseError && !expenseError.classList.contains('d-none');
+                if (!hasError) resetExpenseForm();
             });
         }
     };
@@ -3947,7 +4029,7 @@
                 }
                 if (action !== 'delete-family') return;
                 if (!(await confirmAction('Are you sure you want to delete this family?'))) return;
-                button.disabled = true;
+                setButtonLoading(button, 'Deleting...');
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/families/${id}`, { method: 'DELETE' });
                     if (state.editing.familyId === id) {
@@ -3962,7 +4044,7 @@
                         familyError.classList.remove('d-none');
                     }
                 } finally {
-                    button.disabled = false;
+                    resetButtonLoading(button);
                 }
             });
         }
@@ -3984,7 +4066,7 @@
                 }
                 if (action !== 'delete-participant') return;
                 if (!(await confirmAction('Are you sure you want to delete this participant?'))) return;
-                button.disabled = true;
+                setButtonLoading(button, 'Deleting...');
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/participants/${id}`, { method: 'DELETE' });
                     if (state.editing.participantId === id) {
@@ -3999,7 +4081,7 @@
                         participantError.classList.remove('d-none');
                     }
                 } finally {
-                    button.disabled = false;
+                    resetButtonLoading(button);
                 }
             });
         }
@@ -4022,7 +4104,7 @@
                 }
                 if (action !== 'delete-expense') return;
                 if (!(await confirmAction('Are you sure you want to delete this expense?'))) return;
-                button.disabled = true;
+                setButtonLoading(button, 'Deleting...');
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/expenses/${id}`, { method: 'DELETE' });
                     if (state.editing.expenseId === id) {
@@ -4037,7 +4119,7 @@
                         expenseError.classList.remove('d-none');
                     }
                 } finally {
-                    button.disabled = false;
+                    resetButtonLoading(button);
                 }
             });
         }
@@ -4069,7 +4151,7 @@
                 }
                 if (action !== 'delete-flight') return;
                 if (!(await confirmAction('Are you sure you want to delete this flight?'))) return;
-                button.disabled = true;
+                setButtonLoading(button, 'Deleting...');
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/flights/${id}`, { method: 'DELETE' });
                     resetFlightForm();
@@ -4082,7 +4164,7 @@
                         flightError.classList.remove('d-none');
                     }
                 } finally {
-                    button.disabled = false;
+                    resetButtonLoading(button);
                 }
             });
         }
@@ -4117,7 +4199,7 @@
                 }
                 if (action !== 'delete-lodging') return;
                 if (!(await confirmAction('Are you sure you want to delete this lodging?'))) return;
-                button.disabled = true;
+                setButtonLoading(button, 'Deleting...');
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/lodgings/${id}`, { method: 'DELETE' });
                     if (state.editing.lodgingId === id) {
@@ -4132,7 +4214,7 @@
                         lodgingError.classList.remove('d-none');
                     }
                 } finally {
-                    button.disabled = false;
+                    resetButtonLoading(button);
                 }
             });
         }
@@ -4163,7 +4245,7 @@
                 }
                 if (action !== 'delete-transport') return;
                 if (!(await confirmAction('Are you sure you want to delete this transport?'))) return;
-                button.disabled = true;
+                setButtonLoading(button, 'Deleting...');
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/transports/${id}`, { method: 'DELETE' });
                     if (state.editing.transportId === id) {
@@ -4178,7 +4260,7 @@
                         transportError.classList.remove('d-none');
                     }
                 } finally {
-                    button.disabled = false;
+                    resetButtonLoading(button);
                 }
             });
         }
@@ -4209,7 +4291,7 @@
                 }
                 if (action !== 'delete-ticket') return;
                 if (!(await confirmAction('Are you sure you want to delete this ticket?'))) return;
-                button.disabled = true;
+                setButtonLoading(button, 'Deleting...');
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/tickets/${id}`, { method: 'DELETE' });
                     if (state.editing.ticketId === id) {
@@ -4224,9 +4306,79 @@
                         ticketError.classList.remove('d-none');
                     }
                 } finally {
-                    button.disabled = false;
+                    resetButtonLoading(button);
                 }
             });
+        }
+    };
+
+    const bindParticipantFilters = () => {
+        const searchInput = document.getElementById('filterParticipantSearch');
+        const typeSelect = document.getElementById('filterParticipantType');
+        const familySelect = document.getElementById('filterParticipantFamily');
+        const clearBtn = document.getElementById('clearParticipantFilters');
+        const updateFilters = () => {
+            state.filters.participants.search = searchInput?.value || '';
+            state.filters.participants.type = typeSelect?.value || '';
+            state.filters.participants.family = familySelect?.value || '';
+            renderParticipants();
+        };
+        searchInput?.addEventListener('input', updateFilters);
+        typeSelect?.addEventListener('change', updateFilters);
+        familySelect?.addEventListener('change', updateFilters);
+        clearBtn?.addEventListener('click', () => {
+            if (searchInput) searchInput.value = '';
+            if (typeSelect) typeSelect.value = '';
+            if (familySelect) familySelect.value = '';
+            state.filters.participants = { search: '', type: '', family: '' };
+            renderParticipants();
+        });
+    };
+
+    const bindExpenseFilters = () => {
+        const searchInput = document.getElementById('filterExpenseSearch');
+        const payerSelect = document.getElementById('filterExpensePayer');
+        const clearBtn = document.getElementById('clearExpenseFilters');
+        const updateFilters = () => {
+            state.filters.expenses.search = searchInput?.value || '';
+            state.filters.expenses.payer = payerSelect?.value || '';
+            renderExpenses();
+        };
+        searchInput?.addEventListener('input', updateFilters);
+        payerSelect?.addEventListener('change', updateFilters);
+        clearBtn?.addEventListener('click', () => {
+            if (searchInput) searchInput.value = '';
+            if (payerSelect) payerSelect.value = '';
+            state.filters.expenses = { search: '', payer: '' };
+            renderExpenses();
+        });
+    };
+
+    const populateFilterSelectors = () => {
+        const familySelect = document.getElementById('filterParticipantFamily');
+        if (familySelect) {
+            const currentValue = familySelect.value;
+            familySelect.innerHTML = '<option value="">All</option>';
+            state.families.forEach((family) => {
+                const option = document.createElement('option');
+                option.value = family.id;
+                option.textContent = family.name;
+                familySelect.appendChild(option);
+            });
+            familySelect.value = currentValue;
+        }
+        const payerSelect = document.getElementById('filterExpensePayer');
+        if (payerSelect) {
+            const currentValue = payerSelect.value;
+            payerSelect.innerHTML = '<option value="">All</option>';
+            const uniquePayers = getUniquePayerParticipants(state.participants);
+            uniquePayers.forEach((p) => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = p.displayName;
+                payerSelect.appendChild(option);
+            });
+            payerSelect.value = currentValue;
         }
     };
 
@@ -4521,6 +4673,7 @@
     };
 
     const refreshData = async () => {
+        showSkeletonLoading();
         await loadAirlines();
         await loadLodgingPlatforms();
         await loadGroupData();
@@ -4537,6 +4690,7 @@
         renderLodgings();
         renderTransports();
         renderTickets();
+        populateFilterSelectors();
         populateExpenseSelectors();
         populateFlightParticipants();
         populateTicketParticipants();
@@ -4647,6 +4801,8 @@
         bindInviteForm();
         bindMemberRoleActions();
         bindDeleteActions();
+        bindParticipantFilters();
+        bindExpenseFilters();
         bindFlightFilters();
         bindLodgingFilters();
         bindTransportFilters();
