@@ -3,13 +3,15 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Group travel management" name="description" />
+    <meta content="Bruno Pinto Brum" name="author" />
     <title>Accept Invitation | Kovoy</title>
     <link rel="shortcut icon" href="/assets/images/favicon.ico">
     <link href="/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="/assets/css/icons.min.css" rel="stylesheet" type="text/css">
     <link href="/assets/css/app.min.css" rel="stylesheet" type="text/css">
+    <link href="/assets/css/auth-custom.css" rel="stylesheet" type="text/css">
 </head>
 
 <body class="auth-body-bg">
@@ -34,7 +36,7 @@
 
                         <div class="d-none" id="errorState">
                             <div class="text-center">
-                                <i class="bx bx-x-circle text-danger" style="font-size: 64px;"></i>
+                                <i class="bx bx-x-circle text-danger" class="kv-icon-state"></i>
                                 <h5 class="mt-3" id="errorTitle">Invalid Invitation</h5>
                                 <p class="text-muted" id="errorMessage">This invitation link is invalid or has expired.</p>
                                 <div class="mt-4">
@@ -45,7 +47,7 @@
 
                         <div class="d-none" id="inviteState">
                             <div class="text-center mb-4">
-                                <i class="bx bx-envelope-open text-primary" style="font-size: 64px;"></i>
+                                <i class="bx bx-envelope-open text-primary" class="kv-icon-state"></i>
                                 <h4 class="mt-3">You've been invited!</h4>
                                 <p class="text-muted">You've been invited to join a group on Kovoy.</p>
                             </div>
@@ -102,7 +104,7 @@
 
                         <div class="d-none" id="successState">
                             <div class="text-center">
-                                <i class="bx bx-check-circle text-success" style="font-size: 64px;"></i>
+                                <i class="bx bx-check-circle text-success" class="kv-icon-state"></i>
                                 <h4 class="mt-3">Welcome to the group!</h4>
                                 <p class="text-muted">You have successfully joined <strong id="successGroupName">the group</strong>.</p>
                                 <div class="mt-4">
@@ -113,7 +115,7 @@
                     </div>
 
                     <div class="mt-4 pt-3 border-top text-center">
-                        <p class="text-muted mb-0">&copy; <script>document.write(new Date().getFullYear())</script> Kovoy. Group travel made easy.</p>
+                        <p class="text-muted mb-0">&copy; <script>document.write(new Date().getFullYear())</script> Bruno Pinto Brum. All rights reserved.</p>
                     </div>
                 </div>
             </div>
