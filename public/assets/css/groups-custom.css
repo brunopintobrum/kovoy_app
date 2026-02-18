@@ -161,6 +161,125 @@
 }
 
 /* ================================================
+   Responsividade — tabelas como cards no mobile
+   Migrado de group-details.html <style> inline
+   ================================================ */
+
+@media (max-width: 767.98px) {
+    /* Ocultar cabeçalho da tabela */
+    .table-mobile-cards thead {
+        display: none;
+    }
+
+    /* Forçar elementos da tabela como bloco */
+    .table-mobile-cards,
+    .table-mobile-cards tbody,
+    .table-mobile-cards tbody tr,
+    .table-mobile-cards tbody tr td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Remover bordas padrão da tabela */
+    .table-mobile-cards {
+        border: 0;
+        margin-bottom: 0;
+    }
+
+    .table-mobile-cards tbody {
+        border: 0;
+    }
+
+    /* Cada row vira um card */
+    .table-mobile-cards tbody tr {
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        background-color: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Células com labels via data-label */
+    .table-mobile-cards tbody tr td {
+        border: none;
+        padding: 0.5rem 0 0.5rem 50%;
+        position: relative;
+        min-height: 1.5rem;
+        text-align: left;
+    }
+
+    /* Label antes de cada célula */
+    .table-mobile-cards tbody tr td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        top: 0.5rem;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 700;
+        text-align: left;
+        color: #495057;
+    }
+
+    /* Célula de ações — full-width no rodapé do card */
+    .table-mobile-cards tbody tr td:last-child {
+        display: block;
+        padding-left: 0;
+        padding-top: 1rem;
+        padding-bottom: 0;
+        border-top: 1px solid #dee2e6;
+        margin-top: 0.75rem;
+        text-align: right;
+    }
+
+    .table-mobile-cards tbody tr td:last-child::before {
+        display: none;
+        content: none;
+    }
+
+    /* Filtros colapsáveis no mobile */
+    .lodging-filters-container {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        margin-top: 0;
+        transition: all 0.3s ease;
+    }
+
+    .lodging-filters-container.show {
+        max-height: 500px;
+        opacity: 1;
+        margin-top: 1rem;
+    }
+
+    /* Selects responsivos — evitar overflow */
+    .select-min-200,
+    .select-min-220 {
+        min-width: unset;
+        width: 100%;
+    }
+}
+
+/* ================================================
+   Larguras fixas de colunas de tabela
+   ================================================ */
+.kv-col-role {
+    width: 180px;
+}
+
+.kv-col-action {
+    width: 140px;
+}
+
+/* Progress bar de força de senha */
+.kv-progress-password {
+    height: 6px;
+}
+
+/* ================================================
    Utilitários — migrados de inline styles
    ================================================ */
 
