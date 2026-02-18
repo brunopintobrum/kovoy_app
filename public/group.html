@@ -10,6 +10,7 @@
     <link href="/assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" />
     <link href="/assets/css/icons.min.css" rel="stylesheet" />
     <link href="/assets/css/app.min.css" id="app-style" rel="stylesheet" />
+    <link href="/assets/css/groups-custom.css" rel="stylesheet" />
 </head>
 <body data-layout-mode="light" data-topbar="light" data-sidebar="dark">
     <div id="layout-wrapper">
@@ -22,7 +23,7 @@
                                 <img src="/assets/images/logo.svg" alt="" height="22">
                             </span>
                             <span class="logo-lg">
-                                <img src="/assets/images/logo-dark.png" alt="" height="17">
+                                <img src="/assets/images/logo-dark.png" alt="" height="36">
                             </span>
                         </a>
 
@@ -172,11 +173,11 @@
                                 <div class="d-flex flex-wrap align-items-end gap-3 mt-3 mt-md-0">
                                     <div>
                                         <label class="form-label mb-0" for="groupSelector">Switch group</label>
-                                        <select class="form-select" id="groupSelector" style="min-width: 200px;"></select>
+                                        <select class="form-select select-min-200" id="groupSelector"></select>
                                     </div>
                                     <div>
                                         <label class="form-label mb-0" for="familyBalanceMode">Family balance mode</label>
-                                        <select class="form-select" id="familyBalanceMode" style="min-width: 220px;">
+                                        <select class="form-select select-min-220" id="familyBalanceMode">
                                             <option value="participants">By participants</option>
                                             <option value="families">By families</option>
                                         </select>
@@ -358,7 +359,7 @@
         </div>
     </div>
 
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11000;">
+    <div class="toast-container position-fixed top-0 end-0 p-3 toast-layer">
         <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body" id="successToastMessage"></div>

@@ -159,3 +159,27 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
+/* ================================================
+   Utilitários — migrados de inline styles
+   ================================================ */
+
+/* Colunas ordenáveis em tabelas */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Toast container — z-index acima de modais e overlays */
+.toast-layer {
+    z-index: 11000;
+}
+
+/* Larguras mínimas para selects de navegação */
+.select-min-200 {
+    min-width: 200px;
+}
+
+.select-min-220 {
+    min-width: 220px;
+}

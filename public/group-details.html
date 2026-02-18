@@ -10,6 +10,7 @@
     <link href="/assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" />
     <link href="/assets/css/icons.min.css" rel="stylesheet" />
     <link href="/assets/css/app.min.css" id="app-style" rel="stylesheet" />
+    <link href="/assets/css/groups-custom.css" rel="stylesheet" />
     <style>
         /* Mobile-responsive tables - Ultra specific selectors */
         @media only screen and (max-width: 767px) {
@@ -122,7 +123,7 @@
                                 <img src="/assets/images/logo.svg" alt="" height="22">
                             </span>
                             <span class="logo-lg">
-                                <img src="/assets/images/logo-dark.png" alt="" height="17">
+                                <img src="/assets/images/logo-dark.png" alt="" height="36">
                             </span>
                         </a>
 
@@ -250,7 +251,7 @@
                         <li><a href="#lodgings" class="waves-effect"><i class="bx bx-home-alt"></i><span>Lodgings</span></a></li>
                         <li><a href="#transports" class="waves-effect"><i class="bx bx-bus"></i><span>Transports</span></a></li>
                         <li><a href="#tickets" class="waves-effect"><i class="mdi mdi-ticket"></i><span>Tickets</span></a></li>
-                        <li><a href="#debts" class="waves-effect"><i class="bx bx-transfer"></i><span>Who owes</span></a></li>
+                        <li><a href="/dashboard#debts" class="waves-effect"><i class="bx bx-transfer"></i><span>Who owes</span></a></li>
                     </ul>
                 </div>
             </div>
@@ -284,11 +285,11 @@
                                 <div class="d-flex flex-wrap align-items-end gap-3 mt-3 mt-md-0">
                                     <div>
                                         <label class="form-label mb-0" for="groupSelector">Switch group</label>
-                                        <select class="form-select" id="groupSelector" style="min-width: 200px;"></select>
+                                        <select class="form-select select-min-200" id="groupSelector"></select>
                                     </div>
                                     <div>
                                         <label class="form-label mb-0" for="familyBalanceMode">Family balance mode</label>
-                                        <select class="form-select" id="familyBalanceMode" style="min-width: 220px;">
+                                        <select class="form-select select-min-220" id="familyBalanceMode">
                                             <option value="">Select a balance mode</option>
                                             <option value="participants">By participants</option>
                                             <option value="families">By families</option>
@@ -469,9 +470,9 @@
                                         <table class="table table-sm align-middle mb-0 table-mobile-cards">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th class="sortable" data-sort="displayName" style="cursor:pointer">Name <span class="sort-icon"></span></th>
-                                                    <th class="sortable" data-sort="familyId" style="cursor:pointer">Family <span class="sort-icon"></span></th>
-                                                    <th class="sortable" data-sort="type" style="cursor:pointer">Type <span class="sort-icon"></span></th>
+                                                    <th class="sortable" data-sort="displayName">Name <span class="sort-icon"></span></th>
+                                                    <th class="sortable" data-sort="familyId">Family <span class="sort-icon"></span></th>
+                                                    <th class="sortable" data-sort="type">Type <span class="sort-icon"></span></th>
                                                     <th class="text-end">Action</th>
                                                 </tr>
                                             </thead>
@@ -689,10 +690,10 @@
                                 <table class="table align-middle table-nowrap mb-0 table-mobile-cards">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="sortable" data-sort="description" style="cursor:pointer">Description <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="amount" style="cursor:pointer">Amount <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="date" style="cursor:pointer">Date <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="payerParticipantId" style="cursor:pointer">Paid by <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="description">Description <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="amount">Amount <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="date">Date <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="payerParticipantId">Paid by <span class="sort-icon"></span></th>
                                             <th>Split</th>
                                             <th class="text-end">Action</th>
                                         </tr>
@@ -911,13 +912,13 @@
                                 <table class="table align-middle table-nowrap mb-0 table-mobile-cards">
                                     <thead class="table-light">
                                             <tr>
-                                                <th class="sortable" data-sort="airline" style="cursor:pointer">Flight <span class="sort-icon"></span></th>
-                                                <th class="sortable" data-sort="from" style="cursor:pointer">Route <span class="sort-icon"></span></th>
-                                                <th class="sortable" data-sort="departAt" style="cursor:pointer">Departure <span class="sort-icon"></span></th>
-                                                <th class="sortable" data-sort="arriveAt" style="cursor:pointer">Arrival <span class="sort-icon"></span></th>
-                                                <th class="sortable" data-sort="participantIds" style="cursor:pointer">Pax <span class="sort-icon"></span></th>
-                                                <th class="sortable" data-sort="status" style="cursor:pointer">Status <span class="sort-icon"></span></th>
-                                                <th class="sortable" data-sort="cost" style="cursor:pointer">Cost <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="airline">Flight <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="from">Route <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="departAt">Departure <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="arriveAt">Arrival <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="participantIds">Pax <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="status">Status <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="cost">Cost <span class="sort-icon"></span></th>
                                                 <th class="text-end">Action</th>
                                             </tr>
                                       </thead>
@@ -1167,12 +1168,12 @@
                                 <table class="table align-middle table-nowrap mb-0 table-mobile-cards">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="sortable" data-sort="name" style="cursor:pointer">Property <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="city" style="cursor:pointer">Location <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="checkIn" style="cursor:pointer">Dates <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="name">Property <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="city">Location <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="checkIn">Dates <span class="sort-icon"></span></th>
                                             <th>Rooms</th>
-                                            <th class="sortable" data-sort="status" style="cursor:pointer">Status <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="cost" style="cursor:pointer">Cost <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="status">Status <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="cost">Cost <span class="sort-icon"></span></th>
                                             <th>Contact</th>
                                             <th class="text-end">Action</th>
                                         </tr>
@@ -1328,12 +1329,12 @@
                                 <table class="table align-middle table-nowrap mb-0 table-mobile-cards">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="sortable" data-sort="type" style="cursor:pointer">Type <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="origin" style="cursor:pointer">Route <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="departAt" style="cursor:pointer">Departure <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="arriveAt" style="cursor:pointer">Arrival <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="status" style="cursor:pointer">Status <span class="sort-icon"></span></th>
-                                            <th class="sortable" data-sort="amount" style="cursor:pointer">Amount <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="type">Type <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="origin">Route <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="departAt">Departure <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="arriveAt">Arrival <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="status">Status <span class="sort-icon"></span></th>
+                                            <th class="sortable" data-sort="amount">Amount <span class="sort-icon"></span></th>
                                             <th>Provider/Locator</th>
                                             <th class="text-end">Action</th>
                                         </tr>
@@ -1484,11 +1485,11 @@
                                     <table class="table align-middle table-nowrap mb-0 table-mobile-cards">
                                         <thead class="table-light">
                                             <tr>
-                                                <th class="sortable" data-sort="type" style="cursor:pointer">Type <span class="sort-icon"></span></th>
-                                                <th class="sortable" data-sort="eventAt" style="cursor:pointer">When <span class="sort-icon"></span></th>
-                                                <th class="sortable" data-sort="location" style="cursor:pointer">Location <span class="sort-icon"></span></th>
-                                                <th class="sortable" data-sort="status" style="cursor:pointer">Status <span class="sort-icon"></span></th>
-                                                <th class="sortable" data-sort="amount" style="cursor:pointer">Amount <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="type">Type <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="eventAt">When <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="location">Location <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="status">Status <span class="sort-icon"></span></th>
+                                                <th class="sortable" data-sort="amount">Amount <span class="sort-icon"></span></th>
                                                 <th>Participants</th>
                                                 <th class="text-end">Action</th>
                                             </tr>
@@ -1565,7 +1566,7 @@
         </div>
     </div>
 
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11000;">
+    <div class="toast-container position-fixed top-0 end-0 p-3 toast-layer">
         <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body" id="successToastMessage"></div>
