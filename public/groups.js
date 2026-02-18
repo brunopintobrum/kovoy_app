@@ -293,6 +293,9 @@
             btnGroup.appendChild(dropdownBtn);
             btnGroup.appendChild(menuUl);
 
+            // strategy: 'fixed' evita clipping pelo overflow do .table-responsive
+            new bootstrap.Dropdown(dropdownBtn, { popperConfig: { strategy: 'fixed' } });
+
             const td5 = document.createElement('td');
             td5.className = 'text-end';
             td5.appendChild(openLink);
@@ -383,6 +386,9 @@
                 cardBtnGroup.className = 'btn-group';
                 cardBtnGroup.appendChild(cardDropdownBtn);
                 cardBtnGroup.appendChild(cardMenuUl);
+
+                // strategy: 'fixed' evita clipping pelo overflow do card
+                new bootstrap.Dropdown(cardDropdownBtn, { popperConfig: { strategy: 'fixed' } });
 
                 const cardFooter = document.createElement('div');
                 cardFooter.className = 'd-flex gap-2';
