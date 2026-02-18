@@ -1,0 +1,15 @@
+/* Auth Pages Custom Styles — Kovoy */
+
+/* Social login items desabilitados */
+.social-list-item.is-disabled {
+    opacity: 0.45;
+    filter: grayscale(100%);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Ícones de estado na página de invite */
+.kv-icon-state {
+    font-size: 4rem; /* 64px */
+    line-height: 1;
+}
