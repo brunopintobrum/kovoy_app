@@ -376,6 +376,7 @@ public/data/*
 !public/data/postal-patterns.json
 test-results/
 .claude/
+.claude.json
 .vscode/
 .docker-codex/
 .glitchtip-*.local.txt
