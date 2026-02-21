@@ -2249,8 +2249,14 @@
                 <tr><td colspan="3" class="text-center py-4">
                     <i class="mdi mdi-account-group-outline d-block mb-2" style="font-size:2rem;opacity:.45"></i>
                     <div class="text-muted mb-3">No members yet. Invite people to collaborate on this group.</div>
-                    ${state.canManage ? '<button class="btn btn-sm btn-primary" onclick="document.getElementById(\'inviteEmail\')?.focus()"><i class="mdi mdi-email-plus-outline me-1"></i>Invite member</button>' : ''}
+                    ${state.canManage ? '<button class="btn btn-sm btn-primary" data-action="focus-invite"><i class="mdi mdi-email-plus-outline me-1"></i>Invite member</button>' : ''}
                 </td></tr>`;
+            const inviteBtn = list.querySelector('[data-action="focus-invite"]');
+            if (inviteBtn) {
+                inviteBtn.addEventListener('click', () => {
+                    document.getElementById('inviteEmail')?.focus();
+                });
+            }
             return;
         }
         state.members.forEach((member) => {
