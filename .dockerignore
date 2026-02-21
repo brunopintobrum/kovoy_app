@@ -1,0 +1,17 @@
+node_modules
+.git
+.env*
+data/
+tests/
+e2e/
+docs/
+.claude/
+.vscode/
+test-results/
+.github/
+*.md
+!package.json
+!package-lock.json
+docker-compose*
+.dockerignore
+Dockerfile
