@@ -1630,7 +1630,7 @@
                 <td data-label="Departure">${formatDateTime(flight.departAt)}</td>
                 <td data-label="Arrival">${formatDateTime(flight.arriveAt)}</td>
                 <td data-label="Pax">${passengerCount}</td>
-                <td data-label="Status" class="text-capitalize">${flight.status || 'planned'}</td>
+                <td data-label="Status">${formatStatusBadge(flight.status)}</td>
                 <td data-label="Cost">${formatCurrency(flight.cost, flight.currency)}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-secondary me-1" data-action="toggle-flight-details" data-id="${flight.id}" aria-controls="${detailsId}">Details</button>
@@ -2259,11 +2259,11 @@
                     </button>`
                 : '';
             tr.innerHTML = `
-                <td>
+                <td data-label="Member">
                     <div class="fw-semibold">${displayName}</div>
                     <div class="text-muted small">${member.email || ''}</div>
                 </td>
-                <td>${roleCell}</td>
+                <td data-label="Role">${roleCell}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-primary" data-action="save-member-role" data-id="${member.userId}">
                         Update
@@ -2618,6 +2618,8 @@
         const openLodgingModal = document.getElementById('openLodgingModal');
         const openTransportModal = document.getElementById('openTransportModal');
         const openTicketModal = document.getElementById('openTicketModal');
+        const openParticipantModalBtnPerm = document.getElementById('openParticipantModalBtn');
+        if (openParticipantModalBtnPerm) openParticipantModalBtnPerm.disabled = !state.canEdit;
         if (openFlightModal) openFlightModal.disabled = !state.canEdit;
         if (openExpenseModal) openExpenseModal.disabled = !state.canEdit;
         if (openLodgingModal) openLodgingModal.disabled = !state.canEdit;
@@ -2708,6 +2710,48 @@
         if (family) family.value = participant?.familyId || '';
         state.editing.participantId = participant?.id || null;
         setParticipantFormMode('edit');
+    };
+
+    const openParticipantModal = (participant = null) => {
+        const modal = document.getElementById('participantModal');
+        if (!modal) return;
+        const title = document.getElementById('participantModalLabel');
+        const nameInput = document.getElementById('modalParticipantName');
+        const typeSelect = document.getElementById('modalParticipantType');
+        const familySelect = document.getElementById('modalParticipantFamily');
+        const submitBtn = document.getElementById('participantModalSubmit');
+
+        if (familySelect) {
+            familySelect.innerHTML = '<option value="">No family</option>';
+            state.families.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.id;
+                opt.textContent = f.name;
+                familySelect.appendChild(opt);
+            });
+        }
+
+        const modalForm = document.getElementById('participantModalForm');
+        if (modalForm) {
+            modalForm.classList.remove('was-validated');
+        }
+
+        if (participant) {
+            if (title) title.textContent = 'Edit participant';
+            if (submitBtn) submitBtn.textContent = 'Update participant';
+            if (nameInput) nameInput.value = participant.displayName || '';
+            if (typeSelect) typeSelect.value = participant.type || '';
+            if (familySelect) familySelect.value = participant.familyId || '';
+            state.editing.participantId = participant.id;
+        } else {
+            if (title) title.textContent = 'Add participant';
+            if (submitBtn) submitBtn.textContent = 'Add participant';
+            if (modalForm) modalForm.reset();
+            state.editing.participantId = null;
+        }
+
+        const bsModal = bootstrap.Modal.getOrCreateInstance(modal);
+        bsModal.show();
     };
 
     const setExpenseFormMode = (mode) => {
@@ -3747,6 +3791,53 @@
             });
         }
 
+        // Modal de Participants (mobile)
+        const openParticipantModalBtn = document.getElementById('openParticipantModalBtn');
+        if (openParticipantModalBtn) {
+            openParticipantModalBtn.addEventListener('click', () => {
+                openParticipantModal(null);
+            });
+        }
+
+        const participantModalForm = document.getElementById('participantModalForm');
+        if (participantModalForm) {
+            participantModalForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (!validateForm(participantModalForm)) return;
+                const displayName = document.getElementById('modalParticipantName')?.value || '';
+                const type = document.getElementById('modalParticipantType')?.value || '';
+                const familyIdValue = document.getElementById('modalParticipantFamily')?.value || '';
+                const familyId = familyIdValue ? Number(familyIdValue) : null;
+                const submitBtn = document.getElementById('participantModalSubmit');
+                setButtonLoading(submitBtn, 'Saving...');
+                try {
+                    if (state.editing.participantId) {
+                        await apiRequest(`/api/groups/${state.groupId}/participants/${state.editing.participantId}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({ displayName, type, familyId })
+                        });
+                    } else {
+                        await apiRequest(`/api/groups/${state.groupId}/participants`, {
+                            method: 'POST',
+                            body: JSON.stringify({ displayName, type, familyId })
+                        });
+                    }
+                    showToast('success', state.editing.participantId ? 'Participant updated.' : 'Participant created.');
+                    const modal = document.getElementById('participantModal');
+                    if (modal) {
+                        const bsModal = bootstrap.Modal.getInstance(modal);
+                        if (bsModal) bsModal.hide();
+                    }
+                    state.editing.participantId = null;
+                    await refreshData();
+                } catch (err) {
+                    showToast('error', err.message || 'Failed to save participant.');
+                } finally {
+                    resetButtonLoading(submitBtn);
+                }
+            });
+        }
+
         const expenseForm = document.getElementById('expenseForm');
         const expenseError = document.getElementById('expenseError');
         const splitTargetsError = document.getElementById('splitTargetsError');
@@ -4060,8 +4151,12 @@
                     if (!state.canEdit) return;
                     const participant = state.participants.find((item) => item.id === id);
                     if (!participant) return;
-                    populateParticipantForm(participant);
-                    document.getElementById('participantForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    if (window.innerWidth < 768) {
+                        openParticipantModal(participant);
+                    } else {
+                        populateParticipantForm(participant);
+                        document.getElementById('participantForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
                     return;
                 }
                 if (action !== 'delete-participant') return;
@@ -4317,6 +4412,8 @@
         const typeSelect = document.getElementById('filterParticipantType');
         const familySelect = document.getElementById('filterParticipantFamily');
         const clearBtn = document.getElementById('clearParticipantFilters');
+        const toggleBtn = document.getElementById('toggleParticipantFilters');
+        const filtersContainer = document.getElementById('participantFilters');
         const updateFilters = () => {
             state.filters.participants.search = searchInput?.value || '';
             state.filters.participants.type = typeSelect?.value || '';
@@ -4333,12 +4430,17 @@
             state.filters.participants = { search: '', type: '', family: '' };
             renderParticipants();
         });
+        toggleBtn?.addEventListener('click', () => {
+            filtersContainer?.classList.toggle('show');
+        });
     };
 
     const bindExpenseFilters = () => {
         const searchInput = document.getElementById('filterExpenseSearch');
         const payerSelect = document.getElementById('filterExpensePayer');
         const clearBtn = document.getElementById('clearExpenseFilters');
+        const toggleBtn = document.getElementById('toggleExpenseFilters');
+        const filtersContainer = document.getElementById('expenseFilters');
         const updateFilters = () => {
             state.filters.expenses.search = searchInput?.value || '';
             state.filters.expenses.payer = payerSelect?.value || '';
@@ -4351,6 +4453,9 @@
             if (payerSelect) payerSelect.value = '';
             state.filters.expenses = { search: '', payer: '' };
             renderExpenses();
+        });
+        toggleBtn?.addEventListener('click', () => {
+            filtersContainer?.classList.toggle('show');
         });
     };
 
@@ -4407,6 +4512,11 @@
             state.filters.flights = { airline: '', from: '', to: '', status: '' };
             renderFlights();
         });
+        const toggleBtn = document.getElementById('toggleFlightFilters');
+        const filtersContainer = document.getElementById('flightFilters');
+        toggleBtn?.addEventListener('click', () => {
+            filtersContainer?.classList.toggle('show');
+        });
     };
 
     const updateLodgingFilterBadge = () => {
@@ -4460,6 +4570,8 @@
         const statusSelect = document.getElementById('filterTransportStatus');
         const providerInput = document.getElementById('filterTransportProvider');
         const clearBtn = document.getElementById('clearTransportFilters');
+        const toggleBtn = document.getElementById('toggleTransportFilters');
+        const filtersContainer = document.getElementById('transportFilters');
         const updateFilters = () => {
             state.filters.transports.status = statusSelect?.value || '';
             state.filters.transports.provider = providerInput?.value || '';
@@ -4473,6 +4585,9 @@
             state.filters.transports = { status: '', provider: '' };
             renderTransports();
         });
+        toggleBtn?.addEventListener('click', () => {
+            filtersContainer?.classList.toggle('show');
+        });
     };
 
     const bindTicketFilters = () => {
@@ -4481,6 +4596,8 @@
         const dateFromInput = document.getElementById('filterTicketDateFrom');
         const dateToInput = document.getElementById('filterTicketDateTo');
         const clearBtn = document.getElementById('clearTicketFilters');
+        const toggleBtn = document.getElementById('toggleTicketFilters');
+        const filtersContainer = document.getElementById('ticketFilters');
         const updateFilters = () => {
             state.filters.tickets.type = typeInput?.value || '';
             state.filters.tickets.status = statusSelect?.value || '';
@@ -4499,6 +4616,9 @@
             if (dateToInput) dateToInput.value = '';
             state.filters.tickets = { type: '', status: '', dateFrom: '', dateTo: '' };
             renderTickets();
+        });
+        toggleBtn?.addEventListener('click', () => {
+            filtersContainer?.classList.toggle('show');
         });
     };
 

@@ -315,7 +315,54 @@
                             <div class="card h-100">
                                 <div class="card-body">
                                     <h5 class="card-title">Participants</h5>
-                                    <form id="participantForm" class="row g-2 mb-3 needs-validation" novalidate>
+                                    <!-- Modal Participant (mobile) -->
+                                    <div class="modal fade" id="participantModal" tabindex="-1" aria-labelledby="participantModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="participantModalLabel">Add participant</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="participantModalForm" class="needs-validation" novalidate>
+                                                        <div class="mb-3">
+                                                            <label class="form-label" for="modalParticipantName">Name</label>
+                                                            <input class="form-control" id="modalParticipantName" placeholder="Participant name" maxlength="80" required>
+                                                            <div class="invalid-feedback">Enter a participant name.</div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label" for="modalParticipantType">Type</label>
+                                                            <select class="form-select" id="modalParticipantType">
+                                                                <option value="">Select a type</option>
+                                                                <option value="adult">Adult</option>
+                                                                <option value="child">Child</option>
+                                                                <option value="infant">Infant</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label" for="modalParticipantFamily">Family</label>
+                                                            <select class="form-select" id="modalParticipantFamily">
+                                                                <option value="">No family</option>
+                                                            </select>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary" form="participantModalForm" id="participantModalSubmit">Add participant</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2 mb-3 d-md-none">
+                                        <button class="btn btn-sm btn-primary" type="button" id="openParticipantModalBtn">
+                                            <i class="bx bx-plus me-1"></i>Add participant
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="toggleParticipantFilters">
+                                            <i class="bx bx-filter-alt me-1"></i>Filtros
+                                        </button>
+                                    </div>
+                                    <form id="participantForm" class="row g-2 mb-3 needs-validation d-none d-md-flex" novalidate>
                                         <div class="col-md-5">
                                             <input class="form-control" id="participantName" placeholder="Participant name" maxlength="80" required>
                                             <div class="invalid-feedback">Enter a participant name.</div>
@@ -342,7 +389,7 @@
                                         You have read-only access in this group.
                                     </div>
                                     <div class="alert alert-danger d-none" id="participantError"></div>
-                                    <div class="row g-2 mt-3 align-items-end" id="participantFilters">
+                                    <div class="row g-2 mt-3 align-items-end participant-filters-container" id="participantFilters">
                                         <div class="col-md-4">
                                             <label class="form-label form-label-sm mb-1" for="filterParticipantSearch">Name</label>
                                             <input type="text" class="form-control form-control-sm" id="filterParticipantSearch" placeholder="Search by name...">
@@ -367,7 +414,7 @@
                                         </div>
                                     </div>
                                     <div class="table-responsive">
-                                        <table class="table table-sm align-middle mb-0 table-mobile-cards">
+                                        <table class="table table-sm align-middle mb-0 table-mobile-cards table-mobile-compact">
                                             <thead class="table-light">
                                                 <tr>
                                                     <th class="sortable" data-sort="displayName">Name <span class="sort-icon"></span></th>
@@ -442,7 +489,7 @@
                             </div>
 
                             <div class="table-responsive">
-                                <table class="table align-middle table-nowrap">
+                                <table class="table align-middle table-nowrap table-mobile-cards">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Member</th>
@@ -571,7 +618,10 @@
                                       Add expense
                                   </button>
                               </div>
-                              <div class="row g-2 mt-3 align-items-end" id="expenseFilters">
+                              <button type="button" class="btn btn-sm btn-outline-primary mt-3 d-md-none" id="toggleExpenseFilters">
+                                  <i class="bx bx-filter-alt me-1"></i>Filtros
+                              </button>
+                              <div class="row g-2 mt-3 align-items-end section-filters-container" id="expenseFilters">
                                   <div class="col-md-5">
                                       <label class="form-label form-label-sm mb-1" for="filterExpenseSearch">Description</label>
                                       <input type="text" class="form-control form-control-sm" id="filterExpenseSearch" placeholder="Search by description...">
@@ -782,7 +832,10 @@
                                     Add flight
                                 </button>
                             </div>
-                            <div class="row g-2 mt-3 align-items-end" id="flightFilters">
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-3 d-md-none" id="toggleFlightFilters">
+                                <i class="bx bx-filter-alt me-1"></i>Filtros
+                            </button>
+                            <div class="row g-2 mt-3 align-items-end section-filters-container" id="flightFilters">
                                 <div class="col-md-3">
                                     <label class="form-label form-label-sm mb-1" for="filterFlightAirline">Airline</label>
                                     <input type="text" class="form-control form-control-sm" id="filterFlightAirline" placeholder="Filter by airline...">
@@ -1044,7 +1097,7 @@
                                 </button>
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary mt-3 d-md-none" id="toggleLodgingFilters">
-                                🔍 Filtros <span class="badge bg-primary ms-1 d-none" id="lodgingFilterCount">0</span>
+                                <i class="bx bx-filter-alt me-1"></i>Filtros <span class="badge bg-primary ms-1 d-none" id="lodgingFilterCount">0</span>
                             </button>
                             <div class="row g-2 mt-3 align-items-end lodging-filters-container" id="lodgingFilters">
                                 <div class="col-md-4">
@@ -1207,7 +1260,10 @@
                                     Add transport
                                 </button>
                             </div>
-                            <div class="row g-2 mt-3 align-items-end" id="transportFilters">
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-3 d-md-none" id="toggleTransportFilters">
+                                <i class="bx bx-filter-alt me-1"></i>Filtros
+                            </button>
+                            <div class="row g-2 mt-3 align-items-end section-filters-container" id="transportFilters">
                                 <div class="col-md-3">
                                     <label class="form-label form-label-sm mb-1" for="filterTransportStatus">Status</label>
                                     <select class="form-select form-select-sm" id="filterTransportStatus">
@@ -1355,7 +1411,10 @@
                                     Add ticket
                                 </button>
                             </div>
-                            <div class="row g-2 mt-3 align-items-end" id="ticketFilters">
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-3 d-md-none" id="toggleTicketFilters">
+                                <i class="bx bx-filter-alt me-1"></i>Filtros
+                            </button>
+                            <div class="row g-2 mt-3 align-items-end section-filters-container" id="ticketFilters">
                                 <div class="col-md-3">
                                     <label class="form-label form-label-sm mb-1" for="filterTicketType">Type</label>
                                     <input type="text" class="form-control form-control-sm" id="filterTicketType" placeholder="Filter by type...">

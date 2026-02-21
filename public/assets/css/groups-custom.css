@@ -113,68 +113,107 @@
         display: none;
     }
 
-    /* Forçar elementos da tabela como bloco */
-    .table-mobile-cards,
-    .table-mobile-cards tbody,
-    .table-mobile-cards tbody tr,
-    .table-mobile-cards tbody tr td {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
     /* Remover bordas padrão da tabela */
     .table-mobile-cards {
         border: 0;
         margin-bottom: 0;
+        display: block;
+        width: 100%;
     }
 
     .table-mobile-cards tbody {
         border: 0;
+        display: block;
+        width: 100%;
     }
 
-    /* Cada row vira um card */
+    /* Cada row vira um card com CSS Grid 2 colunas */
     .table-mobile-cards tbody tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
         margin-bottom: 1rem;
-        border: 1px solid #dee2e6;
-        border-radius: 0.25rem;
-        padding: 1rem;
+        border: 1px solid #e9ecef;
+        border-left: 3px solid #5b73e8;
+        border-radius: 8px;
+        padding: 0;
         background-color: #ffffff;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
     }
 
-    /* Células com labels via data-label */
+    /* Células como grid items empilhados (label acima do valor) */
     .table-mobile-cards tbody tr td {
         border: none;
-        padding: 0.5rem 0 0.5rem 50%;
+        padding: 0.5rem 0.75rem;
         position: relative;
-        min-height: 1.5rem;
-        text-align: left;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        font-size: 0.9rem;
+        font-weight: 500;
+        min-width: 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
-    /* Label antes de cada célula */
+    /* Label como texto pequeno acima */
     .table-mobile-cards tbody tr td::before {
         content: attr(data-label);
-        position: absolute;
-        left: 0;
-        top: 0.5rem;
-        width: 45%;
-        padding-right: 10px;
+        position: static;
+        width: auto;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #8590a5;
+        font-weight: 600;
+        margin-bottom: 2px;
         white-space: nowrap;
-        font-weight: 700;
-        text-align: left;
-        color: #495057;
+    }
+
+    /* Primeiro campo = header full-width */
+    .table-mobile-cards tbody tr td:first-child {
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, #f8f9ff 0%, #f1f3f9 100%);
+        padding: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    /* Campos longos = full-width para não cortar texto */
+    .table-mobile-cards tbody tr td[data-label="Route"],
+    .table-mobile-cards tbody tr td[data-label="Property"],
+    .table-mobile-cards tbody tr td[data-label="Venue / Event"],
+    .table-mobile-cards tbody tr td[data-label="Dates"],
+    .table-mobile-cards tbody tr td[data-label="Contact"],
+    .table-mobile-cards tbody tr td[data-label="Location"],
+    .table-mobile-cards tbody tr td[data-label="Participants"],
+    .table-mobile-cards tbody tr td[data-label="Description"],
+    .table-mobile-cards tbody tr td[data-label="Provider"] {
+        grid-column: 1 / -1;
+    }
+
+    /* Badge de expense ($) inline no header — não esticar */
+    .table-mobile-cards tbody tr td:first-child .badge {
+        display: inline-block;
+        font-size: 0.65rem;
+        padding: 0.2em 0.5em;
+        vertical-align: middle;
     }
 
     /* Célula de ações — full-width no rodapé do card */
     .table-mobile-cards tbody tr td:last-child {
-        display: block;
-        padding-left: 0;
-        padding-top: 1rem;
-        padding-bottom: 0;
-        border-top: 1px solid #dee2e6;
-        margin-top: 0.75rem;
-        text-align: right;
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
     }
 
     .table-mobile-cards tbody tr td:last-child::before {
@@ -182,8 +221,39 @@
         content: none;
     }
 
+    /* Botões de ação mais compactos no card */
+    .table-mobile-cards tbody tr td:last-child .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* Selects dentro de cards (ex: Members role) */
+    .table-mobile-cards tbody tr td .form-select-sm {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    /* Linhas de detalhe colapsáveis (details row) = full-width */
+    .table-mobile-cards tbody tr.d-none,
+    .table-mobile-cards tbody tr[id^="flight-details-"],
+    .table-mobile-cards tbody tr[id^="lodging-details-"],
+    .table-mobile-cards tbody tr[id^="transport-details-"],
+    .table-mobile-cards tbody tr[id^="ticket-details-"] {
+        grid-template-columns: 1fr;
+        border-left: 3px solid #5b73e8;
+    }
+
+    .table-mobile-cards tbody tr[id^="flight-details-"] td,
+    .table-mobile-cards tbody tr[id^="lodging-details-"] td,
+    .table-mobile-cards tbody tr[id^="transport-details-"] td,
+    .table-mobile-cards tbody tr[id^="ticket-details-"] td {
+        grid-column: 1 / -1;
+    }
+
     /* Filtros colapsáveis no mobile */
-    .lodging-filters-container {
+    .lodging-filters-container,
+    .participant-filters-container,
+    .section-filters-container {
         max-height: 0;
         overflow: hidden;
         opacity: 0;
@@ -191,7 +261,9 @@
         transition: all 0.3s ease;
     }
 
-    .lodging-filters-container.show {
+    .lodging-filters-container.show,
+    .participant-filters-container.show,
+    .section-filters-container.show {
         max-height: 500px;
         opacity: 1;
         margin-top: 1rem;
@@ -202,6 +274,26 @@
     .select-min-220 {
         min-width: unset;
         width: 100%;
+    }
+
+    /* Cards compactos para tabelas com poucos campos (ex: Participants) */
+    .table-mobile-compact tbody tr {
+        grid-template-columns: 1fr !important;
+    }
+
+    .table-mobile-compact tbody tr td:first-child {
+        background: #f8f9fc;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .table-mobile-compact tbody tr td:first-child::before {
+        display: none;
+    }
+
+    .table-mobile-compact tbody tr td {
+        padding: 0.4rem 0.75rem;
     }
 }
 
