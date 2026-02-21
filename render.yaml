@@ -1,0 +1,47 @@
+# Configuração de deploy para Render — https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: kovoy-app
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    region: oregon
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: DB_PATH
+        value: /app/data/app.db
+      # Segredos — configurar manualmente no painel do Render
+      - key: JWT_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: APP_BASE_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: GLITCHTIP_DSN_BACKEND
+        sync: false
+      - key: GLITCHTIP_DSN_FRONTEND
+        sync: false
+    disk:
+      name: sqlite-data
+      mountPath: /app/data
+      sizeGB: 1
