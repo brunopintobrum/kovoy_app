@@ -1,81 +1,34 @@
 /* Groups Page Custom Styles */
 
 /* Hover Effects for Cards */
+/* Nota: overflow e z-index de dropdown resolvidos via Popper strategy: 'fixed' em groups.js */
 .group-card {
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
-    overflow: visible !important; /* Permite dropdown sair do card */
     position: relative;
-    z-index: 1;
 }
 
 .group-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    border-left-color: #5b73e8;
-    z-index: 2;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-left-color: #556ee6;
 }
 
-/* Card com dropdown aberto tem prioridade máxima */
-.group-card:has(.btn-group.show) {
-    z-index: 10000 !important;
-}
-
-/* Card Body - Garantir que dropdown não seja cortado */
-.group-card .card-body {
-    overflow: visible !important;
-    position: relative;
-}
-
-/* Dropdown menu - Garantir que apareça acima */
-.group-card .dropdown-menu {
-    z-index: 9999 !important;
-}
-
-/* FIX CRÍTICO: Dropdown sendo cortado */
+/* Dropdown — z-index seguro acima de modais */
 .dropdown-menu {
-    max-height: none !important;
-    overflow: visible !important;
-    min-width: 200px !important;
-    z-index: 9999 !important;
-    position: absolute !important;
+    z-index: 1060;
 }
 
-.dropdown-menu-end {
-    max-height: none !important;
-    overflow: visible !important;
-    z-index: 9999 !important;
-}
-
-/* Garantir que btn-group não limite dropdown */
-.btn-group {
-    position: relative;
-    z-index: 1;
-}
-
-/* CRITICAL: Dropdown menu deve estar SEMPRE acima dos cards */
-.btn-group.show {
-    z-index: 10000 !important;
-}
-
-.btn-group .dropdown-menu {
-    position: absolute !important;
-    will-change: transform;
-    top: 100% !important;
-    right: 0 !important;
-    left: auto !important;
-    z-index: 10001 !important;
-}
-
-/* Leave group item - Destacar */
-.dropdown-item.text-danger {
-    color: #dc3545 !important;
+/* Leave group item - Destacar (especificidade aumentada para evitar !important) */
+.dropdown-menu .dropdown-item.text-danger {
+    color: #dc3545;
     font-weight: 500;
 }
 
-.dropdown-item.text-danger:hover {
-    background-color: #dc3545 !important;
-    color: white !important;
+.dropdown-menu .dropdown-item.text-danger:hover,
+.dropdown-menu .dropdown-item.text-danger:focus {
+    background-color: #dc3545;
+    color: #ffffff;
 }
 
 /* Dropdown divider */
@@ -94,18 +47,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* FIX: Permitir dropdown sair da tabela */
-.table-responsive {
-    overflow: visible !important;
-}
-
-.table {
-    overflow: visible !important;
-}
-
-.card-body {
-    overflow: visible !important;
-}
+/* Nota: overflow do .table-responsive resolvido via Popper strategy: 'fixed' em groups.js */
 
 /* Avatar Sizes */
 .avatar-sm {
@@ -135,8 +77,8 @@
 }
 
 .form-control:focus {
-    border-color: #5b73e8;
-    box-shadow: 0 0 0 0.2rem rgba(91, 115, 232, 0.15);
+    border-color: #556ee6;
+    box-shadow: 0 0 0 0.2rem rgba(85, 110, 230, 0.15);
 }
 
 /* Accept Invite Card */
