@@ -84,6 +84,17 @@
         submitButton.setAttribute('aria-busy', isSubmitting ? 'true' : 'false');
     };
 
+    const showToast = (type, message) => {
+        const toastId = type === 'success' ? 'successToast' : 'errorToast';
+        const messageId = type === 'success' ? 'successToastMessage' : 'errorToastMessage';
+        const toastEl = document.getElementById(toastId);
+        const messageEl = document.getElementById(messageId);
+        if (!toastEl || !messageEl) return;
+        messageEl.textContent = message;
+        const toast = new window.bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+    };
+
     const evaluatePassword = () => {
         const password = passwordInput ? passwordInput.value : '';
         const hasInput = password.length > 0;
@@ -229,7 +240,7 @@
                 }
 
                 const data = await res.json().catch(() => ({}));
-                setAlert('Account created successfully. Redirecting...', 'success');
+                showToast('success', 'Account created successfully. Redirecting...');
                 setTimeout(() => {
                     if (data.emailVerificationRequired) {
                         window.location.href = `/email-verification?email=${encodeURIComponent(emailValue)}`;

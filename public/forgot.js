@@ -19,6 +19,17 @@
         alertBox.style.display = message ? 'block' : 'none';
     };
 
+    const showToast = (type, message) => {
+        const toastId = type === 'success' ? 'successToast' : 'errorToast';
+        const messageId = type === 'success' ? 'successToastMessage' : 'errorToastMessage';
+        const toastEl = document.getElementById(toastId);
+        const messageEl = document.getElementById(messageId);
+        if (!toastEl || !messageEl) return;
+        messageEl.textContent = message;
+        const toast = new window.bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+    };
+
     if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -45,7 +56,7 @@
                     setAlert('Unable to send the email right now. Please try again.', 'error');
                     return;
                 }
-                setAlert('If the email exists, we will send you reset instructions.', 'success');
+                showToast('success', 'If the email exists, we will send you reset instructions.');
             } catch (err) {
                 setAlert('Connection error. Please try again.', 'error');
             } finally {

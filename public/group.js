@@ -1273,7 +1273,11 @@
             participantRows.innerHTML = '';
             const balances = state.summary.participantBalances || [];
             if (!balances.length) {
-                participantRows.innerHTML = '<tr><td colspan="2" class="text-muted text-center">No data.</td></tr>';
+                participantRows.innerHTML = `
+                    <tr><td colspan="2" class="text-center py-4">
+                        <i class="mdi mdi-scale-balance d-block mb-2" style="font-size:2rem;opacity:.45"></i>
+                        <div class="text-muted">No balances yet. Add expenses to see participant balances.</div>
+                    </td></tr>`;
             } else {
                 balances.forEach((item) => {
                     const tr = document.createElement('tr');
@@ -1297,7 +1301,11 @@
             familyRows.innerHTML = '';
             const balances = state.summary.familyBalances || [];
             if (!balances.length) {
-                familyRows.innerHTML = '<tr><td colspan="2" class="text-muted text-center">No data.</td></tr>';
+                familyRows.innerHTML = `
+                    <tr><td colspan="2" class="text-center py-4">
+                        <i class="mdi mdi-home-group d-block mb-2" style="font-size:2rem;opacity:.45"></i>
+                        <div class="text-muted">No family balances yet. Create families and add expenses.</div>
+                    </td></tr>`;
             } else {
                 balances.forEach((item) => {
                     const tr = document.createElement('tr');
@@ -1318,7 +1326,11 @@
         list.innerHTML = '';
         const debts = state.summary.debts || [];
         if (!debts.length) {
-            list.innerHTML = '<li class="list-group-item text-muted text-center">No debts yet.</li>';
+            list.innerHTML = `
+                <li class="list-group-item text-center py-4">
+                    <i class="mdi mdi-cash-check d-block mb-2" style="font-size:2rem;opacity:.45"></i>
+                    <div class="text-muted">No debts yet. Everyone is settled up!</div>
+                </li>`;
             return;
         }
         debts.forEach((debt) => {
@@ -2233,7 +2245,12 @@
         if (!list) return;
         list.innerHTML = '';
         if (!state.members.length) {
-            list.innerHTML = '<tr><td colspan="3" class="text-muted text-center">No members yet.</td></tr>';
+            list.innerHTML = `
+                <tr><td colspan="3" class="text-center py-4">
+                    <i class="mdi mdi-account-group-outline d-block mb-2" style="font-size:2rem;opacity:.45"></i>
+                    <div class="text-muted mb-3">No members yet. Invite people to collaborate on this group.</div>
+                    ${state.canManage ? '<button class="btn btn-sm btn-primary" onclick="document.getElementById(\'inviteEmail\')?.focus()"><i class="mdi mdi-email-plus-outline me-1"></i>Invite member</button>' : ''}
+                </td></tr>`;
             return;
         }
         state.members.forEach((member) => {
@@ -4058,35 +4075,43 @@
             if (button.dataset.action === 'save-member-role') {
                 const select = document.querySelector(`select[data-member-role="${userId}"]`);
                 const role = select?.value || '';
+                setButtonLoading(button, 'Saving...');
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/members/${userId}`, {
                         method: 'PUT',
                         body: JSON.stringify({ role })
                     });
+                    showToast('success', 'Role updated.');
                     await refreshData();
                 } catch (err) {
                     if (errorEl) {
                         errorEl.textContent = err.message;
                         errorEl.classList.remove('d-none');
                     }
+                } finally {
+                    resetButtonLoading(button);
                 }
             }
 
             if (button.dataset.action === 'remove-member') {
                 const memberName = button.dataset.name || 'this member';
-                if (!confirm(`Are you sure you want to remove ${memberName} from the group?`)) {
+                if (!(await confirmAction(`Are you sure you want to remove ${memberName} from the group?`))) {
                     return;
                 }
+                setButtonLoading(button, 'Removing...');
                 try {
                     await apiRequest(`/api/groups/${state.groupId}/members/${userId}`, {
                         method: 'DELETE'
                     });
+                    showToast('success', 'Member removed.');
                     await refreshData();
                 } catch (err) {
                     if (errorEl) {
                         errorEl.textContent = err.message;
                         errorEl.classList.remove('d-none');
                     }
+                } finally {
+                    resetButtonLoading(button);
                 }
             }
         });
