@@ -44,6 +44,25 @@ const loadEnvFile = () => {
 
 loadEnvFile();
 
+// Validação de variáveis críticas em produção
+if (process.env.NODE_ENV === 'production') {
+    const required = ['JWT_SECRET', 'APP_BASE_URL', 'ALLOWED_ORIGINS'];
+    const missing = required.filter(k => !process.env[k]);
+    if (missing.length) {
+        console.error(`[FATAL] Variáveis de ambiente obrigatórias não configuradas: ${missing.join(', ')}`);
+        process.exit(1);
+    }
+    if (process.env.JWT_SECRET === 'change-this-secret' || process.env.JWT_SECRET === 'change-me') {
+        console.error('[FATAL] JWT_SECRET não pode usar o valor padrão em produção.');
+        process.exit(1);
+    }
+    const optional = ['SMTP_HOST', 'GOOGLE_CLIENT_ID'];
+    const missingOpt = optional.filter(k => !process.env[k]);
+    if (missingOpt.length) {
+        console.warn(`[WARN] Variáveis opcionais não configuradas (funcionalidades limitadas): ${missingOpt.join(', ')}`);
+    }
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(ROOT_DIR, 'data');
@@ -895,6 +914,15 @@ app.use(express.static(PUBLIC_DIR));
 // Some deployments keep a locale prefix (e.g. `/br`) in the URL while still serving the same HTML.
 // Our HTML uses relative asset paths (`assets/...`), so we also expose the same static root under `/br`.
 app.use('/br', express.static(PUBLIC_DIR));
+app.get('/health', (req, res) => {
+    try {
+        db.prepare('SELECT 1').get();
+        res.json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
+    } catch (err) {
+        res.status(503).json({ status: 'error', message: 'Database unreachable' });
+    }
+});
+
 app.get('/api/config/sentry', (req, res) => {
     res.json({
         dsn: GLITCHTIP_DSN_FRONTEND || null,
