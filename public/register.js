@@ -229,7 +229,7 @@
                 }
 
                 const data = await res.json().catch(() => ({}));
-                setAlert('Account created successfully. Redirecting...', 'success');
+                showToast('success', 'Account created successfully. Redirecting...');
                 setTimeout(() => {
                     if (data.emailVerificationRequired) {
                         window.location.href = `/email-verification?email=${encodeURIComponent(emailValue)}`;

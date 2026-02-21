@@ -1,6 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
+// Provide global showToast (injected by assets/js/app.js at runtime)
+if (typeof window.showToast !== 'function') {
+  window.showToast = () => {};
+}
+
 const loadPage = (relativePath) => {
   const html = fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8');
   const parsed = new DOMParser().parseFromString(html, 'text/html');

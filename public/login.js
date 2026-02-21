@@ -183,7 +183,7 @@
                     return;
                 }
 
-                setAlert('Signed in successfully. Redirecting...', 'success');
+                showToast('success', 'Signed in successfully. Redirecting...');
                 setTimeout(() => {
                     window.location.href = redirectUrl;
                 }, 600);

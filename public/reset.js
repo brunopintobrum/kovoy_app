@@ -43,7 +43,7 @@
                     return;
                 }
 
-                setAlert('Password updated. Redirecting...', 'success');
+                showToast('success', 'Password updated. Redirecting...');
                 setTimeout(() => {
                     window.location.href = '/login';
                 }, 700);

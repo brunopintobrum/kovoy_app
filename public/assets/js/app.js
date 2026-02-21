@@ -294,3 +294,37 @@ File: Main Js File
     
 
 })(jQuery)
+
+// --- Global toast utility (used by all pages) ---
+;(function () {
+    if (!document.getElementById('successToast')) {
+        var container = document.createElement('div');
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '11000';
+        container.innerHTML =
+            '<div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">' +
+                '<div class="d-flex">' +
+                    '<div class="toast-body" id="successToastMessage"></div>' +
+                    '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>' +
+                '</div>' +
+            '</div>' +
+            '<div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">' +
+                '<div class="d-flex">' +
+                    '<div class="toast-body" id="errorToastMessage"></div>' +
+                    '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(container);
+    }
+
+    window.showToast = function (type, message) {
+        var toastId = type === 'success' ? 'successToast' : 'errorToast';
+        var messageId = type === 'success' ? 'successToastMessage' : 'errorToastMessage';
+        var toastEl = document.getElementById(toastId);
+        var messageEl = document.getElementById(messageId);
+        if (!toastEl || !messageEl) return;
+        messageEl.textContent = message;
+        var toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+    };
+})()
