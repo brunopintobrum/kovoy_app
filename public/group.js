@@ -1734,18 +1734,16 @@
         const content = document.getElementById('flightDetailsContent');
         if (!content) return;
 
-        const route = [flight.from, flight.to].filter(Boolean).join(' → ') || '-';
+        const route = [flight.fromLabel || flight.from, flight.toLabel || flight.to].filter(Boolean).join(' → ') || '-';
         const departure = formatDateTime(flight.departAt);
         const arrival = formatDateTime(flight.arriveAt);
-        const passengerNames = (flight.passengers || [])
-            .map((p) => {
-                const member = state.members.find((m) => m.userId === p.userId || m.id === p.userId);
-                return member ? (member.name || member.email || p.userId) : p.userId;
-            })
+        const participantMap = new Map(state.participants.map((p) => [p.id, p.displayName]));
+        const passengerNames = (flight.participantIds || [])
+            .map((id) => participantMap.get(id))
             .filter(Boolean);
         const passengerList = passengerNames.length
             ? passengerNames.map((n) => `<span class="badge bg-light text-dark border me-1 mb-1">${n}</span>`).join('')
-            : '-';
+            : '<span class="text-muted">No passengers selected.</span>';
         const expenseInfo = flight.expenseId
             ? '<span class="badge bg-success">Linked to expense</span>'
             : '<span class="text-muted">No linked expense</span>';
