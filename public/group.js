@@ -1635,9 +1635,49 @@
             const routeLabel = `${flight.fromLabel || flight.from || '-'} → ${flight.toLabel || flight.to || '-'}`;
             const expenseBadge = flight.expenseId ? '<span class="badge bg-success ms-1" title="Linked expense">$</span>' : '';
             const detailsId = `flight-details-${flight.id}`;
+            const durationMs = flight.departAt && flight.arriveAt
+                ? new Date(flight.arriveAt) - new Date(flight.departAt)
+                : 0;
+            const durationLabel = durationMs > 0
+                ? (() => {
+                    const h = Math.floor(durationMs / 3600000);
+                    const m = Math.floor((durationMs % 3600000) / 60000);
+                    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+                })()
+                : '';
+            const departTime = flight.departAt
+                ? new Date(flight.departAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+                : '-';
+            const arriveTime = flight.arriveAt
+                ? new Date(flight.arriveAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+                : '-';
+            const fromCode = flight.from || '-';
+            const toCode = flight.to || '-';
+            const mobileRoute = `
+                <div class="flight-mobile-info d-md-none mt-2">
+                    <div class="mb-2">${formatStatusBadge(flight.status)}</div>
+                    <div class="d-flex align-items-center">
+                        <div class="text-center" style="min-width:46px">
+                            <div class="fw-bold lh-1" style="font-size:1.05rem">${departTime}</div>
+                            <div class="text-muted" style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.04em">${fromCode}</div>
+                        </div>
+                        <div class="flex-fill px-2">
+                            ${durationLabel ? `<div class="text-center text-muted mb-1" style="font-size:0.68rem">${durationLabel}</div>` : ''}
+                            <div class="d-flex align-items-center">
+                                <div class="flex-fill" style="height:1px;background:#ced4da"></div>
+                                <i class="mdi mdi-airplane mx-1" style="font-size:0.85rem;color:#5b73e8"></i>
+                            </div>
+                        </div>
+                        <div class="text-center" style="min-width:46px">
+                            <div class="fw-bold lh-1" style="font-size:1.05rem">${arriveTime}</div>
+                            <div class="text-muted" style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.04em">${toCode}</div>
+                        </div>
+                    </div>
+                </div>`;
             const tr = document.createElement('tr');
+            tr.dataset.status = flight.status || 'planned';
             tr.innerHTML = `
-                <td data-label="Flight">${flightLabel || '-'}${expenseBadge}</td>
+                <td data-label="Flight">${flightLabel || '-'}${expenseBadge}${mobileRoute}</td>
                 <td data-label="Route">${routeLabel}</td>
                 <td data-label="Departure">${formatDateTime(flight.departAt)}</td>
                 <td data-label="Arrival">${formatDateTime(flight.arriveAt)}</td>

@@ -250,6 +250,32 @@
         grid-column: 1 / -1;
     }
 
+    /* ── Flight rows: card visual compacto (Google Flights style) ── */
+
+    /* Borda esquerda reflete status */
+    #flightList tr[data-status="paid"] { border-left-color: #34c38f; }
+    #flightList tr[data-status="due"]  { border-left-color: #f1b44c; }
+
+    /* Ocultar células cujo conteúdo já está no visual do card */
+    #flightList tr td[data-label="Route"],
+    #flightList tr td[data-label="Departure"],
+    #flightList tr td[data-label="Arrival"],
+    #flightList tr td[data-label="Status"] {
+        display: none;
+    }
+
+    /* Primeiro td: layout em coluna para acomodar o route visual */
+    #flightList tr td[data-label="Flight"] {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Ocultar o pseudo-label "FLIGHT" no primeiro td (visual fala por si) */
+    #flightList tr td[data-label="Flight"]::before {
+        display: none;
+    }
+
     /* Filtros colapsáveis no mobile */
     .lodging-filters-container,
     .participant-filters-container,
