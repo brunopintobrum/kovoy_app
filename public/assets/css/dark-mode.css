@@ -1,0 +1,278 @@
+/* ================================================
+   Dark Mode — Kovoy App
+   Aplicado via body[data-theme="dark"]
+   Persistido em localStorage key: "kv_theme"
+   ================================================ */
+
+body[data-theme="dark"] {
+    background-color: #1a1d21;
+    color: #ced4da;
+}
+
+/* ── Topbar ── */
+body[data-theme="dark"] #page-topbar {
+    background-color: #222736;
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .navbar-header .dropdown .show.header-item,
+body[data-theme="dark"] .header-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+body[data-theme="dark"] .header-item {
+    color: #e9ecef;
+}
+
+body[data-theme="dark"] .noti-icon i {
+    color: #ced4da;
+}
+
+/* ── Sidebar ── */
+body[data-theme="dark"] .vertical-menu {
+    background-color: #222736;
+}
+
+body[data-theme="dark"] #sidebar-menu ul li a {
+    color: #8590a5;
+}
+
+body[data-theme="dark"] #sidebar-menu ul li a:hover,
+body[data-theme="dark"] #sidebar-menu ul li a:hover i {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] #sidebar-menu ul li.menu-title {
+    color: #6c7293;
+}
+
+body[data-theme="dark"] #sidebar-menu ul li a.active,
+body[data-theme="dark"] #sidebar-menu ul li .mm-active > a {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Main content ── */
+body[data-theme="dark"] .main-content {
+    background-color: #1a1d21;
+}
+
+body[data-theme="dark"] .page-content {
+    background-color: #1a1d21;
+}
+
+/* ── Cards ── */
+body[data-theme="dark"] .card {
+    background-color: #222736;
+    border-color: #2e3446;
+    color: #ced4da;
+}
+
+body[data-theme="dark"] .card-header {
+    background-color: #222736;
+    border-bottom-color: #2e3446;
+}
+
+body[data-theme="dark"] .card-footer {
+    background-color: #222736;
+    border-top-color: #2e3446;
+}
+
+/* ── Tables ── */
+body[data-theme="dark"] .table {
+    color: #ced4da;
+    border-color: #2e3446;
+}
+
+body[data-theme="dark"] .table thead th {
+    background-color: #2a2f3d;
+    border-bottom-color: #2e3446;
+    color: #adb5bd;
+}
+
+body[data-theme="dark"] .table tbody tr {
+    border-color: #2e3446;
+}
+
+body[data-theme="dark"] .table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+body[data-theme="dark"] .table-light {
+    background-color: #2a2f3d;
+    color: #ced4da;
+}
+
+body[data-theme="dark"] .table-responsive {
+    border-color: #2e3446;
+}
+
+/* ── Forms ── */
+body[data-theme="dark"] .form-control,
+body[data-theme="dark"] .form-select {
+    background-color: #2a2f3d;
+    border-color: #3a4060;
+    color: #ced4da;
+}
+
+body[data-theme="dark"] .form-control:focus,
+body[data-theme="dark"] .form-select:focus {
+    background-color: #2a2f3d;
+    border-color: #556ee6;
+    color: #ced4da;
+    box-shadow: 0 0 0 0.2rem rgba(85, 110, 230, 0.2);
+}
+
+body[data-theme="dark"] .form-control::placeholder {
+    color: #6c757d;
+}
+
+body[data-theme="dark"] .form-label {
+    color: #ced4da;
+}
+
+body[data-theme="dark"] .input-group-text {
+    background-color: #2e3446;
+    border-color: #3a4060;
+    color: #ced4da;
+}
+
+/* ── Modais ── */
+body[data-theme="dark"] .modal-content {
+    background-color: #222736;
+    border-color: #2e3446;
+    color: #ced4da;
+}
+
+body[data-theme="dark"] .modal-header {
+    border-bottom-color: #2e3446;
+}
+
+body[data-theme="dark"] .modal-footer {
+    border-top-color: #2e3446;
+}
+
+body[data-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* ── Dropdowns ── */
+body[data-theme="dark"] .dropdown-menu {
+    background-color: #222736;
+    border-color: #2e3446;
+    color: #ced4da;
+}
+
+body[data-theme="dark"] .dropdown-item {
+    color: #ced4da;
+}
+
+body[data-theme="dark"] .dropdown-item:hover,
+body[data-theme="dark"] .dropdown-item:focus {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .dropdown-divider {
+    border-top-color: #2e3446;
+}
+
+/* ── Nav tabs ── */
+body[data-theme="dark"] .nav-tabs {
+    border-bottom-color: #2e3446;
+}
+
+body[data-theme="dark"] .nav-tabs .nav-link {
+    color: #8590a5;
+}
+
+body[data-theme="dark"] .nav-tabs .nav-link.active {
+    background-color: #222736;
+    border-color: #2e3446 #2e3446 #222736;
+    color: #ffffff;
+}
+
+/* ── Badges / alerts ── */
+body[data-theme="dark"] .badge.bg-light {
+    background-color: #2e3446 !important;
+    color: #ced4da !important;
+}
+
+body[data-theme="dark"] .alert-info {
+    background-color: rgba(85, 110, 230, 0.15);
+    border-color: rgba(85, 110, 230, 0.3);
+    color: #a8b9f8;
+}
+
+/* ── Buttons ── */
+body[data-theme="dark"] .btn-outline-secondary {
+    color: #ced4da;
+    border-color: #495057;
+}
+
+body[data-theme="dark"] .btn-outline-secondary:hover {
+    background-color: #495057;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .btn-light {
+    background-color: #2e3446;
+    border-color: #3a4060;
+    color: #ced4da;
+}
+
+/* ── Footer ── */
+body[data-theme="dark"] .footer {
+    background-color: #222736;
+    border-top-color: #2e3446;
+    color: #6c7293;
+}
+
+/* ── Right-bar ── */
+body[data-theme="dark"] .right-bar {
+    background-color: #222736;
+    color: #ced4da;
+}
+
+body[data-theme="dark"] .rightbar-title h5 {
+    color: #ced4da;
+}
+
+/* ── Misc ── */
+body[data-theme="dark"] hr {
+    border-color: #2e3446;
+}
+
+body[data-theme="dark"] .text-muted {
+    color: #6c7293 !important;
+}
+
+body[data-theme="dark"] .border,
+body[data-theme="dark"] .border-bottom,
+body[data-theme="dark"] .border-top {
+    border-color: #2e3446 !important;
+}
+
+body[data-theme="dark"] .bg-light {
+    background-color: #2a2f3d !important;
+}
+
+body[data-theme="dark"] .bg-white {
+    background-color: #222736 !important;
+}
+
+/* ── Group cards mobile ── */
+body[data-theme="dark"] .table-mobile-cards tbody tr {
+    background-color: #222736;
+    border-color: #2e3446;
+}
+
+body[data-theme="dark"] .table-mobile-cards tbody tr td:first-child {
+    background: linear-gradient(135deg, #262c3d 0%, #222736 100%);
+    border-bottom-color: #2e3446;
+}
+
+body[data-theme="dark"] .table-mobile-cards tbody tr td:last-child {
+    background: #1e2330;
+    border-top-color: #2e3446;
+}

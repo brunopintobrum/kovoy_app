@@ -207,19 +207,23 @@ File: Main Js File
     }
 
     function initSettings() {
-        if (window.sessionStorage) {
-            var allowedThemes = ["light-mode-switch", "dark-mode-switch"];
-            var alreadyVisited = sessionStorage.getItem("is_visited");
-            if (!alreadyVisited || allowedThemes.indexOf(alreadyVisited) === -1) {
-                alreadyVisited = "light-mode-switch";
-                sessionStorage.setItem("is_visited", alreadyVisited);
-            }
-            $(".right-bar input:checkbox").prop('checked', false);
-            $("#" + alreadyVisited).prop('checked', true);
-            updateThemeSetting(alreadyVisited);
+        // Restaurar tema salvo no localStorage (persiste entre páginas e sessões)
+        var savedTheme = localStorage.getItem("kv_theme") || "light";
+        applyTheme(savedTheme);
+
+        // Sincronizar radio buttons com o tema atual
+        if (savedTheme === "dark") {
+            $("#dark-mode-switch").prop("checked", true);
+            $("#light-mode-switch").prop("checked", false);
+        } else {
+            $("#light-mode-switch").prop("checked", true);
+            $("#dark-mode-switch").prop("checked", false);
         }
-        $("#light-mode-switch, #dark-mode-switch").on("change", function (e) {
-            updateThemeSetting(e.target.id);
+
+        $("#light-mode-switch, #dark-mode-switch").on("change", function () {
+            var theme = this.id === "dark-mode-switch" ? "dark" : "light";
+            applyTheme(theme);
+            localStorage.setItem("kv_theme", theme);
         });
 
         // show password input value
@@ -227,26 +231,24 @@ File: Main Js File
             if ($(this).siblings('input').length > 0) {
                 $(this).siblings('input').attr('type') == "password" ? $(this).siblings('input').attr('type', 'input') : $(this).siblings('input').attr('type', 'password');
             }
-        })
+        });
     }
 
-    function updateThemeSetting(id) {
-        if ($("#light-mode-switch").prop("checked") == true && id === "light-mode-switch") {
-            $("html").removeAttr("dir");
-            $("#dark-mode-switch").prop("checked", false);
-            $("#rtl-mode-switch").prop("checked", false);
-            $("#dark-rtl-mode-switch").prop("checked", false);
-            $("#bootstrap-style").attr('href', 'assets/css/bootstrap.min.css');
-            $("#app-style").attr('href', 'assets/css/app.min.css');
-            sessionStorage.setItem("is_visited", "light-mode-switch");
-        } else if ($("#dark-mode-switch").prop("checked") == true && id === "dark-mode-switch") {
-            $("html").removeAttr("dir");
+    function applyTheme(theme) {
+        if (theme === "dark") {
+            $("body").attr("data-theme", "dark");
+            $("#dark-mode-switch").prop("checked", true);
             $("#light-mode-switch").prop("checked", false);
-            $("#bootstrap-style").attr('href', 'assets/css/bootstrap-dark.min.css');
-            $("#app-style").attr('href', 'assets/css/app-dark.min.css');
-            sessionStorage.setItem("is_visited", "dark-mode-switch");
+        } else {
+            $("body").removeAttr("data-theme");
+            $("#light-mode-switch").prop("checked", true);
+            $("#dark-mode-switch").prop("checked", false);
         }
+    }
 
+    // Alias mantido para compatibilidade
+    function updateThemeSetting(id) {
+        applyTheme(id === "dark-mode-switch" ? "dark" : "light");
     }
 
     function initLanguage() {
