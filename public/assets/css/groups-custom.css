@@ -276,6 +276,62 @@
         display: none;
     }
 
+    /* ── flight-mobile-info: layout interno do card ── */
+    .flight-mobile-info {
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .fmi-row {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+    }
+
+    .fmi-airport {
+        width: 46px;
+        flex-shrink: 0;
+        text-align: center;
+    }
+
+    .fmi-time {
+        font-size: 1.05rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .fmi-code {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #8590a5;
+    }
+
+    .fmi-middle {
+        flex: 1 1 0;
+        min-width: 0;
+        overflow: hidden;
+        padding: 0 0.5rem;
+    }
+
+    .fmi-duration {
+        font-size: 0.68rem;
+        color: #8590a5;
+        text-align: center;
+        margin-bottom: 0.25rem;
+    }
+
+    .fmi-line {
+        flex: 1 1 0;
+        height: 1px;
+        background: #ced4da;
+    }
+
+    .fmi-plane-icon {
+        font-size: 0.85rem;
+        color: #5b73e8;
+    }
+
     /* Filtros colapsáveis no mobile */
     .lodging-filters-container,
     .participant-filters-container,

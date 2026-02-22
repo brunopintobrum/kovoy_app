@@ -1548,6 +1548,12 @@
         });
     };
 
+    const extractIata = (val) => {
+        if (!val) return '-';
+        const m = val.match(/\(([A-Z]{3})\)/);
+        return m ? m[1] : val.trim().slice(0, 3).toUpperCase();
+    };
+
     const renderFlights = () => {
         const list = document.getElementById('flightList');
         if (!list) return;
@@ -1651,31 +1657,26 @@
             const arriveTime = flight.arriveAt
                 ? new Date(flight.arriveAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
                 : '-';
-            const extractIata = (val) => {
-                if (!val) return '-';
-                const m = val.match(/\(([A-Z]{3})\)/);
-                return m ? m[1] : val.trim().slice(0, 3).toUpperCase();
-            };
             const fromCode = flight.fromAirportId || extractIata(flight.from);
             const toCode = flight.toAirportId || extractIata(flight.to);
             const mobileRoute = `
-                <div class="flight-mobile-info d-md-none mt-2" style="overflow:hidden;width:100%">
+                <div class="flight-mobile-info d-md-none mt-2">
                     <div class="mb-2">${formatStatusBadge(flight.status)}</div>
-                    <div class="d-flex align-items-center" style="min-width:0">
-                        <div class="text-center" style="width:46px;flex-shrink:0">
-                            <div class="fw-bold lh-1" style="font-size:1.05rem">${departTime}</div>
-                            <div class="text-muted" style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.04em">${fromCode}</div>
+                    <div class="fmi-row">
+                        <div class="fmi-airport">
+                            <div class="fmi-time">${departTime}</div>
+                            <div class="fmi-code">${fromCode}</div>
                         </div>
-                        <div class="flex-fill px-2" style="min-width:0;overflow:hidden">
-                            ${durationLabel ? `<div class="text-center text-muted mb-1" style="font-size:0.68rem">${durationLabel}</div>` : ''}
+                        <div class="fmi-middle">
+                            ${durationLabel ? `<div class="fmi-duration">${durationLabel}</div>` : ''}
                             <div class="d-flex align-items-center">
-                                <div class="flex-fill" style="height:1px;background:#ced4da"></div>
-                                <i class="mdi mdi-airplane mx-1" style="font-size:0.85rem;color:#5b73e8"></i>
+                                <div class="fmi-line"></div>
+                                <i class="mdi mdi-airplane mx-1 fmi-plane-icon"></i>
                             </div>
                         </div>
-                        <div class="text-center" style="width:46px;flex-shrink:0">
-                            <div class="fw-bold lh-1" style="font-size:1.05rem">${arriveTime}</div>
-                            <div class="text-muted" style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.04em">${toCode}</div>
+                        <div class="fmi-airport">
+                            <div class="fmi-time">${arriveTime}</div>
+                            <div class="fmi-code">${toCode}</div>
                         </div>
                     </div>
                 </div>`;
