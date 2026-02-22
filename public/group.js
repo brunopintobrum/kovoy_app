@@ -1727,6 +1727,93 @@
         });
     };
 
+    const openFlightDetailsModal = (flightId) => {
+        const flight = state.flights.find((f) => f.id === flightId);
+        if (!flight) return;
+
+        const content = document.getElementById('flightDetailsContent');
+        if (!content) return;
+
+        const route = [flight.from, flight.to].filter(Boolean).join(' → ') || '-';
+        const departure = formatDateTime(flight.departAt);
+        const arrival = formatDateTime(flight.arriveAt);
+        const passengerNames = (flight.passengers || [])
+            .map((p) => {
+                const member = state.members.find((m) => m.userId === p.userId || m.id === p.userId);
+                return member ? (member.name || member.email || p.userId) : p.userId;
+            })
+            .filter(Boolean);
+        const passengerList = passengerNames.length
+            ? passengerNames.map((n) => `<span class="badge bg-light text-dark border me-1 mb-1">${n}</span>`).join('')
+            : '-';
+        const expenseInfo = flight.expenseId
+            ? '<span class="badge bg-success">Linked to expense</span>'
+            : '<span class="text-muted">No linked expense</span>';
+
+        const modalLabel = document.getElementById('flightDetailsModalLabel');
+        if (modalLabel) modalLabel.textContent = flight.airline ? `${flight.airline} ${flight.flightNumber || ''}`.trim() : 'Flight Details';
+
+        content.innerHTML = `
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Flight Information</h6>
+                <div class="mb-2"><strong>Airline:</strong> ${flight.airline || '-'}</div>
+                <div class="mb-2"><strong>Flight Number:</strong> ${flight.flightNumber || '-'}</div>
+                <div class="mb-2"><strong>Status:</strong> ${formatStatusBadge(flight.status)}</div>
+                <div class="mb-2"><strong>Class:</strong> ${formatFlightClassLabel(flight.cabinClass)}</div>
+                <div class="mb-2"><strong>PNR:</strong> ${flight.pnr || '-'}</div>
+            </div>
+            <div class="col-12"><hr></div>
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Route</h6>
+                <div class="mb-2"><strong>Route:</strong> ${route}</div>
+                <div class="mb-2"><strong>Departure:</strong> ${departure}</div>
+                <div class="mb-2"><strong>Arrival:</strong> ${arrival}</div>
+            </div>
+            <div class="col-12"><hr></div>
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Cost & Expense</h6>
+                <div class="mb-2"><strong>Cost:</strong> ${formatCurrency(flight.cost, flight.currency)}</div>
+                <div class="mb-2"><strong>Expense:</strong> ${expenseInfo}</div>
+            </div>
+            <div class="col-12"><hr></div>
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Passengers (${passengerNames.length})</h6>
+                <div>${passengerList}</div>
+            </div>
+            ${flight.notes ? `
+            <div class="col-12"><hr></div>
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted mb-2">Notes</h6>
+                <div>${flight.notes}</div>
+            </div>
+            ` : ''}
+        `;
+
+        const editBtn = document.getElementById('flightDetailsEdit');
+        const deleteBtn = document.getElementById('flightDetailsDelete');
+
+        if (editBtn) {
+            editBtn.onclick = () => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('flightDetailsModal'));
+                modal?.hide();
+                document.querySelector('[data-action="edit-flight"][data-id="' + flightId + '"]')?.click();
+            };
+            editBtn.disabled = !state.canEdit;
+        }
+
+        if (deleteBtn) {
+            deleteBtn.onclick = () => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('flightDetailsModal'));
+                modal?.hide();
+                document.querySelector('[data-action="delete-flight"][data-id="' + flightId + '"]')?.click();
+            };
+            deleteBtn.disabled = !state.canEdit;
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('flightDetailsModal'));
+        modal.show();
+    };
+
     const openLodgingDetailsModal = (lodgingId) => {
         const lodging = state.lodgings.find((l) => l.id === lodgingId);
         if (!lodging) return;
@@ -4304,9 +4391,12 @@
                 const id = button.dataset.id;
                 if (!id) return;
                 if (action === 'toggle-flight-details') {
-                    const detailsRow = document.getElementById(`flight-details-${id}`);
-                    if (detailsRow) {
-                        detailsRow.classList.toggle('d-none');
+                    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+                    if (isMobile) {
+                        openFlightDetailsModal(id);
+                    } else {
+                        const detailsRow = document.getElementById(`flight-details-${id}`);
+                        if (detailsRow) detailsRow.classList.toggle('d-none');
                     }
                     return;
                 }
