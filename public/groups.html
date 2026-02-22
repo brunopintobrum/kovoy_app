@@ -11,6 +11,13 @@
     <link href="/assets/css/icons.min.css" rel="stylesheet" />
     <link href="/assets/css/app.min.css" id="app-style" rel="stylesheet" />
     <link href="/assets/css/groups-custom.css" rel="stylesheet" />
+    <link href="/assets/css/dark-mode.css" rel="stylesheet" />
+    <script>
+        (function () {
+            var t = localStorage.getItem('kv_theme');
+            if (t === 'dark') document.body ? document.body.setAttribute('data-theme','dark') : document.addEventListener('DOMContentLoaded', function(){ document.body.setAttribute('data-theme','dark'); });
+        })();
+    </script>
 </head>
 <body data-layout-mode="light" data-topbar="light" data-sidebar="dark">
     <div id="layout-wrapper">
