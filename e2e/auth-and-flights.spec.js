@@ -57,7 +57,7 @@ test('register, login, and manage a group', async ({ page }) => {
     await page.waitForSelector('#expenseDescription', { state: 'visible', timeout: 10000 });
     await page.fill('#expenseDescription', 'Airbnb');
     await page.fill('#expenseAmount', '120');
-    await page.fill('#expenseDate', '2026-02-22');
+    await page.fill('#expenseDate', '2026-04-22');
     await page.selectOption('#expenseCurrency', 'USD'); // Campo que estava faltando!
     await page.fill('#expenseCategory', 'Lodging');
     await page.selectOption('#expensePayer', { label: 'Bruno' });
