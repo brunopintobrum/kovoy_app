@@ -148,7 +148,7 @@ describe('group modules with linked expense', () => {
             },
             body: JSON.stringify({
                 type: 'Magic Ticket',
-                eventAt: '2026-03-01T09:00:00Z',
+                eventAt: '2026-04-01T09:00:00Z',
                 location: 'Orlando',
                 status: 'planned',
                 amount: 120,
@@ -159,7 +159,7 @@ describe('group modules with linked expense', () => {
                     description: 'Ticket: Magic Ticket',
                     amount: 120,
                     currency: 'USD',
-                    date: '2026-03-01T09:00:00Z',
+                    date: '2026-04-01T09:00:00Z',
                     category: 'Ticket',
                     payerParticipantId: participantId,
                     splitType: 'participants',
