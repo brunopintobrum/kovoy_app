@@ -494,9 +494,9 @@ Este projeto segue **GitHub Flow**. Veja o guia completo em [`docs/GIT_WORKFLOW.
 - Commits: Conventional Commits (`feat:`, `fix:`, `refactor:`, etc)
 - PRs: Use o template automatico (`.github/pull_request_template.md`)
 
-## Versionamento e changelog
+## Changelog
 
-Nao definido. Sugestao: SemVer + `CHANGELOG.md`.
+Veja o histórico consolidado de atualizações e melhorias do projeto em [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ## Seguranca
 
@@ -512,43 +512,4 @@ Nao definida. Adicione um `LICENSE` quando decidir.
 Mantenedor: Bruno Pinto Brum
 Contato: brunobrum@gmail.com
 
-## Atualizacoes recentes
-
-- Dependencias de upload e email atualizadas: multer 2.x e nodemailer 7.x.
-- `npm audit fix --force` aplicado para zerar vulnerabilidades.
-- `npm test` executado com sucesso.
-- Playwright E2E e pipeline CI adicionados.
-- Fluxo de grupos finalizado (convites, validacoes e UX do painel).
-- Validacao de split e testes de convites adicionados.
-- Despesas: editar pelo painel (UI)
-- CRUD completo de voos/hospedagens/transportes/tickets no dashboard.
-- Base V2: modulos aceitam vinculo opcional de despesa (expense_id).
-- UI: toggle para vincular despesas nos modulos (V2 opcional).
-- Voos V2: chegada agora sincroniza com a partida no formulario.
-- Transportes V2: validacao de chegada posterior a partida no backend.
-- Voos V2: campos avancados + participantes vinculados no modulo de grupos.
-- Transportes V2: UI valida chegada posterior a partida.
-- Hospedagens V2: UI valida check-out posterior ao check-in.
-- Hospedagens V2: check-out sincroniza com check-in quando o campo esta vazio.
-- Hospedagens V2: Property com datalist de nomes mais usados + fallback fixo via `/api/groups/:groupId/lodging-properties`.
-- Hospedagens V2: Country select + sugestoes de City/State por pais com base oficial + historico.
-- Localizacoes: scripts GeoNames (download/conversao/import) para popular countries/states/cities.
-- Transportes V2: chegada sincroniza com partida quando o campo esta vazio.
-- Tickets V2: UI valida data/hora futura quando status=planned.
-- Schema: tabela group_flight_participants para vinculo de passageiros nos voos.
-- Voos V2 (proximos): validar chegada > partida, exibir classe/assento/bagagem na lista, seletor de passageiros com busca.
-- Hospedagens V2: endereco completo + contato, quartos, check-in/out com hora e status.
-- Schema: novos campos em group_lodgings para endereco, horarios, quartos e status.
-- Transportes V2: origem/destino, datas/horas, fornecedor/localizador, status e observacoes.
-- Schema: novos campos em group_transports para origem/destino, datas/horas, fornecedor/localizador e status.
-- Tickets V2: tipo, data/hora, local, status e vinculo a participantes.
-- Schema: novos campos em group_tickets e tabela group_ticket_participants.
-- Modulos V2 agora usam o mesmo pagador/split configurado no painel para preencher as despesas vinculadas.
-- Dashboard: resumo separado da gestao em `/dashboard` e gestao completa em `/group-details`.
-- Dashboard: menu lateral direciona para secoes individuais via hash (mostra apenas o modulo selecionado).
-- Grupos: modo de saldo familiar configuravel por grupo (participants/families).
-- Membros: opcao para sair do grupo (exceto owner).
-- Avatar: imagem padrao neutra e upload de foto propria.
-- Email: suporte a Mailgun para envio de emails de verificacao e reset.
-- Deploy: suporte a Cloudflare Tunnel para expor servidor local.
 
