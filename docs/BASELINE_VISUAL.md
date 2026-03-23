@@ -1,5 +1,5 @@
 # Baseline Visual — Fase 1 da Refatoração Visual
-> Issue: #51 | EPIC: #50 | Data: 2026-02-17
+> Issue: #51 | EPIC: #50 | Criado: 2026-02-17 | Atualizado: 2026-03-23
 
 ---
 
@@ -23,15 +23,17 @@
 
 ### 1.2 CSS carregado por página
 
-| Página | bootstrap.min.css | icons.min.css | app.min.css | groups-custom.css | CSS inline |
-|---|---|---|---|---|---|
-| Auth (7 páginas) | ✅ (sem id) | ✅ | ✅ | ❌ | Mínimo |
-| `invite.html` | ✅ (sem id) | ✅ | ✅ | ❌ | 3× `font-size: 64px` |
-| `groups.html` | ✅ (id=bootstrap-style) | ✅ | ✅ (id=app-style) | ✅ | 1× `z-index: 11000` |
-| `group.html` | ✅ (id=bootstrap-style) | ✅ | ✅ (id=app-style) | ❌ ⚠️ | 2× `min-width`, 1× `z-index: 11000` — **383 linhas total** |
-| `group-details.html` | ✅ (id=bootstrap-style) | ✅ | ✅ (id=app-style) | ❌ ⚠️ | Bloco `<style>` de ~100 linhas (só aqui) + 20× `cursor:pointer` + `z-index: 11000` — **~1590 linhas total** |
+| Página | bootstrap.min.css | icons.min.css | app.min.css | auth-custom.css | groups-custom.css | dark-mode.css | CSS inline |
+|---|---|---|---|---|---|---|---|
+| Auth (7 páginas) | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | Mínimo |
+| `invite.html` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | 3× `font-size: 64px` |
+| `groups.html` | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | Mínimo |
+| `group.html` | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | Mínimo |
+| `group-details.html` | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | Zero |
 
-> ⚠️ `groups-custom.css` define estilos para dropdowns/cards que também são usados em `group.html` e `group-details.html`, mas não é carregado nessas páginas.
+> ✅ **Atualização 2026-03-23:** Quick wins da Fase 1 aplicados (commit `ae834c2`). `groups-custom.css` agora carregado em `group.html` e `group-details.html`. Bloco `<style>` inline removido de `group-details.html` (migrado para CSS externo). Inline styles (`cursor`, `z-index`, `min-width`) migrados para classes CSS.
+
+> ⚠️ **CSS órfão:** `/public/style.css` (1.106 linhas) contém um design system alternativo completo (CSS variables `--accent`, `--accent-2`, `--accent-3`, fontes Manrope/Fraunces, componentes `.ui-*`) mas **não é carregado por nenhuma página**. Decisão pendente: adotar como base para Fase 2 ou remover.
 
 ### 1.3 JS carregado por página
 
@@ -80,7 +82,16 @@
 
 ### 2.1 Uso de `!important`
 
-#### `groups-custom.css` — 21 ocorrências
+#### `groups-custom.css` — ~~21~~ → 2 ocorrências (atualizado 2026-03-23)
+
+> ✅ **Atualização:** Refatoração da Fase 4 (commit `9775fa0`) eliminou a maioria dos `!important` deste arquivo. De 21 ocorrências, restam apenas 2.
+
+| Seletor | Propriedade | Status |
+|---|---|---|
+| (2 restantes) | Verificar arquivo atual | Mantidos por necessidade de override Bootstrap |
+
+<details>
+<summary>Estado original (2026-02-17) — 21 ocorrências (histórico)</summary>
 
 | Seletor | Propriedade | Linha aprox. |
 |---|---|---|
@@ -110,10 +121,13 @@
 | `.table` | `overflow: visible !important` | 103 |
 | `.card-body` | `overflow: visible !important` | 107 |
 
-> Raiz do problema: Bootstrap `.table-responsive` usa `overflow-x: auto` nativamente. O dropdown precisa de `overflow: visible` para não ser cortado. A solução correta é usar `position: fixed` ou Popper.js com `boundary: 'viewport'` — não sobrescrever overflow globalmente.
+</details>
 
-#### `group-details.html` (bloco `<style>` inline) — 30+ ocorrências de `!important`
-Todas no contexto de `@media (max-width: 767px)` para transformar tabelas em cards mobile. Uso de `!important` justificado pela necessidade de sobrescrever Bootstrap com alta especificidade, mas o CSS deveria estar em arquivo externo.
+> Raiz do problema original: Bootstrap `.table-responsive` usa `overflow-x: auto` nativamente. A solução aplicada na Fase 4 usou Popper.js com `boundary: 'viewport'` em vez de sobrescrever overflow globalmente.
+
+#### `group-details.html` (bloco `<style>` inline) — ~~30+ ocorrências~~ → 0 (resolvido)
+
+> ✅ **Resolvido em 2026-03-23:** Bloco `<style>` inline migrado para `groups-custom.css` (commit `1aed590`, Fase 3). Zero inline styles restantes em `group-details.html`.
 
 ### 2.2 z-index — Escada não documentada
 
@@ -154,17 +168,33 @@ Todas no contexto de `@media (max-width: 767px)` para transformar tabelas em car
 | Arquivo | Breakpoints encontrados |
 |---|---|
 | `app.css` | `max-width: 992px`, `max-width: 991.98px`, `max-width: 767.98px`, `max-width: 767px`, `max-width: 600px`, `max-width: 575.98px`, `max-width: 380px`, `max-width: 1199.98px`, `min-width: 992px`, `min-width: 1200px`, `min-width: 1366px`, `@print` — **12 breakpoints distintos** |
-| `group-details.html` (inline `<style>`) | `max-width: 767px` |
-| `group.html` (inline `<style>`) | `max-width: 767px` |
-| `groups-custom.css` | **Nenhum** ❌ |
+| ~~`group-details.html` (inline `<style>`)~~ | ~~`max-width: 767px`~~ | ✅ Migrado para CSS externo |
+| ~~`group.html` (inline `<style>`)~~ | ~~`max-width: 767px`~~ | ✅ Migrado para CSS externo |
+| `groups-custom.css` | Verificar estado atual (Fase 3 adicionou breakpoints) |
 
 > `app.css` usa valores com e sem `.98px` (ex: `767px` e `767.98px`) — inconsistência clássica de migração Bootstrap 4→5.
-> `groups-custom.css` não tem nenhuma regra responsiva. O CSS de cards/dropdowns nunca se adapta a telas pequenas.
 > Breakpoints oficiais do Bootstrap 5: sm=576px, md=768px, lg=992px, xl=1200px, xxl=1400px. O projeto usa variações fora desse padrão (600px, 380px, 1366px).
 
 ---
 
 ## 3. Inconsistências de UX/UI
+
+### 3.0 Dois Design Systems coexistentes (CRÍTICO — adicionado 2026-03-23)
+
+O projeto contém **dois design systems distintos** que nunca foram reconciliados:
+
+| Aspecto | Skote Admin (ativo) | style.css (órfão) |
+|---|---|---|
+| Arquivo | `app.css` (3.771 linhas) | `style.css` (1.106 linhas) |
+| Cor primária | `#556ee6` (azul índigo) | `#1f7a6f` (teal) |
+| Cor secundária | `#5b73e8` | `#e07a5f` (coral) |
+| Fonte body | Poppins | Manrope |
+| Fonte display | — | Fraunces |
+| Theming | `data-*` attributes | CSS variables (`--accent`, `--bg`, `--text`, etc.) |
+| Componentes | Bootstrap classes | `.ui-card`, `.ui-button`, `.ui-pill`, `.ui-timeline` |
+| Carregado | Todas as páginas | **Nenhuma página** |
+
+> **Decisão necessária para Fase 2:** Adotar `style.css` como base do novo design system (migrando gradualmente) ou removê-lo como código morto. As CSS variables e a arquitetura de tokens em `style.css` são mais modernas que o padrão Skote.
 
 ### 3.1 Branding / Copy (CRÍTICO)
 
@@ -267,40 +297,41 @@ Todas no contexto de `@media (max-width: 767px)` para transformar tabelas em car
 
 ### Severidade CRÍTICA — resolver em Fase 2/3
 
-| # | Achado | Impacto de usuário |
-|---|---|---|
-| C1 | `overflow: visible !important` global quebra scroll horizontal de tabelas em mobile | Navegação — dado inacessível em telas pequenas |
-| C2 | `groups-custom.css` com escopo global (`.dropdown-menu`, `.card-body`, `.table`) — afeta toda a app | Risco de regressão em novas páginas |
-| C3 | Bloco `<style>` de 100 linhas inline em `group-details.html` — CSS de responsividade no HTML | Manutenção — deveria estar em arquivo CSS externo |
+| # | Achado | Impacto de usuário | Status |
+|---|---|---|---|
+| C1 | `overflow: visible !important` global quebra scroll horizontal de tabelas em mobile | Navegação — dado inacessível em telas pequenas | ✅ Resolvido (Fase 4) |
+| C2 | `groups-custom.css` com escopo global (`.dropdown-menu`, `.card-body`, `.table`) — afeta toda a app | Risco de regressão em novas páginas | ✅ Resolvido (Fase 4) |
+| C3 | Bloco `<style>` de 100 linhas inline em `group-details.html` — CSS de responsividade no HTML | Manutenção — deveria estar em arquivo CSS externo | ✅ Resolvido (Fase 3) |
+| C4 | Dois design systems coexistentes (`app.css` Skote vs `style.css` órfão) | Arquitetura — decisão bloqueante para Fase 2 | ⏳ Pendente |
 
 ### Severidade ALTA — resolver em Fase 5
 
-| # | Achado | Impacto de usuário |
-|---|---|---|
-| A1 | Títulos e meta tags de auth com copy do template Themesbrand | Confiança — SEO e aba do browser exibem nome errado |
-| A2 | `invite.html` com estrutura HTML completamente diferente das outras auth pages | Consistência — usuário percebe layout diferente |
-| A3 | Logo dark com `height=17px` vs logo light com `height=36px` | Legibilidade — logo praticamente invisível no modo dark |
+| # | Achado | Impacto de usuário | Status |
+|---|---|---|---|
+| A1 | Títulos e meta tags de auth com copy do template Themesbrand | Confiança — SEO e aba do browser exibem nome errado | ✅ Resolvido (2026-03-23) |
+| A2 | `invite.html` com estrutura HTML completamente diferente das outras auth pages | Consistência — usuário percebe layout diferente | Verificar se Fase 5 resolveu |
+| A3 | Logo dark com `height=17px` vs logo light com `height=36px` | Legibilidade — logo praticamente invisível no modo dark | Verificar se Fase 5 resolveu |
 
 ### Severidade MÉDIA — resolver em Fases 3/4
 
-| # | Achado | Impacto de usuário |
-|---|---|---|
-| M1 | `groups-custom.css` não carregado em `group.html` e `group-details.html` | Funcional — dropdowns nessas páginas sem estilo correto |
-| M2 | ~20× `style="cursor:pointer"` em `th.sortable` — deveria ser classe CSS | Manutenção |
-| M3 | `z-index: 11000` inline em 3 arquivos — deveria ser variável/classe CSS | Manutenção |
-| M4 | `min-width` em selects duplicado entre `group.html` e `group-details.html` | Manutenção |
-| M5 | Sidebar com links divergentes entre `group.html` e `group-details.html` | Navegação — links do sidebar podem não funcionar |
-| M6 | z-index ladder sem documentação (10 → 9999 → 10000 → 10001 → 11000) | Risco de regressão em modais/overlays futuros |
-| M7 | Breakpoints não documentados (767px e 992px sem mapeamento oficial) | Responsividade — difícil manter consistência |
+| # | Achado | Impacto de usuário | Status |
+|---|---|---|---|
+| M1 | `groups-custom.css` não carregado em `group.html` e `group-details.html` | Funcional — dropdowns sem estilo correto | ✅ Resolvido (Quick Win) |
+| M2 | ~20× `style="cursor:pointer"` em `th.sortable` — deveria ser classe CSS | Manutenção | ✅ Resolvido (Quick Win) |
+| M3 | `z-index: 11000` inline em 3 arquivos — deveria ser variável/classe CSS | Manutenção | ✅ Resolvido (Quick Win) |
+| M4 | `min-width` em selects duplicado entre `group.html` e `group-details.html` | Manutenção | ✅ Resolvido (Quick Win) |
+| M5 | Sidebar com links divergentes entre `group.html` e `group-details.html` | Navegação | ✅ Resolvido (Fase 3, commit `61d58e6`) |
+| M6 | z-index ladder sem documentação (10 → 9999 → 10000 → 10001 → 11000) | Risco de regressão | ⏳ Pendente |
+| M7 | Breakpoints não documentados (767px e 992px sem mapeamento oficial) | Responsividade | ⏳ Pendente |
 
 ### Severidade BAIXA — limpeza
 
-| # | Achado |
-|---|---|
-| B1 | `owl.carousel.min.js` e `auth-2-carousel.init.js` carregados sem uso em 6 páginas auth |
-| B2 | `two-step-verification.init.js` carregado em `login.html` e `forgot.html` (irrelevante) |
-| B3 | `group.html` e `group-details.html` compartilham o mesmo `group.js` (pode ser intencional, mas merece revisão) |
-| B4 | `invite.html` não carrega `app.js` — consistente com não ter sidebar, mas divergente |
+| # | Achado | Status |
+|---|---|---|
+| B1 | `owl.carousel.min.js` e `auth-2-carousel.init.js` carregados sem uso em 6 páginas auth | ✅ Resolvido (Quick Win) |
+| B2 | `two-step-verification.init.js` carregado em `login.html` e `forgot.html` (irrelevante) | ✅ Resolvido (Quick Win) |
+| B3 | `group.html` e `group-details.html` compartilham o mesmo `group.js` | ⏳ Aceito como intencional |
+| B4 | `invite.html` não carrega `app.js` — consistente com não ter sidebar | ⏳ Aceito como intencional |
 
 ---
 
@@ -308,20 +339,19 @@ Todas no contexto de `@media (max-width: 767px)` para transformar tabelas em car
 
 ### Quick wins (< 1h cada, sem risco de regressão)
 
-| Item | Arquivo(s) | Esforço |
-|---|---|---|
-| Corrigir `<title>`, `<meta description>`, `<meta author>` nas auth pages | 7 HTMLs | 30 min |
-| Migrar `style="cursor:pointer"` para `.sortable { cursor: pointer }` em CSS | `group-details.html` + novo CSS | 20 min |
-| Migrar `style="z-index: 11000;"` para classe `.toast-layer` em CSS | 3 HTMLs + CSS | 20 min |
-| Migrar `style="min-width: 200/220px"` para classes CSS | 2 HTMLs + CSS | 20 min |
-| Remover `owl.carousel` e `auth-2-carousel.init.js` das auth pages | 6 HTMLs | 15 min |
-| Remover `two-step-verification.init.js` de `login.html` e `forgot.html` | 2 HTMLs | 5 min |
-| Adicionar `groups-custom.css` em `group.html` e `group-details.html` | 2 HTMLs | 5 min |
-| Corrigir copy de auth pages (textos internos "Kovoy" → produto correto) | 7 HTMLs | 30 min |
-| Corrigir logo dark height de `17px` para `36px` | 2 HTMLs | 5 min |
-| Corrigir sidebar links divergentes entre `group.html` e `group-details.html` | 2 HTMLs | 15 min |
+| Item | Arquivo(s) | Esforço | Status |
+|---|---|---|---|
+| Migrar `style="cursor:pointer"` para `.sortable { cursor: pointer }` em CSS | `group-details.html` + CSS | 20 min | ✅ |
+| Migrar `style="z-index: 11000;"` para classe `.toast-layer` em CSS | 3 HTMLs + CSS | 20 min | ✅ |
+| Migrar `style="min-width: 200/220px"` para classes CSS | 2 HTMLs + CSS | 20 min | ✅ |
+| Remover `owl.carousel` e `auth-2-carousel.init.js` das auth pages | 6 HTMLs | 15 min | ✅ |
+| Remover `two-step-verification.init.js` de `login.html` e `forgot.html` | 2 HTMLs | 5 min | ✅ |
+| Adicionar `groups-custom.css` em `group.html` e `group-details.html` | 2 HTMLs | 5 min | ✅ |
+| Corrigir sidebar links divergentes | 2 HTMLs | 15 min | ✅ |
+| Corrigir logo dark height de `17px` para `36px` | 2 HTMLs | 5 min | ✅ |
+| Corrigir `<title>`, `<meta>`, copy "Kovoy" → "Orlando 2026" nas auth pages | 8 HTMLs | 30 min | ✅ |
 
-**Total estimado de quick wins: ~2h 45min**
+**Progresso: 9/9 quick wins concluídos.**
 
 ### Mudanças estruturais (planejadas para Fases 2–4)
 
