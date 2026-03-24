@@ -5063,6 +5063,164 @@
         });
     };
 
+    const bindExportImportHandlers = () => {
+        // Export CSV handler
+        const exportCsvBtn = document.getElementById('exportCsvBtn');
+        if (exportCsvBtn) {
+            exportCsvBtn.addEventListener('click', async () => {
+                try {
+                    setButtonLoading(exportCsvBtn, 'Downloading...');
+                    const response = await fetch(`/api/groups/${state.groupId}/export/csv`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-Token': getCookie('csrf_token') || ''
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Export failed: ${response.status}`);
+                    }
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `grupo-${state.groupId}-${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    showToast('success', 'CSV exported successfully.');
+                } catch (err) {
+                    showToast('error', err.message || 'Failed to export CSV.');
+                } finally {
+                    resetButtonLoading(exportCsvBtn);
+                }
+            });
+        }
+
+        // Export JSON handler
+        const exportJsonBtn = document.getElementById('exportJsonBtn');
+        if (exportJsonBtn) {
+            exportJsonBtn.addEventListener('click', async () => {
+                try {
+                    setButtonLoading(exportJsonBtn, 'Downloading...');
+                    const response = await fetch(`/api/groups/${state.groupId}/export/json`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-Token': getCookie('csrf_token') || ''
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Export failed: ${response.status}`);
+                    }
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `grupo-backup-${state.groupId}-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    showToast('success', 'JSON backup exported successfully.');
+                } catch (err) {
+                    showToast('error', err.message || 'Failed to export JSON.');
+                } finally {
+                    resetButtonLoading(exportJsonBtn);
+                }
+            });
+        }
+
+        // Import CSV button handler
+        const importCsvBtn = document.getElementById('importCsvBtn');
+        const csvFileInput = document.getElementById('csvFileInput');
+        if (importCsvBtn && csvFileInput) {
+            importCsvBtn.addEventListener('click', () => {
+                csvFileInput.click();
+            });
+
+            csvFileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                try {
+                    setButtonLoading(importCsvBtn, 'Importing...');
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const response = await fetch(`/api/groups/${state.groupId}/import/csv`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-Token': getCookie('csrf_token') || ''
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Import failed');
+                    }
+
+                    // Show result modal
+                    showImportResultModal(result);
+
+                    // Refresh data if import was successful
+                    if (result.ok && result.imported > 0) {
+                        await refreshData();
+                    }
+                } catch (err) {
+                    showToast('error', err.message || 'Failed to import CSV.');
+                } finally {
+                    resetButtonLoading(importCsvBtn);
+                    csvFileInput.value = ''; // Reset file input
+                }
+            });
+        }
+    };
+
+    const showImportResultModal = (result) => {
+        const modal = document.getElementById('importResultModal');
+        if (!modal) return;
+
+        const resultText = document.getElementById('importResultText');
+        const errorsDiv = document.getElementById('importResultErrors');
+        const errorCount = document.getElementById('importErrorCount');
+        const errorTable = document.getElementById('importErrorTable');
+
+        // Update summary
+        const created = result.participants_created || 0;
+        const summary = `${result.imported} expense(s) imported${created > 0 ? `, ${created} new participant(s) created` : ''}. ${result.summary || ''}`;
+        if (resultText) resultText.textContent = summary;
+
+        // Handle errors
+        if (result.errors && result.errors.length > 0) {
+            errorsDiv.style.display = 'block';
+            if (errorCount) errorCount.textContent = result.errors.length;
+            if (errorTable) {
+                errorTable.innerHTML = '';
+                result.errors.forEach((err) => {
+                    const tr = document.createElement('tr');
+                    const tdLine = document.createElement('td');
+                    tdLine.textContent = err.line;
+                    const tdError = document.createElement('td');
+                    tdError.textContent = err.error;
+                    const tdSuggestion = document.createElement('td');
+                    tdSuggestion.textContent = err.suggestion || '-';
+                    tr.appendChild(tdLine);
+                    tr.appendChild(tdError);
+                    tr.appendChild(tdSuggestion);
+                    errorTable.appendChild(tr);
+                });
+            }
+        } else {
+            errorsDiv.style.display = 'none';
+        }
+
+        // Show modal
+        const bsModal = window.bootstrap.Modal.getInstance(modal) || new window.bootstrap.Modal(modal);
+        bsModal.show();
+    };
+
     const init = async () => {
         await setUserProfile();
         const ok = await loadGroups();
@@ -5096,6 +5254,7 @@
         bindSplitTypeToggle();
         bindSplitModeToggle();
         bindModuleExpenseToggles();
+        bindExportImportHandlers();
         bindLogout();
         bindLeaveGroup();
         bindAvatarChange();
