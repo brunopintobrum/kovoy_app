@@ -3140,12 +3140,16 @@ function generateCSV(headers, rows) {
 // GET /api/groups/:groupId/export/csv - Export expenses as CSV
 app.get('/api/groups/:groupId/export/csv', authRequiredApi, requireGroupMember, (req, res) => {
     try {
+        // Prepare statements outside the loop for efficiency
+        const getParticipantDisplay = db.prepare('SELECT display_name FROM participants WHERE id = ? AND group_id = ?');
+        const getFamilyName = db.prepare('SELECT name FROM families WHERE id = ? AND group_id = ?');
+
         const expenses = listExpensesPaginated.all(req.groupId, 10000, 0);
         const rows = [];
 
         for (const expense of expenses) {
             const splits = listExpenseSplits.all(expense.id);
-            const payer = db.prepare('SELECT display_name FROM participants WHERE id = ? AND group_id = ?').get(expense.payer_participant_id, req.groupId);
+            const payer = getParticipantDisplay.get(expense.payer_participant_id, req.groupId);
 
             if (splits.length === 0) {
                 rows.push({
@@ -3163,10 +3167,10 @@ app.get('/api/groups/:groupId/export/csv', authRequiredApi, requireGroupMember, 
                 for (const split of splits) {
                     let participantName = '';
                     if (split.target_type === 'participant') {
-                        const participant = db.prepare('SELECT display_name FROM participants WHERE id = ? AND group_id = ?').get(split.target_id, req.groupId);
+                        const participant = getParticipantDisplay.get(split.target_id, req.groupId);
                         participantName = participant?.display_name || 'Unknown';
                     } else if (split.target_type === 'family') {
-                        const family = db.prepare('SELECT name FROM families WHERE id = ? AND group_id = ?').get(split.target_id, req.groupId);
+                        const family = getFamilyName.get(split.target_id, req.groupId);
                         participantName = family?.name || 'Unknown';
                     }
 
