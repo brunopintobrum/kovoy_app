@@ -70,6 +70,7 @@ const DB_PATH = process.env.DB_PATH || path.join(DATA_DIR, 'app.db');
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 const UPLOADS_DIR = path.join(PUBLIC_DIR, 'uploads');
 const AVATAR_UPLOAD_DIR = path.join(UPLOADS_DIR, 'avatars');
+const CSV_UPLOAD_DIR = path.join(UPLOADS_DIR, 'csv-imports');
 const POSTAL_PATTERN_PATH = path.join(PUBLIC_DIR, 'data', 'postal-patterns.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -245,6 +246,9 @@ if (!fs.existsSync(DATA_DIR)) {
 }
 if (!fs.existsSync(AVATAR_UPLOAD_DIR)) {
     fs.mkdirSync(AVATAR_UPLOAD_DIR, { recursive: true });
+}
+if (!fs.existsSync(CSV_UPLOAD_DIR)) {
+    fs.mkdirSync(CSV_UPLOAD_DIR, { recursive: true });
 }
 
 const db = new Database(DB_PATH);
@@ -1075,6 +1079,18 @@ const avatarUpload = multer({
     fileFilter: (req, file, cb) => {
         if (!AVATAR_MIME_TYPES.has(file.mimetype)) {
             return cb(new Error('INVALID_AVATAR_TYPE'));
+        }
+        return cb(null, true);
+    }
+});
+
+const csvUpload = multer({
+    dest: CSV_UPLOAD_DIR,
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+    fileFilter: (req, file, cb) => {
+        const ext = path.extname(file.originalname || '').toLowerCase();
+        if (ext !== '.csv') {
+            return cb(new Error('Only CSV files are allowed'));
         }
         return cb(null, true);
     }
@@ -3095,6 +3111,282 @@ app.delete(
         }
         deleteExpense.run(expenseId, req.groupId);
         return res.json({ ok: true });
+    }
+);
+
+// ======== CSV/JSON EXPORT & IMPORT ========
+
+// Helper: Escape CSV field
+function escapeCSVField(field) {
+    if (field === null || field === undefined) return '';
+    const str = String(field);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+    }
+    return str;
+}
+
+// Helper: Generate CSV content
+function generateCSV(headers, rows) {
+    const csv = [
+        headers.map(escapeCSVField).join(','),
+        ...rows.map(row =>
+            headers.map(h => escapeCSVField(row[h])).join(',')
+        )
+    ].join('\n');
+    return csv;
+}
+
+// GET /api/groups/:groupId/export/csv - Export expenses as CSV
+app.get('/api/groups/:groupId/export/csv', authRequiredApi, requireGroupMember, (req, res) => {
+    try {
+        // Prepare statements outside the loop for efficiency
+        const getParticipantDisplay = db.prepare('SELECT display_name FROM participants WHERE id = ? AND group_id = ?');
+        const getFamilyName = db.prepare('SELECT name FROM families WHERE id = ? AND group_id = ?');
+
+        const expenses = listExpensesPaginated.all(req.groupId, 10000, 0);
+        const rows = [];
+
+        for (const expense of expenses) {
+            const splits = listExpenseSplits.all(expense.id);
+            const payer = getParticipantDisplay.get(expense.payer_participant_id, req.groupId);
+
+            if (splits.length === 0) {
+                rows.push({
+                    date: expense.date,
+                    description: expense.description,
+                    amount: expense.amount,
+                    currency: expense.currency,
+                    payer_name: payer?.display_name || 'Unknown',
+                    category: expense.category || '',
+                    participant_name: '',
+                    split_amount: expense.amount,
+                    notes: ''
+                });
+            } else {
+                for (const split of splits) {
+                    let participantName = '';
+                    if (split.target_type === 'participant') {
+                        const participant = getParticipantDisplay.get(split.target_id, req.groupId);
+                        participantName = participant?.display_name || 'Unknown';
+                    } else if (split.target_type === 'family') {
+                        const family = getFamilyName.get(split.target_id, req.groupId);
+                        participantName = family?.name || 'Unknown';
+                    }
+
+                    rows.push({
+                        date: expense.date,
+                        description: expense.description,
+                        amount: expense.amount,
+                        currency: expense.currency,
+                        payer_name: payer?.display_name || 'Unknown',
+                        category: expense.category || '',
+                        participant_name: participantName,
+                        split_amount: split.amount,
+                        notes: ''
+                    });
+                }
+            }
+        }
+
+        const headers = ['date', 'description', 'amount', 'currency', 'payer_name', 'category', 'participant_name', 'split_amount', 'notes'];
+        const csv = generateCSV(headers, rows);
+
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="expenses-${req.groupId}-${new Date().toISOString().split('T')[0]}.csv"`);
+        res.send('\ufeff' + csv); // BOM for Excel compatibility
+    } catch (error) {
+        console.error('CSV export error:', error);
+        res.status(500).json({ error: 'Failed to export CSV' });
+    }
+});
+
+// GET /api/groups/:groupId/export/json - Export group data as JSON
+app.get('/api/groups/:groupId/export/json', authRequiredApi, requireGroupMember, (req, res) => {
+    try {
+        const group = getGroupById.get(req.groupId);
+        if (!group) return res.status(404).json({ error: 'Group not found' });
+
+        const families = listFamilies.all(req.groupId);
+        const participants = listParticipants.all(req.groupId);
+        const expenses = listExpensesPaginated.all(req.groupId, 10000, 0);
+        const flights = listGroupFlights.all(req.groupId);
+        const lodgings = listGroupLodgings.all(req.groupId);
+        const transports = listGroupTransports.all(req.groupId);
+        const tickets = listGroupTickets.all(req.groupId);
+
+        // Transform expenses with splits
+        const expensesWithSplits = expenses.map(exp => ({
+            ...exp,
+            splits: listExpenseSplits.all(exp.id)
+        }));
+
+        const data = {
+            group: { id: group.id, name: group.name, currency: group.currency, createdAt: group.created_at },
+            families: families.map(f => ({ id: f.id, name: f.name, groupId: f.group_id })),
+            participants: participants.map(p => ({ id: p.id, name: p.display_name, type: p.type, familyId: p.family_id, groupId: p.group_id })),
+            expenses: expensesWithSplits,
+            flights,
+            lodgings,
+            transports,
+            tickets
+        };
+
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="backup-${req.groupId}-${new Date().toISOString().split('T')[0]}.json"`);
+        res.json(data);
+    } catch (error) {
+        console.error('JSON export error:', error);
+        res.status(500).json({ error: 'Failed to export JSON' });
+    }
+});
+
+// POST /api/groups/:groupId/import/csv - Import expenses from CSV
+app.post(
+    '/api/groups/:groupId/import/csv',
+    authRequiredApi,
+    dataLimiter,
+    requireCsrfToken,
+    requireGroupMember,
+    requireGroupRole(EDITOR_ROLES),
+    csvUpload.single('file'),
+    (req, res) => {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ error: 'No file uploaded' });
+            }
+
+            const content = fs.readFileSync(req.file.path, 'utf-8');
+            const lines = content.split(/\r?\n/).filter(l => l.trim());
+            if (lines.length < 2) {
+                return res.status(400).json({ error: 'CSV must have header and at least one data row' });
+            }
+
+            // Parse header
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            const requiredHeaders = ['date', 'description', 'amount', 'payer'];
+            const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+            if (missingHeaders.length > 0) {
+                return res.status(400).json({ error: `Missing required headers: ${missingHeaders.join(', ')}` });
+            }
+
+            const errors = [];
+            let imported = 0;
+            let participantsCreated = 0;
+            const participantMap = {}; // Cache for created participants
+
+            // Get existing participants
+            const existingParticipants = listParticipants.all(req.groupId);
+            existingParticipants.forEach(p => {
+                participantMap[p.display_name.toLowerCase()] = p.id;
+            });
+
+            // Process each data row
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                // Simple CSV parsing (doesn't handle quoted values with commas yet)
+                const values = line.split(',').map(v => v.trim());
+                const row = {};
+                headers.forEach((h, idx) => {
+                    row[h] = values[idx] || '';
+                });
+
+                // Validate required fields
+                if (!row.date || !row.description || !row.amount || !row.payer) {
+                    errors.push({ line: i + 1, error: 'Missing required fields', suggestion: 'Ensure date, description, amount, and payer are filled' });
+                    continue;
+                }
+
+                // Validate date format
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(row.date)) {
+                    errors.push({ line: i + 1, error: 'Invalid date format', suggestion: 'Use YYYY-MM-DD format' });
+                    continue;
+                }
+
+                // Validate amount
+                const amount = parseFloat(row.amount);
+                if (isNaN(amount) || amount <= 0) {
+                    errors.push({ line: i + 1, error: 'Invalid amount', suggestion: 'Amount must be a positive number' });
+                    continue;
+                }
+
+                // Get or create payer participant
+                let payerId = participantMap[row.payer.toLowerCase()];
+                if (!payerId) {
+                    // Create new participant
+                    try {
+                        const insertResult = insertParticipant.run(
+                            req.groupId,
+                            null,
+                            null,
+                            sanitizeString(row.payer),
+                            'adult',
+                            new Date().toISOString()
+                        );
+                        payerId = insertResult.lastInsertRowid;
+                        participantMap[row.payer.toLowerCase()] = payerId;
+                        participantsCreated++;
+                    } catch (err) {
+                        errors.push({ line: i + 1, error: 'Failed to create payer participant', suggestion: 'Check participant name' });
+                        continue;
+                    }
+                }
+
+                // Insert expense
+                try {
+                    const insertResult = insertExpense.run(
+                        req.groupId,
+                        sanitizeString(row.description),
+                        amount,
+                        row.currency || 'USD',
+                        row.date,
+                        row.category || null,
+                        payerId,
+                        new Date().toISOString()
+                    );
+
+                    // Create equal split to payer if no splits specified
+                    if (row.participant) {
+                        let participantId = participantMap[row.participant.toLowerCase()];
+                        if (!participantId) {
+                            const insertParticipantResult = insertParticipant.run(
+                                req.groupId,
+                                null,
+                                null,
+                                sanitizeString(row.participant),
+                                'adult',
+                                new Date().toISOString()
+                            );
+                            participantId = insertParticipantResult.lastInsertRowid;
+                            participantMap[row.participant.toLowerCase()] = participantId;
+                            participantsCreated++;
+                        }
+
+                        const splitAmount = parseFloat(row.split_amount || amount);
+                        insertExpenseSplit.run(insertResult.lastInsertRowid, 'participant', participantId, splitAmount);
+                    } else {
+                        insertExpenseSplit.run(insertResult.lastInsertRowid, 'participant', payerId, amount);
+                    }
+
+                    imported++;
+                } catch (err) {
+                    errors.push({ line: i + 1, error: 'Failed to insert expense', suggestion: 'Check all fields are valid' });
+                }
+            }
+
+            res.json({
+                ok: true,
+                imported,
+                participants_created: participantsCreated,
+                errors,
+                summary: `${imported} expenses imported, ${participantsCreated} new participants created, ${errors.length} errors`
+            });
+        } catch (error) {
+            console.error('CSV import error:', error);
+            res.status(500).json({ error: 'Failed to import CSV' });
+        }
     }
 );
 
