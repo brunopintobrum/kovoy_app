@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mockup – Flight Cards</title>
+  <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/assets/css/icons.min.css" />
+  <link rel="stylesheet" href="/assets/css/app.min.css" />
+  <style>
+    body { background: #f5f6fa; padding: 2rem 1rem; }
+
+    /* ── Flight card ── */
+    .flight-card {
+      background: #fff;
+      border: 1px solid #e9ecef;
+      border-left: 3px solid #5b73e8;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.6rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      transition: box-shadow .15s;
+    }
+    .flight-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.10); }
+
+    /* ── Time block ── */
+    .flight-time-block {
+      min-width: 200px;
+    }
+    .flight-time {
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: #343a40;
+    }
+    .flight-iata {
+      font-size: 0.72rem;
+      color: #868e96;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    /* ── Arrow line ── */
+    .flight-route-arrow {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0.75rem;
+      min-width: 80px;
+    }
+    .flight-duration-label {
+      font-size: 0.7rem;
+      color: #868e96;
+      margin-bottom: 2px;
+    }
+    .flight-line {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .flight-line-bar {
+      flex: 1;
+      height: 1.5px;
+      background: #ced4da;
+    }
+    .flight-line-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #adb5bd;
+      flex-shrink: 0;
+    }
+    .flight-line-arrow {
+      font-size: 0.8rem;
+      color: #adb5bd;
+      flex-shrink: 0;
+      margin-left: -2px;
+    }
+    .flight-stop-label {
+      font-size: 0.68rem;
+      color: #f0ad4e;
+      margin-top: 1px;
+    }
+
+    /* ── Middle info ── */
+    .flight-info { flex: 1; min-width: 0; }
+    .flight-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .flight-meta {
+      font-size: 0.75rem;
+      color: #868e96;
+    }
+
+    /* ── Right side ── */
+    .flight-right {
+      text-align: right;
+      flex-shrink: 0;
+      margin-left: 1rem;
+    }
+    .flight-cost {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #343a40;
+    }
+
+    /* ── Details row ── */
+    .flight-details {
+      border-top: 1px dashed #e9ecef;
+      margin-top: 0.65rem;
+      padding-top: 0.65rem;
+    }
+
+    /* ── Comparison label ── */
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #868e96;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 575px) {
+      .flight-time-block { min-width: unset; }
+      .flight-route-arrow { min-width: 50px; padding: 0 0.4rem; }
+      .flight-right { margin-left: 0.5rem; }
+      .flight-cost { font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid" style="max-width:760px">
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- BEFORE: layout atual (tabela)               -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="section-label mb-1">Atual (tabela)</div>
+  <div class="card mb-4">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table align-middle table-nowrap mb-0 table-sm">
+          <thead class="table-light">
+            <tr>
+              <th>Flight</th><th>Route</th><th>Departure</th><th>Arrival</th>
+              <th>Pax</th><th>Status</th><th>Cost</th><th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Air Transat TS401</td>
+              <td>Montreal (YUL) → Fort Lauderdale (FLL)</td>
+              <td>Apr 13 · 06:45</td>
+              <td>Apr 13 · 10:35</td>
+              <td>3</td>
+              <td><span class="badge bg-success bg-soft text-success">Confirmed</span></td>
+              <td>CA$ 813</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-secondary me-1">Details</button>
+                <button class="btn btn-sm btn-outline-primary me-1">Edit</button>
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td>United UA2210</td>
+              <td>Fort Lauderdale (FLL) → Montreal (YUL)</td>
+              <td>Apr 21 · 15:25</td>
+              <td>Apr 21 · 21:32</td>
+              <td>3</td>
+              <td><span class="badge bg-warning bg-soft text-warning">Planned</span></td>
+              <td>CA$ 837</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-secondary me-1">Details</button>
+                <button class="btn btn-sm btn-outline-primary me-1">Edit</button>
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- AFTER: cards estilo Google Flights          -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="section-label mb-1">Proposta (cards compactos)</div>
+
+  <!-- Card 1: Confirmed -->
+  <div class="flight-card">
+    <div class="d-flex align-items-center">
+
+      <!-- Tempo + rota visual -->
+      <div class="flight-time-block d-flex align-items-center">
+        <div class="text-center me-1">
+          <div class="flight-time">06:45</div>
+          <div class="flight-iata">YUL</div>
+        </div>
+        <div class="flight-route-arrow">
+          <div class="flight-duration-label">3h 50m</div>
+          <div class="flight-line">
+            <div class="flight-line-dot"></div>
+            <div class="flight-line-bar"></div>
+            <div class="flight-line-arrow"><i class="mdi mdi-airplane" style="font-size:.85rem;color:#5b73e8"></i></div>
+          </div>
+          <div class="flight-stop-label">Direct</div>
+        </div>
+        <div class="text-center ms-1">
+          <div class="flight-time">10:35</div>
+          <div class="flight-iata">FLL</div>
+        </div>
+      </div>
+
+      <!-- Info central -->
+      <div class="flight-info ms-3">
+        <div class="flight-name">
+          Air Transat · TS401
+          <span class="badge bg-soft-success text-success ms-1" style="font-size:.65rem">$</span>
+        </div>
+        <div class="flight-meta">
+          <i class="mdi mdi-seat-passenger me-1"></i>Economy
+          <span class="mx-1">·</span>
+          <i class="mdi mdi-account-multiple me-1"></i>3 pax
+          <span class="mx-1">·</span>
+          <i class="mdi mdi-identifier me-1"></i>PNR: XJ72K
+        </div>
+      </div>
+
+      <!-- Direita: status + custo + ações -->
+      <div class="flight-right">
+        <div><span class="badge bg-soft-success text-success">Confirmed</span></div>
+        <div class="flight-cost mt-1">CA$ 813</div>
+        <div class="mt-2 d-flex gap-1 justify-content-end">
+          <button class="btn btn-sm btn-outline-secondary px-2 py-0" title="Details"
+            onclick="this.closest('.flight-card').querySelector('.flight-details').classList.toggle('d-none')">
+            <i class="mdi mdi-chevron-down"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-primary px-2 py-0" title="Edit">
+            <i class="mdi mdi-pencil-outline"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger px-2 py-0" title="Delete">
+            <i class="mdi mdi-trash-can-outline"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalhes expansíveis -->
+    <div class="flight-details d-none">
+      <div class="row g-2">
+        <div class="col-sm-3">
+          <div class="text-muted" style="font-size:.72rem">PNR</div>
+          <div class="fw-semibold small">XJ72K</div>
+        </div>
+        <div class="col-sm-3">
+          <div class="text-muted" style="font-size:.72rem">Class</div>
+          <div class="fw-semibold small">Economy</div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted" style="font-size:.72rem">Passengers</div>
+          <table class="table table-sm mb-0 mt-1">
+            <thead class="table-light"><tr><th>Name</th><th>Seat</th><th>Baggage</th></tr></thead>
+            <tbody>
+              <tr><td>Bruno</td><td>14A</td><td>23kg</td></tr>
+              <tr><td>Ana</td><td>14B</td><td>23kg</td></tr>
+              <tr><td>Pedro</td><td>16C</td><td>10kg</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Planned (com escala) -->
+  <div class="flight-card" style="border-left-color:#f0ad4e">
+    <div class="d-flex align-items-center">
+
+      <div class="flight-time-block d-flex align-items-center">
+        <div class="text-center me-1">
+          <div class="flight-time">15:25</div>
+          <div class="flight-iata">FLL</div>
+        </div>
+        <div class="flight-route-arrow">
+          <div class="flight-duration-label">6h 07m</div>
+          <div class="flight-line">
+            <div class="flight-line-dot"></div>
+            <div class="flight-line-bar"></div>
+            <div class="flight-line-dot" style="background:#f0ad4e"></div>
+            <div class="flight-line-bar"></div>
+            <div class="flight-line-arrow"><i class="mdi mdi-airplane" style="font-size:.85rem;color:#f0ad4e"></i></div>
+          </div>
+          <div class="flight-stop-label">1 stop · EWR</div>
+        </div>
+        <div class="text-center ms-1">
+          <div class="flight-time">21:32</div>
+          <div class="flight-iata">YUL</div>
+        </div>
+      </div>
+
+      <div class="flight-info ms-3">
+        <div class="flight-name">United · UA2210</div>
+        <div class="flight-meta">
+          <i class="mdi mdi-seat-passenger me-1"></i>Economy
+          <span class="mx-1">·</span>
+          <i class="mdi mdi-account-multiple me-1"></i>3 pax
+          <span class="mx-1">·</span>
+          <i class="mdi mdi-identifier me-1"></i>PNR: —
+        </div>
+      </div>
+
+      <div class="flight-right">
+        <div><span class="badge bg-soft-warning text-warning">Planned</span></div>
+        <div class="flight-cost mt-1">CA$ 837</div>
+        <div class="mt-2 d-flex gap-1 justify-content-end">
+          <button class="btn btn-sm btn-outline-secondary px-2 py-0" title="Details"
+            onclick="this.closest('.flight-card').querySelector('.flight-details').classList.toggle('d-none')">
+            <i class="mdi mdi-chevron-down"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-primary px-2 py-0" title="Edit">
+            <i class="mdi mdi-pencil-outline"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger px-2 py-0" title="Delete">
+            <i class="mdi mdi-trash-can-outline"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flight-details d-none">
+      <div class="row g-2">
+        <div class="col-sm-3">
+          <div class="text-muted" style="font-size:.72rem">PNR</div>
+          <div class="fw-semibold small text-muted">Not set</div>
+        </div>
+        <div class="col-sm-3">
+          <div class="text-muted" style="font-size:.72rem">Class</div>
+          <div class="fw-semibold small">Economy</div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted" style="font-size:.72rem">Passengers</div>
+          <table class="table table-sm mb-0 mt-1">
+            <thead class="table-light"><tr><th>Name</th><th>Seat</th><th>Baggage</th></tr></thead>
+            <tbody>
+              <tr><td>Bruno</td><td>—</td><td>—</td></tr>
+              <tr><td>Ana</td><td>—</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: Air Canada -->
+  <div class="flight-card">
+    <div class="d-flex align-items-center">
+      <div class="flight-time-block d-flex align-items-center">
+        <div class="text-center me-1">
+          <div class="flight-time">09:40</div>
+          <div class="flight-iata">YUL</div>
+        </div>
+        <div class="flight-route-arrow">
+          <div class="flight-duration-label">3h 36m</div>
+          <div class="flight-line">
+            <div class="flight-line-dot"></div>
+            <div class="flight-line-bar"></div>
+            <div class="flight-line-arrow"><i class="mdi mdi-airplane" style="font-size:.85rem;color:#5b73e8"></i></div>
+          </div>
+          <div class="flight-stop-label">Direct</div>
+        </div>
+        <div class="text-center ms-1">
+          <div class="flight-time">13:16</div>
+          <div class="flight-iata">FLL</div>
+        </div>
+      </div>
+
+      <div class="flight-info ms-3">
+        <div class="flight-name">Air Canada · AC8812</div>
+        <div class="flight-meta">
+          <i class="mdi mdi-seat-passenger me-1"></i>Business
+          <span class="mx-1">·</span>
+          <i class="mdi mdi-account me-1"></i>1 pax
+          <span class="mx-1">·</span>
+          <i class="mdi mdi-identifier me-1"></i>PNR: T4R9Z
+        </div>
+      </div>
+
+      <div class="flight-right">
+        <div><span class="badge bg-soft-success text-success">Confirmed</span></div>
+        <div class="flight-cost mt-1">CA$ 366</div>
+        <div class="mt-2 d-flex gap-1 justify-content-end">
+          <button class="btn btn-sm btn-outline-secondary px-2 py-0" title="Details"
+            onclick="this.closest('.flight-card').querySelector('.flight-details').classList.toggle('d-none')">
+            <i class="mdi mdi-chevron-down"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-primary px-2 py-0" title="Edit">
+            <i class="mdi mdi-pencil-outline"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger px-2 py-0" title="Delete">
+            <i class="mdi mdi-trash-can-outline"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flight-details d-none">
+      <div class="row g-2">
+        <div class="col-sm-3">
+          <div class="text-muted" style="font-size:.72rem">PNR</div>
+          <div class="fw-semibold small">T4R9Z</div>
+        </div>
+        <div class="col-sm-3">
+          <div class="text-muted" style="font-size:.72rem">Class</div>
+          <div class="fw-semibold small">Business</div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted" style="font-size:.72rem">Passengers</div>
+          <table class="table table-sm mb-0 mt-1">
+            <thead class="table-light"><tr><th>Name</th><th>Seat</th><th>Baggage</th></tr></thead>
+            <tbody>
+              <tr><td>Bruno</td><td>2A</td><td>32kg</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-muted mt-3" style="font-size:.75rem">
+    <i class="mdi mdi-information-outline me-1"></i>
+    Clique em <i class="mdi mdi-chevron-down"></i> para expandir os detalhes (PNR, classe, passageiros).
+    A borda esquerda muda de cor conforme o status: azul = confirmed, amarelo = planned.
+  </p>
+
+</div>
+
+<script src="/assets/libs/jquery/jquery.min.js"></script>
+<script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
