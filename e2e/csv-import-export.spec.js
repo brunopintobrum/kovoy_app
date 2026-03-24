@@ -99,7 +99,9 @@ test('export and import CSV expenses', async ({ page }) => {
     console.log('Testing CSV export...');
     await page.goto(`/dashboard?groupId=${groupId}`);
 
-    // Wait for export button and trigger download
+    // Open Group Actions megamenu and trigger CSV download
+    await page.click('button:has-text("Group Actions")');
+    await page.waitForSelector('#megaExportCsvBtn', { state: 'visible', timeout: 5000 });
     const downloadPromise = page.waitForEvent('download');
     await page.click('#megaExportCsvBtn');
     const download = await downloadPromise;
@@ -117,6 +119,8 @@ test('export and import CSV expenses', async ({ page }) => {
 
     // Test JSON Export
     console.log('Testing JSON export...');
+    await page.click('button:has-text("Group Actions")');
+    await page.waitForSelector('#megaExportJsonBtn', { state: 'visible', timeout: 5000 });
     const jsonDownloadPromise = page.waitForEvent('download');
     await page.click('#megaExportJsonBtn');
     const jsonDownload = await jsonDownloadPromise;
