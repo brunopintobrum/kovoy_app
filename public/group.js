@@ -5065,7 +5065,7 @@
 
     const bindExportImportHandlers = () => {
         // Export CSV handler
-        const exportCsvBtn = document.getElementById('exportCsvBtn');
+        const exportCsvBtn = document.getElementById('megaExportCsvBtn');
         if (exportCsvBtn) {
             exportCsvBtn.addEventListener('click', async () => {
                 try {
@@ -5098,7 +5098,7 @@
         }
 
         // Export JSON handler
-        const exportJsonBtn = document.getElementById('exportJsonBtn');
+        const exportJsonBtn = document.getElementById('megaExportJsonBtn');
         if (exportJsonBtn) {
             exportJsonBtn.addEventListener('click', async () => {
                 try {
@@ -5131,7 +5131,7 @@
         }
 
         // Import CSV button handler
-        const importCsvBtn = document.getElementById('importCsvBtn');
+        const importCsvBtn = document.getElementById('megaImportCsvBtn');
         const csvFileInput = document.getElementById('csvFileInput');
         if (importCsvBtn && csvFileInput) {
             importCsvBtn.addEventListener('click', () => {

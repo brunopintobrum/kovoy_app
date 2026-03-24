@@ -77,6 +77,15 @@
                                                 <li><a href="/group-details#members">Members</a></li>
                                             </ul>
                                         </div>
+                                        <div class="col-md-4">
+                                            <h5 class="font-size-14">Data</h5>
+                                            <ul class="list-unstyled megamenu-list">
+                                                <li><a href="javascript:void(0);" id="megaExportCsvBtn"><i class="bx bx-download me-1"></i>Export CSV</a></li>
+                                                <li><a href="javascript:void(0);" id="megaExportJsonBtn"><i class="bx bx-download me-1"></i>Export JSON</a></li>
+                                                <li><a href="javascript:void(0);" id="megaImportCsvBtn"><i class="bx bx-upload me-1"></i>Import CSV</a></li>
+                                                <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-sm-4">
@@ -302,28 +311,6 @@
                         </div>
                     </div>
 
-                    <div class="row g-4 mt-1" id="dataManagement">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Data management</h5>
-                                    <p class="text-muted">Export your group data or import expenses from a CSV file.</p>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <button type="button" class="btn btn-outline-success" id="exportCsvBtn" title="Export expenses as CSV">
-                                            <i class="bx bx-download me-1"></i>Export CSV
-                                        </button>
-                                        <button type="button" class="btn btn-outline-success" id="exportJsonBtn" title="Export complete group backup as JSON">
-                                            <i class="bx bx-download me-1"></i>Export JSON
-                                        </button>
-                                        <button type="button" class="btn btn-outline-info" id="importCsvBtn" title="Import expenses from CSV file">
-                                            <i class="bx bx-upload me-1"></i>Import CSV
-                                        </button>
-                                        <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                 </div>
             </div>
