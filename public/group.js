@@ -5067,9 +5067,9 @@
         // Export CSV handler
         const exportCsvBtn = document.getElementById('megaExportCsvBtn');
         if (exportCsvBtn) {
-            exportCsvBtn.addEventListener('click', async () => {
+            exportCsvBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
                 try {
-                    setButtonLoading(exportCsvBtn, 'Downloading...');
                     const response = await fetch(`/api/groups/${state.groupId}/export/csv`, {
                         method: 'GET',
                         headers: {
@@ -5091,8 +5091,6 @@
                     showToast('success', 'CSV exported successfully.');
                 } catch (err) {
                     showToast('error', err.message || 'Failed to export CSV.');
-                } finally {
-                    resetButtonLoading(exportCsvBtn);
                 }
             });
         }
@@ -5100,9 +5098,9 @@
         // Export JSON handler
         const exportJsonBtn = document.getElementById('megaExportJsonBtn');
         if (exportJsonBtn) {
-            exportJsonBtn.addEventListener('click', async () => {
+            exportJsonBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
                 try {
-                    setButtonLoading(exportJsonBtn, 'Downloading...');
                     const response = await fetch(`/api/groups/${state.groupId}/export/json`, {
                         method: 'GET',
                         headers: {
@@ -5124,8 +5122,6 @@
                     showToast('success', 'JSON backup exported successfully.');
                 } catch (err) {
                     showToast('error', err.message || 'Failed to export JSON.');
-                } finally {
-                    resetButtonLoading(exportJsonBtn);
                 }
             });
         }
@@ -5134,7 +5130,8 @@
         const importCsvBtn = document.getElementById('megaImportCsvBtn');
         const csvFileInput = document.getElementById('csvFileInput');
         if (importCsvBtn && csvFileInput) {
-            importCsvBtn.addEventListener('click', () => {
+            importCsvBtn.addEventListener('click', (e) => {
+                e.preventDefault();
                 csvFileInput.click();
             });
 
@@ -5143,7 +5140,6 @@
                 if (!file) return;
 
                 try {
-                    setButtonLoading(importCsvBtn, 'Importing...');
                     const formData = new FormData();
                     formData.append('file', file);
 
@@ -5171,7 +5167,6 @@
                 } catch (err) {
                     showToast('error', err.message || 'Failed to import CSV.');
                 } finally {
-                    resetButtonLoading(importCsvBtn);
                     csvFileInput.value = ''; // Reset file input
                 }
             });
