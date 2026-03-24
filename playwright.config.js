@@ -1,7 +1,8 @@
 const path = require('path');
 const { defineConfig } = require('playwright/test');
 
-const baseURL = 'http://127.0.0.1:3000';
+const TEST_PORT = process.env.TEST_PORT || '4000';
+const baseURL = `http://127.0.0.1:${TEST_PORT}`;
 
 module.exports = defineConfig({
     testDir: './e2e',
@@ -19,9 +20,10 @@ module.exports = defineConfig({
         command: 'node e2e/webserver.js',
         url: `${baseURL}/login`,
         reuseExistingServer: false,
+        timeout: 120000,
         env: {
             NODE_ENV: 'test',
-            PORT: '3000',
+            PORT: TEST_PORT,
             JWT_SECRET: 'playwright-test-secret',
             EMAIL_VERIFICATION_REQUIRED: 'false',
             TWO_FACTOR_REQUIRED: 'false',
