@@ -3144,6 +3144,7 @@ app.get('/api/groups/:groupId/export/csv', authRequiredApi, requireGroupMember, 
         const getParticipantDisplay = db.prepare('SELECT display_name FROM participants WHERE id = ? AND group_id = ?');
         const getFamilyName = db.prepare('SELECT name FROM families WHERE id = ? AND group_id = ?');
 
+
         const expenses = listExpensesPaginated.all(req.groupId, 10000, 0);
         const rows = [];
 

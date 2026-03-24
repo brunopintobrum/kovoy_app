@@ -39,7 +39,6 @@ test('export and import CSV expenses', async ({ page }) => {
         console.log('On email-verification page, navigating to login...');
         await page.goto('/login', { waitUntil: 'networkidle' });
     }
-
     console.log('On login page');
 
     // Fill login form
@@ -100,9 +99,11 @@ test('export and import CSV expenses', async ({ page }) => {
     console.log('Testing CSV export...');
     await page.goto(`/dashboard?groupId=${groupId}`);
 
-    // Wait for export button and trigger download
+    // Open Group Actions megamenu and trigger CSV download
+    await page.click('button:has-text("Group Actions")');
+    await page.waitForSelector('#megaExportCsvBtn', { state: 'visible', timeout: 5000 });
     const downloadPromise = page.waitForEvent('download');
-    await page.click('#exportCsvBtn');
+    await page.click('#megaExportCsvBtn');
     const download = await downloadPromise;
 
     const csvPath = path.join('/tmp', `group-${groupId}.csv`);
@@ -118,8 +119,10 @@ test('export and import CSV expenses', async ({ page }) => {
 
     // Test JSON Export
     console.log('Testing JSON export...');
+    await page.click('button:has-text("Group Actions")');
+    await page.waitForSelector('#megaExportJsonBtn', { state: 'visible', timeout: 5000 });
     const jsonDownloadPromise = page.waitForEvent('download');
-    await page.click('#exportJsonBtn');
+    await page.click('#megaExportJsonBtn');
     const jsonDownload = await jsonDownloadPromise;
 
     const jsonPath = path.join('/tmp', `group-backup-${groupId}.json`);
