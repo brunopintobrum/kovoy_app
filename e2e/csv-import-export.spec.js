@@ -23,26 +23,23 @@ test('export and import CSV expenses', async ({ page }) => {
 
     console.log('Clicking registration submit button...');
     await page.click('form.needs-validation button[type="submit"]');
-    // Wait for navigation to complete
+    // Wait for navigation to complete - will redirect to /login or /email-verification
     console.log('Waiting for page to load...');
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
-    await page.waitForTimeout(2000); // Extra wait to ensure page has fully loaded
+    // Handle both possible redirect paths
+    try {
+        await page.waitForURL('**/email-verification*', { timeout: 3000 });
+    } catch {
+        // If not email-verification, expect login
+        await page.waitForURL('**/login*', { timeout: 3000 });
+    }
     console.log('Current URL after registration:', page.url());
 
-    // If on email-verification page, intercept the verification email (token in server logs)
-    // For now, test environment should have EMAIL_VERIFICATION_REQUIRED=false
-    // If email verification is still required, navigate directly to /login and attempt login
-    // The server may allow login if verification is eventually bypassed or if the token is auto-verified
+    // If on email-verification page, navigate to login instead
     if (page.url().includes('email-verification')) {
-        console.log('On email-verification page');
-        // In test environment with proper config, this shouldn't happen
-        // But if it does, let's navigate to login and see if we can proceed
-        // Real solution would be to have reuseExistingServer=false and fresh server with EMAIL_VERIFICATION_REQUIRED=false
+        console.log('On email-verification page, navigating to login...');
+        await page.goto('/login', { waitUntil: 'networkidle' });
     }
 
-    // Navigate to login
-    console.log('Navigating to login...');
-    await page.goto('/login', { waitUntil: 'networkidle' });
     console.log('On login page');
 
     // Fill login form
