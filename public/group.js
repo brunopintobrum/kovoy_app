@@ -5131,7 +5131,7 @@
             });
         });
 
-            csvFileInput.addEventListener('change', async (e) => {
+        if (csvFileInput) csvFileInput.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
 
@@ -5166,7 +5166,6 @@
                     csvFileInput.value = ''; // Reset file input
                 }
             });
-        }
     };
 
     const showImportResultModal = (result) => {
