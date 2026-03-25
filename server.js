@@ -3235,7 +3235,7 @@ app.get('/api/groups/:groupId/export/json', authRequiredApi, requireGroupMember,
 
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="backup-${req.groupId}-${new Date().toISOString().split('T')[0]}.json"`);
-        res.json(data);
+        res.send(JSON.stringify(data, null, 2));
     } catch (error) {
         console.error('JSON export error:', error);
         res.status(500).json({ error: 'Failed to export JSON' });
