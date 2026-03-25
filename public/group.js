@@ -5064,78 +5064,74 @@
     };
 
     const bindExportImportHandlers = () => {
-        // Export CSV handler
-        const exportCsvBtn = document.getElementById('megaExportCsvBtn');
-        if (exportCsvBtn) {
-            exportCsvBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                try {
-                    const response = await fetch(`/api/groups/${state.groupId}/export/csv`, {
-                        method: 'GET',
-                        headers: {
-                            'X-CSRF-Token': getCookie('csrf_token') || ''
-                        }
-                    });
-                    if (!response.ok) {
-                        throw new Error(`Export failed: ${response.status}`);
-                    }
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `grupo-${state.groupId}-${new Date().toISOString().split('T')[0]}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                    showToast('success', 'CSV exported successfully.');
-                } catch (err) {
-                    showToast('error', err.message || 'Failed to export CSV.');
-                }
-            });
-        }
+        const doExportCsv = async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch(`/api/groups/${state.groupId}/export/csv`, {
+                    method: 'GET',
+                    headers: { 'X-CSRF-Token': getCookie('csrf_token') || '' }
+                });
+                if (!response.ok) throw new Error(`Export failed: ${response.status}`);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `grupo-${state.groupId}-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                showToast('success', 'CSV exported successfully.');
+            } catch (err) {
+                showToast('error', err.message || 'Failed to export CSV.');
+            }
+        };
 
-        // Export JSON handler
-        const exportJsonBtn = document.getElementById('megaExportJsonBtn');
-        if (exportJsonBtn) {
-            exportJsonBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                try {
-                    const response = await fetch(`/api/groups/${state.groupId}/export/json`, {
-                        method: 'GET',
-                        headers: {
-                            'X-CSRF-Token': getCookie('csrf_token') || ''
-                        }
-                    });
-                    if (!response.ok) {
-                        throw new Error(`Export failed: ${response.status}`);
-                    }
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `grupo-backup-${state.groupId}-${new Date().toISOString().split('T')[0]}.json`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                    showToast('success', 'JSON backup exported successfully.');
-                } catch (err) {
-                    showToast('error', err.message || 'Failed to export JSON.');
-                }
-            });
-        }
+        const doExportJson = async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch(`/api/groups/${state.groupId}/export/json`, {
+                    method: 'GET',
+                    headers: { 'X-CSRF-Token': getCookie('csrf_token') || '' }
+                });
+                if (!response.ok) throw new Error(`Export failed: ${response.status}`);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `grupo-backup-${state.groupId}-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                showToast('success', 'JSON backup exported successfully.');
+            } catch (err) {
+                showToast('error', err.message || 'Failed to export JSON.');
+            }
+        };
+
+        // Bind megamenu + sidebar buttons
+        ['megaExportCsvBtn', 'sideExportCsvBtn'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', doExportCsv);
+        });
+
+        ['megaExportJsonBtn', 'sideExportJsonBtn'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', doExportJson);
+        });
 
         // Import CSV button handler
-        const importCsvBtn = document.getElementById('megaImportCsvBtn');
         const csvFileInput = document.getElementById('csvFileInput');
-        if (importCsvBtn && csvFileInput) {
-            importCsvBtn.addEventListener('click', (e) => {
+        ['megaImportCsvBtn', 'sideImportCsvBtn'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn && csvFileInput) btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 csvFileInput.click();
             });
+        });
 
-            csvFileInput.addEventListener('change', async (e) => {
+        if (csvFileInput) csvFileInput.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
 
@@ -5170,7 +5166,6 @@
                     csvFileInput.value = ''; // Reset file input
                 }
             });
-        }
     };
 
     const showImportResultModal = (result) => {
