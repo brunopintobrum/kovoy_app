@@ -3129,9 +3129,9 @@ function escapeCSVField(field) {
 // Helper: Generate CSV content
 function generateCSV(headers, rows) {
     const csv = [
-        headers.map(escapeCSVField).join(','),
+        headers.map(escapeCSVField).join(';'),
         ...rows.map(row =>
-            headers.map(h => escapeCSVField(row[h])).join(',')
+            headers.map(h => escapeCSVField(row[h])).join(';')
         )
     ].join('\n');
     return csv;
@@ -3154,7 +3154,7 @@ app.get('/api/groups/:groupId/export/csv', authRequiredApi, requireGroupMember, 
 
             if (splits.length === 0) {
                 rows.push({
-                    date: expense.date,
+                    date: (expense.date || '').split('T')[0],
                     description: expense.description,
                     amount: expense.amount,
                     currency: expense.currency,
@@ -3176,7 +3176,7 @@ app.get('/api/groups/:groupId/export/csv', authRequiredApi, requireGroupMember, 
                     }
 
                     rows.push({
-                        date: expense.date,
+                        date: (expense.date || '').split('T')[0],
                         description: expense.description,
                         amount: expense.amount,
                         currency: expense.currency,
