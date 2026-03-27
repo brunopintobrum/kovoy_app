@@ -1104,3 +1104,18 @@ body.login-page {
         scroll-behavior: auto !important;
     }
 }
+
+/* Overlay para fechar sidebar mobile ao clicar fora */
+#sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    background: transparent;
+}
+body.sidebar-enable #sidebar-overlay {
+    display: block;
+}
