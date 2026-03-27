@@ -263,6 +263,28 @@
         return parsed;
     };
 
+    const fillDatalist = (listEl, values) => {
+        if (!listEl) return;
+        while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+        values.forEach((val) => {
+            const option = document.createElement('option');
+            option.value = val;
+            listEl.appendChild(option);
+        });
+    };
+
+    const renderTransportAutocomplete = () => {
+        const origins = [...new Set((state.transports || []).map((t) => t.origin).filter(Boolean))].sort();
+        const destinations = [...new Set((state.transports || []).map((t) => t.destination).filter(Boolean))].sort();
+        fillDatalist(document.getElementById('transportOriginList'), origins);
+        fillDatalist(document.getElementById('transportDestinationList'), destinations);
+    };
+
+    const renderTicketLocationAutocomplete = () => {
+        const locations = [...new Set((state.tickets || []).map((t) => t.location).filter(Boolean))].sort();
+        fillDatalist(document.getElementById('ticketLocationList'), locations);
+    };
+
     const renderAirlineOptions = () => {
         const list = document.getElementById('flightAirlineList');
         if (!list) return;
@@ -1089,6 +1111,14 @@
             event.stopImmediatePropagation();
             document.body.classList.toggle('sidebar-enable');
         }, true);
+    };
+
+    const bindSidebarOverlay = () => {
+        const overlay = document.getElementById('sidebar-overlay');
+        if (!overlay) return;
+        overlay.addEventListener('click', () => {
+            document.body.classList.remove('sidebar-enable');
+        });
     };
 
     const bindMobileMenuAutoClose = () => {
@@ -3788,6 +3818,7 @@
             openTransportModal.addEventListener('click', () => {
                 resetTransportForm();
                 setTransportFormMode('create');
+                renderTransportAutocomplete();
             });
         }
         if (transportModal) {
@@ -3891,6 +3922,7 @@
             openTicketModal.addEventListener('click', () => {
                 resetTicketForm();
                 setTicketFormMode('create');
+                renderTicketLocationAutocomplete();
             });
         }
         if (ticketModal) {
@@ -4496,6 +4528,7 @@
                     const transport = state.transports.find((item) => item.id === id);
                     if (!transport) return;
                     state.editing.transportId = id;
+                    renderTransportAutocomplete();
                     populateTransportForm(transport);
                     setTransportFormMode('edit');
                     const transportForm = document.getElementById('transportForm');
@@ -4542,6 +4575,7 @@
                     const ticket = state.tickets.find((item) => item.id === id);
                     if (!ticket) return;
                     state.editing.ticketId = id;
+                    renderTicketLocationAutocomplete();
                     populateTicketForm(ticket);
                     setTicketFormMode('edit');
                     const ticketForm = document.getElementById('ticketForm');
@@ -5250,6 +5284,7 @@
         bindAvatarChange();
         bindMobileMenuToggleFallback();
         bindMobileMenuAutoClose();
+        bindSidebarOverlay();
         renderGroupHeader();
         await refreshData();
     };

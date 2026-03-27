@@ -122,7 +122,7 @@
     - [x] Exibir classe/assento/bagagem na lista
     - [x] Seletor de passageiros com busca
     - [x] Layout de voos reorganizado (secoes e tabela de detalhes por passageiro)
-    - [ ] UX: filtros por cia/rota/status
+    - [x] UX: filtros por cia/rota/status
     - [ ] Dados: prefilling por airline + flight number
   - [x] Hospedagens
     - [x] Quartos (tipo, quantidade, ocupacao)
@@ -137,8 +137,8 @@
     - [x] Validar check-out > check-in (backend)
     - [x] Validar check-out > check-in (UI)
     - [x] Listagem: resumo de quartos e status
-    - [ ] Filtros por cidade/status
-    - [ ] Dados: contato obrigatorio quando necessario
+    - [x] Filtros por cidade/status
+    - [x] Dados: contato obrigatorio quando necessario
   - [x] Transportes
     - [x] Origem/destino, datas/horas
     - [x] Fornecedor, localizador
@@ -147,8 +147,9 @@
     - [x] Validar chegada > partida (UI)
     - [x] UI: chegada sincroniza com partida quando o campo esta vazio
     - [x] Listagem: origem/destino + horario em destaque
-    - [ ] Filtros por status/fornecedor
-    - [ ] Dados: provider + locator obrigatorios quando status=paid
+    - [x] Filtros por status/fornecedor
+    - [x] Dados: provider + locator obrigatorios quando status=paid
+    - [x] Autocomplete para origem/destino (historico do grupo)
   - [x] Tickets
     - [x] Tipo (parque, evento, etc), data/hora, local
     - [x] Vinculo a participantes
@@ -156,13 +157,14 @@
     - [x] Validar data/hora coerente (backend)
     - [x] Validar data/hora coerente (UI)
     - [x] Listagem: participantes destacados
-    - [ ] Filtros por tipo/status/data
+    - [x] Filtros por tipo/status/data
     - [x] Dados: local obrigatorio quando type exige
+    - [x] Autocomplete para local (historico do grupo)
   - [x] Unificar custos com Expenses (pagador + split dentro do modulo) *(panel split agora reaproveitado automaticamente nos módulos logísticos)*
   - [ ] Anexos/recibos por item (upload, visualizacao e download)
   - [x] Autocomplete/validacao para hospedagens (Country + City/State + Property)
-  - [ ] Autocomplete/validacao para transportes (origem/destino)
-  - [ ] Autocomplete/validacao para tickets (local)
+  - [x] Autocomplete/validacao para transportes (origem/destino)
+  - [x] Autocomplete/validacao para tickets (local)
 - [x] Confirmacao antes de deletar (todos os modulos)
 - [x] Toast de feedback apos salvar/deletar nos modulos
 - [x] Desabilitar botoes durante requisicoes API (prevenir duplicatas)
