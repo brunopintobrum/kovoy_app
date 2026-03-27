@@ -110,8 +110,8 @@ beforeAll(() => {
 
 afterAll(() => {
     if (server) server.close();
-    try { db.close(); } catch (_) {}
-    try { if (process.env.DB_PATH && fs.existsSync(process.env.DB_PATH)) fs.unlinkSync(process.env.DB_PATH); } catch (_) {}
+    try { db.close(); } catch (_) { /* cleanup */ }
+    try { if (process.env.DB_PATH && fs.existsSync(process.env.DB_PATH)) fs.unlinkSync(process.env.DB_PATH); } catch (_) { /* cleanup */ }
 });
 
 // ─── SQL Injection ───────────────────────────────────────────────────────────
