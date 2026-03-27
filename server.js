@@ -4931,7 +4931,7 @@ const validateExpenseSplitPayload = (payload) => {
         return { error: 'Split mode is invalid.' };
     }
 
-    let targetIds = [];
+    let targetIds;
     let manualSplits = null;
     if (splitMode === 'manual') {
         const parsed = parseManualSplits(payload?.splits);
