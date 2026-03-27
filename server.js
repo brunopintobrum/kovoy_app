@@ -940,14 +940,16 @@ const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 50,
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    skip: () => process.env.NODE_ENV === 'test'
 });
 
 const sensitiveLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10,
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    skip: () => process.env.NODE_ENV === 'test'
 });
 
 const dataLimiter = rateLimit({
@@ -955,7 +957,7 @@ const dataLimiter = rateLimit({
     max: 100,
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => !req.user
+    skip: (req) => !req.user || process.env.NODE_ENV === 'test'
 });
 
 const signAccessToken = (user) => {
