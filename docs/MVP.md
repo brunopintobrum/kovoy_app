@@ -123,7 +123,7 @@
     - [x] Seletor de passageiros com busca
     - [x] Layout de voos reorganizado (secoes e tabela de detalhes por passageiro)
     - [x] UX: filtros por cia/rota/status
-    - [ ] Dados: prefilling por airline + flight number
+    - [x] Dados: prefilling por airline + flight number
   - [x] Hospedagens
     - [x] Quartos (tipo, quantidade, ocupacao)
     - [x] Endereco completo + contato
