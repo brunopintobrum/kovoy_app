@@ -3,6 +3,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const https = require('https');
 const express = require('express');
+const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
@@ -896,6 +897,7 @@ if (GLITCHTIP_DSN_FRONTEND) {
 if (GLITCHTIP_PUBLIC_ORIGIN) {
     connectSrc.push(GLITCHTIP_PUBLIC_ORIGIN);
 }
+app.use(compression());
 app.use(helmet({
     contentSecurityPolicy: {
         useDefaults: true,
@@ -2033,6 +2035,13 @@ const listExpenseSplits = db.prepare(`
     FROM expense_splits
     WHERE expense_id = ?
     ORDER BY id
+`);
+const listAllExpenseSplitsByGroup = db.prepare(`
+    SELECT es.expense_id, es.target_type, es.target_id, es.amount
+    FROM expense_splits es
+    INNER JOIN expenses e ON e.id = es.expense_id
+    WHERE e.group_id = ?
+    ORDER BY es.expense_id, es.id
 `);
 const insertExpenseSplit = db.prepare(`
     INSERT INTO expense_splits (expense_id, target_type, target_id, amount)
@@ -3395,16 +3404,28 @@ app.post(
 
 app.get('/api/airlines', authRequiredApi, (req, res) => {
     const airlines = listAirlines.all();
+    const etag = `"airlines-${airlines.length}"`;
+    if (req.headers['if-none-match'] === etag) return res.status(304).end();
+    res.set('Cache-Control', 'private, max-age=300');
+    res.set('ETag', etag);
     return res.json({ ok: true, data: airlines });
 });
 
 app.get('/api/lodging-platforms', authRequiredApi, (req, res) => {
     const platforms = listLodgingPlatforms.all();
+    const etag = `"platforms-${platforms.length}"`;
+    if (req.headers['if-none-match'] === etag) return res.status(304).end();
+    res.set('Cache-Control', 'private, max-age=300');
+    res.set('ETag', etag);
     return res.json({ ok: true, data: platforms });
 });
 
 app.get('/api/locations/countries', authRequiredApi, (req, res) => {
     const countries = listCountries.all();
+    const etag = `"countries-${countries.length}"`;
+    if (req.headers['if-none-match'] === etag) return res.status(304).end();
+    res.set('Cache-Control', 'private, max-age=3600');
+    res.set('ETag', etag);
     return res.json({ ok: true, data: countries });
 });
 
@@ -4352,13 +4373,13 @@ app.get('/api/groups/:groupId/summary', authRequiredApi, requireGroupMember, (re
         payerParticipantId: row.payer_participant_id
     }));
     const expenseSplits = new Map();
-    expenses.forEach((expense) => {
-        const splits = listExpenseSplits.all(expense.id).map((split) => ({
+    listAllExpenseSplitsByGroup.all(req.groupId).forEach((split) => {
+        if (!expenseSplits.has(split.expense_id)) expenseSplits.set(split.expense_id, []);
+        expenseSplits.get(split.expense_id).push({
             targetType: split.target_type,
             targetId: split.target_id,
             amount: split.amount
-        }));
-        expenseSplits.set(expense.id, splits);
+        });
     });
 
     const state = buildBalanceState({
