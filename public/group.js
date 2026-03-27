@@ -703,6 +703,54 @@
         input.addEventListener('change', handler);
     };
 
+    const tryPrefillFromHistory = () => {
+        const airlineInput = document.getElementById('flightAirline');
+        const numberInput = document.getElementById('flightNumber');
+        if (!airlineInput || !numberInput) return;
+        const airline = airlineInput.value.trim().toLowerCase();
+        const number = numberInput.value.trim().toLowerCase();
+        if (!airline || !number) return;
+
+        const fromEl = document.getElementById('flightFrom');
+        const toEl = document.getElementById('flightTo');
+        const departEl = document.getElementById('flightDepart');
+        const arriveEl = document.getElementById('flightArrive');
+        const fromIdEl = document.getElementById('flightFromAirportId');
+        const toIdEl = document.getElementById('flightToAirportId');
+        const badge = document.getElementById('flightPrefillBadge');
+
+        const alreadyFilled = (fromEl?.value || toEl?.value || departEl?.value || arriveEl?.value);
+        if (alreadyFilled) return;
+
+        const editingId = state.editing?.flightId;
+        const match = (state.flights || []).find((f) => {
+            if (f.id === editingId) return false;
+            return f.airline?.toLowerCase() === airline && f.flightNumber?.toLowerCase() === number;
+        });
+
+        if (!match) return;
+
+        if (fromEl) fromEl.value = match.fromLabel || match.from || '';
+        if (toEl) toEl.value = match.toLabel || match.to || '';
+        if (departEl) departEl.value = formatDateTimeLocal(match.departAt);
+        if (arriveEl) {
+            arriveEl.value = formatDateTimeLocal(match.arriveAt);
+            if (departEl?.value) arriveEl.min = departEl.value;
+        }
+        if (fromIdEl) fromIdEl.value = match.fromAirportId || '';
+        if (toIdEl) toIdEl.value = match.toAirportId || '';
+        if (badge) badge.classList.remove('d-none');
+    };
+
+    const setupFlightPrefilling = () => {
+        const airlineInput = document.getElementById('flightAirline');
+        const numberInput = document.getElementById('flightNumber');
+        if (!airlineInput || !numberInput) return;
+        airlineInput.addEventListener('change', tryPrefillFromHistory);
+        numberInput.addEventListener('change', tryPrefillFromHistory);
+        numberInput.addEventListener('blur', tryPrefillFromHistory);
+    };
+
     const renderLodgingPlatformOptions = () => {
         const list = document.getElementById('lodgingPlatformList');
         if (!list) return;
@@ -3100,6 +3148,8 @@
             arrive.removeAttribute('min');
             delete arrive.dataset.autofilled;
         }
+        const badge = document.getElementById('flightPrefillBadge');
+        if (badge) badge.classList.add('d-none');
     };
 
     const populateFlightForm = (flight) => {
@@ -5255,6 +5305,7 @@
         bindForms();
         await loadLodgingCountries();
         setupFlightAirlineAutocomplete();
+        setupFlightPrefilling();
         setupLodgingPlatformAutocomplete();
         setupLodgingLocationAutocomplete();
         setupFlightAirportAutocomplete();
